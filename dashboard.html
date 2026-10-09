@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unified School ERP - Architecture & Glow Graph</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #090d16;
+      color: #f1f5f9;
+    }
+    
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glow utility styles */
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.4);
+    }
+    .glow-indigo {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.4);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4);
+    }
+    .glow-purple {
+      box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.4);
+    }
+    .glow-rose {
+      box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.4);
+    }
+    .glow-amber {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.4);
+    }
+
+    .neon-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .neon-border:hover {
+      border-color: rgba(99, 102, 241, 0.6);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Mermaid Dark Overrides */
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+      filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.25));
+    }
+    
+    .tab-active {
+      border-bottom: 2px solid #6366f1;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* Pulse dot */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.15); }
+    }
+    .pulse-dot {
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background Ambient Lights -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px]"></div>
+    <div class="absolute top-1/3 -right-40 w-96 h-96 bg-cyan-600/20 rounded-full blur-[140px]"></div>
+    <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-purple-600/15 rounded-full blur-[140px]"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-50 bg-[#090d16]/90">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center glow-indigo font-bold text-xl text-white shadow-lg">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-cyan-300 bg-clip-text text-transparent">
+              Unified School ERP
+            </h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+              SaaS Multi-Tenant
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Architecture, Glowing Graphs, Role Hierarchy & Unified Modules</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 text-sm">
+        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+          <span class="font-medium text-xs">TestMaster Pro Pattern</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-mono text-xs">
+          C:\webncode\school erp
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="border-b border-slate-800 bg-[#0c121e]">
+    <div class="max-w-7xl mx-auto px-6 flex overflow-x-auto space-x-2 py-2">
+      <button onclick="switchTab('glow-graph')" id="btn-glow-graph" class="tab-btn tab-active px-4 py-2.5 rounded-lg text-sm font-semibold transition flex items-center space-x-2">
+        <i class="fa-solid fa-network-wired text-indigo-400"></i>
+        <span>Glow Flow Graph</span>
+      </button>
+      <button onclick="switchTab('roles-matrix')" id="btn-roles-matrix" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition flex items-center space-x-2">
+        <i class="fa-solid fa-users-gear text-cyan-400"></i>
+        <span>Roles & Access Scope</span>
+      </button>
+      <button onclick="switchTab('modules-grid')" id="btn-modules-grid" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition flex items-center space-x-2">
+        <i class="fa-solid fa-cubes text-emerald-400"></i>
+        <span>Integrated Modules (7+)</span>
+      </button>
+      <button onclick="switchTab('tenant-security')" id="btn-tenant-security" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition flex items-center space-x-2">
+        <i class="fa-solid fa-shield-halved text-purple-400"></i>
+        <span>Multi-Tenant Isolation</span>
+      </button>
+      <button onclick="switchTab('step-roadmap')" id="btn-step-roadmap" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition flex items-center space-x-2">
+        <i class="fa-solid fa-list-check text-amber-400"></i>
+        <span>Step-by-Step Roadmap</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- TAB 1: GLOW FLOW GRAPH -->
+    <section id="tab-glow-graph" class="tab-content block space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-gradient-to-b from-indigo-950/40 to-slate-900/60 neon-border glow-indigo">
+          <div class="flex items-center space-x-3 mb-2">
+            <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+              👑
+            </span>
+            <h3 class="font-bold text-white">Platform Super Admin</h3>
+          </div>
+          <p class="text-xs text-slate-300">Aapka Master Portal jo sabhi schools ko manage karta hai, unka subscription plan deta hai, aur access cut-off karta hai.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-gradient-to-b from-cyan-950/40 to-slate-900/60 neon-border glow-cyan">
+          <div class="flex items-center space-x-3 mb-2">
+            <span class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+              🏫
+            </span>
+            <h3 class="font-bold text-white">Multi-Tenant Isolation</h3>
+          </div>
+          <p class="text-xs text-slate-300">Har school ka data bilkul isolated hota hai. School A kabhi bhi School B ke teachers, students ya fees nahi dekh sakta.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-gradient-to-b from-emerald-950/40 to-slate-900/60 neon-border glow-emerald">
+          <div class="flex items-center space-x-3 mb-2">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+              ⚡
+            </span>
+            <h3 class="font-bold text-white">Unified Modular Power</h3>
+          </div>
+          <p class="text-xs text-slate-300">Campus CRM, DailyTest, Fee Flow, Salary, TimeTable, Syllabus Tracker, aur HireHub sab ek single platform me synced hain.</p>
+        </div>
+      </div>
+
+      <!-- Glowing Mermaid Chart Card -->
+      <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 glow-indigo">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+          <div>
+            <h2 class="text-lg font-bold text-indigo-300 flex items-center space-x-2">
+              <i class="fa-solid fa-diagram-project"></i>
+              <span>Interactive Architecture Glow Flow</span>
+            </h2>
+            <p class="text-xs text-slate-400">Platform Control -> Tenant Isolation -> Modules Ecosystem</p>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded bg-indigo-900/40 text-indigo-300 border border-indigo-500/30">
+            Mermaid Rendered
+          </span>
+        </div>
+
+        <div class="mermaid text-center py-4 overflow-x-auto">
+flowchart TD
+    classDef super fill:#4f46e5,stroke:#818cf8,stroke-width:2px,color:#fff;
+    classDef tenant fill:#0284c7,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    classDef module fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#e0f2fe;
+    classDef role fill:#18181b,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+
+    SA["👑 SUPER ADMIN (Platform Owner)"]:::super
+    
+    SA -->|"Manages Plans & Cutoffs"| Engine["💳 Subscription & Billing Engine"]:::super
+    SA -->|"Toggles Modules"| Config["🎛️ Feature & Module Flags"]:::super
+    SA -->|"Onboards Tenants"| TenantList["🏫 School Tenants Directory"]:::super
+
+    TenantList -->|"Strict Tenant Filter"| SchA["🏫 School A (e.g. DPS)"]:::tenant
+    TenantList -->|"Strict Tenant Filter"| SchB["🏫 School B (e.g. St. Xavier)"]:::tenant
+    
+    SchA --> Principal["👔 School Admin / Principal"]:::role
+    
+    Principal --> M1["🎯 Campus CRM<br/>(Admission Inquiries)"]:::module
+    Principal --> M2["💳 Fee Flow<br/>(Collection & Dues)"]:::module
+    Principal --> M3["💵 Salary & Payroll<br/>(Staff Salary & Slips)"]:::module
+    Principal --> M4["🎓 DailyTest<br/>(Marks & Attendance)"]:::module
+    Principal --> M5["📖 Syllabus Tracker<br/>(Topics & Notebooks)"]:::module
+    Principal --> M6["📅 TimeTable Pro<br/>(Period Allocation)"]:::module
+    Principal --> M7["💼 HireHub<br/>(Teacher Recruitment)"]:::module
+
+    Principal --> Teachers["👩‍🏫 Teachers (Class Scoped)"]:::role
+    Principal --> Accountants["💰 Accountants (Fee Scoped)"]:::role
+    Principal --> Parents["👨‍👩‍👦 Parents (Own Child Only)"]:::role
+    Principal --> Students["🎒 Students (Own Records Only)"]:::role
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ROLES & ACCESS MATRIX -->
+    <section id="tab-roles-matrix" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 glow-cyan">
+        <h2 class="text-xl font-bold text-white mb-2 flex items-center space-x-2">
+          <i class="fa-solid fa-users text-cyan-400"></i>
+          <span>Multi-Role Access Control (RBAC) Matrix</span>
+        </h2>
+        <p class="text-sm text-slate-400 mb-6">Har role ki exact boundary define hai taaki kisi ka unauthorized access na ho.</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-300 font-semibold bg-slate-800/40">
+                <th class="p-3">Role</th>
+                <th class="p-3">Scope Filter</th>
+                <th class="p-3">Primary Kaam / Responsibilities</th>
+                <th class="p-3">Restricted From</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 text-slate-300">
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-indigo-400 flex items-center space-x-2">
+                  <span>👑 super_admin</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-indigo-300">Global ({})</td>
+                <td class="p-3">All Schools onboard, plan allotment, feature lock/unlock, billing cutoff, login-as-school support.</td>
+                <td class="p-3 text-slate-500">None (Full Access)</td>
+              </tr>
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-cyan-400 flex items-center space-x-2">
+                  <span>🏫 school_admin</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-cyan-300">{ school: req.user.school }</td>
+                <td class="p-3">Academic sessions, classes/sections, staff accounts create karna, admissions approve karna, overall reports.</td>
+                <td class="p-3 text-rose-400 text-xs">Other schools data, Platform billing control</td>
+              </tr>
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-emerald-400 flex items-center space-x-2">
+                  <span>💰 accountant</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-emerald-300">{ school: req.user.school }</td>
+                <td class="p-3">Counter fee collection, fee receipt PDF print, defaulters list, discount concession, expense entry.</td>
+                <td class="p-3 text-rose-400 text-xs">Exams marks entry, syllabus, teacher hiring</td>
+              </tr>
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-purple-400 flex items-center space-x-2">
+                  <span>👩‍🏫 teacher</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-purple-300">Assigned Classes & Subjects</td>
+                <td class="p-3">Daily student attendance, test/exam marks enter karna, homework upload, notebook check, remarks.</td>
+                <td class="p-3 text-rose-400 text-xs">School fees collection, salary payroll, other classes</td>
+              </tr>
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-amber-400 flex items-center space-x-2">
+                  <span>👨‍👩‍👦 parent</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-amber-300">linkedStudents: [...]</td>
+                <td class="p-3">Apne bacho ki real-time attendance, test score & marksheet, online fee payment, leave apply karna.</td>
+                <td class="p-3 text-rose-400 text-xs">Other students, school internal records</td>
+              </tr>
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="p-3 font-semibold text-rose-400 flex items-center space-x-2">
+                  <span>🎒 student</span>
+                </td>
+                <td class="p-3 font-mono text-xs text-rose-300">_id: studentId</td>
+                <td class="p-3">Apna timetable, homework, attendance %, paid fee receipts download karna, exam marksheet view.</td>
+                <td class="p-3 text-rose-400 text-xs">Marks edit, attendance edit, fee collection</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: INTEGRATED MODULES -->
+    <section id="tab-modules-grid" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Campus CRM -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-amber">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-bullhorn text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">🎯 Campus CRM</h3>
+          <p class="text-xs text-amber-300/80 font-mono mb-2">Source: Campus CRM</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>New Admission Enquiry Form (Walk-in / Phone)</li>
+            <li>Lead Stages: Interested -> Visited -> Form Filled</li>
+            <li>Follow-up calling logs with date reminders</li>
+            <li>1-Click Conversion into Student Master</li>
+          </ul>
+        </div>
+
+        <!-- Fee Flow -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-emerald">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-receipt text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">💳 Fee Flow</h3>
+          <p class="text-xs text-emerald-300/80 font-mono mb-2">Source: feesoftware / studentfee</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Class-wise Fee Structure (Tuition, Transport, Exam)</li>
+            <li>Fast Counter Fee Collection (Cash, UPI, Cheque)</li>
+            <li>Instant Printable PDF Receipts</li>
+            <li>Defaulter (Pending Dues) list & WhatsApp reminders</li>
+          </ul>
+        </div>
+
+        <!-- Salary & Payroll -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-cyan">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-money-check-dollar text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">💵 Salary & Payroll</h3>
+          <p class="text-xs text-cyan-300/80 font-mono mb-2">Source: salary_software</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Staff Salary Structure (Basic, HRA, Allowances, PF)</li>
+            <li>Biometric / Attendance linked working days</li>
+            <li>Advance salary & loan EMI auto-deduction</li>
+            <li>1-Click Monthly Payslip PDF Generation</li>
+          </ul>
+        </div>
+
+        <!-- DailyTest & Academics -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-purple">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-chart-line text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">🎓 DailyTest & Academics</h3>
+          <p class="text-xs text-purple-300/80 font-mono mb-2">Source: daily-test (TestMaster Pro)</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Daily Student Attendance (Present / Absent / Leave)</li>
+            <li>Daily Tests & Term Exams Mark Entry</li>
+            <li>Automated Grading & Student Ranking</li>
+            <li>Printable CBSE / State Board Marksheets</li>
+          </ul>
+        </div>
+
+        <!-- Syllabus Tracker -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-rose">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-book-open-reader text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">📖 Syllabus Tracker</h3>
+          <p class="text-xs text-rose-300/80 font-mono mb-2">Source: syllabus tracker</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Class & Subject-wise Chapter breakdown</li>
+            <li>Completed vs Pending Topics Percentage</li>
+            <li>Teacher Daily Lesson Planning</li>
+            <li>Student Notebook Checking Records</li>
+          </ul>
+        </div>
+
+        <!-- TimeTable Pro -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-indigo">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-calendar-days text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">📅 TimeTable Pro</h3>
+          <p class="text-xs text-indigo-300/80 font-mono mb-2">Source: timetablepro</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Dynamic Class & Teacher Period Matrix</li>
+            <li>Zero Clash Conflict Prevention Algorithm</li>
+            <li>Substitute Teacher Auto-allotment on leave</li>
+            <li>Printable Class & Teacher Schedules</li>
+          </ul>
+        </div>
+
+        <!-- HireHub -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-cyan">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-user-plus text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">💼 HireHub (HR)</h3>
+          <p class="text-xs text-cyan-300/80 font-mono mb-2">Source: hirehub</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Teacher & Staff Vacancy Announcements</li>
+            <li>Resume Screening & Interview Pipeline</li>
+            <li>Offer Letter Generation</li>
+            <li>Direct 1-Click Onboarding to Staff Directory</li>
+          </ul>
+        </div>
+
+        <!-- Super Admin Engine -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-indigo">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-sliders text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">👑 SaaS Platform Engine</h3>
+          <p class="text-xs text-indigo-300/80 font-mono mb-2">Core SaaS Controller</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>School Subscriptions (Starter, Pro, Enterprise)</li>
+            <li>Module On/Off Toggle Per School</li>
+            <li>Subscription Expiry & Automatic Access Cut-off</li>
+            <li>Login As School Admin for Instant Support</li>
+          </ul>
+        </div>
+
+        <!-- Mobile Portals -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 neon-border glow-purple">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold mb-3">
+            <i class="fa-solid fa-mobile-screen text-lg"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">📱 Mobile Portals</h3>
+          <p class="text-xs text-purple-300/80 font-mono mb-2">Parent & Student Access</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+            <li>Parent Multi-child instant switching</li>
+            <li>Real-time attendance absent notification</li>
+            <li>Online fee payment via UPI / Cards</li>
+            <li>Digital Leave Application to School</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: MULTI-TENANT ISOLATION -->
+    <section id="tab-tenant-security" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 glow-purple">
+        <h2 class="text-xl font-bold text-white mb-2 flex items-center space-x-2">
+          <i class="fa-solid fa-shield-halved text-purple-400"></i>
+          <span>Multi-Tenant Architecture & Data Isolation</span>
+        </h2>
+        <p class="text-sm text-slate-400 mb-6">TestMaster Pro model par aadharit: Har request tenant-scoped hoti hai.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60">
+              <h4 class="font-semibold text-indigo-300 mb-1">1. Model Level Scoping</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Har database model (`Student`, `Teacher`, `Fee`, `Attendance`, `Salary`) ke andar mandatory field hoti hai: <code class="text-cyan-300 bg-slate-900 px-1 py-0.5 rounded">school: ObjectId</code> with indexed compound keys.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60">
+              <h4 class="font-semibold text-cyan-300 mb-1">2. Automatic getSchoolFilter(user) Middleware</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Backend API me koi bhi query execute hone se pehle user ka `school` inject hota hai. Kisi school ka user chahkar bhi query me dusre school ka data nahi nikal sakta.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60">
+              <h4 class="font-semibold text-emerald-300 mb-1">3. Parent & Teacher Fine-Grained Security</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Parent sirf unhi students ka data query kar sakta hai jinka `_id` unke <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">linkedStudents</code> array me exist karta hai.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#0b101b] border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto">
+            <div class="text-slate-500 mb-2">// backend/src/middleware/tenant.js (Architecture Core)</div>
+            <pre class="text-slate-200">
+<span class="text-indigo-400">export const</span> <span class="text-cyan-300">getSchoolFilter</span> = (user) => {
+  <span class="text-slate-500">// 1. Super Admin sees entire system</span>
+  <span class="text-indigo-400">if</span> (user.role === <span class="text-emerald-300">'super_admin'</span>) {
+    <span class="text-indigo-400">return</span> {};
+  }
+
+  <span class="text-slate-500">// 2. Enforce school association</span>
+  <span class="text-indigo-400">if</span> (!user.school) {
+    <span class="text-indigo-400">throw new</span> <span class="text-amber-300">ApiError</span>(403, <span class="text-emerald-300">'No school associated.'</span>);
+  }
+
+  <span class="text-slate-500">// 3. Strict tenant filter</span>
+  <span class="text-indigo-400">return</span> { school: user.school };
+};
+
+<span class="text-indigo-400">export const</span> <span class="text-cyan-300">requireSchoolActive</span> = <span class="text-indigo-400">async</span> (req, res, next) => {
+  <span class="text-indigo-400">if</span> (req.user.role === <span class="text-emerald-300">'super_admin'</span>) <span class="text-indigo-400">return</span> next();
+  
+  <span class="text-indigo-400">const</span> school = <span class="text-indigo-400">await</span> School.findById(req.user.school);
+  <span class="text-indigo-400">if</span> (!school || !school.isActive) {
+    <span class="text-indigo-400">throw new</span> <span class="text-amber-300">ApiError</span>(403, <span class="text-emerald-300">'School account expired or paused.'</span>);
+  }
+  next();
+};</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: ROADMAP -->
+    <section id="tab-step-roadmap" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 glow-amber">
+        <h2 class="text-xl font-bold text-white mb-2 flex items-center space-x-2">
+          <i class="fa-solid fa-stairs text-amber-400"></i>
+          <span>Step-by-Step Execution Plan</span>
+        </h2>
+        <p class="text-sm text-slate-400 mb-6">Isko modular tareeqe se aaram se ek-ek step banayenge:</p>
+
+        <div class="space-y-4">
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-indigo-500/30 glow-indigo">
+            <span class="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center shrink-0 text-sm">1</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Base Foundation & Project Setup</h4>
+              <p class="text-xs text-slate-400">Node/Express backend + React/Vite frontend + PostgreSQL with Prisma ORM + Multi-tenant auth & roles setup.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">2</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Super Admin SaaS Platform Engine</h4>
+              <p class="text-xs text-slate-400">School Onboarding, Plans & Pricing, Module access flags, Expiry & Cut-off logic.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">3</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Campus CRM (Admissions & Inquiries)</h4>
+              <p class="text-xs text-slate-400">Inquiry logs, follow-up call status, 1-click student conversion.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">4</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Fee Flow (Complete Fee Management)</h4>
+              <p class="text-xs text-slate-400">Class fee structure, counter collection, printable receipts, pending dues list.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">5</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Salary & Payroll Management</h4>
+              <p class="text-xs text-slate-400">Staff salary structure, attendance-linked pay, loan deductions, monthly payslips.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">6</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">DailyTest & Academic Performance</h4>
+              <p class="text-xs text-slate-400">Student attendance, daily test marks entry, grading, automated printable marksheets.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">7</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">Syllabus Tracker & TimeTable Pro</h4>
+              <p class="text-xs text-slate-400">Chapter completion tracker, notebook checking, period allocation, conflict resolver.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+            <span class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center justify-center shrink-0 text-sm">8</span>
+            <div>
+              <h4 class="font-bold text-white text-sm">HireHub & Portals (Student / Parent)</h4>
+              <p class="text-xs text-slate-400">Teacher recruitment pipeline, parent mobile portal, student dashboard.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800/80 mt-12 py-6 text-center text-xs text-slate-500">
+    Unified School ERP SaaS &bull; Architecture & Glow Graph &bull; WebNCode Ecosystem
+  </footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#090d16',
+        primaryColor: '#4f46e5',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#818cf8',
+        lineColor: '#38bdf8',
+        secondaryColor: '#0284c7',
+        tertiaryColor: '#1e293b'
+      }
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.remove('text-indigo-400', 'text-cyan-400', 'text-emerald-400', 'text-purple-400', 'text-amber-400');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeSection = document.getElementById('tab-' + tabId);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('tab-active');
+        activeBtn.classList.remove('text-slate-400');
+      }
+    }
+  </script>
+</body>
+</html>
