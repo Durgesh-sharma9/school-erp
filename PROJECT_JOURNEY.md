@@ -167,6 +167,18 @@ This document tracks the complete development journey of the **Unified School ER
   * Verified production build: compiled cleanly in **10.21s** with 0 errors!
 * **Status:** ✅ Completed
 
+### 📍 [Entry #13] - Dev Servers Started & Live Runnable Link Provided
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Start frontend and backend development servers, ensure error-free connectivity, and provide the user with the direct runnable link to inspect Step 1.
+* **Actions Taken:**
+  * Cleaned duplicate closure syntax in `backend/src/modules/dashboard/dashboard.controller.js`.
+  * Started backend server on port 5000 (`http://localhost:5000`).
+  * Started Vite frontend server on port 5173 (`http://localhost:5173`).
+  * Verified backend API `/api/dashboard/stats` responding with HTTP 200 and J D International School metrics.
+  * Verified frontend Vite proxy communicating smoothly with backend.
+  * Synced repository with GitHub remote (`https://github.com/Durgesh-sharma9/school-erp.git`).
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:
@@ -174,3 +186,4 @@ This document tracks the complete development journey of the **Unified School ER
   * Replicate UAB `/student-registration` (Student Details, Parent's Details, Transport, Hostel, Documents, Objection, Sports).
   * Build Student API controller & Prisma persistence.
   * Build Student Directory & Portfolio search.
+
