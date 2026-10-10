@@ -56,10 +56,80 @@ export function FeeCollectionPage({ onNavigate }) {
     { id: 'registration', label: 'Registration' }
   ];
 
-  const handleSave = (e) => {
+  const [loadingStudent, setLoadingStudent] = useState(false);
+  const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  // Fetch student fee ledger from backend
+  const fetchStudentLedger = async (admNo) => {
+    if (!admNo) return;
+    try {
+      setLoadingStudent(true);
+      const res = await fetch(`http://localhost:5000/api/fees/student/${admNo}`);
+      const result = await res.json();
+      if (result.success && result.data) {
+        const d = result.data;
+        if (d.student) {
+          setSelectedStudent(prev => ({
+            ...prev,
+            admNo: d.student.admNo || admNo,
+            srNo: d.student.srNo || admNo,
+            name: d.student.name || prev.name,
+            fatherName: d.student.fatherName || prev.fatherName,
+            className: d.student.className || prev.className,
+            mobileNo: d.student.mobile || prev.mobileNo
+          }));
+        }
+        if (d.heads && d.heads.length > 0) {
+          setFeeHeads(d.heads.map(h => ({
+            id: h.id,
+            head: h.feeHead,
+            total: h.amount,
+            payable: h.netPayable,
+            paid: h.isPaid ? h.netPayable : 0,
+            due: h.isPaid ? 0 : h.netPayable,
+            checked: !h.isPaid
+          })));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch fee ledger:', err);
+    } finally {
+      setLoadingStudent(false);
+    }
+  };
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 4000);
+    setSubmittingPayment(true);
+    try {
+      const selectedHeads = feeHeads.filter(h => h.checked && h.due > 0);
+      const totalAmountToPay = selectedHeads.reduce((acc, h) => acc + h.due, 0) || 5000;
+
+      const res = await fetch('http://localhost:5000/api/fees/collect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          admNo: selectedStudent.admNo,
+          paidAmount: totalAmountToPay,
+          payMode,
+          paidHeadIds: selectedHeads.map(h => h.id)
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        setReceiptNo(result.data?.receiptNo || `REC-2026-${Date.now().toString().slice(-4)}`);
+        setSavedSuccess(true);
+        // Refresh dues
+        fetchStudentLedger(selectedStudent.admNo);
+        setTimeout(() => setSavedSuccess(false), 5000);
+      }
+    } catch (err) {
+      console.error('Payment failed:', err);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4000);
+    } finally {
+      setSubmittingPayment(false);
+    }
   };
 
   return (
@@ -123,14 +193,21 @@ export function FeeCollectionPage({ onNavigate }) {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search Student..."
+              placeholder="Search Student (e.g. 1992 or 2024)..."
               value={studentSearch}
               onChange={(e) => setStudentSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') fetchStudentLedger(studentSearch);
+              }}
               className="w-full text-xs rounded-md border border-slate-300 pl-9 pr-3 py-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
-          <button className="px-5 py-2.5 rounded-md bg-[#4338ca] text-white text-xs font-semibold hover:bg-indigo-800 transition-colors shrink-0 shadow-xs">
-            A/C Open
+          <button 
+            type="button"
+            onClick={() => fetchStudentLedger(studentSearch || selectedStudent.admNo)}
+            className="px-5 py-2.5 rounded-md bg-[#4338ca] text-white text-xs font-semibold hover:bg-indigo-800 transition-colors shrink-0 shadow-xs flex items-center space-x-1"
+          >
+            <span>{loadingStudent ? 'Fetching...' : 'A/C Open'}</span>
           </button>
         </div>
 

@@ -18,77 +18,65 @@ export function StudentPortfolioPage({ onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClass, setSelectedClass] = useState('All');
   const [selectedSection, setSelectedSection] = useState('All');
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const studentsList = [
+  // Live fetch from backend API
+  React.useEffect(() => {
+    fetch('http://localhost:5000/api/students')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const mapped = data.data.map((s, idx) => ({
+            id: s.id || String(idx + 1),
+            admNo: s.admNo,
+            srNo: s.srNo || s.admNo,
+            name: `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'Student',
+            gender: s.gender === 'Female' ? 'Girl' : 'Boy',
+            className: s.className || 'Class 10',
+            section: s.section || 'A',
+            fatherName: s.fatherName || '--',
+            mobile: s.smsWhatsappNo || s.fatherMobile || '--',
+            studentType: s.studentType ? s.studentType.toUpperCase() : 'NEW',
+            feeStatus: 'Active',
+            attendance: '95%',
+            photoUrl: s.photoUrl
+          }));
+          setStudents(mapped);
+        }
+      })
+      .catch(err => console.error('Failed to fetch students:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const studentsList = students.length > 0 ? students : [
     {
       id: '1',
-      admNo: 'JD-2026-101',
-      srNo: '10964/001',
+      admNo: '1992',
+      srNo: '1992',
       name: 'Aarav Sharma',
       gender: 'Boy',
       className: 'Class 10',
       section: 'A',
       fatherName: 'Rajesh Sharma',
-      mobile: '9829012345',
-      studentType: 'OLD',
+      mobile: '9876543210',
+      studentType: 'NEW',
       feeStatus: 'Paid',
       attendance: '96%'
     },
     {
       id: '2',
-      admNo: 'JD-2026-102',
-      srNo: '10964/002',
-      name: 'Ananya Gupta',
+      admNo: '2024',
+      srNo: '2024',
+      name: 'Ananya Verma',
       gender: 'Girl',
-      className: 'Class 10',
-      section: 'A',
-      fatherName: 'Sanjay Gupta',
-      mobile: '9829012346',
+      className: 'Class 9',
+      section: 'B',
+      fatherName: 'Vikas Verma',
+      mobile: '9123456789',
       studentType: 'OLD',
       feeStatus: 'Due ₹ 4,500',
       attendance: '98%'
-    },
-    {
-      id: '3',
-      admNo: 'JD-2026-103',
-      srNo: '10964/003',
-      name: 'Rohan Meena',
-      gender: 'Boy',
-      className: 'Class 8',
-      section: 'B',
-      fatherName: 'Vikram Meena',
-      mobile: '9829012347',
-      studentType: 'NEW',
-      feeStatus: 'Paid',
-      attendance: '92%'
-    },
-    {
-      id: '4',
-      admNo: 'JD-2026-104',
-      srNo: '10964/004',
-      name: 'Diya Choudhary',
-      gender: 'Girl',
-      className: 'Class 5',
-      section: 'A',
-      fatherName: 'Manoj Choudhary',
-      mobile: '9829012348',
-      studentType: 'OLD',
-      feeStatus: 'Paid',
-      attendance: '100%'
-    },
-    {
-      id: '5',
-      admNo: 'JD-2026-105',
-      srNo: '10964/005',
-      name: 'Kabir Verma',
-      gender: 'Boy',
-      className: 'Class 12',
-      section: 'Sci',
-      fatherName: 'Praveen Verma',
-      mobile: '9829012349',
-      studentType: 'OLD',
-      feeStatus: 'Due ₹ 12,000',
-      attendance: '94%'
     }
   ];
 

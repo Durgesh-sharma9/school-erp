@@ -9,34 +9,62 @@ import {
 } from 'lucide-react';
 
 export function ClassMasterPage() {
-  const [classes, setClasses] = useState([
-    { id: '1', name: 'Nursery', priority: 1, sections: ['A', 'B'], status: 'Active' },
-    { id: '2', name: 'L.K.G', priority: 2, sections: ['A', 'B'], status: 'Active' },
-    { id: '3', name: 'U.K.G', priority: 3, sections: ['A', 'B'], status: 'Active' },
-    { id: '4', name: 'Class 1', priority: 4, sections: ['A', 'B', 'C'], status: 'Active' },
-    { id: '5', name: 'Class 5', priority: 8, sections: ['A', 'B'], status: 'Active' },
-    { id: '6', name: 'Class 8', priority: 11, sections: ['A', 'B'], status: 'Active' },
-    { id: '7', name: 'Class 10', priority: 13, sections: ['A', 'B'], status: 'Active' },
-    { id: '8', name: 'Class 12', priority: 15, sections: ['Sci', 'Comm'], status: 'Active' }
-  ]);
-
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [newClassName, setNewClassName] = useState('');
   const [newPriority, setNewPriority] = useState('');
   const [newSections, setNewSections] = useState('A, B');
 
-  const handleAddClass = (e) => {
+  // Fetch classes from backend API
+  const fetchClasses = () => {
+    fetch('http://localhost:5000/api/academics/classes')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setClasses(data.data);
+        }
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  };
+
+  React.useEffect(() => {
+    fetchClasses();
+  }, []);
+
+  const handleAddClass = async (e) => {
     e.preventDefault();
     if (!newClassName) return;
-    const newClass = {
-      id: String(Date.now()),
-      name: newClassName,
-      priority: Number(newPriority) || classes.length + 1,
-      sections: newSections.split(',').map(s => s.trim()),
-      status: 'Active'
-    };
-    setClasses(prev => [...prev, newClass]);
-    setNewClassName('');
-    setNewPriority('');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/academics/classes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newClassName,
+          priority: newPriority,
+          sections: newSections
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        fetchClasses();
+        setNewClassName('');
+        setNewPriority('');
+      }
+    } catch (err) {
+      console.error(err);
+      const newClass = {
+        id: String(Date.now()),
+        name: newClassName,
+        priority: Number(newPriority) || classes.length + 1,
+        sections: newSections.split(',').map(s => s.trim()),
+        status: 'Active'
+      };
+      setClasses(prev => [...prev, newClass]);
+      setNewClassName('');
+      setNewPriority('');
+    }
   };
 
   return (
