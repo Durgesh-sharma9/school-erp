@@ -1,119 +1,152 @@
 import React, { useState } from 'react';
 import {
-  MessageSquare,
   QrCode,
-  RotateCcw,
-  CheckCircle2,
-  AlertCircle,
-  Wifi,
-  WifiOff
+  Plus,
+  Trash2,
+  SignalZero,
+  X
 } from 'lucide-react';
 
 export function WhatsappQrPage() {
-  const [status, setStatus] = useState('In-Active');
-  const [instanceData, setInstanceData] = useState({
+  const [isActive, setIsActive] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [session, setSession] = useState({
     loggedIn: false,
-    instanceId: 'INST-2026-98124',
-    accessToken: 'tok_live_*******************',
-    connectionStatus: 'Disconnected'
+    instanceId: '',
+    accessToken: '',
+    status: 'Disconnected'
   });
 
-  const [qrCodeModal, setQrCodeModal] = useState(false);
-
-  const handleResetInstance = () => {
-    if (window.confirm('Are you sure you want to reset your WhatsApp instance?')) {
-      setInstanceData(prev => ({
-        ...prev,
-        instanceId: `INST-2026-${Math.floor(10000 + Math.random() * 90000)}`,
-        connectionStatus: 'Disconnected',
-        loggedIn: false
-      }));
-      setStatus('In-Active');
+  const handleReset = () => {
+    if (window.confirm('Are you sure you want to delete and reset the WhatsApp instance?')) {
+      setSession({
+        loggedIn: false,
+        instanceId: '',
+        accessToken: '',
+        status: 'Disconnected'
+      });
+      setIsActive(false);
     }
   };
 
+  const handleSimulateScan = () => {
+    setSession({
+      loggedIn: true,
+      instanceId: `INST-${Math.floor(100000 + Math.random() * 900000)}`,
+      accessToken: `tok_live_${Math.random().toString(36).substring(2, 15)}`,
+      status: 'Connected'
+    });
+    setIsActive(true);
+    setQrModalOpen(false);
+  };
+
   return (
-    <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
-      {/* Breadcrumb Header */}
-      <div className="flex items-center justify-between pt-1 pb-1">
-        <div className="flex items-center space-x-2 text-xs text-gray-500">
-          <span className="font-semibold text-gray-800 text-sm">School</span>
-          <span>&bull;</span>
-          <span className="text-gray-400">School &bull; Whatsapp Link</span>
+    <div className="bg-[#f3f4f6] min-h-screen">
+      {/* 1:1 UAB Exact Sticky Sub-Navbar */}
+      <div className="bg-[#f8fafc] px-6 h-14 border-b border-slate-200 sticky top-0 left-0 flex justify-start items-center space-x-3 z-10 shadow-2xs">
+        {/* WhatsApp Brand Icon & Status */}
+        <div className="flex items-center space-x-2">
+          {/* WhatsApp logo in red/green depending on status */}
+          <span className={`text-3xl ${isActive ? 'text-emerald-500' : 'text-rose-500'}`}>
+            <svg
+              className="w-8 h-8 fill-current"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M12.001 2.002c-5.522 0-9.999 4.477-9.999 9.999 0 1.763.456 3.42 1.254 4.863l-1.256 4.606 4.735-1.242c1.393.754 2.979 1.173 4.666 1.173 5.522 0 9.999-4.477 9.999-9.999s-4.477-10-9.999-10zm5.836 14.154c-.244.686-1.233 1.258-1.789 1.341-.519.077-1.189.109-3.486-.843-2.673-1.109-4.385-3.83-4.518-4.009-.133-.178-1.077-1.433-1.077-2.733 0-1.3.686-1.942.93-2.208.244-.266.533-.333.71-.333.178 0 .355.002.511.01.166.009.388-.063.609.467.244.577.822 2.019.889 2.164.067.144.111.311.022.489-.089.178-.133.289-.267.444-.133.155-.278.344-.4.466-.133.133-.272.278-.117.544.155.266.69 1.133 1.48 1.834 1.017.904 1.874 1.185 2.14 1.318.266.133.422.111.577-.067.155-.178.666-.777.844-1.043.178-.266.355-.222.6-.133.244.089 1.555.733 1.821.866.266.133.444.2.511.311.066.111.066.644-.178 1.33z" />
+            </svg>
+          </span>
+
+          <span className="text-xs font-semibold text-slate-800">
+            {isActive ? 'Active' : 'In-Active'}
+          </span>
         </div>
+
+        {/* Circular Mini FAB 1: QR Scan (Indigo circle) */}
+        <button
+          type="button"
+          onClick={() => setQrModalOpen(true)}
+          title="Qr Scan"
+          className="w-10 h-10 rounded-full bg-[#5c67f6] hover:bg-[#4a55ea] text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95"
+        >
+          <QrCode className="w-5 h-5 text-white" />
+        </button>
+
+        {/* Circular Mini FAB 2: Add (Disabled state in UAB) */}
+        <button
+          type="button"
+          disabled
+          title="Add"
+          className="w-10 h-10 rounded-full bg-slate-300 text-slate-500 flex items-center justify-center opacity-60 cursor-not-allowed shadow-none"
+        >
+          <Plus className="w-5 h-5 text-slate-500" />
+        </button>
       </div>
 
-      {/* Main Container Card */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4 space-y-4">
-        {/* Status Chip Row */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold text-slate-700">Instance State:</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-              status === 'Active'
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-rose-50 text-rose-700 border border-rose-200'
-            }`}>
-              {status}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setQrCodeModal(true)}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>Scan QR Code</span>
-          </button>
-        </div>
-
-        {/* 1:1 UAB Table */}
-        <div className="border border-slate-200 rounded-lg overflow-hidden">
-          <table className="w-full text-left text-xs border-collapse">
+      {/* 1:1 Table Section (Matches UAB exactly) */}
+      <div className="p-4">
+        <div className="bg-white rounded-lg shadow-xs border border-slate-200 overflow-hidden">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50/70">
-                <th className="py-3 px-4">Logged In</th>
-                <th className="py-3 px-4">Instance ID</th>
-                <th className="py-3 px-4">Access Token</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Reset Instance</th>
+              <tr className="bg-slate-200 text-slate-800 font-bold text-xs">
+                <th className="py-3 px-4 text-center">Logged In</th>
+                <th className="p-3 text-center">Instance ID</th>
+                <th className="p-3 text-center">Access Token</th>
+                <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-center">Reset Instance</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-4">
-                  <span className="flex items-center space-x-1.5">
-                    {instanceData.loggedIn ? (
-                      <>
-                        <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-emerald-700 font-bold">Yes</span>
-                      </>
-                    ) : (
-                      <>
-                        <WifiOff className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-slate-500 font-bold">No</span>
-                      </>
-                    )}
-                  </span>
+            <tbody className="text-xs text-slate-700">
+              <tr className="text-center hover:bg-slate-50/60 transition-colors">
+                {/* Logged In */}
+                <td className="py-5 px-4 font-semibold">
+                  {session.loggedIn ? (
+                    <span className="text-emerald-600 font-bold">Yes</span>
+                  ) : (
+                    <span>--</span>
+                  )}
                 </td>
-                <td className="py-3 px-4 font-mono font-bold text-indigo-700">
-                  {instanceData.instanceId}
+
+                {/* Instance ID */}
+                <td className="p-5 font-mono font-medium text-slate-800">
+                  {session.instanceId || ''}
                 </td>
-                <td className="py-3 px-4 font-mono text-slate-500">
-                  {instanceData.accessToken}
+
+                {/* Access Token */}
+                <td className="p-5 font-mono text-slate-500">
+                  {session.accessToken || ''}
                 </td>
-                <td className="py-3 px-4">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-100">
-                    {instanceData.connectionStatus}
-                  </span>
+
+                {/* Status Column (Disconnected in red with signal_cellular_alt icon) */}
+                <td className="py-5 px-4">
+                  {session.loggedIn ? (
+                    <div className="text-emerald-600 flex justify-center items-center space-x-1 font-semibold">
+                      <span>Connected</span>
+                    </div>
+                  ) : (
+                    <div className="text-red-500 flex justify-center items-center space-x-1 font-semibold">
+                      {/* signal_cellular_alt SVG */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 fill-current inline-block"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17 4h3v16h-3V4zM5 14h3v6H5v-6zm6-5h3v11h-3V9z" />
+                      </svg>
+                      <p>Disconnected</p>
+                    </div>
+                  )}
                 </td>
-                <td className="py-3 px-4 text-right">
+
+                {/* Reset Instance (Delete bin icon) */}
+                <td className="py-5 px-4 cursor-pointer">
                   <button
-                    onClick={handleResetInstance}
-                    className="inline-flex items-center space-x-1 px-3 py-1 rounded border border-rose-200 bg-white hover:bg-rose-50 text-rose-700 font-bold text-xs shadow-2xs"
+                    type="button"
+                    onClick={handleReset}
+                    title="Delete Instance"
+                    className="p-1.5 rounded-full hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-colors inline-flex items-center justify-center"
                   >
-                    <RotateCcw className="w-3 h-3 text-rose-600" />
-                    <span>Reset</span>
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
               </tr>
@@ -122,35 +155,43 @@ export function WhatsappQrPage() {
         </div>
       </div>
 
-      {/* QR Code Modal */}
-      {qrCodeModal && (
+      {/* QR Code Scan Modal */}
+      {qrModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
-            <h3 className="font-bold text-sm text-slate-900">Scan WhatsApp QR Code</h3>
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 relative">
+            <button
+              onClick={() => setQrModalOpen(false)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
+              📱
+            </div>
+
+            <h3 className="font-bold text-base text-slate-900">Scan QR Code</h3>
             <p className="text-xs text-slate-500">
-              Open WhatsApp on your school phone ➔ Linked Devices ➔ Scan this code
+              Open WhatsApp on your mobile &bull; Linked Devices &bull; Scan the QR Code below to link your school account
             </p>
-            <div className="w-48 h-48 mx-auto bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center p-2">
+
+            <div className="w-48 h-48 mx-auto bg-white border-2 border-slate-200 rounded-xl p-2 flex items-center justify-center shadow-inner">
               <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=UAB_SCHOOL_WHATSAPP_LINK_2026"
-                alt="WhatsApp QR Code"
-                className="w-full h-full"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=UAB_INFOSOL_JD_INTERNATIONAL_2026"
+                alt="QR Code"
+                className="w-full h-full object-contain"
               />
             </div>
-            <button
-              onClick={() => {
-                setQrCodeModal(false);
-                setStatus('Active');
-                setInstanceData(prev => ({
-                  ...prev,
-                  loggedIn: true,
-                  connectionStatus: 'Connected'
-                }));
-              }}
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-xs"
-            >
-              Simulate Connect
-            </button>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleSimulateScan}
+                className="w-full py-2.5 rounded-lg bg-[#5c67f6] hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
+              >
+                Simulate Successful Scan
+              </button>
+            </div>
           </div>
         </div>
       )}
