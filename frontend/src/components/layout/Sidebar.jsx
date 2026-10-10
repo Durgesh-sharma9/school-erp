@@ -345,6 +345,13 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       setOpenDropdowns(prev => ({ ...prev, student: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'student-reports': true }));
     }
+    const certificatePaths = [
+      '/certificate-generater-new', '/transfer-certificate',
+      '/generate-manual-tc', '/add-update-tc-bulk', '/manual-cc-bc'
+    ];
+    if (certificatePaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, certificates: true }));
+    }
   }, [currentPath]);
 
   if (!isOpen) return null;

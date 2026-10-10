@@ -44,6 +44,13 @@ import {
   StudentCallListPage,
   SubjectWiseStudentListPage
 } from './modules/students/reports';
+import {
+  CertificateGeneratorPage,
+  GenerateManualTcPage,
+  BulkTcPage,
+  ManualCcBcPage,
+  TransferCertificatePage
+} from './modules/certificates';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -177,6 +184,16 @@ function App() {
                 return <StudentCallListPage onNavigate={handleNavigate} />;
               case '/subject-wise-student-details':
                 return <SubjectWiseStudentListPage onNavigate={handleNavigate} />;
+              case '/certificate-generater-new':
+                return <CertificateGeneratorPage onNavigate={handleNavigate} />;
+              case '/transfer-certificate':
+                return <TransferCertificatePage onNavigate={handleNavigate} />;
+              case '/generate-manual-tc':
+                return <GenerateManualTcPage onNavigate={handleNavigate} />;
+              case '/add-update-tc-bulk':
+                return <BulkTcPage onNavigate={handleNavigate} />;
+              case '/manual-cc-bc':
+                return <ManualCcBcPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">

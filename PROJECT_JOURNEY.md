@@ -650,8 +650,48 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #33] - 1:1 Live Certificates Module Replication (`/certificate-generater-new`, `/generate-manual-tc`, `/add-update-tc-bulk`, `/manual-cc-bc`, `/transfer-certificate`)
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Replicate all requested certificate management pages (`/certificate-generater-new`, `/generate-manual-tc`, `/add-update-tc-bulk`, `/manual-cc-bc`) with exact 1:1 parity with UAB Infosol under strict read-only safety rules and zero-push git policy.
+* **Actions Taken:**
+  * **Strict Read-Only DOM Analysis of All Certificate Pages on Live Portal:**
+    1. **CC/BC/TF Generator (`/certificate-generater-new`):**
+       * Top breadcrumbs toolbar (`Student > Generate Computer Slip`).
+       * Dual tabs: `Student Certificate Details` & `Staff Certificate Details`.
+       * Config controls: Student autocomplete search, Report Type (`Bonafide Certificate`, `Character Certificate`, `Tution Fee Report`, `Participation Certificate`, `Participation Achievement`, `Study Certificate`), With (`Father's Name`, `Mother's Name`, `Both`), Format (`Standard`, `Formal`, `Board`), Border (`None`, `Single Border`, `Double Border`, `Ornate Border`), Purple `Print Certificate` button.
+       * Live Authentic CBSE Certificate Sheet rendering school crest, affiliation details, student metadata, certificate wording, official seal, and Principal signature.
+    2. **Gen Manual TC (`/generate-manual-tc`):**
+       * Breadcrumbs (`Student > Generate TC Manual`), search bar, purple mini FAB (`#5c67f6`), paginator.
+       * Table with `S.NO.`, `SR.NO.`, `NAME`, `CLASS`, `FATHER'S NAME`, `MOTHER'S NAME`, `TC NO.`, `ISSUE DATE`, Action buttons (Print, Delete).
+       * Complete `GENERATE MANUAL TC` Modal with all **28 extracted fields** (`Adm.No.`, `Enroll.No.`, `Student Registration No`, `PEN No`, `Student Name`, `Class Name`, `Mother's Name`, `Father's Name`, `Nationality`, `Category`, `DOB`, `Adm. Date`, `Failed`, `Got Last Exam Result`, `Promotion`, `Fees Paid`, `Last Fee Paid date`, `Fees Concession`, `NCC/Scout`, `Attendance`, `School Open days`, `General Conduct`, `Issue Date`, `Date of Leaving`, `Reason of Leaving`, `subjects`, `Remark`, `Print Type`).
+       * Authentic CBSE Transfer Certificate (TC) printable format modal.
+    3. **Bulk TC Gen (`/add-update-tc-bulk`):**
+       * Filters: `Class`, `Section`, `Select Reason` (`Parent Wish`, `Family Relocation`, `Completed Course`).
+       * Red `Generate` button (`#ef4444`).
+       * Multi-select student table with bulk selection checkbox and batch generation feedback modal.
+    4. **Manual CC/BC/TF (`/manual-cc-bc`):**
+       * Search bar, purple mini FAB, table with Print & Delete actions.
+       * Complete `GENERATE CERTIFICATE` Modal with all **17 extracted fields** (`Adm No`, `Sr No`, `Pen No`, `Student Name`, `Class & Division`, `Father's Name`, `Mother's Name`, `DOB`, `From Year to Year`, `Academic Yr`, `Issue Date`, `Remark`, `Gender`, `Report Type`, `With`, `Format`, `Print Type`).
+    5. **TC Generation (`/transfer-certificate`):**
+       * Standard TC generation table with `Pending` vs `Issued` status tags, Approve & Issue workflow, and Print preview.
+  * **Backend API Vertical Slice:**
+    * Created [`certificates.controller.js`](file:///C:/webncode/school%20erp/backend/src/modules/certificates/certificates.controller.js) and [`certificates.routes.js`](file:///C:/webncode/school%20erp/backend/src/modules/certificates/certificates.routes.js):
+      * `GET/POST /api/certificates/cc-bc` (Manual certificates log & creation)
+      * `GET/POST /api/certificates/tc/manual` (Manual TC logs & creation)
+      * `POST /api/certificates/tc/bulk` (Bulk TC batch processing)
+    * Mounted under `/api/certificates` in `backend/src/app.js`.
+  * **Routing & Verification:**
+    * Updated [`Sidebar.jsx`](file:///C:/webncode/school%20erp/frontend/src/components/layout/Sidebar.jsx) with auto-expansion for all certificate routes.
+    * Synchronized routes in [`App.jsx`](file:///C:/webncode/school%20erp/frontend/src/App.jsx).
+    * Verified build: `npm run build` compiled in **3.19s** with 0 errors.
+    * Tested and validated rendering of all 5 certificate pages via headless browser.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* **Target:** Certificates Module (`/certificate-generater-new`, `/transfer-certificate`, `/generate-manual-tc`, `/add-update-tc-bulk`, `/manual-cc-bc`) or next requested module.
+* **Target:** Study Material Module (`/homework`, `/upload-pre-year-paper`, `/study-material-reports`) or Greeting Card Module (`/send-greeting-card-msg`, `/greeting-card-reports`) or next requested module.
+
 
 
 
