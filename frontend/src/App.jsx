@@ -47,80 +47,52 @@ function App() {
 
         {/* Dynamic Canvas Routing */}
         <main className="flex-1 overflow-y-auto">
-          {currentPath === '/' && (
-            <DashboardPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/student-registration' && (
-            <StudentRegistrationPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/student-portfolio' && (
-            <StudentPortfolioPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/fee-collection' && (
-            <FeeCollectionPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/fee-structure' && (
-            <FeeStructurePage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/student-attendance' && (
-            <StudentAttendancePage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/marks-entry' && (
-            <MarksEntryPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/school-info' && (
-            <SchoolInfoPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/whatsapp-qr-settings' && (
-            <WhatsappQrPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/settings-and-permissions' && (
-            <SettingsAndPermissionsPage onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/class' && (
-            <ClassMasterPage onNavigate={handleNavigate} />
-          )}
-
-          {/* Fallback for other UAB routes */}
-          {![
-            '/',
-            '/student-registration',
-            '/student-portfolio',
-            '/fee-collection',
-            '/fee-structure',
-            '/student-attendance',
-            '/marks-entry',
-            '/school-info',
-            '/class'
-          ].includes(currentPath) && (
-            <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto text-2xl font-bold shadow-xs">
-                📄
-              </div>
-              <h3 className="text-xl font-extrabold text-slate-900">
-                Route: <span className="font-mono text-indigo-600">{currentPath}</span>
-              </h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
-                Ready for implementation in the next step.
-              </p>
-              <button
-                onClick={() => handleNavigate('/')}
-                className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
-              >
-                &larr; Return to Dashboard
-              </button>
-            </div>
-          )}
+          {(() => {
+            switch (currentPath) {
+              case '/':
+                return <DashboardPage onNavigate={handleNavigate} />;
+              case '/school-info':
+                return <SchoolInfoPage onNavigate={handleNavigate} />;
+              case '/whatsapp-qr-settings':
+                return <WhatsappQrPage onNavigate={handleNavigate} />;
+              case '/settings-and-permissions':
+                return <SettingsAndPermissionsPage onNavigate={handleNavigate} />;
+              case '/class':
+                return <ClassMasterPage onNavigate={handleNavigate} />;
+              case '/student-registration':
+                return <StudentRegistrationPage onNavigate={handleNavigate} />;
+              case '/student-portfolio':
+                return <StudentPortfolioPage onNavigate={handleNavigate} />;
+              case '/fee-collection':
+                return <FeeCollectionPage onNavigate={handleNavigate} />;
+              case '/fee-structure':
+                return <FeeStructurePage onNavigate={handleNavigate} />;
+              case '/student-attendance':
+                return <StudentAttendancePage onNavigate={handleNavigate} />;
+              case '/marks-entry':
+                return <MarksEntryPage onNavigate={handleNavigate} />;
+              default:
+                return (
+                  <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto text-2xl font-bold shadow-xs">
+                      📄
+                    </div>
+                    <h3 className="text-xl font-extrabold text-slate-900">
+                      Route: <span className="font-mono text-indigo-600">{currentPath}</span>
+                    </h3>
+                    <p className="text-sm text-slate-500 max-w-md mx-auto">
+                      Ready for implementation in the next step.
+                    </p>
+                    <button
+                      onClick={() => handleNavigate('/')}
+                      className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      &larr; Return to Dashboard
+                    </button>
+                  </div>
+                );
+            }
+          })()}
         </main>
       </div>
     </div>

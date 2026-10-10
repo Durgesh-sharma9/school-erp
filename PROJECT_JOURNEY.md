@@ -442,10 +442,34 @@ This document tracks the complete development journey of the **Unified School ER
     * `npm run build` compiled cleanly in **2.42s** with 0 errors.
 * **Status:** ✅ Completed
 
+### 📍 [Entry #27] - Route Switch-Case Architecture Fixed in App.jsx
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Fix fallback route conflict where `/settings-and-permissions` was showing the placeholder screen instead of the actual page ("fix this").
+* **Actions Taken:**
+  * Diagnosed `frontend/src/App.jsx`: The previous router logic used an array blacklist check for fallback rendering which missed `/settings-and-permissions` and `/whatsapp-qr-settings`, causing the placeholder screen to render.
+  * Re-architected routing into a clean, deterministic `switch(currentPath)` block.
+  * Explicitly routed:
+    * `/` ➔ `DashboardPage`
+    * `/school-info` ➔ `SchoolInfoPage`
+    * `/whatsapp-qr-settings` ➔ `WhatsappQrPage`
+    * `/settings-and-permissions` ➔ `SettingsAndPermissionsPage`
+    * `/class` ➔ `ClassMasterPage`
+    * `/student-registration` ➔ `StudentRegistrationPage`
+    * `/student-portfolio` ➔ `StudentPortfolioPage`
+    * `/fee-collection` ➔ `FeeCollectionPage`
+    * `/fee-structure` ➔ `FeeStructurePage`
+    * `/student-attendance` ➔ `StudentAttendancePage`
+    * `/marks-entry` ➔ `MarksEntryPage`
+    * `default` ➔ Placeholder only for yet-to-be-built modules.
+  * Verified build: `npm run build` compiled in **2.56s** with 0 errors.
+  * Policy update: User instructed to commit locally on each step, but **DO NOT push to remote** unless explicitly asked.
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:
 * **Target:** **Master Module (Class Master `/class`, Group Subject `/subject-group`, Subject Master `/subject`, Subject Link `/subject-link`, Stream Master `/add-update-stream`, Master Reports `/master-reports`)**
+
 
 
 
