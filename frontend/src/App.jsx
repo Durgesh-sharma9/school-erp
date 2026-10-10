@@ -3,7 +3,13 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { DashboardPage } from './modules/dashboard/DashboardPage';
 import { StudentRegistrationPage } from './modules/students/StudentRegistrationPage';
+import { AssignRollNumberPage } from './modules/students/AssignRollNumberPage';
+import { OnlineClassesPage } from './modules/students/OnlineClassesPage';
+import { PromotionPage } from './modules/students/PromotionPage';
 import { StudentPortfolioPage } from './modules/students/StudentPortfolioPage';
+import { IdCardGeneratorPage } from './modules/students/IdCardGeneratorPage';
+import { AdmitCardGeneratorPage } from './modules/students/AdmitCardGeneratorPage';
+import { ExamDateSheetPage } from './modules/students/ExamDateSheetPage';
 import { FeeCollectionPage } from './modules/fees/FeeCollectionPage';
 import { FeeStructurePage } from './modules/fees/FeeStructurePage';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
@@ -92,14 +98,26 @@ function App() {
                 return <SubjectListPage onNavigate={handleNavigate} />;
               case '/student-registration':
                 return <StudentRegistrationPage onNavigate={handleNavigate} />;
+              case '/assign-roll-number':
+                return <AssignRollNumberPage onNavigate={handleNavigate} />;
+              case '/student-attendance':
+                return <StudentAttendancePage onNavigate={handleNavigate} />;
+              case '/create-online-classes':
+                return <OnlineClassesPage onNavigate={handleNavigate} />;
+              case '/promotion':
+                return <PromotionPage onNavigate={handleNavigate} />;
               case '/student-portfolio':
                 return <StudentPortfolioPage onNavigate={handleNavigate} />;
+              case '/id-card-generator':
+                return <IdCardGeneratorPage onNavigate={handleNavigate} />;
+              case '/admit-card-generator':
+                return <AdmitCardGeneratorPage onNavigate={handleNavigate} />;
+              case '/exam-date-sheet':
+                return <ExamDateSheetPage onNavigate={handleNavigate} />;
               case '/fee-collection':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;
               case '/fee-structure':
                 return <FeeStructurePage onNavigate={handleNavigate} />;
-              case '/student-attendance':
-                return <StudentAttendancePage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
               default:

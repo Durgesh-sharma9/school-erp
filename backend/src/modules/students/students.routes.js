@@ -4,16 +4,23 @@ import {
   registerStudent,
   uploadStudentPhoto,
   getStudentsList,
-  getStudentByAdmNo
+  getStudentByAdmNo,
+  assignRollNumbers,
+  getAttendance,
+  saveAttendance,
+  getOnlineClasses,
+  createOnlineClass,
+  promoteStudents,
+  getExamDateSheets,
+  createExamDateSheet
 } from './students.controller.js';
 
 const router = express.Router();
 
-// Memory storage for multer so buffer can be streamed to ImageKit directly
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -23,8 +30,26 @@ const upload = multer({
   }
 });
 
-// Photo upload to ImageKit
+// Photo upload
 router.post('/upload-photo', upload.single('photo'), uploadStudentPhoto);
+
+// Roll Number Assignment
+router.post('/assign-roll', assignRollNumbers);
+
+// Attendance
+router.get('/attendance', getAttendance);
+router.post('/attendance', saveAttendance);
+
+// Online Classes
+router.get('/online-classes', getOnlineClasses);
+router.post('/online-classes', createOnlineClass);
+
+// Promotion
+router.post('/promote', promoteStudents);
+
+// Exam Date Sheets
+router.get('/exam-date-sheets', getExamDateSheets);
+router.post('/exam-date-sheets', createExamDateSheet);
 
 // Student registration and queries
 router.post('/', registerStudent);
