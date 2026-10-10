@@ -308,10 +308,31 @@ This document tracks the complete development journey of the **Unified School ER
   * Pushed to remote GitHub repository (`Durgesh-sharma9/school-erp.git` commit `e8aa170`).
 * **Status:** ✅ Completed
 
+### 📍 [Entry #20] - 1:1 Exact Fee Collection Counter & Submenu Micro-Styles Refined
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** User showed screenshot of School dropdown submenu and requested: "is sme jitne bhi pageshai sab ko neeche tak scrool kaor and proper same banao"
+* **Actions Taken:**
+  * Pre-flight: Checked `INSTRUCTIONS.md` (Checked layout integrity & vertical slice architecture).
+  * Extracted exact live UAB submenu styling from Puppeteer computed CSS:
+    * Submenu Item Height: `40px`
+    * Submenu Left Indentation: `paddingLeft: 52px` (exactly matches UAB indentation)
+    * Normal Item Background: `#f4f4f5` with text `#030712`
+    * Active Subitem Background: `rgba(99, 102, 241, 0.2)` soft indigo highlight
+  * Inspected live UAB **Fee Collection Counter (`/fee-collection`)** and built 100% matching view:
+    * Top navigation tabs (*Fee, Transport, Con. Category, Concession, Fee Cancel, Registration*).
+    * Global Student Search Bar + Indigo **A/C Open** button.
+    * Left side Peach/Amber student biodata box (`#fff8f2` with border `orange-200`) showing Enroll No, Sr. No, Adm No, Name, Class, Parents, Mobile, and Graduate silhouette avatar.
+    * Right side inputs: Fee Type, Choose a date, Receipt No, Pay Mode dropdown (Cash, Bank, Cheque, UPI, Debit Card), and "Show Receipts" button.
+    * Lower Head-Wise Fees breakdown table with checkboxes, Total Amount, Payable, Paid, and Due Balance.
+  * Verified build: `npm run build` compiled in **2.41s** with 0 errors.
+  * Pushed updates to GitHub remote (`Durgesh-sharma9/school-erp.git` commit `632c62e`).
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:
 * **Target:** **Step 3: Database & Backend Wiring for Student Admission & Fee Counter**
+
 
 
 
