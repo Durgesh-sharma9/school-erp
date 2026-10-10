@@ -51,7 +51,8 @@ export const menuCategories = [
       { title: 'Subject Master', path: '/subject' },
       { title: 'Subject Link', path: '/subject-link' },
       { title: 'Stream Master', path: '/add-update-stream' },
-      { title: 'Reports', path: '/master-reports' }
+      { title: 'Class List', path: '/class-list' },
+      { title: 'Subject List', path: '/subject-list' }
     ]
   },
   {

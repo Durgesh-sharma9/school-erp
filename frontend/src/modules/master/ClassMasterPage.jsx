@@ -1,34 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Layers,
+  Home,
+  Search,
+  ListFilter,
   Plus,
-  Save,
-  CheckCircle2,
   Trash2,
-  Edit2
+  X
 } from 'lucide-react';
 
 export function ClassMasterPage() {
   const [classes, setClasses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [newClassName, setNewClassName] = useState('');
-  const [newPriority, setNewPriority] = useState('');
-  const [newSections, setNewSections] = useState('A, B');
+  const [newNumSections, setNewNumSections] = useState('1');
 
-  // Fetch classes from backend API
-  const fetchClasses = () => {
-    fetch('http://localhost:5000/api/academics/classes')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data) {
-          setClasses(data.data);
-        }
-      })
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+  // Fetch from backend
+  const fetchClasses = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/academics/classes');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setClasses(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch classes:', err);
+    }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchClasses();
   }, []);
 
@@ -42,151 +42,217 @@ export function ClassMasterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newClassName,
-          priority: newPriority,
-          sections: newSections
+          sections: Array.from({ length: Number(newNumSections) || 1 }, (_, i) => String.fromCharCode(65 + i)),
+          priority: classes.length + 1
         })
       });
-      const result = await res.json();
-      if (result.success) {
+      const data = await res.json();
+      if (data.success) {
         fetchClasses();
+        setAddModalOpen(false);
         setNewClassName('');
-        setNewPriority('');
+        setNewNumSections('1');
       }
     } catch (err) {
-      console.error(err);
-      const newClass = {
-        id: String(Date.now()),
-        name: newClassName,
-        priority: Number(newPriority) || classes.length + 1,
-        sections: newSections.split(',').map(s => s.trim()),
-        status: 'Active'
-      };
-      setClasses(prev => [...prev, newClass]);
-      setNewClassName('');
-      setNewPriority('');
+      console.error('Error adding class:', err);
     }
   };
 
+  const handleDeleteClass = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this class?')) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/academics/classes/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchClasses();
+      }
+    } catch (err) {
+      console.error('Error deleting class:', err);
+    }
+  };
+
+  const filteredClasses = classes.filter((c) =>
+    searchQuery ? c.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
+  );
+
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-200">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Master Configuration
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span>Class & Section Master</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-              Total {classes.length} Classes
-            </span>
-          </h2>
+    <div className="bg-[#f3f4f6] min-h-screen">
+      {/* 1:1 Secondary Toolbar Header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-2 text-xs">
+          <h1 className="text-xl font-bold text-slate-800 pr-3 border-r border-slate-300">
+            Class Master
+          </h1>
+          <Home className="w-3.5 h-3.5 text-slate-400" />
+          <span className="text-slate-400">&bull;</span>
+          <span className="text-slate-500 hover:text-indigo-600 cursor-pointer">Masters</span>
+          <span className="text-slate-400">&bull;</span>
+          <span className="text-indigo-600 font-semibold">Class Master</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left: Add Class Form */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs h-fit space-y-4">
-          <div className="flex items-center space-x-2 pb-3 border-b border-slate-100">
-            <Plus className="w-4 h-4 text-indigo-600" />
-            <h3 className="font-extrabold text-sm text-slate-900">Add New Class</h3>
+      {/* Main Container */}
+      <div className="p-6">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
+          {/* Action Bar (Search, Checklist filter, Add FAB) */}
+          <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full text-xs rounded-full border border-slate-200 pl-9 pr-4 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                title="Filter Columns"
+                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <ListFilter className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(true)}
+                title="Add Class"
+                className="w-9 h-9 rounded-full bg-[#5c67f6] hover:bg-indigo-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleAddClass} className="space-y-3.5">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Class Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Class 11"
-                value={newClassName}
-                onChange={(e) => setNewClassName(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Display Priority / Sort Order
-              </label>
-              <input
-                type="number"
-                placeholder="e.g. 14"
-                value={newPriority}
-                onChange={(e) => setNewPriority(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Sections (Comma Separated)
-              </label>
-              <input
-                type="text"
-                placeholder="A, B, C"
-                value={newSections}
-                onChange={(e) => setNewSections(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors"
-            >
-              + Create Class
-            </button>
-          </form>
-        </div>
-
-        {/* Right: Classes Table */}
-        <div className="md:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 text-slate-400 uppercase font-bold text-[10px] bg-slate-50/70">
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4">Class Name</th>
-                <th className="py-3 px-4">Sections</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-              {classes.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-slate-400">{c.priority}</td>
-                  <td className="py-3 px-4 font-bold text-slate-900">{c.name}</td>
-                  <td className="py-3 px-4">
-                    <div className="flex gap-1">
-                      {c.sections.map(s => (
-                        <span key={s} className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-100">
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={() => setClasses(prev => prev.filter(x => x.id !== c.id))}
-                      className="p-1 rounded text-rose-500 hover:bg-rose-50 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-bold text-[11px] uppercase">
+                  <th className="py-3 px-4 w-16">S.NO.</th>
+                  <th className="py-3 px-4">CLASS</th>
+                  <th className="py-3 px-4">SECTIONS</th>
+                  <th className="py-3 px-4">PRIORITY</th>
+                  <th className="py-3 px-4 text-right w-16"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                {filteredClasses.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-slate-400">
+                      No records found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredClasses.map((item, idx) => (
+                    <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-mono">{idx + 1}</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">{item.name}</td>
+                      <td className="py-3 px-4">{Array.isArray(item.sections) ? item.sections.length : 1}</td>
+                      <td className="py-3 px-4 font-mono">{item.priority || idx + 1}</td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClass(item.id)}
+                          className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-end space-x-6 text-xs text-slate-500">
+            <div className="flex items-center space-x-2">
+              <span>Items per page:</span>
+              <select className="border border-slate-200 rounded px-2 py-1 bg-white text-xs">
+                <option value="50">50</option>
+                <option value="25">25</option>
+              </select>
+            </div>
+            <span>1 – {filteredClasses.length} of {filteredClasses.length}</span>
+            <div className="flex items-center space-x-1">
+              <button disabled className="p-1 text-slate-300 cursor-not-allowed">&lt;</button>
+              <button disabled className="p-1 text-slate-300 cursor-not-allowed">&gt;</button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* 1:1 ADD CLASS MODAL (Matches UAB CLASS MASTER exactly) */}
+      {addModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-5 space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="font-bold text-sm text-slate-900 uppercase">CLASS MASTER</h3>
+              <button
+                onClick={() => setAddModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddClass} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  Class Name*
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none"
+                  placeholder="e.g. XI - COMMERCE"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  No. of Sections*
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={newNumSections}
+                  onChange={(e) => setNewNumSections(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setAddModalOpen(false)}
+                  className="px-4 py-2 rounded text-slate-600 hover:bg-slate-100 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded bg-[#5c67f6] hover:bg-indigo-700 text-white font-bold shadow-md"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default ClassMasterPage;

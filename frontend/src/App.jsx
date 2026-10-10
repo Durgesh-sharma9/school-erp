@@ -12,6 +12,12 @@ import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
 import { WhatsappQrPage } from './modules/school/WhatsappQrPage';
 import { SettingsAndPermissionsPage } from './modules/school/SettingsAndPermissionsPage';
 import { ClassMasterPage } from './modules/master/ClassMasterPage';
+import { SubjectGroupPage } from './modules/master/SubjectGroupPage';
+import { SubjectMasterPage } from './modules/master/SubjectMasterPage';
+import { SubjectLinkPage } from './modules/master/SubjectLinkPage';
+import { StreamMasterPage } from './modules/master/StreamMasterPage';
+import { ClassListPage } from './modules/master/ClassListPage';
+import { SubjectListPage } from './modules/master/SubjectListPage';
 
 function App() {
   const [currentPath, setCurrentPath] = useState('/');
@@ -59,6 +65,18 @@ function App() {
                 return <SettingsAndPermissionsPage onNavigate={handleNavigate} />;
               case '/class':
                 return <ClassMasterPage onNavigate={handleNavigate} />;
+              case '/subject-group':
+                return <SubjectGroupPage onNavigate={handleNavigate} />;
+              case '/subject':
+                return <SubjectMasterPage onNavigate={handleNavigate} />;
+              case '/subject-link':
+                return <SubjectLinkPage onNavigate={handleNavigate} />;
+              case '/add-update-stream':
+                return <StreamMasterPage onNavigate={handleNavigate} />;
+              case '/class-list':
+                return <ClassListPage onNavigate={handleNavigate} />;
+              case '/subject-list':
+                return <SubjectListPage onNavigate={handleNavigate} />;
               case '/student-registration':
                 return <StudentRegistrationPage onNavigate={handleNavigate} />;
               case '/student-portfolio':
