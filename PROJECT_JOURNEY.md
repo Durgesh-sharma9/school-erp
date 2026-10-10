@@ -393,27 +393,30 @@ This document tracks the complete development journey of the **Unified School ER
   * Verification: `npm run build` compiled in **3.16s** with 0 errors.
 * **Status:** ✅ Completed
 
-### 📍 [Entry #25] - 1:1 Live Settings & Permissions (`/settings-and-permissions`) Exact Match
+### 📍 [Entry #25] - 1:1 Live Settings & Permissions (`/settings-and-permissions`) Exact Match & Clicked Dialogs Replicated
 * **Timestamp:** 2026-10-10
-* **Goal / Prompt:** Replicate `https://schools.uabinfosol.com/settings-and-permissions` 1:1 exactly as-is under strict Read-Only inspection protocol (zero modifications to live production school data).
+* **Goal / Prompt:** Replicate all dialogs and tab contents inside `settings-and-permissions` by inspecting them in live UAB portal under strict read-only safety rules.
 * **Actions Taken:**
-  * Pre-flight: Extracted live DOM from UAB portal in strictly read-only mode:
-    * Tabs Structure: 6 tabs (*Masters*, *Add SMS Template*, *Transport Settings*, *Student App Settings*, *Student App Module*, *Coming Soon*).
-    * Tab 1 Masters Layout: UAB `vex-all-masters` card with 4 items:
-      1. `House` (home icon)
-      2. `Stream` (explicit icon)
-      3. `Fee Concession By` (person icon)
-      4. `Fee Concession Type` (payments credit card icon)
-    * Click interactions: Interactive modals to view and configure Houses (Red, Blue, Green, Yellow), Streams (PCM, PCB, Commerce, Arts), and Concession tiers.
-    * Tabs 2 to 6: SMS template manager, GPS tracking refresh intervals, App notification marquee ticker, and mobile permissions.
-  * Replaced [`SettingsAndPermissionsPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/school/SettingsAndPermissionsPage.jsx).
-  * Verification: `npm run build` compiled cleanly in **2.92s** with 0 errors.
+  * Pre-flight: Inspected every single sub-item and tab by safe read-only clicking on live UAB portal:
+    * **Masters Dialogs Extracted:**
+      1. `House Master`: Exact table with columns (*S.NO., HOUSE, PRIORITY, ACTION*) containing real school houses (`RED` (1), `BLUE` (2), `GREEN` (3), `YELLOW` (4)).
+      2. `Stream Master`: Exact table with columns (*S.NO., STREAM, ACTION*) containing (`SCIENCE`, `COMMERCE`, `HUMANITIES`).
+      3. `Fee Concession By`: Exact table with columns (*S.NO., NAME, ACTION*) containing (`Management`, `Principal`).
+      4. `Fee Concession Type`: Exact table with columns (*S.NO., CONCESSION TYPE, DESCRIPTION, ACTION*) containing (`Handicap`, `Poor Student`, `Staff`, `Principal`, `Management`, `Other`, `3rd Child`).
+    * **Tabs 2 to 5 Exact Tables Extracted:**
+      * Tab 2 `Add SMS Template`: Exact table with headers (*S.NO., TEMP. ID, SENDER ID, TEMP. NAME, TEMP. TYPE, LANG, TYPE, DATE & TIME, STATUS*).
+      * Tab 3 `Transport Settings`: Exact 12-month calendar toggle table (*April, May, June, July, August, September, October, November, December, January, February, March*).
+      * Tab 4 `Student App Settings`: Module status table (*App Session, Fee, Result with Result Term Setting*).
+      * Tab 5 `Student App Module`: Exact table of all **38 mobile app modules** with icons, URLs, orders, and active toggles (*Home, Profile, Homework, Fee, DateSheet, Attendance, Sms, Calendar Planing, Birthday, Id Card, Syllabus, Fee Receipt, Admit Card, Gate Pass, Notifications, Transport, Study Material, Result, Hostel, Time Table, etc.*).
+  * Updated [`SettingsAndPermissionsPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/school/SettingsAndPermissionsPage.jsx).
+  * Verification: `npm run build` compiled in **2.68s** with 0 errors.
 * **Status:** ✅ Completed
 
 ---
 
 ## 🔜 Current Next Task in Queue:
 * **Target:** **Master Module (Class Master `/class`, Group Subject `/subject-group`, Subject Master `/subject`, Subject Link `/subject-link`, Stream Master `/add-update-stream`, Master Reports `/master-reports`)**
+
 
 
 

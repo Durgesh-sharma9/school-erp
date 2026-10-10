@@ -7,7 +7,11 @@ import {
   Plus,
   Trash2,
   X,
+  Edit2,
   CheckCircle2,
+  Search,
+  Filter,
+  Check,
   ChevronRight
 } from 'lucide-react';
 
@@ -27,63 +31,105 @@ export function SettingsAndPermissionsPage() {
   // Active sub-master modal for House / Stream / Fee Concession By / Fee Concession Type
   const [activeMasterModal, setActiveMasterModal] = useState(null);
 
-  // In-memory data for masters
+  // Exact live UAB Masters data
   const [houseList, setHouseList] = useState([
-    { id: '1', name: 'Red House' },
-    { id: '2', name: 'Blue House' },
-    { id: '3', name: 'Green House' },
-    { id: '4', name: 'Yellow House' }
+    { sNo: 1, house: 'RED', priority: 1 },
+    { sNo: 2, house: 'BLUE', priority: 2 },
+    { sNo: 3, house: 'GREEN', priority: 3 },
+    { sNo: 4, house: 'YELLOW', priority: 4 }
   ]);
   const [newHouseName, setNewHouseName] = useState('');
+  const [newHousePriority, setNewHousePriority] = useState('');
 
   const [streamList, setStreamList] = useState([
-    { id: '1', name: 'Science (PCM)' },
-    { id: '2', name: 'Science (PCB)' },
-    { id: '3', name: 'Commerce' },
-    { id: '4', name: 'Arts / Humanities' }
+    { sNo: 1, stream: 'SCIENCE' },
+    { sNo: 2, stream: 'COMMERCE' },
+    { sNo: 3, stream: 'HUMANITIES' }
   ]);
   const [newStreamName, setNewStreamName] = useState('');
 
   const [concessionByList, setConcessionByList] = useState([
-    { id: '1', name: 'Director / Management' },
-    { id: '2', name: 'Principal' }
+    { sNo: 1, name: 'Management' },
+    { sNo: 2, name: 'Principal' }
   ]);
   const [newConcessionByName, setNewConcessionByName] = useState('');
 
   const [concessionTypeList, setConcessionTypeList] = useState([
-    { id: '1', name: 'Sibling Concession', percent: '10%' },
-    { id: '2', name: 'Staff Ward Concession', percent: '50%' },
-    { id: '3', name: 'Merit Scholarship', percent: '25%' }
+    { sNo: 1, type: 'Handicap', description: '' },
+    { sNo: 2, type: 'Poor Student', description: '' },
+    { sNo: 3, type: 'Staff', description: '' },
+    { sNo: 4, type: 'Principal', description: '' },
+    { sNo: 5, type: 'Management', description: '' },
+    { sNo: 6, type: 'Other', description: '' },
+    { sNo: 7, type: '3rd Child', description: '' }
   ]);
   const [newConcessionTypeName, setNewConcessionTypeName] = useState('');
+  const [newConcessionTypeDesc, setNewConcessionTypeDesc] = useState('');
 
-  const handleAddHouse = (e) => {
-    e.preventDefault();
-    if (!newHouseName.trim()) return;
-    setHouseList(prev => [...prev, { id: String(Date.now()), name: newHouseName.trim() }]);
-    setNewHouseName('');
-  };
+  // Tab 3: Exact 12 Months Transport Settings Table
+  const [transportMonths, setTransportMonths] = useState([
+    { no: 1, month: 'April', active: true },
+    { no: 2, month: 'May', active: true },
+    { no: 3, month: 'June', active: false },
+    { no: 4, month: 'July', active: true },
+    { no: 5, month: 'August', active: true },
+    { no: 6, month: 'September', active: true },
+    { no: 7, month: 'October', active: true },
+    { no: 8, month: 'November', active: true },
+    { no: 9, month: 'December', active: true },
+    { no: 10, month: 'January', active: true },
+    { no: 11, month: 'February', active: true },
+    { no: 12, month: 'March', active: true }
+  ]);
 
-  const handleAddStream = (e) => {
-    e.preventDefault();
-    if (!newStreamName.trim()) return;
-    setStreamList(prev => [...prev, { id: String(Date.now()), name: newStreamName.trim() }]);
-    setNewStreamName('');
-  };
+  // Tab 4: Student App Settings
+  const [appSettings, setAppSettings] = useState([
+    { sNo: 6, module: 'App Session', status: true },
+    { sNo: 1, module: 'Fee', status: true },
+    { sNo: 3, module: 'Result', status: true, termSetting: true }
+  ]);
 
-  const handleAddConcessionBy = (e) => {
-    e.preventDefault();
-    if (!newConcessionByName.trim()) return;
-    setConcessionByList(prev => [...prev, { id: String(Date.now()), name: newConcessionByName.trim() }]);
-    setNewConcessionByName('');
-  };
-
-  const handleAddConcessionType = (e) => {
-    e.preventDefault();
-    if (!newConcessionTypeName.trim()) return;
-    setConcessionTypeList(prev => [...prev, { id: String(Date.now()), name: newConcessionTypeName.trim(), percent: '10%' }]);
-    setNewConcessionTypeName('');
-  };
+  // Tab 5: Exact 38 Student App Modules
+  const [appModules, setAppModules] = useState([
+    { sNo: 1, name: 'Home', icon: 'home', url: 'home', order: 0, active: true },
+    { sNo: 2, name: 'Profile', icon: 'account_circle', url: 'profile', order: 1, active: true },
+    { sNo: 3, name: 'Homework', icon: 'menu_book', url: 'get-homework', order: 1, active: true },
+    { sNo: 4, name: 'Fee', icon: 'currency_rupee', url: 'get-fee', order: 1, active: true },
+    { sNo: 5, name: 'DateSheet', icon: 'today', url: 'get-datesheet', order: 1, active: true },
+    { sNo: 6, name: 'Attendance', icon: 'calendar_month', url: 'get-attendance', order: 1, active: true },
+    { sNo: 7, name: 'Sms', icon: 'textsms', url: 'get-sms', order: 1, active: true },
+    { sNo: 8, name: 'Calendar Planing', icon: 'calendar_month', url: 'get-calendar-planing', order: 1, active: true },
+    { sNo: 9, name: 'Student Birthday', icon: 'celebration', url: 'student-birthday', order: 1, active: true },
+    { sNo: 10, name: 'Id Card', icon: 'recent_actors', url: 'student-id-card', order: 2, active: true },
+    { sNo: 11, name: 'Syllabus', icon: 'auto_stories', url: 'get-syllabus', order: 2, active: true },
+    { sNo: 12, name: 'Fee Receipt', icon: 'receipt', url: 'get-fee-receipt', order: 2, active: true },
+    { sNo: 13, name: 'Admit Card', icon: 'recent_actors', url: 'student-admit-card', order: 2, active: true },
+    { sNo: 14, name: 'Gate Pass', icon: 'recent_actors', url: 'get-gate-pass', order: 2, active: true },
+    { sNo: 15, name: 'Notifications', icon: 'article', url: 'all-notifications', order: 2, active: true },
+    { sNo: 16, name: 'Birthday', icon: 'cake', url: 'get-birthday', order: 2, active: true },
+    { sNo: 17, name: 'Class Test', icon: 'recent_actors', url: 'get-class-test-result', order: 2, active: true },
+    { sNo: 18, name: 'Transport', icon: 'airport_shuttle', url: 'get-transport', order: 3, active: true },
+    { sNo: 19, name: 'Study Material', icon: 'local_library', url: 'get-study-material', order: 3, active: true },
+    { sNo: 20, name: 'Result', icon: 'insert_chart', url: 'get-result', order: 3, active: true },
+    { sNo: 21, name: 'Leave Request', icon: 'contact_emergency', url: 'leave-request', order: 3, active: true },
+    { sNo: 22, name: 'Voice Sms', icon: 'voice_chat', url: 'get-voice-sms', order: 3, active: true },
+    { sNo: 23, name: 'Batchmate', icon: 'diversity_3', url: 'get-batch-mate', order: 3, active: true },
+    { sNo: 24, name: 'Hostel', icon: 'business', url: 'get-hostel', order: 4, active: true },
+    { sNo: 25, name: 'Time Table', icon: 'calendar_month', url: 'get-time-table', order: 4, active: true },
+    { sNo: 26, name: 'Seating Plan', icon: 'event_seat', url: 'get-seating-plan', order: 4, active: true },
+    { sNo: 27, name: 'Circular', icon: 'event_note', url: 'get-circular', order: 4, active: true },
+    { sNo: 28, name: 'News', icon: 'fiber_new', url: 'get-news', order: 4, active: true },
+    { sNo: 29, name: 'Library', icon: 'library_books', url: 'get-library', order: 5, active: true },
+    { sNo: 30, name: 'Assignment', icon: 'note_alt', url: 'get-assignment', order: 5, active: true },
+    { sNo: 31, name: 'Complaint', icon: 'design_services', url: 'get-complaint', order: 5, active: true },
+    { sNo: 32, name: 'Gallery', icon: 'photo_library', url: 'get-gallary', order: 5, active: true },
+    { sNo: 33, name: 'Achievement', icon: 'design_services', url: 'get-acheivement', order: 5, active: true },
+    { sNo: 34, name: 'App Session', icon: 'recent_actors', url: 'session', order: 6, active: true },
+    { sNo: 35, name: 'Online Classes', icon: 'important_devices', url: 'get-online-classes', order: 6, active: true },
+    { sNo: 36, name: 'Social Media', icon: 'diversity_2', url: 'get-social-media', order: 6, active: true },
+    { sNo: 37, name: 'Online Exam', icon: 'devices', url: 'get-online-exam', order: 7, active: true },
+    { sNo: 38, name: 'Pre year Paper', icon: 'local_library', url: 'get-pre-year-paper', order: 8, active: true }
+  ]);
 
   return (
     <div className="bg-[#f3f4f6] min-h-screen">
@@ -99,7 +145,7 @@ export function SettingsAndPermissionsPage() {
         </div>
       </div>
 
-      {/* Tabs Header (1:1 UAB Angular Material Tab Styling) */}
+      {/* Tabs Header (1:1 UAB Angular Material Tab Strip) */}
       <div className="bg-white border-b border-slate-200 px-6 flex space-x-8 overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -109,7 +155,7 @@ export function SettingsAndPermissionsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`py-3.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
                 isActive
-                  ? 'border-indigo-600 text-indigo-600'
+                  ? 'border-indigo-600 text-indigo-600 font-bold'
                   : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
               }`}
             >
@@ -121,7 +167,7 @@ export function SettingsAndPermissionsPage() {
 
       {/* Tab Body Container */}
       <div className="p-6">
-        {/* TAB 1: Masters (1:1 UAB vex-all-masters Vertical Navigation Box) */}
+        {/* TAB 1: Masters (Exact vex-all-masters list) */}
         {activeTab === 'masters' && (
           <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-5 max-w-xl">
             <ul className="flex flex-col gap-1 w-full">
@@ -176,114 +222,153 @@ export function SettingsAndPermissionsPage() {
           </div>
         )}
 
-        {/* TAB 2: Add SMS Template */}
+        {/* TAB 2: Add SMS Template (1:1 UAB Table) */}
         {activeTab === 'smsTemplate' && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-6 max-w-2xl space-y-4">
-            <h3 className="font-bold text-sm text-slate-800">Add New SMS Template</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block font-medium text-slate-600 mb-1">Template Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Fee Due Notification"
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block font-medium text-slate-600 mb-1">DLT Template ID</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 110716128472910"
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-            <div className="text-xs">
-              <label className="block font-medium text-slate-600 mb-1">
-                SMS Content (Use {'{#var#}'} for variables)
-              </label>
-              <textarea
-                rows={4}
-                placeholder="Dear Parent, your ward {#var#} fee of Rs {#var#} is pending. Please clear by {#var#}."
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-            <div className="flex justify-end pt-2">
-              <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded shadow-xs">
-                Save SMS Template
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">SMS Template Register</h3>
+              <button className="px-3.5 py-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs">
+                + Upload Template
               </button>
             </div>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold text-[11px] uppercase">
+                  <th className="py-2.5 px-3">S.No.</th>
+                  <th className="py-2.5 px-3">Temp. ID</th>
+                  <th className="py-2.5 px-3">Sender ID</th>
+                  <th className="py-2.5 px-3">Temp. Name</th>
+                  <th className="py-2.5 px-3">Temp. Type</th>
+                  <th className="py-2.5 px-3">Lang</th>
+                  <th className="py-2.5 px-3">Type</th>
+                  <th className="py-2.5 px-3">Date &amp; Time</th>
+                  <th className="py-2.5 px-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tr>
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
+                    No SMS templates uploaded yet (0 of 0)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* TAB 3: Transport Settings */}
+        {/* TAB 3: Transport Settings (Exact 12 Months Table) */}
         {activeTab === 'transportSettings' && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-6 max-w-xl space-y-4 text-xs">
-            <h3 className="font-bold text-sm text-slate-800">Transport & GPS Configuration</h3>
-            <div>
-              <label className="block font-medium text-slate-600 mb-1">Live Tracking Refresh Interval</label>
-              <select className="w-full rounded border border-slate-300 px-3 py-2 bg-white">
-                <option value="15">15 Seconds (Real-time)</option>
-                <option value="30">30 Seconds</option>
-                <option value="60">1 Minute</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium text-slate-600 mb-1">Parent Proximity Alert Radius</label>
-              <select className="w-full rounded border border-slate-300 px-3 py-2 bg-white">
-                <option value="500">500 Meters before stop</option>
-                <option value="1000">1 Kilometer before stop</option>
-                <option value="2000">2 Kilometers before stop</option>
-              </select>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded shadow-xs">
-                Save Transport Settings
-              </button>
-            </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-5 max-w-lg">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 mb-3 border-b pb-2">
+              Transport Active Months
+            </h3>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold text-[11px]">
+                  <th className="py-2 px-3">No.</th>
+                  <th className="py-2 px-3">Month</th>
+                  <th className="py-2 px-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {transportMonths.map((m) => (
+                  <tr key={m.no} className="hover:bg-slate-50/50">
+                    <td className="py-2 px-3 font-mono">{m.no}</td>
+                    <td className="py-2 px-3 font-semibold text-slate-800">{m.month}</td>
+                    <td className="py-2 px-3 text-right">
+                      <input
+                        type="checkbox"
+                        checked={m.active}
+                        onChange={() => setTransportMonths(prev => prev.map(x => x.no === m.no ? { ...x, active: !x.active } : x))}
+                        className="rounded w-4 h-4 text-indigo-600"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* TAB 4: Student App Settings */}
+        {/* TAB 4: Student App Settings (1:1 Table) */}
         {activeTab === 'appSettings' && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-6 max-w-xl space-y-4 text-xs">
-            <h3 className="font-bold text-sm text-slate-800">Student & Parent Mobile App Settings</h3>
-            <div>
-              <label className="block font-medium text-slate-600 mb-1">Notice Board Marquee Ticker</label>
-              <input
-                type="text"
-                defaultValue="Welcome to Session 2026-2027! Annual Sports Meet scheduled next week."
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white"
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-slate-600 mb-1">Fee Payment Gateway</label>
-              <select className="w-full rounded border border-slate-300 px-3 py-2 bg-white">
-                <option value="razorpay">Razorpay UPI & Cards</option>
-                <option value="paytm">Paytm PG</option>
-                <option value="easebuzz">Easebuzz</option>
-              </select>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded shadow-xs">
-                Update App Settings
-              </button>
-            </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-5 max-w-xl">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 mb-3 border-b pb-2">
+              Student App Permission Settings
+            </h3>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold text-[11px]">
+                  <th className="py-2.5 px-3">S. No.</th>
+                  <th className="py-2.5 px-3">Module Name</th>
+                  <th className="py-2.5 px-3 text-center">App Permission Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {appSettings.map((s) => (
+                  <tr key={s.sNo} className="hover:bg-slate-50/50">
+                    <td className="py-3 px-3 font-mono">{s.sNo}</td>
+                    <td className="py-3 px-3 font-bold text-slate-800">
+                      <div>{s.module}</div>
+                      {s.termSetting && <span className="text-[10px] text-indigo-600 font-normal">Result Term Setting</span>}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        onClick={() => setAppSettings(prev => prev.map(x => x.sNo === s.sNo ? { ...x, status: !x.status } : x))}
+                        className={`px-3 py-1 rounded-full text-[11px] font-bold ${
+                          s.status ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}
+                      >
+                        {s.status ? 'On' : 'Off'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* TAB 5: Student App Module */}
+        {/* TAB 5: Student App Module (Exact 38 Modules Table) */}
         {activeTab === 'appModule' && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-6 max-w-2xl space-y-4">
-            <h3 className="font-bold text-sm text-slate-800">Mobile App Module Permissions</h3>
-            <p className="text-xs text-slate-500">Enable or disable modules visible to students & parents on the mobile application.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-              {['Homework', 'Daily Attendance', 'Online Fee Payment', 'Timetable & Routine', 'Report Cards', 'Online Tests', 'Bus Live Tracking', 'Syllabus Tracker', 'Leave Request'].map((mod) => (
-                <label key={mod} className="p-3 border border-slate-200 rounded-lg flex items-center space-x-2 bg-slate-50 cursor-pointer hover:bg-indigo-50/50">
-                  <input type="checkbox" defaultChecked className="rounded text-indigo-600 w-4 h-4" />
-                  <span className="font-semibold text-slate-800">{mod}</span>
-                </label>
-              ))}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">
+                Student App Module Directory (Total 38 Modules)
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold text-[11px] uppercase">
+                    <th className="py-2.5 px-3">S.No.</th>
+                    <th className="py-2.5 px-3">Module Name</th>
+                    <th className="py-2.5 px-3">Module Icon</th>
+                    <th className="py-2.5 px-3">Module URL</th>
+                    <th className="py-2.5 px-3">Module Order</th>
+                    <th className="py-2.5 px-3 text-center">Is Active</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {appModules.map((m) => (
+                    <tr key={m.sNo} className="hover:bg-slate-50/50">
+                      <td className="py-2.5 px-3 font-mono">{m.sNo}</td>
+                      <td className="py-2.5 px-3 font-bold text-slate-900">{m.name}</td>
+                      <td className="py-2.5 px-3 font-mono text-indigo-600">{m.icon}</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-500">{m.url}</td>
+                      <td className="py-2.5 px-3 font-mono">{m.order}</td>
+                      <td className="py-2.5 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={m.active}
+                          onChange={() => setAppModules(prev => prev.map(x => x.sNo === m.sNo ? { ...x, active: !x.active } : x))}
+                          className="rounded w-4 h-4 text-indigo-600"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -294,176 +379,223 @@ export function SettingsAndPermissionsPage() {
             <div className="text-4xl">🚀</div>
             <h3 className="font-bold text-base text-slate-800">New Features In Pipeline</h3>
             <p className="text-xs text-slate-500">
-              AI Face Recognition Attendance &amp; Smart RFID integration for gates and buses will be enabled in next firmware update.
+              Coming Soon - Under Development.
             </p>
           </div>
         )}
       </div>
 
-      {/* House Master Modal */}
+      {/* House Master Exact Dialog */}
       {activeMasterModal === 'house' && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-sm text-slate-800">House Master</h3>
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">House Master</h3>
+                <span className="text-xs text-slate-400">Masters &bull; House Master</span>
+              </div>
               <button onClick={() => setActiveMasterModal(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddHouse} className="flex gap-2">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newHouseName) return;
+              setHouseList(prev => [...prev, { sNo: prev.length + 1, house: newHouseName.toUpperCase(), priority: Number(newHousePriority) || prev.length + 1 }]);
+              setNewHouseName('');
+              setNewHousePriority('');
+            }} className="grid grid-cols-3 gap-2">
               <input
                 type="text"
-                placeholder="Enter House Name (e.g. Shivaji House)"
+                placeholder="House Name (e.g. ORANGE)"
                 value={newHouseName}
                 onChange={(e) => setNewHouseName(e.target.value)}
-                className="flex-1 text-xs rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
+                className="col-span-2 text-xs rounded border border-slate-300 px-3 py-2 bg-white"
                 required
               />
               <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded shadow-xs">
-                Add
+                + Add House
               </button>
             </form>
 
-            <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto text-xs">
-              {houseList.map((h) => (
-                <div key={h.id} className="py-2.5 flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{h.name}</span>
-                  <button
-                    onClick={() => setHouseList(prev => prev.filter(x => x.id !== h.id))}
-                    className="text-slate-400 hover:text-rose-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                  <th className="py-2.5 px-3">S.NO.</th>
+                  <th className="py-2.5 px-3">HOUSE</th>
+                  <th className="py-2.5 px-3">PRIORITY</th>
+                  <th className="py-2.5 px-3 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {houseList.map((h) => (
+                  <tr key={h.sNo} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-3 font-mono">{h.sNo}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{h.house}</td>
+                    <td className="py-2.5 px-3 font-mono">{h.priority}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => setHouseList(prev => prev.filter(x => x.sNo !== h.sNo))}
+                        className="text-slate-400 hover:text-rose-600 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Stream Master Modal */}
+      {/* Stream Master Exact Dialog */}
       {activeMasterModal === 'stream' && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-sm text-slate-800">Stream Master</h3>
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">Stream Master</h3>
+                <span className="text-xs text-slate-400">Masters &bull; Stream Master</span>
+              </div>
               <button onClick={() => setActiveMasterModal(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddStream} className="flex gap-2">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newStreamName) return;
+              setStreamList(prev => [...prev, { sNo: prev.length + 1, stream: newStreamName.toUpperCase() }]);
+              setNewStreamName('');
+            }} className="flex gap-2">
               <input
                 type="text"
-                placeholder="Enter Stream Name"
+                placeholder="Stream Name (e.g. VOCATIONAL)"
                 value={newStreamName}
                 onChange={(e) => setNewStreamName(e.target.value)}
-                className="flex-1 text-xs rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
+                className="flex-1 text-xs rounded border border-slate-300 px-3 py-2 bg-white"
                 required
               />
               <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded shadow-xs">
-                Add
+                + Add Stream
               </button>
             </form>
 
-            <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto text-xs">
-              {streamList.map((s) => (
-                <div key={s.id} className="py-2.5 flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{s.name}</span>
-                  <button
-                    onClick={() => setStreamList(prev => prev.filter(x => x.id !== s.id))}
-                    className="text-slate-400 hover:text-rose-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                  <th className="py-2.5 px-3">S.NO.</th>
+                  <th className="py-2.5 px-3">STREAM</th>
+                  <th className="py-2.5 px-3 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {streamList.map((s) => (
+                  <tr key={s.sNo} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-3 font-mono">{s.sNo}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{s.stream}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => setStreamList(prev => prev.filter(x => x.sNo !== s.sNo))}
+                        className="text-slate-400 hover:text-rose-600 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Fee Concession By Modal */}
+      {/* Fee Concession By Exact Dialog */}
       {activeMasterModal === 'concessionBy' && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-sm text-slate-800">Fee Concession By</h3>
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">Fee Concession By</h3>
+                <span className="text-xs text-slate-400">Masters &bull; Fee Concession By</span>
+              </div>
               <button onClick={() => setActiveMasterModal(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddConcessionBy} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter Approver Title (e.g. Director)"
-                value={newConcessionByName}
-                onChange={(e) => setNewConcessionByName(e.target.value)}
-                className="flex-1 text-xs rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-                required
-              />
-              <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded shadow-xs">
-                Add
-              </button>
-            </form>
-
-            <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto text-xs">
-              {concessionByList.map((c) => (
-                <div key={c.id} className="py-2.5 flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{c.name}</span>
-                  <button
-                    onClick={() => setConcessionByList(prev => prev.filter(x => x.id !== c.id))}
-                    className="text-slate-400 hover:text-rose-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                  <th className="py-2.5 px-3">S.NO.</th>
+                  <th className="py-2.5 px-3">NAME</th>
+                  <th className="py-2.5 px-3 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {concessionByList.map((c) => (
+                  <tr key={c.sNo} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-3 font-mono">{c.sNo}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{c.name}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => setConcessionByList(prev => prev.filter(x => x.sNo !== c.sNo))}
+                        className="text-slate-400 hover:text-rose-600 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Fee Concession Type Modal */}
+      {/* Fee Concession Type Exact Dialog */}
       {activeMasterModal === 'concessionType' && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-sm text-slate-800">Fee Concession Type</h3>
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">Fee Concession Type</h3>
+                <span className="text-xs text-slate-400">Masters &bull; Fee Concession Type</span>
+              </div>
               <button onClick={() => setActiveMasterModal(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddConcessionType} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter Concession Type"
-                value={newConcessionTypeName}
-                onChange={(e) => setNewConcessionTypeName(e.target.value)}
-                className="flex-1 text-xs rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-                required
-              />
-              <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded shadow-xs">
-                Add
-              </button>
-            </form>
-
-            <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto text-xs">
-              {concessionTypeList.map((ct) => (
-                <div key={ct.id} className="py-2.5 flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{ct.name}</span>
-                  <button
-                    onClick={() => setConcessionTypeList(prev => prev.filter(x => x.id !== ct.id))}
-                    className="text-slate-400 hover:text-rose-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                  <th className="py-2.5 px-3">S.NO.</th>
+                  <th className="py-2.5 px-3">CONCESSION TYPE</th>
+                  <th className="py-2.5 px-3">DESCRIPTION</th>
+                  <th className="py-2.5 px-3 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {concessionTypeList.map((ct) => (
+                  <tr key={ct.sNo} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-3 font-mono">{ct.sNo}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{ct.type}</td>
+                    <td className="py-2.5 px-3 text-slate-500">{ct.description || '--'}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => setConcessionTypeList(prev => prev.filter(x => x.sNo !== ct.sNo))}
+                        className="text-slate-400 hover:text-rose-600 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
