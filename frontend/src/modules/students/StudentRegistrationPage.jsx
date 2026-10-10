@@ -1,93 +1,66 @@
 import React, { useState } from 'react';
 import {
-  UserPlus,
-  Users,
   Search,
+  Printer,
+  Upload,
+  Camera,
+  Calendar,
   Save,
   RotateCcw,
-  Upload,
-  Calendar,
-  Phone,
-  Mail,
-  Home,
-  CheckCircle2,
-  AlertCircle,
-  FileText,
-  Bus,
-  BedDouble,
-  Trophy,
-  ShieldAlert,
-  GraduationCap
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2
 } from 'lucide-react';
 
 export function StudentRegistrationPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('student');
   const [formData, setFormData] = useState({
     // Student Details
-    srNo: '10964/2026/089',
-    admNo: 'JD-2026-142',
-    enrollNo: 'ENR-9842',
-    permanentEduNo: 'PEN-871239082',
+    srNo: '1992',
+    admNo: '1992',
+    enrollNo: '',
+    permanentEduNo: '',
+    className: 'Class 10',
+    section: 'A',
     admDate: '2026-04-01',
-    dob: '2012-08-15',
-    studentType: 'NEW', // NEW / OLD
-    classId: 'Class 8',
-    sectionId: 'A',
-    stream: 'General',
-    firstName: 'Aarav',
-    lastName: 'Sharma',
-    gender: 'Boy',
+    dob: '2011-08-15',
+    feeType: 'Day Scholar', // Day Scholar / Hosteller
+    studentType: 'New', // New / Old
+    stream: 'None',
+    firstName: '',
+    lastName: '',
+    gender: 'Male',
+    contactPersonName: '',
+    smsWhatsappNo: '',
+    fatherName: '',
+    motherName: '',
+    fatherMobile: '',
+    motherMobile: '',
+    address: '',
+    bloodGroup: '',
     category: 'General',
-    religion: 'Hindu',
-    bloodGroup: 'B+',
-    aadharNo: '7823-4412-9011',
-
-    // Parent's Details
-    fatherName: 'Rajesh Sharma',
-    motherName: 'Sunita Sharma',
-    fatherMobile: '9829012345',
-    motherMobile: '9829012346',
-    smsMobile: '9829012345',
-    fatherOccupation: 'Businessman',
-    motherOccupation: 'Teacher',
-    fatherAadhar: '4412-9981-3321',
-    annualIncome: '8,50,000',
-    currentAddress: 'Plot No. 42, Gokul Vatika, Tonk Road, Jaipur',
-    permanentAddress: 'Plot No. 42, Gokul Vatika, Tonk Road, Jaipur',
-    city: 'Jaipur',
-    pincode: '302018',
+    aadharNo: '',
 
     // Transport
-    optTransport: 'No',
-    route: '',
+    busRoute: '',
     pickupPoint: '',
-    vehicleNo: '',
 
     // Hostel
-    optHostel: 'No',
-    roomNo: '',
-    bedNo: '',
-
-    // Objection
-    hasObjection: 'No',
-    objectionReason: '',
-
-    // Sports & Extra Curricular
-    sportName: 'Cricket',
-    achievementLevel: 'District Level',
-    hobbies: 'Chess, Coding'
+    hostelRoom: '',
+    bedNo: ''
   });
 
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const tabs = [
-    { id: 'student', label: '1. Student Details', icon: GraduationCap },
-    { id: 'parents', label: "2. Parent's Details", icon: Users },
-    { id: 'transport', label: '3. Transport', icon: Bus },
-    { id: 'hostel', label: '4. Hostel', icon: BedDouble },
-    { id: 'documents', label: '5. Documents', icon: FileText },
-    { id: 'objection', label: '6. Objection', icon: ShieldAlert },
-    { id: 'sports', label: '7. Sports', icon: Trophy },
+    { id: 'student', label: 'Student Details' },
+    { id: 'parents', label: "Parent's Details" },
+    { id: 'transport', label: 'Transport' },
+    { id: 'hostel', label: 'Hostel Allocation' },
+    { id: 'documents', label: 'Documents' },
+    { id: 'objection', label: 'Objection' },
+    { id: 'sports', label: 'Sports' }
   ];
 
   const handleInputChange = (e) => {
@@ -95,241 +68,326 @@ export function StudentRegistrationPage({ onNavigate }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header Breadcrumb */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-200">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Student Management
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span>Student Registration (Admission)</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-              Session 2026-2027
-            </span>
-          </h2>
+    <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
+      {/* Breadcrumb Header */}
+      <div className="flex items-center justify-between pt-1 pb-1">
+        <div className="flex items-center space-x-2 text-xs text-gray-500">
+          <span className="font-semibold text-gray-800 text-sm">Student</span>
+          <span>&bull;</span>
+          <span className="text-gray-400">Student &bull; Student Registration</span>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => onNavigate && onNavigate('/student-portfolio')}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
-          >
-            <Users className="w-3.5 h-3.5 text-slate-500" />
-            <span>Student Directory</span>
-          </button>
-        </div>
+        <button
+          onClick={() => window.print()}
+          className="text-indigo-600 hover:text-indigo-800 p-1 rounded"
+          title="Print Blank Form"
+        >
+          <Printer className="w-5 h-5" />
+        </button>
       </div>
 
       {savedSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-sm animate-fade-in shadow-xs">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-xs shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           <div>
-            <span className="font-bold">Admission Record Registered Successfully!</span> Admission No: <span className="font-mono font-semibold">{formData.admNo}</span> ({formData.firstName} {formData.lastName}) saved to database.
+            Student Admission <span className="font-bold">Sr.No {formData.srNo}</span> registered successfully!
           </div>
         </div>
       )}
 
-      {/* Main Registration Form Container */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        {/* 7 Tabs Header (UAB Style) */}
-        <div className="flex border-b border-slate-200 overflow-x-auto bg-slate-50/70 p-1.5 gap-1">
+      {/* Main Container Card */}
+      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4 space-y-4">
+        {/* Global Student Search Top Bar */}
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search student by name, mobile, admission no..."
+            className="w-full text-xs rounded-md border border-slate-300 pl-9 pr-3 py-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        {/* Tab Switcher Line */}
+        <div className="flex items-center space-x-1 border-b border-slate-200 pb-1 overflow-x-auto text-xs font-semibold">
+          <button className="p-1 text-slate-400 hover:text-slate-600">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-4 py-2 border-b-2 font-medium whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-white text-indigo-600 shadow-xs border border-slate-200 font-bold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    ? 'border-indigo-600 text-indigo-600 font-bold'
+                    : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
-                <span>{tab.label}</span>
+                {tab.label}
               </button>
             );
           })}
+          <button className="p-1 text-slate-400 hover:text-slate-600">
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Tab Content Form */}
-        <form onSubmit={handleSave} className="p-6">
-          {/* TAB 1: Student Details */}
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {activeTab === 'student' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* SR No */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    SR No. <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="srNo"
-                    value={formData.srNo}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    required
-                  />
+            <div className="flex flex-col md:flex-row gap-5">
+              {/* Left Profile Avatar Card */}
+              <div className="w-full md:w-56 flex-shrink-0 bg-blue-50/50 rounded-xl border border-blue-100 p-4 flex flex-col items-center justify-center text-center space-y-3">
+                {/* Graduate Silhouette Avatar */}
+                <div className="w-24 h-24 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-5xl overflow-hidden shadow-inner">
+                  🎓
                 </div>
 
-                {/* Admission No */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Admission No. <span className="text-rose-500">*</span>
+                {/* Upload Buttons */}
+                <div className="flex items-center space-x-1 w-full justify-center">
+                  <label className="cursor-pointer inline-flex items-center space-x-1 px-3 py-1.5 rounded-l bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Browse</span>
+                    <input type="file" className="hidden" accept="image/*" />
                   </label>
-                  <input
-                    type="text"
-                    name="admNo"
-                    value={formData.admNo}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-indigo-50/40 text-indigo-900 font-bold font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    required
-                  />
+                  <button
+                    type="button"
+                    className="p-1.5 rounded-r bg-slate-800 hover:bg-slate-900 text-white shadow-xs"
+                    title="Camera Capture"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                {/* Enrollment No */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Enrollment No.
-                  </label>
-                  <input
-                    type="text"
-                    name="enrollNo"
-                    value={formData.enrollNo}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
-                </div>
-
-                {/* Permanent Edu No (PEN) */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    PEN (Permanent Edu No.)
-                  </label>
-                  <input
-                    type="text"
-                    name="permanentEduNo"
-                    value={formData.permanentEduNo}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
+                {/* Metadata details */}
+                <div className="text-[11px] text-slate-600 space-y-0.5 text-left w-full pt-2 border-t border-blue-100">
+                  <p><strong>Roll No. :</strong> <span>--</span></p>
+                  <p><strong>Comp. No. :</strong> <span>--</span></p>
+                  <p><strong>Status :</strong> <span className="text-emerald-600 font-bold">Studying</span></p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Admission Date */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Admission Date
-                  </label>
-                  <input
-                    type="date"
-                    name="admDate"
-                    value={formData.admDate}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
+              {/* Right Input Fields Grid */}
+              <div className="flex-1 space-y-3.5 text-xs">
+                {/* Row 1: Sr.No, Adm.No, Enroll No, Permanent Edu No */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Sr.No.*
+                    </label>
+                    <input
+                      type="text"
+                      name="srNo"
+                      value={formData.srNo}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:border-indigo-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Adm.No./Sr.No.*
+                    </label>
+                    <input
+                      type="text"
+                      name="admNo"
+                      value={formData.admNo}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:border-indigo-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Enroll No
+                    </label>
+                    <input
+                      type="text"
+                      name="enrollNo"
+                      value={formData.enrollNo}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Permanent Edu No (PEN)
+                    </label>
+                    <input
+                      type="text"
+                      name="permanentEduNo"
+                      value={formData.permanentEduNo}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
-                {/* Student Type */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Student Type <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    name="studentType"
-                    value={formData.studentType}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                  >
-                    <option value="NEW">NEW ADMISSION</option>
-                    <option value="OLD">OLD STUDENT</option>
-                  </select>
-                </div>
-
-                {/* Class */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Class <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    name="classId"
-                    value={formData.classId}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                  >
-                    <option value="Nursery">Nursery</option>
-                    <option value="L.K.G">L.K.G</option>
-                    <option value="U.K.G">U.K.G</option>
-                    <option value="Class 1">Class 1</option>
-                    <option value="Class 2">Class 2</option>
-                    <option value="Class 3">Class 3</option>
-                    <option value="Class 4">Class 4</option>
-                    <option value="Class 5">Class 5</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                    <option value="Class 11">Class 11</option>
-                    <option value="Class 12">Class 12</option>
-                  </select>
-                </div>
-
-                {/* Section */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Section <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    name="sectionId"
-                    value={formData.sectionId}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                  >
-                    <option value="A">Section A</option>
-                    <option value="B">Section B</option>
-                    <option value="C">Section C</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Personal Details */}
-              <div className="pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                  Personal Details
-                </h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* First Name */}
+                {/* Row 2: Class, Section, Admission Date, Date of Birth */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      First Name <span className="text-rose-500">*</span>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Class*
+                    </label>
+                    <select
+                      name="className"
+                      value={formData.className}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                      required
+                    >
+                      <option value="Nursery">Nursery</option>
+                      <option value="L.K.G">L.K.G</option>
+                      <option value="U.K.G">U.K.G</option>
+                      <option value="Class 1">Class 1</option>
+                      <option value="Class 5">Class 5</option>
+                      <option value="Class 8">Class 8</option>
+                      <option value="Class 10">Class 10</option>
+                      <option value="Class 12">Class 12</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Section*
+                    </label>
+                    <select
+                      name="section"
+                      value={formData.section}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                      required
+                    >
+                      <option value="A">Section A</option>
+                      <option value="B">Section B</option>
+                      <option value="C">Section C</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Admission Date
+                    </label>
+                    <input
+                      type="date"
+                      name="admDate"
+                      value={formData.admDate}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5 text-orange-600 font-semibold">
+                      Date Of Birth*
+                    </label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-orange-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Fee Type, Student Type, Stream, Gender */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Fee Type
+                    </label>
+                    <select
+                      name="feeType"
+                      value={formData.feeType}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    >
+                      <option value="Day Scholar">Day Scholar</option>
+                      <option value="Hosteller">Hosteller</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Student Type*
+                    </label>
+                    <select
+                      name="studentType"
+                      value={formData.studentType}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    >
+                      <option value="New">New</option>
+                      <option value="Old">Old</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-0.5">
+                      <label className="text-[11px] font-medium text-slate-600">Stream</label>
+                      <span className="text-[10px] text-indigo-600 hover:underline cursor-pointer">Add Stream</span>
+                    </div>
+                    <select
+                      name="stream"
+                      value={formData.stream}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    >
+                      <option value="None">None</option>
+                      <option value="Science">Science</option>
+                      <option value="Commerce">Commerce</option>
+                      <option value="Arts">Arts</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Gender*
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 4: First Name, Last Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-orange-600 mb-0.5">
+                      First Name*
                     </label>
                     <input
                       type="text"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      placeholder="e.g. Aarav"
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium"
+                      placeholder="First Name"
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
                       required
                     />
                   </div>
 
-                  {/* Last Name */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label className="block text-[11px] font-semibold text-orange-600 mb-0.5">
                       Last Name
                     </label>
                     <input
@@ -337,512 +395,88 @@ export function StudentRegistrationPage({ onNavigate }) {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      placeholder="e.g. Sharma"
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium"
+                      placeholder="Last Name"
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
                     />
-                  </div>
-
-                  {/* Gender */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Gender <span className="text-rose-500">*</span>
-                    </label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium"
-                    >
-                      <option value="Boy">Boy</option>
-                      <option value="Girl">Girl</option>
-                      <option value="Other">Other</option>
-                    </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                  {/* DOB */}
+                {/* Row 5: Contact Person, SMS/Whatsapp, Father Name, Mother Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Date of Birth (DOB)
-                    </label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Category */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    >
-                      <option value="General">General</option>
-                      <option value="OBC">OBC</option>
-                      <option value="SC">SC</option>
-                      <option value="ST">ST</option>
-                    </select>
-                  </div>
-
-                  {/* Blood Group */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Blood Group
-                    </label>
-                    <select
-                      name="bloodGroup"
-                      value={formData.bloodGroup}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                    >
-                      <option value="A+">A+</option>
-                      <option value="A-">A-</option>
-                      <option value="B+">B+</option>
-                      <option value="B-">B-</option>
-                      <option value="O+">O+</option>
-                      <option value="O-">O-</option>
-                      <option value="AB+">AB+</option>
-                      <option value="AB-">AB-</option>
-                    </select>
-                  </div>
-
-                  {/* Aadhar No */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Student Aadhar No.
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Contact Person Name
                     </label>
                     <input
                       type="text"
-                      name="aadharNo"
-                      value={formData.aadharNo}
+                      name="contactPersonName"
+                      value={formData.contactPersonName}
                       onChange={handleInputChange}
-                      placeholder="XXXX-XXXX-XXXX"
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: Parent's Details */}
-          {activeTab === 'parents' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Father Name */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Father's Name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherName"
-                    value={formData.fatherName}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                    required
-                  />
-                </div>
-
-                {/* Father Mobile */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Father's Mobile No. <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherMobile"
-                    value={formData.fatherMobile}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                    required
-                  />
-                </div>
-
-                {/* Father Occupation */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Father's Occupation
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherOccupation"
-                    value={formData.fatherOccupation}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Mother Name */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mother's Name
-                  </label>
-                  <input
-                    type="text"
-                    name="motherName"
-                    value={formData.motherName}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                  />
-                </div>
-
-                {/* Mother Mobile */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mother's Mobile No.
-                  </label>
-                  <input
-                    type="text"
-                    name="motherMobile"
-                    value={formData.motherMobile}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
-                </div>
-
-                {/* SMS & WhatsApp Alert No */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    SMS / WhatsApp Mobile No.
-                  </label>
-                  <input
-                    type="text"
-                    name="smsMobile"
-                    value={formData.smsMobile}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-emerald-50/50 text-emerald-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
-                  />
-                </div>
-              </div>
-
-              {/* Address Details */}
-              <div className="pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                  Residential Address
-                </h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Current Residential Address
-                    </label>
-                    <textarea
-                      name="currentAddress"
-                      rows={2}
-                      value={formData.currentAddress}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        City
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Pin Code
-                      </label>
-                      <input
-                        type="text"
-                        name="pincode"
-                        value={formData.pincode}
-                        onChange={handleInputChange}
-                        className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: Transport */}
-          {activeTab === 'transport' && (
-            <div className="space-y-4 max-w-xl">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Require School Transport Facility?
-                </label>
-                <select
-                  name="optTransport"
-                  value={formData.optTransport}
-                  onChange={handleInputChange}
-                  className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-semibold"
-                >
-                  <option value="No">No - Own Transport</option>
-                  <option value="Yes">Yes - School Bus Required</option>
-                </select>
-              </div>
-
-              {formData.optTransport === 'Yes' && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Bus Route
-                    </label>
-                    <select
-                      name="route"
-                      value={formData.route}
-                      onChange={handleInputChange}
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-white"
-                    >
-                      <option value="">Select Route</option>
-                      <option value="Route 1">Route 1 (Tonk Road - Mansarovar)</option>
-                      <option value="Route 2">Route 2 (Malviya Nagar - Jagatpura)</option>
-                      <option value="Route 3">Route 3 (Vaishali Nagar - Ajmer Road)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Pickup / Drop Point
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      SMS/Whatsapp Mobile
                     </label>
                     <input
                       type="text"
-                      name="pickupPoint"
-                      value={formData.pickupPoint}
+                      name="smsWhatsappNo"
+                      value={formData.smsWhatsappNo}
                       onChange={handleInputChange}
-                      placeholder="e.g. Sanganer Flyover"
-                      className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-white"
+                      placeholder="10 digit mobile"
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Father Name*
+                    </label>
+                    <input
+                      type="text"
+                      name="fatherName"
+                      value={formData.fatherName}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                      Mother Name*
+                    </label>
+                    <input
+                      type="text"
+                      name="motherName"
+                      value={formData.motherName}
+                      onChange={handleInputChange}
+                      className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 4: Hostel */}
-          {activeTab === 'hostel' && (
-            <div className="space-y-4 max-w-xl">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Opt for Hostel Accommodation?
-                </label>
-                <select
-                  name="optHostel"
-                  value={formData.optHostel}
-                  onChange={handleInputChange}
-                  className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-semibold"
-                >
-                  <option value="No">No - Day Scholar</option>
-                  <option value="Yes">Yes - Hosteller</option>
-                </select>
-              </div>
-
-              {formData.optHostel === 'Yes' && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Room No.</label>
-                      <input
-                        type="text"
-                        name="roomNo"
-                        value={formData.roomNo}
-                        onChange={handleInputChange}
-                        placeholder="e.g. 204"
-                        className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Bed No.</label>
-                      <input
-                        type="text"
-                        name="bedNo"
-                        value={formData.bedNo}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Bed B"
-                        className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 5: Documents */}
-          {activeTab === 'documents' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Student Photo */}
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-2">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <div className="text-xs font-bold text-slate-800">Student Passport Photo</div>
-                  <div className="text-[10px] text-slate-400 mt-1">PNG, JPG up to 2MB (ImageKit)</div>
-                  <button type="button" className="mt-3 px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold">
-                    Upload Photo
-                  </button>
-                </div>
-
-                {/* Birth Certificate */}
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-2">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div className="text-xs font-bold text-slate-800">Birth Certificate</div>
-                  <div className="text-[10px] text-slate-400 mt-1">PDF or Image</div>
-                  <button type="button" className="mt-3 px-3 py-1 rounded bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-semibold">
-                    Upload Doc
-                  </button>
-                </div>
-
-                {/* Transfer Certificate (TC) */}
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-2">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div className="text-xs font-bold text-slate-800">Previous School TC</div>
-                  <div className="text-[10px] text-slate-400 mt-1">Mandatory for Class 2+</div>
-                  <button type="button" className="mt-3 px-3 py-1 rounded bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-semibold">
-                    Upload Doc
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 6: Objection */}
-          {activeTab === 'objection' && (
-            <div className="space-y-4 max-w-xl">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Has Any Legal / Disciplinary Objection?
-                </label>
-                <select
-                  name="hasObjection"
-                  value={formData.hasObjection}
-                  onChange={handleInputChange}
-                  className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-semibold"
-                >
-                  <option value="No">No - Clean Record</option>
-                  <option value="Yes">Yes - Has Objection Remark</option>
-                </select>
-              </div>
-
-              {formData.hasObjection === 'Yes' && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Objection Note / Justification
-                  </label>
-                  <textarea
-                    name="objectionReason"
-                    rows={3}
-                    value={formData.objectionReason}
-                    onChange={handleInputChange}
-                    placeholder="Enter reason for objection..."
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-rose-50/40 text-rose-900 focus:bg-white"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 7: Sports */}
-          {activeTab === 'sports' && (
-            <div className="space-y-4 max-w-xl">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Primary Sport
-                  </label>
-                  <input
-                    type="text"
-                    name="sportName"
-                    value={formData.sportName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Cricket, Football"
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-medium"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Level of Achievement
-                  </label>
-                  <select
-                    name="achievementLevel"
-                    value={formData.achievementLevel}
-                    onChange={handleInputChange}
-                    className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-medium"
-                  >
-                    <option value="School Level">School Level</option>
-                    <option value="Zonal Level">Zonal Level</option>
-                    <option value="District Level">District Level</option>
-                    <option value="State Level">State Level</option>
-                    <option value="National Level">National Level</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Hobbies / Special Talents
-                </label>
-                <input
-                  type="text"
-                  name="hobbies"
-                  value={formData.hobbies}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Chess, Coding, Music"
-                  className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 font-medium"
-                />
               </div>
             </div>
           )}
 
           {/* Action Buttons Bar */}
-          <div className="mt-8 pt-4 border-t border-slate-200 flex items-center justify-between">
+          <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
             <button
-              type="button"
-              onClick={() => {
-                const currentIndex = tabs.findIndex(t => t.id === activeTab);
-                if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1].id);
-              }}
-              disabled={activeTab === tabs[0].id}
-              className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              type="reset"
+              className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              &larr; Previous Tab
+              Reset
             </button>
 
-            <div className="flex items-center space-x-2">
-              <button
-                type="reset"
-                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                <span>Reset</span>
-              </button>
-
-              <button
-                type="submit"
-                className="inline-flex items-center space-x-1.5 px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors"
-              >
-                <Save className="w-3.5 h-3.5" />
-                <span>Save Student Record</span>
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="px-6 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Record</span>
+            </button>
           </div>
         </form>
       </div>
