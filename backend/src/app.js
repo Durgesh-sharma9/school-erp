@@ -29,7 +29,12 @@ app.get('/api/health', (req, res) => {
 
 // Feature Modules Routes
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import studentRoutes from './modules/students/students.routes.js';
+import feeRoutes from './modules/fees/fees.routes.js';
+
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/fees', feeRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
