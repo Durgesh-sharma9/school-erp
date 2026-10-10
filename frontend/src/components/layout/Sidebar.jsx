@@ -282,6 +282,7 @@ export const menuCategories = [
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const [openDropdowns, setOpenDropdowns] = useState({
     student: false,
+    school: false,
     fee: false,
     master: false
   });
@@ -312,7 +313,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         </div>
 
         {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
-        <div className="flex-1 overflow-y-auto pt-2 pb-6 space-y-1 text-sm font-medium custom-scrollbar">
+        <div className="flex-1 overflow-y-auto pt-2 pb-6 text-sm font-medium custom-scrollbar">
           {menuCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
@@ -320,7 +321,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => sub.path === currentPath));
 
             return (
-              <div key={item.id} className="px-3">
+              <div key={item.id}>
+                {/* Parent Item */}
                 <button
                   onClick={() => {
                     if (hasChildren) {
@@ -330,34 +332,39 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
-                  className={`w-full h-10 flex items-center justify-between px-3 rounded-lg text-sm transition-all group ${
-                    isActive
+                  style={{
+                    margin: '0px 12px 4px 12px',
+                    height: '40px',
+                    padding: '8px 12px'
+                  }}
+                  className={`w-[calc(100%-24px)] flex items-center justify-between rounded-lg text-sm transition-all group ${
+                    isOpen || isActive
                       ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
-                      : 'text-slate-800 hover:bg-slate-200/50'
+                      : 'text-slate-800 hover:bg-slate-200/60'
                   }`}
                 >
                   <div className="flex items-center space-x-3.5">
                     <Icon className={`w-5 h-5 transition-colors ${
-                      isActive ? 'text-[#4338ca]' : 'text-[#4338ca] opacity-80 group-hover:opacity-100'
+                      isOpen || isActive ? 'text-[#4338ca]' : 'text-[#4338ca] opacity-80 group-hover:opacity-100'
                     }`} />
-                    <span className="text-[13.5px] font-medium tracking-tight text-slate-900">
+                    <span className="text-[14px] font-medium tracking-tight text-slate-900">
                       {item.title}
                     </span>
                   </div>
                   {hasChildren && (
-                    <span className="text-slate-400 group-hover:text-slate-600">
+                    <span className="text-slate-500">
                       {isOpen ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4 text-slate-700" />
                       ) : (
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 text-slate-400" />
                       )}
                     </span>
                   )}
                 </button>
 
-                {/* Submenu Dropdown List (Matching UAB child links) */}
+                {/* Submenu Dropdown List (1:1 UAB Exact style: height 40px, pl-52px, my-1, bg-[#f4f4f5] or active rgba(99,102,241,0.2)) */}
                 {hasChildren && isOpen && (
-                  <div className="pl-9 pr-1 py-1 space-y-0.5 border-l-2 border-indigo-200/60 ml-5 my-1">
+                  <div className="space-y-1 mb-1">
                     {item.subItems.map((sub) => {
                       const isSubActive = currentPath === sub.path;
                       return (
@@ -367,10 +374,16 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          className={`w-full text-left px-3 py-1.5 rounded-md text-[12px] transition-colors block ${
+                          style={{
+                            margin: '0px 12px 4px 12px',
+                            height: '40px',
+                            paddingLeft: '52px',
+                            paddingRight: '12px'
+                          }}
+                          className={`w-[calc(100%-24px)] text-left flex items-center rounded-lg text-[14px] transition-colors ${
                             isSubActive
-                              ? 'bg-[#4338ca] text-white font-semibold shadow-2xs'
-                              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+                              ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
+                              : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal'
                           }`}
                         >
                           {sub.title}
