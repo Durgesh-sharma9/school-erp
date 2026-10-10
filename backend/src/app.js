@@ -27,6 +27,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Feature Modules Routes
+import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+app.use('/api/dashboard', dashboardRoutes);
+
 // Global Error Handler
 app.use(errorHandler);
 
