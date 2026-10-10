@@ -34,6 +34,7 @@ import feeRoutes from './modules/fees/fees.routes.js';
 import schoolRoutes from './modules/schools/schools.routes.js';
 import academicRoutes from './modules/academics/academics.routes.js';
 import certificateRoutes from './modules/certificates/certificates.routes.js';
+import studyMaterialRoutes from './modules/study-material/study-material.routes.js';
 
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/students', studentRoutes);
@@ -41,6 +42,7 @@ app.use('/api/fees', feeRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/academics', academicRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/study-material', studyMaterialRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

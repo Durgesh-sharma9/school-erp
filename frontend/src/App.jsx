@@ -51,6 +51,11 @@ import {
   ManualCcBcPage,
   TransferCertificatePage
 } from './modules/certificates';
+import {
+  StudyMaterialPage,
+  HomeworkPage,
+  PreviousYearPaperPage
+} from './modules/study-material';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -194,6 +199,12 @@ function App() {
                 return <BulkTcPage onNavigate={handleNavigate} />;
               case '/manual-cc-bc':
                 return <ManualCcBcPage onNavigate={handleNavigate} />;
+              case '/study-material':
+                return <StudyMaterialPage onNavigate={handleNavigate} />;
+              case '/homework':
+                return <HomeworkPage onNavigate={handleNavigate} />;
+              case '/upload-pre-year-paper':
+                return <PreviousYearPaperPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">

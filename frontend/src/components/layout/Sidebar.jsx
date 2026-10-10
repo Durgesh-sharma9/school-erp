@@ -118,6 +118,7 @@ export const menuCategories = [
     title: 'Study Material',
     icon: BookOpen, // local_library in UAB
     subItems: [
+      { title: 'Study Material', path: '/study-material' },
       { title: 'Homework', path: '/homework' },
       { title: 'Online Classes', path: '/create-online-classes' },
       { title: 'Upload Pre Year Paper', path: '/upload-pre-year-paper' },
@@ -351,6 +352,12 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     ];
     if (certificatePaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, certificates: true }));
+    }
+    const studyMaterialPaths = [
+      '/study-material', '/homework', '/upload-pre-year-paper', '/study-material-reports'
+    ];
+    if (studyMaterialPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, studyMaterial: true }));
     }
   }, [currentPath]);
 

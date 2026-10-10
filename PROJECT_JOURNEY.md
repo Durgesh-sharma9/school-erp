@@ -689,8 +689,55 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+---
+
+### 📍 [Entry #34] - 1:1 Live Study Material Module Replication (`/study-material`, `/homework`, `/create-online-classes`, `/upload-pre-year-paper`)
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Replicate the Study Material module pages (`https://schools.uabinfosol.com/study-material`, `https://schools.uabinfosol.com/homework`, `https://schools.uabinfosol.com/create-online-classes`, `https://schools.uabinfosol.com/upload-pre-year-paper`) with exact 1:1 parity with UAB Infosol under strict read-only safety rules and zero-push git policy.
+* **Actions Taken:**
+  * **Strict Read-Only DOM Analysis of All 4 Pages on Live Portal:**
+    1. **Study Material (`/study-material`):**
+       * Top breadcrumbs toolbar (`Students > Study Material`), search input pill, purple mini FAB (`#5c67f6`).
+       * Table columns: `S.NO.`, `DATE`, `CLASS`, `SUBJECT`, `TITLE`, `DAYS`, `TYPE`, `ACTION`.
+       * Full `STUDY MATERIAL` Modal with dynamic Type selector (`Study Material`, `Assignment`, `Syllabus`, `Teaching Video`, `Time Table`, `Webinar`), Date, Class, Division, Subject, Days, Title, Description, and 4 specialized file upload buttons (`Browse Img`, `Browse PDF`, `Browse Doc`, `Browse PPT`).
+       * Interactive document preview modal with direct download link.
+    2. **Home Work (`/homework`):**
+       * Top breadcrumbs toolbar (`Students > Home Work`), search input pill, purple mini FAB (`#5c67f6`).
+       * Table columns: `S.NO.`, `DATE`, `CLASS`, `SUBJECT`, `TITLE`, `CREATED BY`, `ACTION`.
+       * Full `HOME WORK` Modal with Date, Class, Section, Subject, Title, Description, and file attachment (`Browse` button with note "Image & PDF Files Only (Max 5MB)").
+       * Interactive homework preview and attachment download modal.
+    3. **Online Classes (`/create-online-classes`):**
+       * Top breadcrumbs toolbar (`Students > Online Classes`), purple mini FAB.
+       * Table columns: `S.NO.`, `TITLE`, `CLASS`, `DATE`, `START TIME`, `END TIME`, `PLATFORM / LINK`, `ACTION`.
+       * Full modal with Google Meet / Zoom meeting link generator, class picker, time slots, and joining launcher.
+    4. **Previous Year Questions (`/upload-pre-year-paper`):**
+       * Top breadcrumbs toolbar (`Examination > Previous Year Questsions`), search input pill, purple mini FAB (`#5c67f6`).
+       * Table columns: `S.NO.`, `TITLE`, `PAPER NAME`, `CLASS`, `YEAR`, `ACTION`.
+       * Full `PREVIOUS YEAR QUESTIONS` Modal with Title, Select an class, Paper Name, Paper Year, Select File, Cancel, and Add.
+       * Question paper preview and instant download dialog.
+  * **Backend API Implementation:**
+    * Created [`study-material.controller.js`](file:///C:/webncode/school%20erp/backend/src/modules/study-material/study-material.controller.js) and [`study-material.routes.js`](file:///C:/webncode/school%20erp/backend/src/modules/study-material/study-material.routes.js):
+      * `GET/POST /api/study-material/materials` (Study materials & assignments)
+      * `GET/POST /api/study-material/homework` (Homework entries)
+      * `GET/POST /api/study-material/papers` (Previous year question papers)
+    * Mounted under `/api/study-material` in `backend/src/app.js`.
+  * **Frontend Component Architecture & Routing:**
+    * Created [`StudyMaterialPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/study-material/StudyMaterialPage.jsx)
+    * Created [`HomeworkPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/study-material/HomeworkPage.jsx)
+    * Created [`PreviousYearPaperPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/study-material/PreviousYearPaperPage.jsx)
+    * Created [`index.js`](file:///C:/webncode/school%20erp/frontend/src/modules/study-material/index.js) barrel export.
+    * Updated [`Sidebar.jsx`](file:///C:/webncode/school%20erp/frontend/src/components/layout/Sidebar.jsx) with `/study-material`, `/homework`, `/create-online-classes`, `/upload-pre-year-paper` and auto-expansion logic.
+    * Updated [`App.jsx`](file:///C:/webncode/school%20erp/frontend/src/App.jsx) routes.
+  * **Build Verification & Automated Browser Testing:**
+    * `npm run build` executed and passed in **3.26s** with 0 errors.
+    * Visual and functional verification executed across all 4 pages and their modals via Puppeteer.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* **Target:** Study Material Module (`/homework`, `/upload-pre-year-paper`, `/study-material-reports`) or Greeting Card Module (`/send-greeting-card-msg`, `/greeting-card-reports`) or next requested module.
+* Ready for user's next module instruction.
+
 
 
 
