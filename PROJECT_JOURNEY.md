@@ -6,14 +6,14 @@ This document tracks the complete development journey of the **Unified School ER
 
 ## 📊 Live Project Status Summary
 
-* **Project Name:** Unified School ERP (Multi-Tenant SaaS)
+* **Project Name:** Unified School ERP (Basic Edition)
 * **Location:** `C:\webncode\school erp`
-* **Active Phase:** **Phase 1: Foundation, Auth & Core Setup**
+* **Active Phase:** **Planning & Requirements (Basic ERP)**
 * **Database & ORM:** PostgreSQL + Prisma ORM (v5.22.0)
-* **Frontend Tech:** React 18 + Vite 5 + Tailwind CSS + Lucide Icons + TanStack Table
-* **Backend Tech:** Node.js + Express (ES Modules) + JWT Auth + Multi-Tenant Engine
+* **Frontend Tech:** React 18 + Vite 5 + Tailwind CSS + Lucide Icons
+* **Backend Tech:** Node.js + Express (ES Modules) + JWT Auth
 * **Communication & Media:** ImageKit (Photos) + SMTP Nodemailer (Email) + Meta Cloud API (WhatsApp)
-* **Last Updated:** 2026-10-09
+* **Last Updated:** 2026-10-10
 
 ---
 
@@ -140,10 +140,20 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #11] - Plan Reset: Cleaned Slate for Basic School ERP
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Clear the previous complex 8-module SaaS setup and reset the project for a clean, basic ERP as instructed by the user, while preserving technology stack and documentation structure.
+* **Actions Taken:**
+  * Removed previous complex module folders (`backend/src/modules`, `frontend/src/modules`).
+  * Reset `schema.prisma` to a clean base.
+  * Cleaned out obsolete documentation files (`ARCHITECTURE_AND_ROADMAP.md`, `dashboard.html`, `DATABASE_SCHEMA_PRISMA.md`, `MODULES_SPECIFICATION.md`, `ROADMAP_8_PARTS.md`, `ROLES_AND_PERMISSIONS.md`).
+  * Preserved core tech dependencies (`node_modules`, Express, Prisma, React, Vite, Tailwind, ImageKit, Nodemailer, WhatsApp).
+  * Maintained `README.md`, `INSTRUCTIONS.md`, and `PROJECT_JOURNEY.md`.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* **Target:** **Part 1 Implementation: Base Engine, Auth & School Setup**
-  1. Backend Auth Controller & Service (`registerSchool`, `login`, `getMe`).
-  2. Public Landing Page with neon glow aesthetics, module showcase & pricing.
-  3. Glassmorphism Login Page with role auto-detection.
-  4. Multi-Step School Signup Wizard (Start 14-day free trial).
-  5. School Admin Dashboard Shell & Academic Session / Class / Section / Student admission setup.
+* **Target:** **Awaiting User's New Plan & Requirements for Basic School ERP**
+  * Define new simplified models & roles.
+  * Implement modules as requested by user.
