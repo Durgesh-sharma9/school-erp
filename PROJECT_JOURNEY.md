@@ -412,10 +412,41 @@ This document tracks the complete development journey of the **Unified School ER
   * Verification: `npm run build` compiled in **2.68s** with 0 errors.
 * **Status:** ✅ Completed
 
+### 📍 [Entry #26] - Settings & Permissions 100% Complete with All Nested Sub-Dialogs Replicated
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Replicate all sub-dialogs, nested Add forms, fee head breakdown tables, and term-wise settings after live DOM inspection ("inn sab me click karke dekho na kya kya cheeje hai same vesa banana hai humko").
+* **Actions Taken:**
+  * **Strict Read-Only Live Portal DOM Extraction:**
+    1. **House Master Dialog & Nested Add Modal:**
+       * Breadcrumbs header (`House Master | Home > Masters > House Master`), Search pill, Filter checklist button, Add mini FAB button (`#5c67f6`).
+       * Table with `S.No.`, `House`, `Priority`, and Trash delete icon.
+       * Nested `Add House` modal with `House Name*` and `Priority*` inputs.
+    2. **Stream Master Dialog & Nested Add Modal:**
+       * Breadcrumbs header, Search pill, Filter checklist button, Add mini FAB button.
+       * Table with `S.No.`, `Stream`, and Trash delete icon.
+       * Nested `Add Stream` modal with `Stream Name*` input.
+    3. **Fee Concession By Dialog & Nested Add Modal:**
+       * Breadcrumbs header, Search pill, Filter checklist button, Add mini FAB button.
+       * Table with `S.No.`, `Name`, and Trash delete icon.
+       * Nested `Add Fee Concession By` modal with `Fee Concession By*` input.
+    4. **Fee Concession Type Dialog & Nested Heads Add Modal:**
+       * Breadcrumbs header, Search pill, Filter checklist button, Add mini FAB button.
+       * Table with `S.No.`, `Concession Type`, `Description`, and Trash delete icon.
+       * Nested `Add Fee Concession` modal with `Concession Type*`, `Amount (₹)` vs `Percentage (%)` radio toggle, and complete 10 Fee Heads table (`Transport`, `Hostel`, `Extra Concession`, `Admission Fee`, `Tuition Fee`, `Activity Fee`, `Digital Learning fee`, `Registration fee`, `Examination Fee`, `School Application Fee`).
+    5. **Student App Settings & Result Term Setting Modal:**
+       * App Session, Fee, and Result toggles.
+       * Dedicated `Result Term Setting` modal with all 19 school classes (`Nursery - PP3+` up to `XII-NON-MEDICAL`), `SHOW HALF YEARLY EXAMINATION` (with select-all checkbox), and `SHOW ANNUAL EXAMINATION` / `Pre-Board Examinations` (with select-all checkbox).
+    6. **Student App Module (Full 8 Columns):**
+       * `S.NO.`, `MODULE NAME`, `MODULE ICON`, `MODULE URL`, `MODULE ORDER`, `DASHBOARD ICON` (slide toggle), `IS REPORT` (slide toggle), `IS ACTIVE` (slide toggle).
+  * **Build & Quality Check:**
+    * `npm run build` compiled cleanly in **2.42s** with 0 errors.
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:
 * **Target:** **Master Module (Class Master `/class`, Group Subject `/subject-group`, Subject Master `/subject`, Subject Link `/subject-link`, Stream Master `/add-update-stream`, Master Reports `/master-reports`)**
+
 
 
 
