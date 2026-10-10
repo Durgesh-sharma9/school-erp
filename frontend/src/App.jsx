@@ -9,6 +9,8 @@ import { FeeStructurePage } from './modules/fees/FeeStructurePage';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
 import { MarksEntryPage } from './modules/examination/MarksEntryPage';
 import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
+import { WhatsappQrPage } from './modules/school/WhatsappQrPage';
+import { SettingsAndPermissionsPage } from './modules/school/SettingsAndPermissionsPage';
 import { ClassMasterPage } from './modules/master/ClassMasterPage';
 
 function App() {
@@ -75,6 +77,14 @@ function App() {
 
           {currentPath === '/school-info' && (
             <SchoolInfoPage onNavigate={handleNavigate} />
+          )}
+
+          {currentPath === '/whatsapp-qr-settings' && (
+            <WhatsappQrPage onNavigate={handleNavigate} />
+          )}
+
+          {currentPath === '/settings-and-permissions' && (
+            <SettingsAndPermissionsPage onNavigate={handleNavigate} />
           )}
 
           {currentPath === '/class' && (
