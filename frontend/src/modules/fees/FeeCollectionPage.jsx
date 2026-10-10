@@ -1,247 +1,311 @@
 import React, { useState } from 'react';
 import {
-  CreditCard,
   Search,
-  IndianRupee,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
   Printer,
   CheckCircle2,
-  Calendar,
-  User,
-  Receipt,
-  FileCheck,
-  AlertCircle
+  RotateCcw,
+  Save,
+  ChevronDown
 } from 'lucide-react';
 
 export function FeeCollectionPage({ onNavigate }) {
-  const [searchAdmNo, setSearchAdmNo] = useState('JD-2026-102');
+  const [activeTab, setActiveTab] = useState('fee');
+  const [studentSearch, setStudentSearch] = useState('');
+  const [feeType, setFeeType] = useState('All');
+  const [payMode, setPayMode] = useState('Cash');
+  const [receiptDate, setReceiptDate] = useState('2026-10-10');
+  const [receiptNo, setReceiptNo] = useState('RCP-2026-1092');
+
   const [selectedStudent, setSelectedStudent] = useState({
-    admNo: 'JD-2026-102',
-    name: 'Ananya Gupta',
-    fatherName: 'Sanjay Gupta',
-    className: 'Class 10 - Sec A',
-    totalAnnualFee: 45000,
-    paidSoFar: 40500,
-    currentDue: 4500,
-    previousDue: 0
+    enrollNo: 'ENR-9842',
+    srNo: '1992',
+    admNo: '1992',
+    name: 'Aarav Sharma',
+    className: 'Class 10 - A',
+    fatherName: 'Rajesh Sharma',
+    motherName: 'Sunita Sharma',
+    mobileNo: '9829012345',
+    address: 'Tonk Road, Jaipur',
+    docRemark: 'Aadhar Verified',
+    genRemark: 'Regular Student',
+    stuType: 'New',
+    feeType: 'Day Scholar',
+    transportStatus: 'Not Opted'
   });
 
-  const [collectAmount, setCollectAmount] = useState('4500');
-  const [payMode, setPayMode] = useState('Cash'); // Cash, UPI, Cheque, Bank
-  const [discount, setDiscount] = useState('0');
-  const [remarks, setRemarks] = useState('Quarter 4 Tuition Fee');
-  const [receiptGenerated, setReceiptGenerated] = useState(null);
+  const [feeHeads, setFeeHeads] = useState([
+    { id: 1, head: 'Tuition Fee (Q1)', total: 9000, payable: 9000, paid: 9000, due: 0, checked: true },
+    { id: 2, head: 'Tuition Fee (Q2)', total: 9000, payable: 9000, paid: 9000, due: 0, checked: true },
+    { id: 3, head: 'Tuition Fee (Q3)', total: 9000, payable: 9000, paid: 4500, due: 4500, checked: true },
+    { id: 4, head: 'Tuition Fee (Q4)', total: 9000, payable: 9000, paid: 0, due: 9000, checked: false },
+    { id: 5, head: 'Exam Charges', total: 5000, payable: 5000, paid: 5000, due: 0, checked: true },
+    { id: 6, head: 'Lab & Computer Fee', total: 4000, payable: 4000, paid: 4000, due: 0, checked: true }
+  ]);
 
-  const handleCollect = (e) => {
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const tabs = [
+    { id: 'fee', label: 'Fee' },
+    { id: 'transport', label: 'Transport' },
+    { id: 'conCategory', label: 'Con. Category' },
+    { id: 'concession', label: 'Concession' },
+    { id: 'feeCancel', label: 'Fee Cancel' },
+    { id: 'registration', label: 'Registration' }
+  ];
+
+  const handleSave = (e) => {
     e.preventDefault();
-    const receipt = {
-      receiptNo: 'RCP-2026-' + Math.floor(1000 + Math.random() * 9000),
-      date: new Date().toLocaleDateString('en-IN'),
-      student: selectedStudent,
-      paid: collectAmount,
-      mode: payMode,
-      discount: discount,
-      remarks: remarks
-    };
-    setReceiptGenerated(receipt);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-200">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Fee Counter
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span>Fee Collection (POS Counter)</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-              Live Counter
-            </span>
-          </h2>
+    <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
+      {/* Top Breadcrumb */}
+      <div className="flex items-center justify-between pt-1 pb-1">
+        <div className="flex items-center space-x-2 text-xs text-gray-500">
+          <span className="font-semibold text-gray-800 text-sm">Fee</span>
+          <span>&bull;</span>
+          <span className="text-gray-400">Fee &bull; Fee Collection</span>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => onNavigate && onNavigate('/fee-structure')}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs"
-          >
-            <span>View Fee Structure</span>
-          </button>
-        </div>
+        <button
+          onClick={() => window.print()}
+          className="text-indigo-600 hover:text-indigo-800 p-1 rounded"
+          title="Print Counter Summary"
+        >
+          <Printer className="w-5 h-5" />
+        </button>
       </div>
 
-      {receiptGenerated && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-xs">
-          <div className="flex items-center space-x-3">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
-            <div>
-              <div className="font-bold text-sm">
-                Fee Receipt Generated Successfully! (#{receiptGenerated.receiptNo})
-              </div>
-              <div className="text-xs text-emerald-700">
-                Received ₹ {receiptGenerated.paid} for {receiptGenerated.student.name} via {receiptGenerated.mode}.
-              </div>
-            </div>
+      {savedSuccess && (
+        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-xs shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <div>
+            Fee Receipt <span className="font-bold font-mono">#{receiptNo}</span> for <span className="font-bold">{selectedStudent.name}</span> saved successfully!
           </div>
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print Receipt</span>
-          </button>
         </div>
       )}
 
-      {/* Counter Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Search & Student Dues Breakup */}
-        <div className="lg:col-span-2 space-y-5">
-          {/* Student Search Box */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={searchAdmNo}
-                onChange={(e) => setSearchAdmNo(e.target.value)}
-                placeholder="Enter Student Admission No (e.g. JD-2026-102)..."
-                className="w-full text-xs rounded-lg border border-slate-200 pl-9 pr-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono"
-              />
-            </div>
-            <button className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-xs">
-              Search Dues
-            </button>
-          </div>
+      {/* Main Container Card */}
+      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4 space-y-4">
+        {/* Navigation Tabs Header */}
+        <div className="flex items-center space-x-1 border-b border-slate-200 pb-1 overflow-x-auto text-xs font-semibold">
+          <button className="p-1 text-slate-400 hover:text-slate-600">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 border-b-2 font-medium whitespace-nowrap transition-all ${
+                  isActive
+                    ? 'border-indigo-600 text-indigo-600 font-bold'
+                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+          <button className="p-1 text-slate-400 hover:text-slate-600">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Student Summary Card */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-sm">
-                  👧
+        {/* Global Student Search Bar + A/C Open Action */}
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search Student..."
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
+              className="w-full text-xs rounded-md border border-slate-300 pl-9 pr-3 py-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <button className="px-5 py-2.5 rounded-md bg-[#4338ca] text-white text-xs font-semibold hover:bg-indigo-800 transition-colors shrink-0 shadow-xs">
+            A/C Open
+          </button>
+        </div>
+
+        {/* Student Biodata Box + Payment Inputs Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left Student Info Box (Peach/Amber Tint 1:1 UAB style) */}
+          <div className="lg:col-span-6 bg-[#fff8f2] border border-orange-200/60 rounded-xl p-3.5 flex flex-col justify-between text-xs">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1 text-slate-800 font-medium">
+                <p><strong>Enroll No. :</strong> <span className="font-mono">{selectedStudent.enrollNo}</span></p>
+                <p><strong>Sr. No. :</strong> <span className="font-mono">{selectedStudent.srNo}</span></p>
+                <p><strong>Adm. No. :</strong> <span className="font-mono font-bold text-indigo-700">{selectedStudent.admNo}</span></p>
+                <p><strong>Name :</strong> <span className="font-bold text-slate-900">{selectedStudent.name}</span></p>
+                <p><strong>Class :</strong> <span>{selectedStudent.className}</span></p>
+                <p><strong>Father's Name :</strong> <span>{selectedStudent.fatherName}</span></p>
+                <p><strong>Mother's Name :</strong> <span>{selectedStudent.motherName}</span></p>
+                <p><strong>Mobile No. :</strong> <span className="font-mono">{selectedStudent.mobileNo}</span></p>
+                <p><strong>Address :</strong> <span>{selectedStudent.address}</span></p>
+                <p><strong>Document Remark :</strong> <span>{selectedStudent.docRemark}</span></p>
+                <p><strong>General Remark :</strong> <span>{selectedStudent.genRemark}</span></p>
+              </div>
+
+              {/* Student Avatar Silhouette */}
+              <div className="flex flex-col items-center text-center space-y-1">
+                <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl shadow-xs">
+                  🎓
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900">{selectedStudent.name}</h3>
-                  <div className="text-xs text-slate-500 font-medium">
-                    Adm: <span className="font-mono text-slate-800">{selectedStudent.admNo}</span> &bull; {selectedStudent.className}
-                  </div>
+                <div className="text-[10px] text-slate-600 space-y-0.5">
+                  <p><strong>Stu Type :</strong> {selectedStudent.stuType}</p>
+                  <p><strong>Fee Type :</strong> {selectedStudent.feeType}</p>
+                  <p><strong>Transport Status :</strong> {selectedStudent.transportStatus}</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
-                Due: ₹ {selectedStudent.currentDue.toLocaleString('en-IN')}
-              </span>
             </div>
 
-            {/* Dues Breakup Table */}
-            <div className="mt-4">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Fee Ledger & Installment Heads
-              </h4>
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase font-bold text-[10px] bg-slate-50/50">
-                    <th className="py-2 px-3">Fee Head</th>
-                    <th className="py-2 px-3">Total Amount</th>
-                    <th className="py-2 px-3">Paid Amount</th>
-                    <th className="py-2 px-3 text-right">Pending Balance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                  <tr>
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">Tuition Fee (Q4)</td>
-                    <td className="py-2.5 px-3 font-mono">₹ 25,000</td>
-                    <td className="py-2.5 px-3 font-mono text-emerald-600">₹ 22,000</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-rose-600 text-right">₹ 3,000</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">Exam & Lab Charges</td>
-                    <td className="py-2.5 px-3 font-mono">₹ 10,000</td>
-                    <td className="py-2.5 px-3 font-mono text-emerald-600">₹ 8,500</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-rose-600 text-right">₹ 1,500</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">Annual Activity Fee</td>
-                    <td className="py-2.5 px-3 font-mono">₹ 10,000</td>
-                    <td className="py-2.5 px-3 font-mono text-emerald-600">₹ 10,000</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-400 text-right">₹ 0</td>
-                  </tr>
-                </tbody>
-              </table>
+            {/* Checkbox other row */}
+            <div className="pt-2 mt-2 border-t border-orange-200/60 flex items-center space-x-2 text-xs">
+              <input type="checkbox" id="other" className="rounded border-slate-300" />
+              <label htmlFor="other" className="text-slate-600 font-medium">Other</label>
+            </div>
+          </div>
+
+          {/* Right Inputs: Fee Type, Date, Receipt No, Pay Mode */}
+          <div className="lg:col-span-6 space-y-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  Fee Type
+                </label>
+                <select
+                  value={feeType}
+                  onChange={(e) => setFeeType(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-medium"
+                >
+                  <option value="All">All</option>
+                  <option value="Tuition">Tuition Only</option>
+                  <option value="Transport">Transport Only</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  Choose a date*
+                </label>
+                <input
+                  type="date"
+                  value={receiptDate}
+                  onChange={(e) => setReceiptDate(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  Receipt No.
+                </label>
+                <input
+                  type="text"
+                  value={receiptNo}
+                  onChange={(e) => setReceiptNo(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  Pay Mode*
+                </label>
+                <select
+                  value={payMode}
+                  onChange={(e) => setPayMode(e.target.value)}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-medium"
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Bank">Bank / Online</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="UPI">UPI / QR</option>
+                  <option value="DebitCard">Debit / Credit Card</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Quick Action Button */}
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                className="px-4 py-2 rounded bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-colors"
+              >
+                Show Receipts
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Right 1 Col: Payment Collection Box */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs h-fit space-y-4">
-          <div className="flex items-center space-x-2 pb-3 border-b border-slate-100">
-            <IndianRupee className="w-5 h-5 text-emerald-600" />
-            <h3 className="font-extrabold text-sm text-slate-900">Receive Payment</h3>
+        {/* Head Wise Fees Table */}
+        <div className="border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
+            <h4 className="font-bold text-xs text-slate-800">Head Wise Fees Breakdown</h4>
+            <span className="text-[11px] font-semibold text-slate-500">Academic Year 2026-2027</span>
           </div>
 
-          <form onSubmit={handleCollect} className="space-y-3.5">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Collecting Amount (₹) <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="number"
-                value={collectAmount}
-                onChange={(e) => setCollectAmount(e.target.value)}
-                className="w-full text-base font-extrabold text-emerald-900 rounded-lg border border-slate-200 px-3 py-2 bg-emerald-50/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                required
-              />
-            </div>
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                <th className="py-2.5 px-3">Select</th>
+                <th className="py-2.5 px-3">Fee Head</th>
+                <th className="py-2.5 px-3 text-right">Total Amount</th>
+                <th className="py-2.5 px-3 text-right">Payable</th>
+                <th className="py-2.5 px-3 text-right">Paid</th>
+                <th className="py-2.5 px-3 text-right">Due Balance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              {feeHeads.map((f) => (
+                <tr key={f.id} className="hover:bg-slate-50/50">
+                  <td className="py-2 px-3">
+                    <input
+                      type="checkbox"
+                      checked={f.checked}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFeeHeads(prev => prev.map(x => x.id === f.id ? { ...x, checked } : x));
+                      }}
+                      className="rounded border-slate-300"
+                    />
+                  </td>
+                  <td className="py-2 px-3 font-semibold text-slate-900">{f.head}</td>
+                  <td className="py-2 px-3 text-right font-mono">₹ {f.total.toLocaleString('en-IN')}</td>
+                  <td className="py-2 px-3 text-right font-mono">₹ {f.payable.toLocaleString('en-IN')}</td>
+                  <td className="py-2 px-3 text-right font-mono text-emerald-600">₹ {f.paid.toLocaleString('en-IN')}</td>
+                  <td className="py-2 px-3 text-right font-mono font-bold text-rose-600">₹ {f.due.toLocaleString('en-IN')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Payment Mode <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={payMode}
-                onChange={(e) => setPayMode(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white font-semibold"
-              >
-                <option value="Cash">Cash Counter</option>
-                <option value="UPI">UPI / QR Code</option>
-                <option value="Bank">Bank Transfer / NEFT</option>
-                <option value="Cheque">Cheque</option>
-              </select>
-            </div>
+        {/* Bottom Save Action Bar */}
+        <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <button
+            type="reset"
+            className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Reset
+          </button>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Concession / Discount (₹)
-              </label>
-              <input
-                type="number"
-                value={discount}
-                onChange={(e) => setDiscount(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Receipt Remarks
-              </label>
-              <input
-                type="text"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 focus:bg-white text-xs"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition-colors flex items-center justify-center space-x-2"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Collect ₹ {collectAmount} & Generate Receipt</span>
-            </button>
-          </form>
+          <button
+            onClick={handleSave}
+            className="px-6 py-2.5 rounded bg-[#4338ca] hover:bg-indigo-800 text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
+          >
+            <Save className="w-4 h-4" />
+            <span>Save Fee Receipt</span>
+          </button>
         </div>
       </div>
     </div>
