@@ -75,7 +75,30 @@ export const menuCategories = [
       { title: 'ID Card Generator', path: '/id-card-generator' },
       { title: 'Admit Card Generator', path: '/admit-card-generator' },
       { title: 'Exam Date Sheet', path: '/exam-date-sheet' },
-      { title: 'Reports', path: '/student-reports' }
+      {
+        id: 'student-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Student List', path: '/students-report' },
+          { title: 'Donation Report', path: '/donation-collection-report' },
+          { title: 'Student Board Data Summary', path: '/student-upload-data-summary' },
+          { title: 'Student Promotion List', path: '/students-promotion-report' },
+          { title: 'Inactive Student List', path: '/inactive-student-list' },
+          { title: 'Student Board Registration', path: '/student-board-registration' },
+          { title: 'Student Consolidated Report', path: '/student-consolidated-report' },
+          { title: 'Generate Slips', path: '/generate-slips-report' },
+          { title: 'Attendance Report', path: '/attendance-report' },
+          { title: 'Day Wise Attendance Summary', path: '/student-attedance-summary' },
+          { title: 'Monthly Attendance Report', path: '/monthly-attendance-report' },
+          { title: 'Student Wise Subject List', path: '/student-wise-subject-list' },
+          { title: 'Date Sheet Report', path: '/date-sheet-report' },
+          { title: 'Sibling Report', path: '/sibling-report' },
+          { title: 'TC Report', path: '/tc-report' },
+          { title: 'Cancel Tc Report', path: '/cancel-tc-report' },
+          { title: 'Student Call List', path: '/student-call-list' },
+          { title: 'Subject Wise Student List', path: '/subject-wise-student-details' }
+        ]
+      }
     ]
   },
   {
@@ -309,6 +332,18 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (currentPath === '/class-list' || currentPath === '/subject-list') {
       setOpenDropdowns(prev => ({ ...prev, master: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'master-reports': true }));
+    }
+    const studentReportPaths = [
+      '/students-report', '/donation-collection-report', '/student-upload-data-summary',
+      '/students-promotion-report', '/inactive-student-list', '/student-board-registration',
+      '/student-consolidated-report', '/generate-slips-report', '/attendance-report',
+      '/student-attedance-summary', '/monthly-attendance-report', '/student-wise-subject-list',
+      '/date-sheet-report', '/sibling-report', '/tc-report', '/cancel-tc-report',
+      '/student-call-list', '/subject-wise-student-details'
+    ];
+    if (studentReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, student: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'student-reports': true }));
     }
   }, [currentPath]);
 

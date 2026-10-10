@@ -617,11 +617,42 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #32] - 1:1 Live Replication of All 18 Student Reports & Submenu
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Replicate all 18 student report pages under `Student > Reports` shown in the user's screenshot down to exact 1:1 parity with UAB Infosol under strict read-only safety rules and zero-push git policy.
+* **Actions Taken:**
+  * **Strict Read-Only DOM Analysis of All 18 Live Reports:**
+    1. **Student List (`/students-report`):** Report Type (All, Class Wise, City/Village, New Student, RTE, FREE, Repeater), Sorting (Admission No., Sr. No., Enroll. No., Roll No., Feebook No., Name, Gender), full table matching UAB columns.
+    2. **Donation Report (`/donation-collection-report`):** Donation metric summary cards, search filter, donor students table with Total Amount, Total Paid, Total Due.
+    3. **Student Board Data Summary (`/student-upload-data-summary`):** Class wise board registration vs uploaded status tracking.
+    4. **Student Promotion List (`/students-promotion-report`):** Previous Class vs Current Class promotion audit table.
+    5. **Inactive Student List (`/inactive-student-list`):** Struck Off, Left School, Long Absent reasons and student list.
+    6. **Student Board Registration (`/student-board-registration`):** Printable CBSE Board Registration confirmation slip modal with subjects, parent details, and signatures.
+    7. **Student Consolidated Report (`/student-consolidated-report`):** Class-wise boys, girls, category (GEN, OBC, SC, ST) breakdown with grand totals.
+    8. **Generate Slips (`/generate-slips-report`):** Gate Pass, Bus Pass, Library Slip generator with interactive multi-select print modal.
+    9. **Attendance Report (`/attendance-report`):** Date range, Absent/Present/Leave filters, minimum absent days threshold.
+    10. **Day Wise Attendance Summary (`/student-attedance-summary`):** Daily attendance breakdown by class & section with present/absent ratios.
+    11. **Monthly Attendance Report (`/monthly-attendance-report`):** Complete month day-by-day (1..31) calendar grid with P/A status indicators.
+    12. **Student Wise Subject List (`/student-wise-subject-list`):** Class & division subject links table.
+    13. **Date Sheet Report (`/date-sheet-report`):** Term-wise and exam-wise date sheet schedules with subject, time, and room allocations.
+    14. **Sibling Report (`/sibling-report`):** Sibling groups in school with contact details.
+    15. **TC Report (`/tc-report`):** Issued Transfer Certificates with TC numbers and reasons.
+    16. **Cancel Tc Report (`/cancel-tc-report`):** Cancelled/revoked TC logs with cancellation date and authorities.
+    17. **Student Call List (`/student-call-list`):** Direct calling actions, call status updater (Connected, Ringing, Switched Off), and remarks.
+    18. **Subject Wise Student List (`/subject-wise-student-details`):** Subject enrollment list by student and section.
+  * **Sidebar Integration:**
+    * Updated [`Sidebar.jsx`](file:///C:/webncode/school%20erp/frontend/src/components/layout/Sidebar.jsx) with nested expandable `Reports` submenu containing all 18 items with auto-expansion on active route.
+  * **Routing & Verification:**
+    * Mapped all 18 routes in [`App.jsx`](file:///C:/webncode/school%20erp/frontend/src/App.jsx).
+    * Verified build: `npm run build` compiled in **4.74s** with 0 errors.
+    * Tested and validated rendering across live browser sessions.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* **Target:** Next requested modules:
-  * `Student Reports` (`/student-reports`)
-  * `Certificates` module (`/certificate-generater-new`, `/transfer-certificate`, etc.)
-  * Or any additional module requested by the user.
+* **Target:** Certificates Module (`/certificate-generater-new`, `/transfer-certificate`, `/generate-manual-tc`, `/add-update-tc-bulk`, `/manual-cc-bc`) or next requested module.
+
 
 
 

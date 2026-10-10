@@ -24,6 +24,26 @@ import { SubjectLinkPage } from './modules/master/SubjectLinkPage';
 import { StreamMasterPage } from './modules/master/StreamMasterPage';
 import { ClassListPage } from './modules/master/ClassListPage';
 import { SubjectListPage } from './modules/master/SubjectListPage';
+import {
+  StudentListPage,
+  DonationReportPage,
+  StudentBoardDataSummaryPage,
+  StudentPromotionListPage,
+  InactiveStudentListPage,
+  StudentBoardRegistrationPage,
+  StudentConsolidatedReportPage,
+  GenerateSlipsReportPage,
+  AttendanceReportPage,
+  DayWiseAttendanceSummaryPage,
+  MonthlyAttendanceReportPage,
+  StudentWiseSubjectListPage,
+  DateSheetReportPage,
+  SiblingReportPage,
+  TcReportPage,
+  CancelTcReportPage,
+  StudentCallListPage,
+  SubjectWiseStudentListPage
+} from './modules/students/reports';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -120,6 +140,43 @@ function App() {
                 return <FeeStructurePage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
+              case '/students-report':
+              case '/student-reports':
+                return <StudentListPage onNavigate={handleNavigate} />;
+              case '/donation-collection-report':
+                return <DonationReportPage onNavigate={handleNavigate} />;
+              case '/student-upload-data-summary':
+                return <StudentBoardDataSummaryPage onNavigate={handleNavigate} />;
+              case '/students-promotion-report':
+                return <StudentPromotionListPage onNavigate={handleNavigate} />;
+              case '/inactive-student-list':
+                return <InactiveStudentListPage onNavigate={handleNavigate} />;
+              case '/student-board-registration':
+                return <StudentBoardRegistrationPage onNavigate={handleNavigate} />;
+              case '/student-consolidated-report':
+                return <StudentConsolidatedReportPage onNavigate={handleNavigate} />;
+              case '/generate-slips-report':
+                return <GenerateSlipsReportPage onNavigate={handleNavigate} />;
+              case '/attendance-report':
+                return <AttendanceReportPage onNavigate={handleNavigate} />;
+              case '/student-attedance-summary':
+                return <DayWiseAttendanceSummaryPage onNavigate={handleNavigate} />;
+              case '/monthly-attendance-report':
+                return <MonthlyAttendanceReportPage onNavigate={handleNavigate} />;
+              case '/student-wise-subject-list':
+                return <StudentWiseSubjectListPage onNavigate={handleNavigate} />;
+              case '/date-sheet-report':
+                return <DateSheetReportPage onNavigate={handleNavigate} />;
+              case '/sibling-report':
+                return <SiblingReportPage onNavigate={handleNavigate} />;
+              case '/tc-report':
+                return <TcReportPage onNavigate={handleNavigate} />;
+              case '/cancel-tc-report':
+                return <CancelTcReportPage onNavigate={handleNavigate} />;
+              case '/student-call-list':
+                return <StudentCallListPage onNavigate={handleNavigate} />;
+              case '/subject-wise-student-details':
+                return <SubjectWiseStudentListPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">
