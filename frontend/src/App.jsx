@@ -13,28 +13,38 @@ import { ClassMasterPage } from './modules/master/ClassMasterPage';
 
 function App() {
   const [currentPath, setCurrentPath] = useState('/');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleNavigate = (path) => {
     setCurrentPath(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
-    <div className="flex min-h-screen bg-[#f8fafc] text-slate-800 antialiased font-sans">
-      {/* 1:1 UAB Collapsible Navigation Sidebar */}
-      <Sidebar currentPath={currentPath} onNavigate={handleNavigate} />
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
 
-      {/* Main App Container */}
-      <div className="flex-1 flex flex-col min-w-0">
+  return (
+    <div className="flex min-h-screen bg-[#f3f4f6] text-slate-800 antialiased font-sans">
+      {/* 1:1 UAB Collapsible Navigation Sidebar */}
+      <Sidebar
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Main Full-Width Canvas Container */}
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-hidden">
         {/* Top Navbar */}
         <Navbar
           schoolName="J D International School"
           session="2026-2027"
-          userRole="Admin"
+          onToggleSidebar={handleToggleSidebar}
         />
 
         {/* Dynamic Canvas Routing */}
-        <main className="flex-1 overflow-y-auto pb-12">
+        <main className="flex-1 overflow-y-auto">
           {currentPath === '/' && (
             <DashboardPage onNavigate={handleNavigate} />
           )}
