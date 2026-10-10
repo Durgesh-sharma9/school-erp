@@ -1,43 +1,40 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard,
-  School,
-  Database,
+  PieChart,
+  Home,
   GraduationCap,
+  User,
   Award,
   BookOpen,
-  CreditCard,
+  Gift,
+  FileEdit,
+  IndianRupee,
   Bus,
   Building,
   FileSpreadsheet,
-  Banknote,
-  Headphones,
+  Users,
+  UserCheck,
   BookMarked,
   Package,
   MessageSquare,
-  Users,
-  CalendarCheck,
+  Settings,
+  ClipboardList,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
-  ChevronLeft,
-  X,
-  HeartHandshake,
-  Edit,
-  Mail
+  X
 } from 'lucide-react';
 
 export const menuCategories = [
   {
     id: 'dashboard',
     title: 'Dashboard',
-    icon: LayoutDashboard,
+    icon: PieChart, // donut_small in UAB
     path: '/'
   },
   {
     id: 'school',
     title: 'School',
-    icon: School,
+    icon: Home, // home in UAB
     subItems: [
       { title: 'Edit School', path: '/school-info' },
       { title: 'Whatsapp Link', path: '/whatsapp-qr-settings' },
@@ -47,7 +44,7 @@ export const menuCategories = [
   {
     id: 'master',
     title: 'Master',
-    icon: Database,
+    icon: GraduationCap, // school in UAB
     subItems: [
       { title: 'Class Master', path: '/class' },
       { title: 'Group Subject Master', path: '/subject-group' },
@@ -60,7 +57,7 @@ export const menuCategories = [
   {
     id: 'student',
     title: 'Student',
-    icon: GraduationCap,
+    icon: User, // person in UAB
     subItems: [
       { title: 'Registration', path: '/student-registration' },
       { title: 'Assign Roll/Feebook No.', path: '/assign-roll-number' },
@@ -77,7 +74,7 @@ export const menuCategories = [
   {
     id: 'certificates',
     title: 'Certificates',
-    icon: Award,
+    icon: Award, // card_membership in UAB
     subItems: [
       { title: 'CC/BC/TF', path: '/certificate-generater-new' },
       { title: 'TC Generation', path: '/transfer-certificate' },
@@ -89,7 +86,7 @@ export const menuCategories = [
   {
     id: 'studyMaterial',
     title: 'Study Material',
-    icon: BookOpen,
+    icon: BookOpen, // local_library in UAB
     subItems: [
       { title: 'Homework', path: '/homework' },
       { title: 'Online Classes', path: '/create-online-classes' },
@@ -100,7 +97,7 @@ export const menuCategories = [
   {
     id: 'greetingCard',
     title: 'Greeting Card',
-    icon: HeartHandshake,
+    icon: Gift, // redeem in UAB
     subItems: [
       { title: 'Send Greeting Card', path: '/send-greeting-card-msg' },
       { title: 'Reports', path: '/greeting-card-reports' }
@@ -109,7 +106,7 @@ export const menuCategories = [
   {
     id: 'bulkEditing',
     title: 'Bulk Editing',
-    icon: Edit,
+    icon: FileEdit, // edit_note in UAB
     subItems: [
       { title: 'Edit Bulk Student', path: '/add-edit-bulk-students' },
       { title: 'Student Photo Management', path: '/student-photo-management' }
@@ -118,7 +115,7 @@ export const menuCategories = [
   {
     id: 'fee',
     title: 'Fee',
-    icon: CreditCard,
+    icon: IndianRupee, // currency_rupee in UAB
     subItems: [
       { title: 'Fee Group', path: '/fee-head-group' },
       { title: 'Fee Head', path: '/fee-head' },
@@ -137,7 +134,7 @@ export const menuCategories = [
   {
     id: 'transport',
     title: 'Transport',
-    icon: Bus,
+    icon: Bus, // airport_shuttle in UAB
     subItems: [
       { title: 'Transport Vehicle', path: '/transport-vehicle' },
       { title: 'Transport Route', path: '/transport-route' },
@@ -151,7 +148,7 @@ export const menuCategories = [
   {
     id: 'hostel',
     title: 'Hostel',
-    icon: Building,
+    icon: Building, // apartment in UAB
     subItems: [
       { title: 'Hostel Master', path: '/add-update-hostel' },
       { title: 'Block Master', path: '/add-update-block' },
@@ -164,7 +161,7 @@ export const menuCategories = [
   {
     id: 'examination',
     title: 'Examination',
-    icon: FileSpreadsheet,
+    icon: FileSpreadsheet, // description in UAB
     subItems: [
       { title: 'Exam Term', path: '/exam-terms' },
       { title: 'Exam Names', path: '/exam-names' },
@@ -181,7 +178,7 @@ export const menuCategories = [
   {
     id: 'payroll',
     title: 'Payroll',
-    icon: Banknote,
+    icon: Users, // people in UAB
     subItems: [
       { title: 'Branch', path: '/payroll-branch' },
       { title: 'Department', path: '/payroll-department' },
@@ -200,7 +197,7 @@ export const menuCategories = [
   {
     id: 'frontOffice',
     title: 'Front Office',
-    icon: Headphones,
+    icon: UserCheck, // account_circle in UAB
     subItems: [
       { title: 'App Users', path: '/app-users' },
       { title: 'Reminder', path: '/reminder' },
@@ -219,7 +216,7 @@ export const menuCategories = [
   {
     id: 'library',
     title: 'Library',
-    icon: BookMarked,
+    icon: BookMarked, // menu_book in UAB
     subItems: [
       { title: 'Library Master', path: '/library-master' },
       { title: 'Add Books', path: '/add-books' },
@@ -234,7 +231,7 @@ export const menuCategories = [
   {
     id: 'stationary',
     title: 'Stationary',
-    icon: Package,
+    icon: Package, // inventory_2 in UAB
     subItems: [
       { title: 'School Shop Info', path: '/shop-info' },
       { title: 'Supplier Shop Master', path: '/supplier-master' },
@@ -250,7 +247,7 @@ export const menuCategories = [
   {
     id: 'sms',
     title: 'SMS',
-    icon: MessageSquare,
+    icon: MessageSquare, // textsms in UAB
     subItems: [
       { title: 'Student SMS', path: '/student-sms' },
       { title: 'Staff SMS', path: '/staff-sms' },
@@ -264,7 +261,7 @@ export const menuCategories = [
   {
     id: 'userManagement',
     title: 'User Management',
-    icon: Users,
+    icon: Settings, // manage_accounts in UAB
     subItems: [
       { title: 'Manage Users', path: '/user-privilege' },
       { title: 'Reports', path: '/user-reports' }
@@ -273,7 +270,7 @@ export const menuCategories = [
   {
     id: 'leaveManagement',
     title: 'Leave Management',
-    icon: CalendarCheck,
+    icon: ClipboardList, // receipt_long in UAB
     subItems: [
       { title: 'Student Leave Requests', path: '/all-leave-requests' },
       { title: 'Staff Leave Requests', path: '/staff-leave-requests' },
@@ -288,18 +285,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     fee: false,
     master: false
   });
-  const [searchTerm, setSearchTerm] = useState('');
 
   const toggleDropdown = (id) => {
     setOpenDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
-  const filteredCategories = menuCategories.filter(item => {
-    if (!searchTerm) return true;
-    const matchParent = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchChild = item.subItems?.some(s => s.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchParent || matchChild;
-  });
 
   if (!isOpen) return null;
 
@@ -311,54 +300,27 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         className="fixed inset-0 bg-slate-900/40 z-40 md:hidden transition-opacity"
       />
 
-      <aside className="fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-lg md:shadow-none transition-transform duration-300">
-        {/* Brand Header */}
-        <div className="h-14 px-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-xs">
-              U
-            </div>
-            <div>
-              <div className="font-bold text-sm tracking-tight text-slate-900 leading-none">
-                UAB ERP
-              </div>
-              <div className="text-[10px] text-slate-500 font-medium mt-0.5">
-                School Management
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="md:hidden p-1 rounded text-slate-500 hover:bg-slate-100"
-          >
+      {/* 1:1 UAB Exact Left Sidenav (Width 250px, border-r, seamless background) */}
+      <aside className="fixed md:static inset-y-0 left-0 z-50 w-[250px] bg-slate-50 border-r border-slate-200 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-md md:shadow-none transition-transform duration-300">
+        
+        {/* Top Spacer matching UAB navbar height (56px) */}
+        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/60 bg-slate-50 shrink-0 md:hidden">
+          <span className="font-bold text-sm text-slate-800">UAB Navigation</span>
+          <button onClick={onClose} className="p-1 rounded text-slate-500 hover:bg-slate-200">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Menu Search Box */}
-        <div className="px-3 pt-2 pb-1 shrink-0">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search Menu..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-[11px] rounded bg-slate-100 border border-transparent px-2.5 py-1.5 focus:bg-white focus:border-indigo-400 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Menu List - Smooth Infinite Scroll for all 19 UAB categories and 100+ submenus */}
-        <div className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5 text-xs font-medium custom-scrollbar">
-          {filteredCategories.map((item) => {
+        {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
+        <div className="flex-1 overflow-y-auto pt-2 pb-6 space-y-1 text-sm font-medium custom-scrollbar">
+          {menuCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
-            const isOpen = openDropdowns[item.id] || searchTerm.length > 0;
+            const isOpen = openDropdowns[item.id];
             const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => sub.path === currentPath));
 
             return (
-              <div key={item.id}>
+              <div key={item.id} className="px-3">
                 <button
                   onClick={() => {
                     if (hasChildren) {
@@ -368,28 +330,34 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md transition-colors group ${
+                  className={`w-full h-10 flex items-center justify-between px-3 rounded-lg text-sm transition-all group ${
                     isActive
-                      ? 'bg-indigo-50 text-indigo-700 font-bold'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
+                      : 'text-slate-800 hover:bg-slate-200/50'
                   }`}
                 >
-                  <div className="flex items-center space-x-2.5">
-                    <Icon className={`w-4 h-4 transition-colors ${
-                      isActive ? 'text-indigo-600' : 'text-slate-500 group-hover:text-slate-700'
+                  <div className="flex items-center space-x-3.5">
+                    <Icon className={`w-5 h-5 transition-colors ${
+                      isActive ? 'text-[#4338ca]' : 'text-[#4338ca] opacity-80 group-hover:opacity-100'
                     }`} />
-                    <span className="text-[12px]">{item.title}</span>
+                    <span className="text-[13.5px] font-medium tracking-tight text-slate-900">
+                      {item.title}
+                    </span>
                   </div>
                   {hasChildren && (
                     <span className="text-slate-400 group-hover:text-slate-600">
-                      {isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      {isOpen ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
                     </span>
                   )}
                 </button>
 
-                {/* Submenu Dropdown */}
+                {/* Submenu Dropdown List (Matching UAB child links) */}
                 {hasChildren && isOpen && (
-                  <div className="pl-7 pr-1 py-0.5 space-y-0.5 border-l border-indigo-100 ml-4 my-0.5">
+                  <div className="pl-9 pr-1 py-1 space-y-0.5 border-l-2 border-indigo-200/60 ml-5 my-1">
                     {item.subItems.map((sub) => {
                       const isSubActive = currentPath === sub.path;
                       return (
@@ -399,10 +367,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          className={`w-full text-left px-2 py-1.5 rounded text-[11px] transition-colors block ${
+                          className={`w-full text-left px-3 py-1.5 rounded-md text-[12px] transition-colors block ${
                             isSubActive
-                              ? 'bg-indigo-600 text-white font-semibold shadow-2xs'
-                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                              ? 'bg-[#4338ca] text-white font-semibold shadow-2xs'
+                              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
                           }`}
                         >
                           {sub.title}
@@ -416,9 +384,9 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           })}
         </div>
 
-        {/* Footer Info */}
-        <div className="p-2 border-t border-slate-200 text-[10px] text-slate-400 text-center bg-slate-50 shrink-0">
-          UAB Infosolutions &bull; Session 2026-27
+        {/* Bottom subtle session indicator */}
+        <div className="py-2 text-[10px] text-slate-400 text-center border-t border-slate-200/60 bg-slate-50 shrink-0">
+          UAB Portal &bull; Session 2026-2027
         </div>
       </aside>
     </>
