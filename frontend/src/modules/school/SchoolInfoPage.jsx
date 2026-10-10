@@ -541,7 +541,7 @@ export function SchoolInfoPage() {
           )}
         </div>
 
-        {/* Card 3: Collapsible Accordion 2 - SOCIAL MEDIA LINK */}
+        {/* Card 3: Collapsible Accordion 2 - SOCIAL MEDIA LINK (1:1 UAB Match) */}
         <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
           <button
             type="button"
@@ -556,9 +556,10 @@ export function SchoolInfoPage() {
           </button>
 
           {expandedSection === 'social' && (
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white border-t border-slate-200 text-xs">
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white border-t border-slate-200 text-xs">
+              {/* Row 1 */}
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">YouTube Page URL</label>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Youtube</label>
                 <input
                   type="text"
                   name="youtube_page"
@@ -569,7 +570,7 @@ export function SchoolInfoPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Facebook Page URL</label>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Facebook</label>
                 <input
                   type="text"
                   name="facebook_page"
@@ -580,13 +581,89 @@ export function SchoolInfoPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Instagram / Twitter URL</label>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Instagram</label>
                 <input
                   type="text"
                   name="twitter_page"
                   value={formData.twitter_page}
                   onChange={handleInputChange}
                   className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Fee URL</label>
+                <input
+                  type="text"
+                  name="app_fee_url"
+                  value={formData.app_fee_url}
+                  onChange={handleInputChange}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                />
+              </div>
+
+              {/* Row 2 */}
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Win. URL</label>
+                <input
+                  type="text"
+                  name="app_win_url"
+                  value={formData.app_win_url}
+                  onChange={handleInputChange}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Android URL</label>
+                <input
+                  type="text"
+                  name="app_andr_url"
+                  value={formData.app_andr_url}
+                  onChange={handleInputChange}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App IOS URL</label>
+                <input
+                  type="text"
+                  name="app_ios_url"
+                  value={formData.app_ios_url}
+                  onChange={handleInputChange}
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Online Adm Btn From Date</label>
+                <input
+                  type="text"
+                  name="online_adm_btn_from"
+                  defaultValue="27-Dec-2024 01:31:53 PM"
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
+                />
+              </div>
+
+              {/* Row 3 */}
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Online Adm Btn To Date</label>
+                <input
+                  type="text"
+                  name="online_adm_btn_to"
+                  defaultValue="27-Dec-2024 01:31:53 PM"
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Admission Limit</label>
+                <input
+                  type="text"
+                  name="admission_limit"
+                  defaultValue="0"
+                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
                 />
               </div>
             </div>
