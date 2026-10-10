@@ -51,8 +51,14 @@ export const menuCategories = [
       { title: 'Subject Master', path: '/subject' },
       { title: 'Subject Link', path: '/subject-link' },
       { title: 'Stream Master', path: '/add-update-stream' },
-      { title: 'Class List', path: '/class-list' },
-      { title: 'Subject List', path: '/subject-list' }
+      {
+        id: 'master-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Class List', path: '/class-list' },
+          { title: 'Subject List', path: '/subject-list' }
+        ]
+      }
     ]
   },
   {
@@ -285,12 +291,26 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     student: false,
     school: false,
     fee: false,
-    master: false
+    master: true
+  });
+  const [openSubDropdowns, setOpenSubDropdowns] = useState({
+    'master-reports': true
   });
 
   const toggleDropdown = (id) => {
     setOpenDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
   };
+
+  const toggleSubDropdown = (id) => {
+    setOpenSubDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  React.useEffect(() => {
+    if (currentPath === '/class-list' || currentPath === '/subject-list') {
+      setOpenDropdowns(prev => ({ ...prev, master: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'master-reports': true }));
+    }
+  }, [currentPath]);
 
   if (!isOpen) return null;
 
@@ -319,7 +339,11 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
             const isOpen = openDropdowns[item.id];
-            const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => sub.path === currentPath));
+            const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => {
+              if (sub.path === currentPath) return true;
+              if (sub.children && sub.children.some(c => c.path === currentPath)) return true;
+              return false;
+            }));
 
             return (
               <div key={item.id}>
@@ -367,6 +391,66 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                 {hasChildren && isOpen && (
                   <div className="space-y-1 mb-1">
                     {item.subItems.map((sub) => {
+                      const hasSubChildren = sub.children && sub.children.length > 0;
+                      if (hasSubChildren) {
+                        const subId = sub.id || `${item.id}-${sub.title}`;
+                        const isSubOpen = openSubDropdowns[subId] ?? true;
+                        const isAnyChildActive = sub.children.some(c => c.path === currentPath);
+                        return (
+                          <div key={subId} className="space-y-1">
+                            {/* Expandable Sub-Item (e.g. Reports) */}
+                            <button
+                              onClick={() => toggleSubDropdown(subId)}
+                              style={{
+                                margin: '0px 12px 4px 12px',
+                                height: '40px',
+                                paddingLeft: '52px',
+                                paddingRight: '12px'
+                              }}
+                              className={`w-[calc(100%-24px)] flex items-center justify-between rounded-lg text-[14px] transition-colors ${
+                                isSubOpen || isAnyChildActive
+                                  ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
+                                  : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal'
+                              }`}
+                            >
+                              <span>{sub.title}</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-700 transition-transform ${isSubOpen ? 'rotate-0' : '-rotate-90'}`} />
+                            </button>
+
+                            {/* Nested children (Class List, Subject List) */}
+                            {isSubOpen && (
+                              <div className="space-y-1">
+                                {sub.children.map((child) => {
+                                  const isChildActive = currentPath === child.path;
+                                  return (
+                                    <button
+                                      key={child.path}
+                                      onClick={() => {
+                                        if (onNavigate) onNavigate(child.path);
+                                        if (window.innerWidth < 768 && onClose) onClose();
+                                      }}
+                                      style={{
+                                        margin: '0px 12px 4px 12px',
+                                        height: '40px',
+                                        paddingLeft: '64px',
+                                        paddingRight: '12px'
+                                      }}
+                                      className={`w-[calc(100%-24px)] text-left flex items-center rounded-lg text-[14px] transition-colors ${
+                                        isChildActive
+                                          ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
+                                          : 'text-[#030712] hover:bg-slate-200/70 font-normal'
+                                      }`}
+                                    >
+                                      {child.title}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+
                       const isSubActive = currentPath === sub.path;
                       return (
                         <button

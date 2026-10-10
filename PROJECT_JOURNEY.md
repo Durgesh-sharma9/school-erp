@@ -516,8 +516,24 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #29] - Master Sidebar Reports Submenu Nesting 1:1 Matched
+* **Timestamp:** 2026-10-10
+* **Goal / Prompt:** Replicate exact UAB sidebar nesting where `Class List` and `Subject List` are sub-items under a collapsible `Reports` dropdown ("ye do report ke ander sub the").
+* **Actions Taken:**
+  * Analyzed user screenshot: In UAB's sidebar under `Master`, `Reports` has a chevron `˅` and expands to show `Class List` and `Subject List`.
+  * Updated `frontend/src/components/layout/Sidebar.jsx`:
+    * Added hierarchical child support in `menuCategories` under `master`: `Reports` with `children: [{ title: 'Class List', path: '/class-list' }, { title: 'Subject List', path: '/subject-list' }]`.
+    * Implemented `openSubDropdowns` state and `toggleSubDropdown` with smooth chevron down/right animation.
+    * Added automatic expansion when active route is `/class-list` or `/subject-list`.
+    * Styled nested items with 1:1 UAB padding and active pill background (`bg-[rgba(99,102,241,0.2)]`).
+  * Verified build: `npm run build` compiled in **2.52s** with 0 errors.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
 * **Target:** **Student Module (Registration `/student-registration`, Assign Roll/Feebook No. `/assign-roll-number`, Attendance `/student-attendance`, Promotion `/promotion`, Student Portfolio `/student-portfolio`, ID Card Generator `/id-card-generator`, Admit Card Generator `/admit-card-generator`, Exam Date Sheet `/exam-date-sheet`, Reports `/student-reports`)**
+
 
 
 
