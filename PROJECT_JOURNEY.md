@@ -533,45 +533,36 @@ This document tracks the complete development journey of the **Unified School ER
 
 ### 📍 [Entry #30] - Complete 1:1 Student Registration Page (`/student-registration`)
 * **Timestamp:** 2026-10-10
-* **Goal / Prompt:** Replicate `https://schools.uabinfosol.com/student-registration` down to the exact 1:1 details, including all 7 tabs, 5 collapsible accordions, 11 document upload slots, 8 verification checkboxes, photo avatar card with red Browse button, and backend persistence ("https://schools.uabinfosol.com/student-registration ye bana do ab and is spage me jitna hai asitis ecopy karna ahai humko sabhi pages dekh lena and ha a kuch change mat karna reaal vakle me ek ek cheej dekh kar asistise banana").
+* **Goal / Prompt:** Replicate `https://schools.uabinfosol.com/student-registration` down to the exact 1:1 details, matching live UAB Angular Material layout, exact tabs placement beneath search bar, graduate avatar cap graphic, notched floating labels, and landscape mountain document cards ("iastise banao dekho uss ke different hai or tumne different banaya hai").
 * **Actions Taken:**
-  * Inspected live UAB `schools.uabinfosol.com/student-registration` DOM structure and Angular reactive form fields via Puppeteer in strict read-only mode.
-  * Extracted and implemented all form controls and components in `frontend/src/modules/students/StudentRegistrationPage.jsx`:
-    * **Top Header & Search Bar:** Global search input with search icon, print icon, clean title bar.
-    * **Profile Photo Avatar Card:**
-      * Silhouette placeholder with live preview on upload.
-      * Red `Browse` button with custom file picker and ImageKit integration.
-      * Roll No & Comp No inputs.
-      * Status indicator: `Studying` badge.
-    * **Primary Top Fields (24 fields + 3 checkboxes):**
-      * Sr.No, Adm.No, Enroll No, PEN, Class, Section, Adm Date, Orange Date Of Birth, Fee Type, Student Type, Stream, Gender, Orange First Name, Last Name, Contact Person, SMS/Whatsapp, Father Name, Mother Name, Blood Group, Religion, Caste, Category, Sub Category, Aadhar Number.
-      * Checkboxes: `is Active` (checked by default), `EWS`, `is Study Material`.
-    * **Tab 1: Student Details (5 Collapsible Accordions):**
-      * `CONTACT DETAILS`: Permanent Address, Current Address, City, State, Pin Code, Phone, Mobile.
-      * `OTHER DETAILS`: Birth Place, Nationality, Mother Tongue, Identification Mark, Physical Disability.
-      * `EDUCATION DETAILS`: Last School Name, Last Class Passed, Last Exam Roll No, Transfer Certificate No, Date of TC.
-      * `PREVIOUS DETAILS`: Previous School Board, Previous School Address, Reason for Leaving, Remarks.
-      * `BANK DETAILS`: Bank Name, Account Holder Name, Account Number, IFSC Code, Branch Name.
-    * **Tab 2: Parent's Details:**
-      * Father Details (19 fields): Name, Qualification, Occupation, Organization, Designation, Office Address, Annual Income, Email, Mobile, Phone, Aadhar Number, PAN Number, etc.
-      * Mother Details (18 fields): Name, Qualification, Occupation, Organization, Designation, Office Address, Annual Income, Email, Mobile, Phone, Aadhar Number, PAN Number, etc.
-      * Guardian 1 & Guardian 2 Details: Name, Relation, Contact, Address.
-    * **Tab 3: Transport:**
-      * `apply transport` checkbox toggle.
-      * Route Name, Pickup Point / Stop, Vehicle Number, Transport Fee heads.
-    * **Tab 4: Hostel Allocation:**
-      * `apply Hostel` checkbox toggle.
-      * Hostel Block, Floor No, Room No, Bed No.
-    * **Tab 5: Documents (11 Upload Slots + 8 Verification Checkboxes):**
-      * 11 document upload cards with red `Browse` buttons: Student Photo, Father Photo, Mother Photo, Birth Certificate, Aadhar Card (Student), Aadhar Card (Father), Aadhar Card (Mother), Transfer Certificate, Previous Marksheet, Caste Certificate, Address Proof.
-      * 8 Document Verification checkboxes matching live UAB: `Std Aadhar`, `CC`, `TC`, `BC`, `F Aadhar`, `M Aadhar`, `F Marksheet`, `M Marksheet`.
-    * **Tab 6: Objection:**
-      * Administrative objection notes textarea with objection status toggle.
-    * **Tab 7: Sports:**
-      * Sports / Extra-curricular activities participation and achievements.
-    * **Sticky Bottom Action Bar:**
-      * Purple unelevated `Save` button wired to `POST /api/students` with toast feedback.
-  * Verified build: `npm run build` compiled in **3.30s** with 0 errors.
+  * Re-inspected live UAB `schools.uabinfosol.com/student-registration` DOM structure and visual elements via Puppeteer in strict read-only mode.
+  * Identified layout nuances and aligned 100% 1:1:
+    * **Tabs Placement:** Positioned all 7 Material tabs (`Student Details`, `Parent's Details`, `Transport`, `Hostel Allocation`, `Documents`, `Objection`, `Sports`) directly below the full-width Search bar, with the active purple underline indicator.
+    * **Tab 1 Structure:**
+      * Avatar card on left (`col-span-3`): Rounded `bg-indigo-50 border-2 border-indigo-100` card with graduate mortarboard cap silhouette illustration, dual action buttons (red `Browse` with cloud upload icon + dark camera button), `Roll No. :` & `Comp. No. :`, and `Status: Studying`.
+      * Primary inputs grid on right (`col-span-9`): 4 columns with floating notched outline labels (`mat-form-field appearance="outline"` style).
+      * Orange highlighted labels: `Date Of Birth*`, `First Name*`, `Last Name`.
+      * Top-right blue text links: `Add Stream` above Stream dropdown, `Add House` above House dropdown.
+      * Full-width 4-column rows below avatar: Rows 5, 6, 7 and the 3 checkboxes (`is Active`, `EWS`, `is Study Material`).
+      * 5 Collapsible Accordions: `CONTACT DETAILS`, `OTHER DETAILS`, `EDUCATION DETAILS`, `PREVIOUS DETAILS`, `BANK DETAILS`.
+    * **Tab 2 (Parent's Details):**
+      * `FATHER DETAILS`: Avatar card with red Browse & camera buttons + 19 specific father fields (including DOB calendar, Annual Income, Service In radio, Parents Status radio, Company, Samagra ID).
+      * `MOTHER DETAILS`: Avatar card with red Browse & camera buttons + 18 specific mother fields.
+      * `GUARDIAN DETAILS`: Guardian 1 & Guardian 2 fields (Name, Mobile, Relation, Remark).
+    * **Tab 3 (Transport):**
+      * `apply transport` checkbox toggle, revealing Route, Destination, Vehicle dropdowns when checked.
+    * **Tab 4 (Hostel Allocation):**
+      * `apply Hostel` checkbox toggle, revealing Hostel, Block, Floor, Room dropdowns when checked.
+    * **Tab 5 (Documents):**
+      * 11 document upload cards in a 4-column grid with landscape illustration (blue sky, yellow sun, green mountain peaks) and red Browse + camera buttons.
+      * 8 verification checkboxes in a single horizontal row (`Std Aadhar`, `CC`, `TC`, `BC`, `F Aadhar`, `M Aadhar`, `F Marksheet`, `M Marksheet`).
+    * **Tab 6 & 7 (Objection & Sports):**
+      * Administrative objection status & remarks, physical fitness and sports achievements.
+    * **Sticky Bottom Bar:**
+      * Purple `Save` button (`#4f46e5`) wired to backend.
+    * **Browser URL & Route Synchronization:**
+      * Fixed `App.jsx` to synchronize with `window.location.pathname` and `popstate` history so direct navigation to `/student-registration` immediately loads the registration page.
+  * Verified build: `npm run build` compiled cleanly in **2.49s** with 0 errors.
 * **Status:** ✅ Completed
 
 ---
