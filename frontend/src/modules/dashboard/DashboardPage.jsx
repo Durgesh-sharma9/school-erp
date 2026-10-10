@@ -2,20 +2,22 @@ import React, { useEffect, useState } from 'react';
 import {
   IndianRupee,
   RefreshCw,
-  TrendingUp,
-  Receipt,
-  RotateCcw,
   ExternalLink,
   CreditCard,
   Building2,
   QrCode,
   Globe,
-  Wallet,
+  Receipt,
   Home,
-  ChevronRight,
-  TrendingDown
+  Cake,
+  Calendar as CalendarIcon,
+  Bell,
+  Bus,
+  Clock,
+  UserCheck,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
-import axios from 'axios';
 
 export function DashboardPage({ onNavigate }) {
   const [stats, setStats] = useState({
@@ -25,9 +27,29 @@ export function DashboardPage({ onNavigate }) {
     attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0% ↓" }
   });
 
+  const [activeReminderTab, setActiveReminderTab] = useState('Today');
+
   const formatINR = (val) => {
     return Number(val || 0).toLocaleString('en-IN');
   };
+
+  // Live vehicles data from UAB
+  const vehicles = [
+    { sNo: 1, name: "[RJ02PA2762] Bus", driver: "[5] SHAITAN SINGH", capacity: 42, status: "Active" },
+    { sNo: 2, name: "[RJ14PC1019] Bus", driver: "[1] HANSRAJ JAT", capacity: 42, status: "Active" },
+    { sNo: 3, name: "[RJ14PC1037] Bus", driver: "[10] PRAKASH CHOUDHARY", capacity: 50, status: "Active" },
+    { sNo: 4, name: "[RJ14PC2278] Bus", driver: "[7] SHYAM SUNDER", capacity: 40, status: "Active" },
+    { sNo: 5, name: "[RJ14PC5938] Bus", driver: "[8] NARESH", capacity: 45, status: "Active" },
+    { sNo: 6, name: "[RJ14PC7878] Bus", driver: "[6] BABU LAL", capacity: 42, status: "Active" },
+    { sNo: 7, name: "[RJ14PE0832] Van", driver: "[3] RAMESH MEENA", capacity: 25, status: "Active" }
+  ];
+
+  // Live student birthdays from UAB
+  const birthdays = [
+    { name: "DHRITI YADAV", classSec: "Lower Kindergarten - PP4+-A", roll: "12" },
+    { name: "ABHIMANYU DUBEY", classSec: "VI-A", roll: "04" },
+    { name: "ARYA KUMARI", classSec: "IX-A", roll: "18" }
+  ];
 
   return (
     <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
@@ -273,9 +295,9 @@ export function DashboardPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* Row 3: Estimated Fee Collection Chart & Accounts Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Left: Estimated Fee Collection */}
+      {/* Row 3: Estimated Fee Collection Chart, Recent Transactions, and Accounts Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* Estimated Fee Collection */}
         <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative">
           <div className="bg-rose-50 border-b border-rose-100 px-3 py-1 flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -291,8 +313,8 @@ export function DashboardPage({ onNavigate }) {
             </button>
           </div>
 
-          <div className="p-4">
-            <div className="flex items-center justify-center space-x-4 text-xs font-semibold mb-3">
+          <div className="p-3">
+            <div className="flex items-center justify-center space-x-3 text-[11px] font-semibold mb-2">
               <span className="flex items-center space-x-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                 <span>Expected</span>
@@ -308,19 +330,19 @@ export function DashboardPage({ onNavigate }) {
             </div>
 
             {/* Bar Visual Representation */}
-            <div className="h-44 flex items-end justify-around border-b border-slate-200 pb-2 px-6">
+            <div className="h-40 flex items-end justify-around border-b border-slate-200 pb-2 px-4">
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 bg-rose-500 rounded-t" style={{ height: '140px' }}></div>
+                <div className="w-7 bg-rose-500 rounded-t" style={{ height: '120px' }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Expected</span>
                 <span className="text-[10px] font-bold">3.12 Cr</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 bg-emerald-500 rounded-t" style={{ height: '10px' }}></div>
+                <div className="w-7 bg-emerald-500 rounded-t" style={{ height: '10px' }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Recieved</span>
                 <span className="text-[10px] font-bold">2.83 L</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 bg-amber-400 rounded-t" style={{ height: '136px' }}></div>
+                <div className="w-7 bg-amber-400 rounded-t" style={{ height: '116px' }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Due</span>
                 <span className="text-[10px] font-bold">3.09 Cr</span>
               </div>
@@ -328,7 +350,27 @@ export function DashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* Right: Accounts Widget (Teal-50 Header) */}
+        {/* Recent Transactions Widget (Orange-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden flex flex-col">
+          <div className="bg-orange-50 border-b border-orange-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-full bg-orange-200 text-orange-700 flex items-center justify-center text-xs">
+                📜
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">
+                Recent Transactions
+              </h3>
+            </div>
+          </div>
+
+          <div className="p-3 flex-1 flex flex-col items-center justify-center text-center text-slate-400 text-xs py-8">
+            <Receipt className="w-8 h-8 text-slate-300 mb-2" />
+            <p className="font-semibold text-slate-500">No Transactions Today</p>
+            <p className="text-[10px] text-slate-400">All collected receipts will appear here in real-time</p>
+          </div>
+        </div>
+
+        {/* Accounts Widget (Teal-50 Header) */}
         <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
           <div className="bg-teal-50 border-b border-teal-100 px-3 py-1 flex items-center space-x-2">
             <div className="w-6 h-6 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center text-xs">
@@ -339,38 +381,38 @@ export function DashboardPage({ onNavigate }) {
             </h3>
           </div>
 
-          <div className="p-4 space-y-3">
+          <div className="p-3 space-y-2">
             <div className="flex items-center justify-between">
               {/* Total Transactions Counter */}
-              <div className="w-1/2 flex flex-col items-center justify-center border-r border-slate-100 pr-3">
-                <span className="text-5xl font-extrabold text-green-500 leading-none">0</span>
+              <div className="w-1/2 flex flex-col items-center justify-center border-r border-slate-100 pr-2">
+                <span className="text-4xl font-extrabold text-green-500 leading-none">0</span>
                 <span className="text-xs text-slate-600 mt-1 font-medium">Transactions</span>
               </div>
 
               {/* Today Accounts Mini Table */}
-              <div className="w-1/2 pl-3 text-xs">
-                <p className="text-[11px] font-bold text-center text-slate-500 mb-1">Today</p>
+              <div className="w-1/2 pl-2 text-xs">
+                <p className="text-[10px] font-bold text-center text-slate-500 mb-0.5">Today</p>
                 <div className="grid grid-cols-4 gap-1 text-center font-medium">
                   <div>
-                    <span className="text-[10px] text-slate-400 block">Cash</span>
+                    <span className="text-[9px] text-slate-400 block">Cash</span>
                     <span className="font-bold">0</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block">Bank</span>
+                    <span className="text-[9px] text-slate-400 block">Bank</span>
                     <span className="font-bold">0</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-green-600 block">Earning</span>
+                    <span className="text-[9px] text-green-600 block">Earning</span>
                     <span className="font-bold text-green-600">0</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-red-600 block">Expense</span>
+                    <span className="text-[9px] text-red-600 block">Expense</span>
                     <span className="font-bold text-red-600">0</span>
                   </div>
                 </div>
 
-                <div className="mt-2 text-center">
-                  <span className="inline-block px-2.5 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold">
+                <div className="mt-1 text-center">
+                  <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-[11px] font-bold">
                     : 0 ↑
                   </span>
                 </div>
@@ -379,20 +421,20 @@ export function DashboardPage({ onNavigate }) {
 
             {/* Year Till Date Summary */}
             <div className="pt-2 border-t border-slate-100">
-              <p className="text-[10px] text-center font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <p className="text-[10px] text-center font-bold text-slate-400 uppercase tracking-wider mb-1">
                 Year Till Date
               </p>
               <div className="grid grid-cols-3 text-center text-xs">
                 <div className="text-green-700">
-                  <p className="text-[10px] font-semibold text-slate-500">Cash</p>
+                  <p className="text-[9px] font-semibold text-slate-500">Cash</p>
                   <p className="font-bold font-mono">43,355</p>
                 </div>
                 <div className="text-blue-700">
-                  <p className="text-[10px] font-semibold text-slate-500">Bank</p>
+                  <p className="text-[9px] font-semibold text-slate-500">Bank</p>
                   <p className="font-bold font-mono">2,07,090</p>
                 </div>
                 <div className="text-orange-700">
-                  <p className="text-[10px] font-semibold text-slate-500">Total</p>
+                  <p className="text-[9px] font-semibold text-slate-500">Total</p>
                   <p className="font-bold font-mono">2,50,445</p>
                 </div>
               </div>
@@ -400,6 +442,206 @@ export function DashboardPage({ onNavigate }) {
           </div>
         </div>
       </div>
+
+      {/* Row 4: Fee Reminders, Complaints, Calendar, and Staff Attendance */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Fee Reminders (Cyan-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-cyan-50 border-b border-cyan-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-cyan-200 text-blue-600 flex items-center justify-center text-xs">
+                🔔
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Fee Reminders</h3>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="p-3">
+            <div className="flex border-b border-slate-100 text-xs font-semibold mb-2">
+              <button
+                onClick={() => setActiveReminderTab('Today')}
+                className={`flex-1 pb-1 text-center ${activeReminderTab === 'Today' ? 'border-b-2 border-cyan-500 text-cyan-600 font-bold' : 'text-slate-400'}`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => setActiveReminderTab('Upcoming')}
+                className={`flex-1 pb-1 text-center ${activeReminderTab === 'Upcoming' ? 'border-b-2 border-cyan-500 text-cyan-600 font-bold' : 'text-slate-400'}`}
+              >
+                Upcoming
+              </button>
+            </div>
+            <div className="py-6 text-center text-xs text-slate-400">
+              No fee reminders scheduled for {activeReminderTab.toLowerCase()}
+            </div>
+          </div>
+        </div>
+
+        {/* Complaints (Yellow-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-yellow-50 border-b border-yellow-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-yellow-200 text-yellow-800 flex items-center justify-center text-xs">
+                ✏️
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Complaints</h3>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="p-3 py-8 text-center text-xs text-slate-400">
+            <p className="font-medium">No Open Complaints</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Parent and student grievance box clear</p>
+          </div>
+        </div>
+
+        {/* Calendar (Teal-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-teal-50 border-b border-teal-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center text-xs">
+                📅
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Calendar (Oct)</h3>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="p-3">
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-slate-400 mb-1">
+              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-700">
+              {[...Array(31)].map((_, i) => (
+                <span
+                  key={i}
+                  className={`p-1 rounded ${i + 1 === 10 ? 'bg-indigo-600 text-white font-bold' : 'hover:bg-slate-100'}`}
+                >
+                  {i + 1}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Staff Attendance (Orange-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-orange-50 border-b border-orange-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">
+                👆
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Staff Attendance</h3>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="p-4 space-y-2 text-xs">
+            <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+              <span className="font-semibold text-slate-700">Present (P):</span>
+              <span className="font-bold text-emerald-600 font-mono">0</span>
+            </div>
+            <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+              <span className="font-semibold text-slate-700">Absent (Ab):</span>
+              <span className="font-bold text-rose-600 font-mono">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 5: Student Birthdays, Staff Birthdays, Leave Requests, and Live Vehicle Tracking */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Student Birthday (3) (Pink-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-pink-50 border-b border-pink-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-pink-200 text-pink-600 flex items-center justify-center text-xs">
+                🎂
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Student Birthday (3)</h3>
+            </div>
+          </div>
+
+          <div className="p-3 divide-y divide-slate-100 text-xs">
+            {birthdays.map((b, i) => (
+              <div key={i} className="py-2 first:pt-0 last:pb-0">
+                <p className="font-bold text-slate-900">{b.name}</p>
+                <p className="text-[11px] text-pink-600 font-medium">{b.classSec}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Staff Birthday (0) (Blue-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-blue-50 border-b border-blue-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-blue-200 text-blue-600 flex items-center justify-center text-xs">
+                🎂
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Staff Birthday (0)</h3>
+            </div>
+          </div>
+
+          <div className="p-3 py-10 text-center text-xs text-slate-400">
+            No staff birthdays today
+          </div>
+        </div>
+
+        {/* Staff/Student Leave Request (Blue-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-blue-50 border-b border-blue-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-blue-200 text-blue-600 flex items-center justify-center text-xs">
+                📝
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Staff/Student Leave Request</h3>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="p-3 py-10 text-center text-xs text-slate-400">
+            No Data Found !
+          </div>
+        </div>
+
+        {/* Live Vehicle Tracking (Teal-50 Header Table) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden flex flex-col">
+          <div className="bg-teal-50 border-b border-teal-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center text-xs">
+                🚌
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">Vehicle Tracking</h3>
+            </div>
+          </div>
+
+          <div className="p-2 overflow-y-auto max-h-48 flex-1">
+            <table className="w-full text-left text-[11px] border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th className="py-1">S.No</th>
+                  <th className="py-1">Vehicle</th>
+                  <th className="py-1">Driver</th>
+                  <th className="py-1 text-right">Cap</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {vehicles.map((v) => (
+                  <tr key={v.sNo}>
+                    <td className="py-1 text-slate-400 font-mono">{v.sNo}</td>
+                    <td className="py-1 font-semibold text-slate-800">{v.name}</td>
+                    <td className="py-1 text-slate-600">{v.driver}</td>
+                    <td className="py-1 text-right font-mono font-bold text-indigo-700">{v.capacity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
