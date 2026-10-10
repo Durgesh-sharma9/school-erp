@@ -1,323 +1,404 @@
 import React, { useEffect, useState } from 'react';
 import {
   IndianRupee,
-  Users,
-  UserCheck,
+  RefreshCw,
   TrendingUp,
   Receipt,
-  ArrowUpRight,
-  UserPlus,
+  RotateCcw,
+  ExternalLink,
   CreditCard,
-  ClipboardCheck,
-  FileSpreadsheet,
-  CalendarDays,
-  Percent
+  Building2,
+  QrCode,
+  Globe,
+  Wallet,
+  Home,
+  ChevronRight,
+  TrendingDown
 } from 'lucide-react';
 import axios from 'axios';
 
 export function DashboardPage({ onNavigate }) {
   const [stats, setStats] = useState({
     todayCollection: { total: 0, receiptsCount: 0, cash: 0, bank: 0 },
-    feeRevenueSummary: { totalRevenue: 31221901, totalReceivedYTD: 30943456, totalDue: 283445, receivedPercentage: 99.1 },
-    totalStudents: { total: 928, boys: 494, girls: 434, newAdmissions: 168, oldStudents: 760, growthRate: "+18.1%" },
+    feeRevenueSummary: { totalRevenue: 31221901, totalDue: 30943456, totalReceivedYTD: 283445, receivedPercentage: 0.9, duePercentage: 99.1 },
+    totalStudents: { total: 928, boys: 494, girls: 434, newAdmissions: 168, oldStudents: 760, growthRate: "18.1% ↑" },
     attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0% ↓" }
   });
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await axios.get('/api/dashboard/stats');
-        if (res.data?.success && res.data.data) {
-          setStats(res.data.data);
-        }
-      } catch (err) {
-        // Graceful fallback to default UAB metrics
-        console.log('Using default UAB stats');
-      }
-    };
-    fetchStats();
-  }, []);
 
   const formatINR = (val) => {
     return Number(val || 0).toLocaleString('en-IN');
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Breadcrumb & Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Overview
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Dashboard
-          </h2>
-        </div>
+    <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
+      {/* Breadcrumb Bar */}
+      <div className="flex items-center space-x-2 text-xs text-gray-500 pt-1 pb-1">
+        <span className="font-semibold text-gray-800 text-sm">Dashboard</span>
+        <span>&bull;</span>
+        <Home className="w-3.5 h-3.5 text-gray-400" />
+        <span className="text-gray-400">&bull; Dashboard</span>
+      </div>
 
-        {/* Quick Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => onNavigate && onNavigate('/student-registration')}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>+ New Admission</span>
-          </button>
+      {/* Row 1: 4 Core Top Cards (1:1 UAB Exact Dimensions & Colors) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        {/* Card 1: Today Collection (Blue-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative cursor-grab select-none transition-transform duration-300 hover:scale-[1.02]">
           <button
             onClick={() => onNavigate && onNavigate('/fee-collection')}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors"
+            className="absolute top-1 right-2 text-slate-400 hover:text-indigo-600 transition-colors"
+            title="Open Fee Register"
           >
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>+ Fee Entry</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </button>
+          
+          <div className="bg-blue-50 border-b border-blue-100 py-1 px-3">
+            <h3 className="font-medium text-xs text-slate-800">Today Collection</h3>
+          </div>
+
+          <div className="p-3 pt-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-base font-bold text-slate-900">
+                {stats.todayCollection.total}
+              </span>
+              <span className="bg-green-100 text-green-700 font-semibold px-2 py-0.5 text-[11px] rounded-lg">
+                Receipts: <strong>{stats.todayCollection.receiptsCount}</strong>
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-100">
+              <div className="text-left">
+                <p className="text-green-600 font-bold leading-none">{stats.todayCollection.cash}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 flex items-center">
+                  <span className="text-green-600 font-bold mr-1">₹</span> Cash
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-blue-600 font-bold leading-none">{stats.todayCollection.bank}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-end">
+                  <Building2 className="w-3 h-3 text-blue-600 mr-1" /> Bank
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Fee Revenue Summary (Orange-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative cursor-grab select-none transition-transform duration-300 hover:scale-[1.02]">
+          <div className="bg-orange-50 border-b border-orange-100 py-1 px-3">
+            <h3 className="font-medium text-xs text-slate-800">Fee Revenue Summary</h3>
+          </div>
+
+          <div className="p-3 pt-2 space-y-2">
+            <p className="text-sm font-bold text-slate-900">
+              {formatINR(stats.feeRevenueSummary.totalRevenue)}
+            </p>
+
+            {/* Total Due Row */}
+            <div>
+              <div className="flex justify-between items-center text-[10px] text-slate-600">
+                <span>Total Due</span>
+                <span className="font-semibold">
+                  {formatINR(stats.feeRevenueSummary.totalDue)}{' '}
+                  <span className="text-red-600 font-bold">&nbsp;(99.1%)</span>
+                </span>
+              </div>
+              <div className="w-full bg-zinc-200 rounded-lg h-1 mt-0.5 overflow-hidden">
+                <div className="bg-red-600 h-1 rounded-sm" style={{ width: '99.1%' }}></div>
+              </div>
+            </div>
+
+            {/* Total Received (YTD) Row */}
+            <div>
+              <div className="flex justify-between items-center text-[10px] text-slate-600">
+                <span>Total Received (YTD)</span>
+                <span className="font-semibold">
+                  {formatINR(stats.feeRevenueSummary.totalReceivedYTD)}{' '}
+                  <span className="text-green-600 font-bold">&nbsp;(0.9%)</span>
+                </span>
+              </div>
+              <div className="w-full bg-zinc-200 rounded-lg h-1 mt-0.5 overflow-hidden">
+                <div className="bg-green-500 h-1 rounded-sm" style={{ width: '0.9%' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Total Student (Yellow-50 Header with Boy/Girl breakdown) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative cursor-grab select-none transition-transform duration-300 hover:scale-[1.02]">
+          <div className="bg-yellow-50 border-b border-yellow-100 py-1 px-3 flex justify-between items-center">
+            <h3 className="font-medium text-xs text-slate-800">Total Student</h3>
+            <span className="text-sm font-bold text-slate-900 flex items-center">
+              {stats.totalStudents.total}&nbsp;
+              <span className="text-green-600 text-[10px] font-semibold">(18.1% ↑)</span>
+            </span>
+          </div>
+
+          <div className="p-3 pt-2 space-y-2">
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="flex items-center text-slate-600">
+                  <span className="text-blue-600 mr-1 font-bold">👦</span> Boy
+                </span>
+                <span className="font-semibold text-slate-800">{stats.totalStudents.boys}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center text-slate-600">
+                  <span className="text-pink-600 mr-1 font-bold">👧</span> Girl
+                </span>
+                <span className="font-semibold text-slate-800">{stats.totalStudents.girls}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-1 border-t border-slate-100 text-[11px]">
+              <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-lg font-medium">
+                New : <strong>{stats.totalStudents.newAdmissions}</strong>
+              </div>
+              <div className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded-lg font-medium">
+                Old : <strong>{stats.totalStudents.oldStudents}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Student Attendance (Rose-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative cursor-grab select-none transition-transform duration-300 hover:scale-[1.02]">
           <button
             onClick={() => onNavigate && onNavigate('/student-attendance')}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold shadow-xs transition-colors"
+            className="absolute top-1 right-2 text-slate-400 hover:text-indigo-600 transition-colors"
+            title="Mark Attendance"
           >
-            <ClipboardCheck className="w-3.5 h-3.5" />
-            <span>Mark Attendance</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </button>
-        </div>
-      </div>
 
-      {/* 4 Executive Stats Cards (UAB Layout) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        {/* Card 1: Today Collection */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Today Collection
-            </span>
-            <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              <IndianRupee className="w-4 h-4" />
-            </span>
-          </div>
-
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-extrabold text-slate-900">
-              ₹ {formatINR(stats.todayCollection.total)}
-            </span>
-            <span className="text-xs text-slate-400 font-medium">
-              Receipts: {stats.todayCollection.receiptsCount}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs">
-            <div className="bg-slate-50 p-2 rounded-lg">
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Cash</div>
-              <div className="font-bold text-slate-800">₹ {formatINR(stats.todayCollection.cash)}</div>
+          <div className="bg-rose-50 border-b border-rose-100 py-1 px-3 flex items-center space-x-1.5">
+            <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-xs">
+              👆
             </div>
-            <div className="bg-slate-50 p-2 rounded-lg">
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Bank / Online</div>
-              <div className="font-bold text-slate-800">₹ {formatINR(stats.todayCollection.bank)}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Fee Revenue Summary */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Fee Revenue Summary
-            </span>
-            <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-              <Receipt className="w-4 h-4" />
-            </span>
+            <h3 className="font-medium text-xs text-slate-800">Student Attendance</h3>
           </div>
 
-          <div className="text-2xl font-extrabold text-slate-900">
-            ₹ {formatINR(stats.feeRevenueSummary.totalRevenue)}
-          </div>
-          <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-            Total Due: <span className="font-bold text-rose-600">₹ {formatINR(stats.feeRevenueSummary.totalDue)}</span>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-3">
-            <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
-              <span>Received (YTD)</span>
-              <span className="text-emerald-600">{stats.feeRevenueSummary.receivedPercentage}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${stats.feeRevenueSummary.receivedPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Total Student */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Total Student
-            </span>
-            <div className="flex items-center space-x-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-100">
-                {stats.totalStudents.growthRate}
+          <div className="p-3 pt-2">
+            <div className="flex justify-between items-baseline mb-3">
+              <span className="text-xs font-bold text-red-600">
+                {stats.attendanceToday.trend}
               </span>
-              <span className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-                <Users className="w-4 h-4" />
+              <span className="text-sm font-bold text-slate-900">
+                {stats.attendanceToday.percentage}
               </span>
             </div>
-          </div>
 
-          <div className="text-2xl font-extrabold text-slate-900">
-            {formatINR(stats.totalStudents.total)}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs">
-            <div className="bg-sky-50/60 p-2 rounded-lg">
-              <div className="text-[10px] text-sky-700 uppercase font-semibold">Boys / Girls</div>
-              <div className="font-bold text-slate-800">{stats.totalStudents.boys} / {stats.totalStudents.girls}</div>
-            </div>
-            <div className="bg-indigo-50/60 p-2 rounded-lg">
-              <div className="text-[10px] text-indigo-700 uppercase font-semibold">New / Old</div>
-              <div className="font-bold text-slate-800">{stats.totalStudents.newAdmissions} / {stats.totalStudents.oldStudents}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 4: Student Attendance */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Student Attendance
-            </span>
-            <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-              <UserCheck className="w-4 h-4" />
-            </span>
-          </div>
-
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-extrabold text-slate-900">
-              {stats.attendanceToday.percentage}%
-            </span>
-            <span className="text-xs text-rose-500 font-semibold">
-              {stats.attendanceToday.trend}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs">
-            <div className="bg-emerald-50 p-2 rounded-lg">
-              <div className="text-[10px] text-emerald-700 uppercase font-semibold">Present</div>
-              <div className="font-bold text-emerald-800">{stats.attendanceToday.totalPresent}</div>
-            </div>
-            <div className="bg-rose-50 p-2 rounded-lg">
-              <div className="text-[10px] text-rose-700 uppercase font-semibold">Absent</div>
-              <div className="font-bold text-rose-800">{stats.attendanceToday.totalAbsent}</div>
+            <div className="flex justify-around items-center pt-1 border-t border-slate-100 text-xs">
+              <div className="text-center">
+                <p className="text-pink-600 font-bold leading-none">{stats.attendanceToday.totalAbsent}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Absent</p>
+              </div>
+              <div className="text-center">
+                <p className="text-green-600 font-bold leading-none">{stats.attendanceToday.totalPresent}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Present</p>
+              </div>
             </div>
           </div>
         </div>
 
       </div>
 
-      {/* Class Capacity & Quick Operations Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left: Class Distribution / Capacity Table */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">
-                Class Summary & Capacity
+      {/* Row 2: Today's Paymode Summary (Lime-50 Header Grid) */}
+      <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+        <div className="bg-lime-50 border-b border-lime-100 px-3 py-1 flex items-center space-x-1.5">
+          <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs">
+            🔍
+          </div>
+          <h3 className="font-medium text-xs text-slate-800">
+            Today's Paymode Summary
+          </h3>
+        </div>
+
+        <div className="p-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-5xl mx-auto">
+            {/* CASH */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <IndianRupee className="w-4 h-4 text-green-700" />
+              <div className="text-center text-green-700">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">CASH</p>
+              </div>
+            </div>
+
+            {/* BANK */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <Building2 className="w-4 h-4 text-red-700" />
+              <div className="text-center text-red-700">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">BANK</p>
+              </div>
+            </div>
+
+            {/* CHEQUE */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <Receipt className="w-4 h-4 text-orange-500" />
+              <div className="text-center text-orange-500">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">CHEQUE</p>
+              </div>
+            </div>
+
+            {/* ONLINE */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <Globe className="w-4 h-4 text-blue-700" />
+              <div className="text-center text-blue-700">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">ONLINE</p>
+              </div>
+            </div>
+
+            {/* UPI */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <QrCode className="w-4 h-4 text-violet-700" />
+              <div className="text-center text-violet-700">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">UPI</p>
+              </div>
+            </div>
+
+            {/* DEBIT/CREDIT */}
+            <div className="flex items-center justify-center space-x-2 p-2 rounded border border-slate-100 bg-slate-50/50">
+              <CreditCard className="w-4 h-4 text-fuchsia-700" />
+              <div className="text-center text-fuchsia-700">
+                <p className="text-xs font-bold leading-none">0</p>
+                <p className="text-[10px] font-semibold mt-0.5 text-slate-600">DEBIT/CREDIT</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Estimated Fee Collection Chart & Accounts Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Left: Estimated Fee Collection */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden relative">
+          <div className="bg-rose-50 border-b border-rose-100 px-3 py-1 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-full bg-rose-200 text-rose-600 flex items-center justify-center text-xs">
+                🏦
+              </div>
+              <h3 className="font-semibold text-xs text-slate-800">
+                Estimated Fee Collection
               </h3>
-              <p className="text-xs text-slate-500">Registered students count across academic classes</p>
             </div>
-            <button
-              onClick={() => onNavigate && onNavigate('/class')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-            >
-              View Class Master &rarr;
+            <button className="text-slate-400 hover:text-slate-700">
+              <RefreshCw className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 uppercase font-bold text-[10px] bg-slate-50/50">
-                  <th className="py-2.5 px-3">S.No</th>
-                  <th className="py-2.5 px-3">Class Name</th>
-                  <th className="py-2.5 px-3">Sections</th>
-                  <th className="py-2.5 px-3">Capacity</th>
-                  <th className="py-2.5 px-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {[
-                  { sNo: 1, name: "Nursery", sections: "A, B", capacity: 60, status: "Active" },
-                  { sNo: 2, name: "L.K.G", sections: "A, B", capacity: 60, status: "Active" },
-                  { sNo: 3, name: "U.K.G", sections: "A, B", capacity: 60, status: "Active" },
-                  { sNo: 4, name: "Class 1", sections: "A, B, C", capacity: 90, status: "Active" },
-                  { sNo: 5, name: "Class 5", sections: "A, B", capacity: 70, status: "Active" },
-                  { sNo: 6, name: "Class 10", sections: "A, B", capacity: 80, status: "Active" },
-                  { sNo: 7, name: "Class 12", sections: "Sci, Comm", capacity: 80, status: "Active" }
-                ].map((row) => (
-                  <tr key={row.sNo} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-2.5 px-3 text-slate-400 font-mono">{row.sNo}</td>
-                    <td className="py-2.5 px-3 font-semibold text-slate-900">{row.name}</td>
-                    <td className="py-2.5 px-3 text-slate-600">{row.sections}</td>
-                    <td className="py-2.5 px-3 text-slate-600">{row.capacity} Seats</td>
-                    <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-100">
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-4">
+            <div className="flex items-center justify-center space-x-4 text-xs font-semibold mb-3">
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span>Expected</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span>Recieved</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span>Due</span>
+              </span>
+            </div>
+
+            {/* Bar Visual Representation */}
+            <div className="h-44 flex items-end justify-around border-b border-slate-200 pb-2 px-6">
+              <div className="flex flex-col items-center space-y-1">
+                <div className="w-8 bg-rose-500 rounded-t" style={{ height: '140px' }}></div>
+                <span className="text-[10px] text-slate-500 font-medium">Expected</span>
+                <span className="text-[10px] font-bold">3.12 Cr</span>
+              </div>
+              <div className="flex flex-col items-center space-y-1">
+                <div className="w-8 bg-emerald-500 rounded-t" style={{ height: '10px' }}></div>
+                <span className="text-[10px] text-slate-500 font-medium">Recieved</span>
+                <span className="text-[10px] font-bold">2.83 L</span>
+              </div>
+              <div className="flex flex-col items-center space-y-1">
+                <div className="w-8 bg-amber-400 rounded-t" style={{ height: '136px' }}></div>
+                <span className="text-[10px] text-slate-500 font-medium">Due</span>
+                <span className="text-[10px] font-bold">3.09 Cr</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right: Quick Module Shortcuts */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">
-              Quick Shortcuts
+        {/* Right: Accounts Widget (Teal-50 Header) */}
+        <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
+          <div className="bg-teal-50 border-b border-teal-100 px-3 py-1 flex items-center space-x-2">
+            <div className="w-6 h-6 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center text-xs">
+              💰
+            </div>
+            <h3 className="font-semibold text-xs text-slate-800">
+              Accounts
             </h3>
-            <p className="text-xs text-slate-500">Most frequent administrative actions</p>
           </div>
 
-          <div className="space-y-2">
-            {[
-              { title: "Student Registration", desc: "Admit new student with 7-tab biodata", path: "/student-registration", icon: UserPlus, color: "text-indigo-600 bg-indigo-50" },
-              { title: "Fee Collection Counter", desc: "Instant receipt search & payment", path: "/fee-collection", icon: CreditCard, color: "text-emerald-600 bg-emerald-50" },
-              { title: "Class Attendance", desc: "One-tap student daily attendance", path: "/student-attendance", icon: ClipboardCheck, color: "text-amber-600 bg-amber-50" },
-              { title: "Marks Entry Grid", desc: "Term exam and unit test marks fill", path: "/marks-entry", icon: FileSpreadsheet, color: "text-sky-600 bg-sky-50" },
-              { title: "Edit School Profile", desc: "UDISE, Affiliation, Header logo", path: "/school-info", icon: CalendarDays, color: "text-purple-600 bg-purple-50" },
-            ].map((shortcut) => {
-              const Icon = shortcut.icon;
-              return (
-                <button
-                  key={shortcut.path}
-                  onClick={() => onNavigate && onNavigate(shortcut.path)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50/70 transition-all text-left group"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${shortcut.color}`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
-                        {shortcut.title}
-                      </div>
-                      <div className="text-[10px] text-slate-400">
-                        {shortcut.desc}
-                      </div>
-                    </div>
+          <div className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              {/* Total Transactions Counter */}
+              <div className="w-1/2 flex flex-col items-center justify-center border-r border-slate-100 pr-3">
+                <span className="text-5xl font-extrabold text-green-500 leading-none">0</span>
+                <span className="text-xs text-slate-600 mt-1 font-medium">Transactions</span>
+              </div>
+
+              {/* Today Accounts Mini Table */}
+              <div className="w-1/2 pl-3 text-xs">
+                <p className="text-[11px] font-bold text-center text-slate-500 mb-1">Today</p>
+                <div className="grid grid-cols-4 gap-1 text-center font-medium">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">Cash</span>
+                    <span className="font-bold">0</span>
                   </div>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                </button>
-              );
-            })}
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">Bank</span>
+                    <span className="font-bold">0</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-green-600 block">Earning</span>
+                    <span className="font-bold text-green-600">0</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-red-600 block">Expense</span>
+                    <span className="font-bold text-red-600">0</span>
+                  </div>
+                </div>
+
+                <div className="mt-2 text-center">
+                  <span className="inline-block px-2.5 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold">
+                    : 0 ↑
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Year Till Date Summary */}
+            <div className="pt-2 border-t border-slate-100">
+              <p className="text-[10px] text-center font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Year Till Date
+              </p>
+              <div className="grid grid-cols-3 text-center text-xs">
+                <div className="text-green-700">
+                  <p className="text-[10px] font-semibold text-slate-500">Cash</p>
+                  <p className="font-bold font-mono">43,355</p>
+                </div>
+                <div className="text-blue-700">
+                  <p className="text-[10px] font-semibold text-slate-500">Bank</p>
+                  <p className="font-bold font-mono">2,07,090</p>
+                </div>
+                <div className="text-orange-700">
+                  <p className="text-[10px] font-semibold text-slate-500">Total</p>
+                  <p className="font-bold font-mono">2,50,445</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );
