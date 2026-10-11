@@ -800,6 +800,27 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #38] - Full Working Admission QR Code Studio, Multi-Template Poster Generator & Print Engine
+* **Timestamp:** 2026-10-11
+* **Goal / Prompt:** Make the QR Code / Links page (`/crm/qr-code`) 100% working like the original in `C:\webncode\admissionandtest` (Campus CRM): real scannable QR code generation, direct PNG image download, invisible iframe print engine (prints cleanly without sidebar/navigation), 5 template choices with thumbnail cards, theme switcher (Brand vs Monochrome), live branding customizer (School Identity, Titles, USPs/Highlights, Contact & Visibility toggles), and local persistence.
+* **Actions Taken:**
+  * **Installed Required Canvas & PDF Dependencies:** Added `html2canvas` (^1.4.1) and `jspdf` (^2.5.2) to `frontend/package.json`.
+  * **Created Reusable CRM Input Component:** Created [`frontend/src/modules/crm/components/Input.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/crm/components/Input.jsx) supporting text, select, and textarea formats with unified focus rings and labels.
+  * **Implemented Fully Functional [`CrmQrLinksPage.jsx`](file:///C:/webncode/school%20erp/frontend/src/modules/crm/CrmQrLinksPage.jsx):**
+    1. **Real Scannable QR Code Generation:** Powered by dynamic QR engine configured with margins and encoded destination URL pointing to the school's online admission form (`/crm/admission-form`).
+    2. **Instant Download QR Only (PNG):** Direct high-resolution (1000x1000) PNG download of the QR code graphic with automatic filename formatting.
+    3. **Clean Standee Printing Engine:** Invisible iframe (`poster-print-iframe`) print generator that sanitizes canvas colors, renders only the printable poster, and invokes `print()` without browser sidebar/navigation UI.
+    4. **5 Interactive Poster Templates:** Modern Premium (Classic), Corporate Split, Luxury Black, Color Burst, and Creative Gradient with miniature visual preview cards and active badges.
+    5. **Monochrome vs Brand Mode:** Live color theme switcher between full brand colors and high-contrast Black & White.
+    6. **Live Customization Studio:** 5 accordion sections for School Identity (Name, Tagline, Logo upload/clear, Color pickers), Poster Announcement Titles & Academic Session, Contact & Campus Address, USPs / Highlights, and Visibility Toggles.
+    7. **Branding Persistence:** Permanent storage in browser `localStorage` ensuring school modifications persist across sessions.
+    8. **Multi-Format Flyer Export:** Direct High-Resolution Poster PNG download and A4 PDF Flyer export.
+    9. **Fullscreen Preview Modal:** Zoomable preview mode with quick-print and ESC key dismissal.
+  * **Build & Dev Verification:** `npm run build` compiled 3233 modules in 10.53s with 0 errors. Restarted Vite dev server to hot-reload new dependencies cleanly.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
 * Ready for user's next module instruction.
 
