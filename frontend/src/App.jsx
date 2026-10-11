@@ -56,7 +56,15 @@ import {
   HomeworkPage,
   PreviousYearPaperPage
 } from './modules/study-material';
-import { CrmPage } from './modules/crm';
+import {
+  CrmDashboardPage,
+  CrmEnquiriesPage,
+  CrmTasksPage,
+  CrmAssessmentsPage,
+  CrmAdmissionFormPage,
+  CrmQrLinksPage,
+  CrmThankYouCmsPage
+} from './modules/crm';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -207,11 +215,20 @@ function App() {
               case '/upload-pre-year-paper':
                 return <PreviousYearPaperPage onNavigate={handleNavigate} />;
               case '/crm':
-              case '/crm/leads':
-              case '/crm/follow-ups':
-              case '/crm/pipeline':
-              case '/crm/call-logs':
-                return <CrmPage onNavigate={handleNavigate} />;
+              case '/crm/dashboard':
+                return <CrmDashboardPage onNavigate={handleNavigate} />;
+              case '/crm/enquiries':
+                return <CrmEnquiriesPage onNavigate={handleNavigate} />;
+              case '/crm/tasks':
+                return <CrmTasksPage onNavigate={handleNavigate} />;
+              case '/crm/assessments':
+                return <CrmAssessmentsPage onNavigate={handleNavigate} />;
+              case '/crm/admission-form':
+                return <CrmAdmissionFormPage onNavigate={handleNavigate} />;
+              case '/crm/qr-code':
+                return <CrmQrLinksPage onNavigate={handleNavigate} />;
+              case '/crm/thankyou-cms':
+                return <CrmThankYouCmsPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">

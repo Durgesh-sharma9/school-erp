@@ -108,9 +108,13 @@ export const menuCategories = [
     icon: Contact,
     path: '/crm',
     subItems: [
-      { title: 'Enquiry / Leads', path: '/crm' },
-      { title: 'Follow-ups', path: '/crm/follow-ups' },
-      { title: 'Admission Pipeline', path: '/crm/pipeline' }
+      { title: 'Dashboard', path: '/crm' },
+      { title: 'Enquiries', path: '/crm/enquiries' },
+      { title: "Today's Tasks", path: '/crm/tasks' },
+      { title: 'Assessments', path: '/crm/assessments' },
+      { title: 'Admission Form', path: '/crm/admission-form' },
+      { title: 'QR Code / Links', path: '/crm/qr-code' },
+      { title: 'Enquiry Banner', path: '/crm/thankyou-cms' }
     ]
   },
   {
