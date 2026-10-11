@@ -65,6 +65,7 @@ import {
   CrmQrLinksPage,
   CrmThankYouCmsPage
 } from './modules/crm';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -94,6 +95,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen bg-[#f3f4f6] text-slate-800 antialiased font-sans">
+      <Toaster position="top-right" />
       {/* 1:1 UAB Collapsible Navigation Sidebar */}
       <Sidebar
         currentPath={currentPath}

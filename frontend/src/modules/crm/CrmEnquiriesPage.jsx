@@ -25,19 +25,15 @@ import {
   GitCommit,
   Check,
   FileQuestion,
-  FileText
+  FileText,
+  Eye
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
 import { DEFAULT_ENQUIRIES } from './crmData';
-
-const STAGES = [
-  'Inquiry',
-  'Campus Visit',
-  'Application',
-  'Assessment',
-  'Interview',
-  'Final Decision'
-];
+import AdmissionJourneyTimeline from './components/AdmissionJourneyTimeline';
+import CRMProfileModal from './components/CRMProfileModal';
+import ContactModal from './components/ContactModal';
 
 export function CrmEnquiriesPage({ onNavigate }) {
   const [enquiries, setEnquiries] = useState(DEFAULT_ENQUIRIES);
@@ -52,12 +48,7 @@ export function CrmEnquiriesPage({ onNavigate }) {
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [selectedForFollowUp, setSelectedForFollowUp] = useState(null);
-
-  // Follow-up form
-  const [followUpNote, setFollowUpNote] = useState('');
-  const [nextFollowUpDate, setNextFollowUpDate] = useState('');
-  const [newStatus, setNewStatus] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
 
   // Add Enquiry Form State
   const [formData, setFormData] = useState({
@@ -88,7 +79,7 @@ export function CrmEnquiriesPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.studentName || !formData.mobile) {
-      alert('Please fill mandatory fields: Student Name and Contact Mobile');
+      toast.error('Please fill mandatory fields: Student Name and Contact Mobile');
       return;
     }
 
@@ -99,16 +90,19 @@ export function CrmEnquiriesPage({ onNavigate }) {
       createdAt: new Date().toISOString().split('T')[0],
       academicSession: '2026-2027',
       followUpDate: new Date().toISOString().split('T')[0],
-      journey: STAGES.map((st, idx) => ({
-        stage: st,
-        date: idx === 0 ? new Date().toISOString().split('T')[0] : '',
-        status: idx === 0 ? 'Completed' : 'Pending',
-        note: idx === 0 ? 'Enquiry submitted' : ''
-      }))
+      journey: [
+        { stage: 'Form Submitted', status: 'Completed', completedAt: new Date(), notes: 'Form submitted at reception', createdBy: 'System' },
+        { stage: 'Call', status: 'Pending', followUpDate: new Date().toISOString().split('T')[0], notes: 'Initial counseling call required' },
+        { stage: 'Campus Visit', status: 'Pending', notes: '' },
+        { stage: 'Application', status: 'Pending', notes: '' },
+        { stage: 'Assessment', status: 'Pending', notes: '' },
+        { stage: 'Admission Confirmed', status: 'Pending', notes: '' }
+      ]
     };
 
     setEnquiries(prev => [newEnquiry, ...prev]);
     setShowAddModal(false);
+    toast.success(`Enquiry ${newEnquiry.enquiryId} registered successfully!`);
     setFormData({
       studentName: '',
       gender: 'Male',
@@ -130,46 +124,26 @@ export function CrmEnquiriesPage({ onNavigate }) {
     });
   };
 
-  const handleSaveFollowUp = () => {
-    if (!selectedForFollowUp) return;
-    setEnquiries(prev => prev.map(e => {
-      if (e.id === selectedForFollowUp.id) {
+  const handleSaveJourney = async (enquiryId, updatedJourney, journeyStatus) => {
+    setEnquiries(prev => prev.map(enq => {
+      if (enq.id === enquiryId || enq.enquiryId === enquiryId) {
         return {
-          ...e,
-          status: newStatus || e.status,
-          followUpDate: nextFollowUpDate || e.followUpDate,
-          notes: followUpNote ? `${e.notes} | ${new Date().toLocaleDateString('en-GB')}: ${followUpNote}` : e.notes
+          ...enq,
+          journey: updatedJourney,
+          journeyStatus: journeyStatus || enq.journeyStatus,
+          status: journeyStatus === 'CLOSED' ? 'Closed' : enq.status
         };
       }
-      return e;
+      return enq;
     }));
-    setSelectedForFollowUp(null);
-    setFollowUpNote('');
+    toast.success('Admission Journey updated successfully!');
   };
 
   const handleDelete = (id) => {
     if (confirm('Are you sure you want to delete this enquiry?')) {
       setEnquiries(prev => prev.filter(e => e.id !== id));
+      toast.success('Enquiry deleted successfully!');
     }
-  };
-
-  const updateStageStatus = (enquiryId, stageName, newStageStatus) => {
-    setEnquiries(prev => prev.map(enq => {
-      if (enq.id === enquiryId) {
-        const updatedJourney = enq.journey.map(j => {
-          if (j.stage === stageName) {
-            return {
-              ...j,
-              status: newStageStatus,
-              date: newStageStatus === 'Completed' ? new Date().toISOString().split('T')[0] : j.date
-            };
-          }
-          return j;
-        });
-        return { ...enq, journey: updatedJourney };
-      }
-      return enq;
-    }));
   };
 
   // Filtered List
@@ -230,7 +204,7 @@ export function CrmEnquiriesPage({ onNavigate }) {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowAddModal(true)}
-            className="h-9 px-3.5 rounded-full bg-[#5c67f6] hover:bg-indigo-600 text-white flex items-center space-x-1.5 shadow-md hover:shadow-lg transition-transform hover:scale-105 text-xs font-semibold"
+            className="h-9 px-3.5 rounded-full bg-[#5c67f6] hover:bg-indigo-600 text-white flex items-center space-x-1.5 shadow-md hover:shadow-lg transition-transform hover:scale-105 text-xs font-semibold cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>New Enquiry</span>
@@ -333,7 +307,7 @@ export function CrmEnquiriesPage({ onNavigate }) {
                           <td className="py-3 px-3 text-center">
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : enq.id)}
-                              className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                              className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100 cursor-pointer"
                               title="Toggle Admission Journey"
                             >
                               {isExpanded ? (
@@ -347,7 +321,12 @@ export function CrmEnquiriesPage({ onNavigate }) {
                             {enq.enquiryId}
                           </td>
                           <td className="py-3 px-3">
-                            <div className="font-bold text-slate-900">{enq.studentName}</div>
+                            <button
+                              onClick={() => setSelectedProfile(enq)}
+                              className="font-bold text-slate-900 hover:text-indigo-600 text-left cursor-pointer"
+                            >
+                              {enq.studentName}
+                            </button>
                             <div className="text-[11px] text-slate-400">{enq.gender} • DOB: {enq.dob}</div>
                           </td>
                           <td className="py-3 px-3 font-semibold text-slate-800">
@@ -375,44 +354,38 @@ export function CrmEnquiriesPage({ onNavigate }) {
                           </td>
                           <td className="py-3 px-3 text-center">
                             <div className="flex items-center justify-center space-x-1">
+                              {/* Quick Contact Modal Launcher */}
                               <button
-                                onClick={() => {
-                                  setSelectedForFollowUp(enq);
-                                  setNewStatus(enq.status);
-                                  setNextFollowUpDate(enq.followUpDate);
-                                }}
-                                className="p-1 rounded text-blue-600 hover:bg-blue-50"
-                                title="Log Follow-up Call"
-                              >
-                                <Phone className="w-4 h-4" />
-                              </button>
-                              <a
-                                href={`https://wa.me/91${enq.mobile}?text=Hello%20${encodeURIComponent(enq.parentName)},%20Greetings%20from%20J%20D%20International%20School.%20Regarding%20admission%20enquiry%20for%20${encodeURIComponent(enq.studentName)}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1 rounded text-emerald-600 hover:bg-emerald-50"
-                                title="Chat on WhatsApp"
+                                onClick={() => setSelectedContact(enq)}
+                                className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 cursor-pointer"
+                                title="Contact (Call / WhatsApp)"
                               >
                                 <MessageCircle className="w-4 h-4" />
-                              </a>
+                              </button>
+
+                              {/* Profile Drawer */}
                               <button
                                 onClick={() => setSelectedProfile(enq)}
-                                className="p-1 rounded text-purple-600 hover:bg-purple-50"
+                                className="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 cursor-pointer"
                                 title="View Complete CRM Profile"
                               >
-                                <User className="w-4 h-4" />
+                                <Eye className="w-4 h-4" />
                               </button>
+
+                              {/* Convert to Student Registration */}
                               <button
                                 onClick={() => onNavigate && onNavigate('/student-registration')}
-                                className="p-1 rounded text-indigo-600 hover:bg-indigo-50"
-                                title="Enroll / Register Student"
+                                className="p-1.5 rounded-lg text-purple-600 hover:bg-purple-50 cursor-pointer"
+                                title="Convert to Admission Registration"
                               >
                                 <GraduationCap className="w-4 h-4" />
                               </button>
+
+                              {/* Delete */}
                               <button
                                 onClick={() => handleDelete(enq.id)}
-                                className="p-1 rounded text-rose-500 hover:bg-rose-50"
-                                title="Delete"
+                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 cursor-pointer"
+                                title="Delete Enquiry"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -420,11 +393,11 @@ export function CrmEnquiriesPage({ onNavigate }) {
                           </td>
                         </tr>
 
-                        {/* Expandable Admission Journey Timeline (Campus CRM Feature) */}
+                        {/* Authentic Campus CRM Admission Journey Timeline */}
                         {isExpanded && (
                           <tr className="bg-slate-50/80">
                             <td colSpan="10" className="p-4 border-b border-indigo-100">
-                              <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
+                              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
                                 <div className="flex items-center justify-between pb-2 border-b">
                                   <div className="flex items-center space-x-2">
                                     <GitCommit className="w-4 h-4 text-indigo-600" />
@@ -432,65 +405,19 @@ export function CrmEnquiriesPage({ onNavigate }) {
                                       Admission Journey Pipeline: {enq.studentName} ({enq.enquiryId})
                                     </span>
                                   </div>
-                                  <span className="text-[11px] text-slate-500">
-                                    Click any stage to change status
+                                  <span className="text-[11px] text-slate-400">
+                                    Interactive node timeline • Click any node to add stage or complete
                                   </span>
                                 </div>
 
-                                {/* Journey Stage Steps */}
-                                <div className="grid grid-cols-2 md:grid-cols-6 gap-2 pt-1">
-                                  {enq.journey.map((step, idx) => {
-                                    const isDone = step.status === 'Completed';
-                                    const isInProg = step.status === 'In Progress';
-                                    return (
-                                      <div
-                                        key={step.stage}
-                                        onClick={() => {
-                                          const nextSt = isDone ? 'Pending' : isInProg ? 'Completed' : 'In Progress';
-                                          updateStageStatus(enq.id, step.stage, nextSt);
-                                        }}
-                                        className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                                          isDone
-                                            ? 'bg-emerald-50/70 border-emerald-200 text-emerald-800'
-                                            : isInProg
-                                            ? 'bg-blue-50/70 border-blue-300 text-blue-800'
-                                            : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
-                                        }`}
-                                      >
-                                        <div className="flex items-center justify-between mb-1">
-                                          <span className="font-bold text-[11px]">{idx + 1}. {step.stage}</span>
-                                          {isDone ? (
-                                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                          ) : (
-                                            <span className="w-2 h-2 rounded-full bg-slate-300" />
-                                          )}
-                                        </div>
-                                        <div className="text-[10px] font-medium">
-                                          {step.status} {step.date ? `(${step.date})` : ''}
-                                        </div>
-                                        {step.note && (
-                                          <div className="text-[10px] text-slate-500 mt-1 italic truncate">
-                                            {step.note}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-
-                                <div className="text-xs text-slate-600 pt-2 border-t flex items-center justify-between">
-                                  <span><strong>Notes / Conversation History:</strong> {enq.notes}</span>
-                                  <button
-                                    onClick={() => {
-                                      setSelectedForFollowUp(enq);
-                                      setNewStatus(enq.status);
-                                      setNextFollowUpDate(enq.followUpDate);
-                                    }}
-                                    className="text-xs text-indigo-600 font-semibold hover:underline"
-                                  >
-                                    + Add Follow-up Note
-                                  </button>
-                                </div>
+                                {/* Render Campus CRM Horizontal Timeline */}
+                                <AdmissionJourneyTimeline
+                                  enquiry={enq}
+                                  onSaveJourney={(updatedNormalized, journeyStatus) =>
+                                    handleSaveJourney(enq.id, updatedNormalized, journeyStatus)
+                                  }
+                                  counselorName={enq.counselor || 'Admin'}
+                                />
                               </div>
                             </td>
                           </tr>
@@ -517,7 +444,7 @@ export function CrmEnquiriesPage({ onNavigate }) {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAddModal(false)}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -690,13 +617,13 @@ export function CrmEnquiriesPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg font-semibold shadow-md transition-colors"
+                  className="px-6 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg font-semibold shadow-md transition-colors cursor-pointer"
                 >
                   Save Enquiry
                 </button>
@@ -706,162 +633,31 @@ export function CrmEnquiriesPage({ onNavigate }) {
         </div>
       )}
 
-      {/* FULL CRM PROFILE MODAL (Campus CRM Profile Drawer) */}
-      {selectedProfile && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedProfile(null)}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {/* FULL CAMPUS CRM PROFILE DRAWER MODAL */}
+      <CRMProfileModal
+        isOpen={!!selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        data={selectedProfile}
+        type="school"
+        onConvert={() => {
+          setSelectedProfile(null);
+          onNavigate && onNavigate('/student-registration');
+        }}
+        onSaveJourney={(updatedJourney, journeyStatus) => {
+          if (selectedProfile) {
+            handleSaveJourney(selectedProfile.id, updatedJourney, journeyStatus);
+          }
+        }}
+        schoolName="J D International School"
+      />
 
-            <div className="flex items-center space-x-3 border-b pb-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
-                {selectedProfile.studentName.charAt(0)}
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-base">{selectedProfile.studentName}</h3>
-                <p className="text-xs text-slate-500 font-mono">
-                  {selectedProfile.enquiryId} • Class {selectedProfile.className} • {selectedProfile.gender}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Father / Guardian</span>
-                  <span className="font-bold text-slate-800">{selectedProfile.parentName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Contact Mobile</span>
-                  <span className="font-bold text-indigo-600">{selectedProfile.mobile}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Email Address</span>
-                  <span className="font-medium text-slate-700">{selectedProfile.email || '—'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Locality / City</span>
-                  <span className="font-medium text-slate-700">{selectedProfile.locality || selectedProfile.city}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Previous School</span>
-                  <span className="font-medium text-slate-700">{selectedProfile.previousSchool || '—'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Lead Source</span>
-                  <span className="font-semibold text-slate-800">{selectedProfile.source}</span>
-                </div>
-              </div>
-
-              <div>
-                <span className="font-bold text-slate-800 block mb-1">Conversation Notes:</span>
-                <p className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 leading-relaxed">
-                  {selectedProfile.notes}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t">
-                <a
-                  href={`https://wa.me/91${selectedProfile.mobile}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg font-semibold flex items-center gap-1.5"
-                >
-                  <MessageCircle className="w-4 h-4" /> WhatsApp
-                </a>
-                <button
-                  onClick={() => {
-                    setSelectedProfile(null);
-                    onNavigate && onNavigate('/student-registration');
-                  }}
-                  className="px-4 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-md"
-                >
-                  <GraduationCap className="w-4 h-4" /> Convert to Admission
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* LOG FOLLOW-UP MODAL */}
-      {selectedForFollowUp && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-            <button
-              onClick={() => setSelectedForFollowUp(null)}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-bold text-slate-900 text-sm mb-1">
-              Log Follow-up: {selectedForFollowUp.studentName}
-            </h3>
-            <p className="text-xs text-slate-500 mb-4 font-mono">
-              {selectedForFollowUp.enquiryId} • Class {selectedForFollowUp.className}
-            </p>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block text-slate-600 font-semibold mb-1">Update Status</label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium"
-                >
-                  <option value="New">New</option>
-                  <option value="Hot">Hot</option>
-                  <option value="Warm">Warm</option>
-                  <option value="Follow Up">Follow Up</option>
-                  <option value="Enrolled">Enrolled</option>
-                  <option value="Dropped">Dropped / Not Interested</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-semibold mb-1">Next Follow-up Date</label>
-                <input
-                  type="date"
-                  value={nextFollowUpDate}
-                  onChange={(e) => setNextFollowUpDate(e.target.value)}
-                  className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-semibold mb-1">Conversation Notes / Outcome</label>
-                <textarea
-                  rows="3"
-                  value={followUpNote}
-                  onChange={(e) => setFollowUpNote(e.target.value)}
-                  placeholder="Parent discussed fee structure, scheduled visit for Saturday..."
-                  className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 mt-5 pt-3 border-t">
-              <button
-                onClick={() => setSelectedForFollowUp(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveFollowUp}
-                className="px-5 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold shadow-md"
-              >
-                Save Outcome
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* CAMPUS CRM CONTACT MODAL (WhatsApp +91, Phone, Templates) */}
+      <ContactModal
+        isOpen={!!selectedContact}
+        onClose={() => setSelectedContact(null)}
+        data={selectedContact}
+        type="school"
+      />
     </div>
   );
 }
