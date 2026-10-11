@@ -21,6 +21,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronRight,
+  Contact,
   X
 } from 'lucide-react';
 
@@ -99,6 +100,17 @@ export const menuCategories = [
           { title: 'Subject Wise Student List', path: '/subject-wise-student-details' }
         ]
       }
+    ]
+  },
+  {
+    id: 'crm',
+    title: 'CRM',
+    icon: Contact,
+    path: '/crm',
+    subItems: [
+      { title: 'Enquiry / Leads', path: '/crm' },
+      { title: 'Follow-ups', path: '/crm/follow-ups' },
+      { title: 'Admission Pipeline', path: '/crm/pipeline' }
     ]
   },
   {
@@ -359,6 +371,9 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (studyMaterialPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, studyMaterial: true }));
     }
+    if (currentPath === '/crm' || currentPath.startsWith('/crm/')) {
+      setOpenDropdowns(prev => ({ ...prev, crm: true }));
+    }
   }, [currentPath]);
 
   if (!isOpen) return null;
@@ -401,6 +416,9 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                   onClick={() => {
                     if (hasChildren) {
                       toggleDropdown(item.id);
+                      if (item.path && onNavigate) {
+                        onNavigate(item.path);
+                      }
                     } else if (onNavigate) {
                       onNavigate(item.path);
                       if (window.innerWidth < 768 && onClose) onClose();

@@ -56,6 +56,7 @@ import {
   HomeworkPage,
   PreviousYearPaperPage
 } from './modules/study-material';
+import { CrmPage } from './modules/crm';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -205,6 +206,12 @@ function App() {
                 return <HomeworkPage onNavigate={handleNavigate} />;
               case '/upload-pre-year-paper':
                 return <PreviousYearPaperPage onNavigate={handleNavigate} />;
+              case '/crm':
+              case '/crm/leads':
+              case '/crm/follow-ups':
+              case '/crm/pipeline':
+              case '/crm/call-logs':
+                return <CrmPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">

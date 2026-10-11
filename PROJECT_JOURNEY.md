@@ -735,6 +735,34 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### 📍 [Entry #35] - CRM & Admission Enquiries Module Implementation (`/crm`)
+* **Timestamp:** 2026-10-11
+* **Goal / Prompt:** Create a dedicated "CRM" navigation tab in the school ERP sidebar and build a fully functional CRM & Admission Enquiries system.
+* **Actions Taken:**
+  * **Sidebar Navigation Integration:**
+    * Added `CRM` item in [`Sidebar.jsx`](file:///C:/webncode/school%20erp/frontend/src/components/layout/Sidebar.jsx) with `Contact` icon from `lucide-react`.
+    * Sub-items: `Enquiry / Leads` (`/crm`), `Follow-ups` (`/crm/follow-ups`), `Admission Pipeline` (`/crm/pipeline`).
+    * Configured auto-expansion and instant direct navigation.
+  * **Frontend CRM Module (`CrmPage.jsx`):**
+    * **KPI Summary Cards:** Total Enquiries, Today's Follow-ups due, Hot Leads count, Enrolled Students count & conversion rate percentage.
+    * **Tab Navigation:**
+      1. `All Enquiries / Leads`: Interactive data table with status badges (`Hot`, `Warm`, `Follow Up`, `Enrolled`, `New`), contact details, search by student/parent/phone/enquiry number, status filter, and class filter.
+      2. `Admission Pipeline (Kanban)`: Stage breakdown (`Inquiry` -> `Campus Visit` -> `Application` -> `Test/Interview` -> `Admitted`) with one-click progress to the next stage.
+      3. `Today Follow-ups`: Filtered alert queue of pending parent follow-ups with instant Call, WhatsApp, and Log Outcome buttons.
+    * **Interactive Modals:**
+      - `NEW ADMISSION ENQUIRY / LEAD` modal with student name, class, parent name, mobile, email, source, priority, counselor, follow-up date, and notes.
+      - `UPDATE FOLLOW-UP / LOG OUTCOME` modal for logging conversation details and rescheduling follow-up dates.
+    * **Actions:** One-click WhatsApp chat launch, call triggers, and quick conversion to Student Registration (`/student-registration`).
+  * **Backend API Vertical Slice:**
+    * Created [`crm.controller.js`](file:///C:/webncode/school%20erp/backend/src/modules/crm/crm.controller.js) & [`crm.routes.js`](file:///C:/webncode/school%20erp/backend/src/modules/crm/crm.routes.js).
+    * Mounted endpoints under `/api/crm/leads` (`GET`, `POST`, `PATCH`, `DELETE`) in [`app.js`](file:///C:/webncode/school%20erp/backend/src/app.js).
+  * **Verification:**
+    * Production build `npm run build` compiled cleanly with 0 errors.
+    * Browser verification completed via Puppeteer.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
 * Ready for user's next module instruction.
 
