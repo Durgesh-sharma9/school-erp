@@ -23,6 +23,7 @@ model School {
   website         String?           @default("www.jdschooljaipur.com")
   logoUrl         String?
   receiptNotes    String?
+  extraData       Json?             @default("{}")
 
   sessions        AcademicSession[]
   classes         Class[]
@@ -32,6 +33,7 @@ model School {
   feeStructures   FeeStructure[]
   feeReceipts     FeeReceipt[]
   exams           Exam[]
+  users           User[]
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -107,7 +109,7 @@ model Student {
 
   // Student Details Tab
   srNo            String?
-  admNo           String            @unique
+  admNo           String
   enrollNo        String?
   permanentEduNo  String?
   admDate         DateTime          @default(now())
@@ -136,6 +138,8 @@ model Student {
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+
+  @@unique([schoolId, admNo])
 }
 
 // 4. Attendance (One-tap class attendance)
@@ -204,7 +208,7 @@ model FeeReceipt {
   session         AcademicSession   @relation(fields: [sessionId], references: [id])
   studentId       String
   student         Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  receiptNo       String            @unique
+  receiptNo       String
   receiptDate     DateTime          @default(now())
   payMode         String            @default("Cash") // Cash, UPI, Cheque, Bank
   totalAmount     Float
@@ -216,6 +220,8 @@ model FeeReceipt {
   collectedBy     String            @default("Admin")
 
   createdAt       DateTime          @default(now())
+
+  @@unique([schoolId, receiptNo])
 }
 
 // 6. Examination & Marksheet
@@ -252,7 +258,7 @@ model Staff {
   id              String            @id @default(uuid())
   schoolId        String
   school          School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  employeeCode    String            @unique
+  employeeCode    String
   name            String
   mobile          String
   email           String?
@@ -262,15 +268,21 @@ model Staff {
   salary          Float             @default(0)
 
   createdAt       DateTime          @default(now())
+
+  @@unique([schoolId, employeeCode])
 }
 
 model User {
   id              String            @id @default(uuid())
-  username        String            @unique // e.g. "8947919195"
+  schoolId        String?
+  school          School?           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  username        String            // e.g. "8947919195"
   password        String            // Hashed bcrypt
-  role            String            @default("ADMIN") // ADMIN, STAFF, STUDENT
+  role            String            @default("ADMIN") // SUPER_ADMIN, ADMIN, STAFF, STUDENT
   name            String            @default("Admin")
   isActive        Boolean           @default(true)
 
   createdAt       DateTime          @default(now())
+
+  @@unique([schoolId, username])
 }

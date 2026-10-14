@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Save,
   CheckCircle2,
@@ -8,31 +10,34 @@ import {
   Share2,
   MapPin,
   ShieldCheck,
+  Building2,
   Image as ImageIcon
 } from 'lucide-react';
 
 export function SchoolInfoPage() {
+  const { schoolId, schoolName } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [expandedSection, setExpandedSection] = useState('logo'); // 'logo', 'social', 'range', 'superAdmin'
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
+  const initialProfile = tenantStore.getSchoolProfile(schoolId);
   const [formData, setFormData] = useState({
-    name: 'J D International School',
-    school_code: '10964',
-    udies_no: '08121204312',
-    school_affl_no: '1730619',
+    name: initialProfile.schoolName || schoolName || '',
+    school_code: initialProfile.schoolCode || '',
+    udies_no: initialProfile.udiseNo || '',
+    school_affl_no: initialProfile.affiliationNo || '',
     school_category: 'Private',
     school_type: 'Senior Secondary',
-    place: 'Jaipur',
-    address: 'Mahapura, Ajmer Road',
-    postal_code: '302026',
-    phone_num1: '8947919195',
-    phone_num2: '',
+    place: initialProfile.place || '',
+    address: initialProfile.address || '',
+    postal_code: initialProfile.pinCode || '',
+    phone_num1: initialProfile.phone1 || '',
+    phone_num2: initialProfile.phone2 || '',
     fax: '',
-    website: 'www.jdschooljaipur.com',
-    email: '10964@cbseshiksha.in',
+    website: initialProfile.website || '',
+    email: initialProfile.email || '',
     board: 'C.B.S.E',
     tc_renewed_upto: '',
     students_min_age: '0',
@@ -40,12 +45,12 @@ export function SchoolInfoPage() {
     fee_ac_closing_sms: '',
     school_tag_line_1: '',
     school_tag_line_2: '',
-    fee_receipt_notes: 'Fees once paid is non-refundable. Please keep this computerized receipt for tax purposes.',
+    fee_receipt_notes: initialProfile.receiptNotes || 'Fees once paid is non-refundable. Please keep this computerized receipt for tax purposes.',
     fee_remainder_popup_from: 'Inactive',
     fee_remainder_popup_msg: '',
-    youtube_page: 'https://youtube.com/@jdinternationalschool9765',
-    facebook_page: 'https://www.facebook.com/DirectorNeha',
-    twitter_page: 'https://www.instagram.com/j_d_international_school/',
+    youtube_page: 'https://youtube.com',
+    facebook_page: 'https://facebook.com',
+    twitter_page: 'https://instagram.com',
     app_fee_url: '',
     app_win_url: '',
     app_andr_url: '',
@@ -56,7 +61,7 @@ export function SchoolInfoPage() {
     paytm_merchant_id: '',
     paytm_merchant_key: '',
     study_material_url: '',
-    logoUrl: 'https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg'
+    logoUrl: initialProfile.logoUrl || ''
   });
 
   const logoUploadSlots = [
@@ -77,27 +82,52 @@ export function SchoolInfoPage() {
   ];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/schools/profile')
+    const prof = tenantStore.getSchoolProfile(schoolId);
+    setFormData(prev => ({
+      ...prev,
+      name: prof.schoolName || prev.name,
+      school_code: prof.schoolCode || prev.school_code,
+      udies_no: prof.udiseNo || prev.udies_no,
+      school_affl_no: prof.affiliationNo || prev.school_affl_no,
+      phone_num1: prof.phone1 || prev.phone_num1,
+      phone_num2: prof.phone2 || prev.phone_num2,
+      email: prof.email || prev.email,
+      website: prof.website || prev.website,
+      address: prof.address || prev.address,
+      place: prof.place || prev.place,
+      postal_code: prof.pinCode || prev.postal_code,
+      logoUrl: prof.logoUrl || prev.logoUrl
+    }));
+
+    fetch('http://localhost:5000/api/schools/profile', {
+      headers: { 'x-school-id': schoolId || '' }
+    })
       .then(r => r.json())
       .then(d => {
         if (d.success && d.data) {
+          const item = d.data;
           setFormData(prev => ({
             ...prev,
-            name: d.data.schoolName || prev.name,
-            school_code: d.data.schoolCode || prev.school_code,
-            udies_no: d.data.udiseNo || prev.udies_no,
-            school_affl_no: d.data.affiliationNo || prev.school_affl_no,
-            phone_num1: d.data.phone1 || prev.phone_num1,
-            email: d.data.email || prev.email,
-            website: d.data.website || prev.website,
-            address: d.data.address || prev.address,
-            logoUrl: d.data.logoUrl || prev.logoUrl
+            ...item,
+            name: item.schoolName ?? item.name ?? prev.name,
+            school_code: item.schoolCode ?? item.school_code ?? prev.school_code,
+            udies_no: item.udiseNo ?? item.udies_no ?? prev.udies_no,
+            school_affl_no: item.affiliationNo ?? item.school_affl_no ?? prev.school_affl_no,
+            phone_num1: item.phone1 ?? item.phone_num1 ?? prev.phone_num1,
+            phone_num2: item.phone2 ?? item.phone_num2 ?? prev.phone_num2,
+            email: item.email ?? prev.email,
+            website: item.website ?? prev.website,
+            address: item.address ?? prev.address,
+            place: item.place ?? prev.place,
+            postal_code: item.pinCode ?? item.postal_code ?? prev.postal_code,
+            fee_receipt_notes: item.receiptNotes ?? item.fee_receipt_notes ?? prev.fee_receipt_notes,
+            logoUrl: item.logoUrl ?? prev.logoUrl
           }));
         }
       })
       .catch(e => console.error(e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [schoolId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,33 +164,45 @@ export function SchoolInfoPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/schools/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          schoolName: formData.name,
-          schoolCode: formData.school_code,
-          udiseNo: formData.udies_no,
-          affiliationNo: formData.school_affl_no,
-          phone1: formData.phone_num1,
-          email: formData.email,
-          website: formData.website,
-          address: formData.address,
-          place: formData.place,
-          pinCode: formData.postal_code,
-          receiptNotes: formData.fee_receipt_notes,
-          logoUrl: formData.logoUrl
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
+      const payload = {
+        ...formData,
+        schoolName: formData.name,
+        schoolCode: formData.school_code,
+        udiseNo: formData.udies_no,
+        affiliationNo: formData.school_affl_no,
+        phone1: formData.phone_num1,
+        phone2: formData.phone_num2,
+        email: formData.email,
+        website: formData.website,
+        address: formData.address,
+        place: formData.place,
+        pinCode: formData.postal_code,
+        receiptNotes: formData.fee_receipt_notes,
+        logoUrl: formData.logoUrl
+      };
+
+      // 1. Persist strictly in active tenant store
+      tenantStore.updateSchoolProfile(schoolId, payload);
+
+      // 2. Put to backend with tenant boundary header
+      try {
+        const res = await fetch('http://localhost:5000/api/schools/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-school-id': schoolId || 'sch_jd_intl'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+      } catch (netErr) {
+        // Proceed with tenant store
       }
-    } catch (err) {
-      console.error(err);
+
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err) {
+      console.error(err);
     }
   };
 

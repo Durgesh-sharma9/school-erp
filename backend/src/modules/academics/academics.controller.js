@@ -117,11 +117,28 @@ let subjectLinksStore = classesStore.map((c) => ({
 }));
 
 // ==========================================
-// 1. CLASS CONTROLLER
+// 1. CLASS CONTROLLER (Multi-Tenant Partitioned)
 // ==========================================
+const TENANT_CLASSES = {
+  'sch_jd_intl': classesStore,
+  'sch_dps_branch2': [
+    { id: 'dps_c1', name: 'Nursery', sections: ['A'], priority: 1, studentCount: 20 },
+    { id: 'dps_c2', name: 'Kindergarten', sections: ['A'], priority: 2, studentCount: 25 },
+    { id: 'dps_c3', name: 'Class 1', sections: ['A', 'B'], priority: 3, studentCount: 40 },
+    { id: 'dps_c4', name: 'Class 9', sections: ['A', 'B'], priority: 4, studentCount: 38 },
+    { id: 'dps_c5', name: 'Class 10', sections: ['A'], priority: 5, studentCount: 35 }
+  ]
+};
+
 export const getAllClasses = async (req, res, next) => {
   try {
-    return res.status(200).json({ success: true, data: classesStore });
+    const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
+    if (!TENANT_CLASSES[schoolId]) {
+      TENANT_CLASSES[schoolId] = [
+        { id: '1', name: 'Class 1', sections: ['A'], priority: 1, studentCount: 0 }
+      ];
+    }
+    return res.status(200).json({ success: true, schoolId, data: TENANT_CLASSES[schoolId] });
   } catch (error) {
     next(error);
   }
@@ -129,16 +146,23 @@ export const getAllClasses = async (req, res, next) => {
 
 export const createClass = async (req, res, next) => {
   try {
+    const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
     const { name, sections, priority } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Class name required' });
+    
+    if (!TENANT_CLASSES[schoolId]) {
+      TENANT_CLASSES[schoolId] = [];
+    }
+
     const newClass = {
       id: String(Date.now()),
+      schoolId,
       name,
       sections: Array.isArray(sections) ? sections : (sections ? sections.split(',').map(s => s.trim()) : ['A']),
-      priority: Number(priority) || classesStore.length + 1,
+      priority: Number(priority) || TENANT_CLASSES[schoolId].length + 1,
       studentCount: 0
     };
-    classesStore.push(newClass);
+    TENANT_CLASSES[schoolId].push(newClass);
     return res.status(201).json({ success: true, message: 'Class created', data: newClass });
   } catch (error) {
     next(error);
@@ -147,8 +171,11 @@ export const createClass = async (req, res, next) => {
 
 export const deleteClass = async (req, res, next) => {
   try {
+    const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
     const { id } = req.params;
-    classesStore = classesStore.filter(c => c.id !== id);
+    if (TENANT_CLASSES[schoolId]) {
+      TENANT_CLASSES[schoolId] = TENANT_CLASSES[schoolId].filter(c => c.id !== id);
+    }
     return res.status(200).json({ success: true, message: 'Class deleted successfully' });
   } catch (error) {
     next(error);

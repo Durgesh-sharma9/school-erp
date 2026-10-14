@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   IndianRupee,
   RefreshCw,
@@ -16,25 +18,55 @@ import {
   Clock,
   UserCheck,
   FileText,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck,
+  ArrowRight
 } from 'lucide-react';
 
 export function DashboardPage({ onNavigate }) {
-  const [stats, setStats] = useState({
-    todayCollection: { total: 0, receiptsCount: 0, cash: 0, bank: 0 },
-    feeRevenueSummary: { totalRevenue: 31221901, totalDue: 30943456, totalReceivedYTD: 283445, receivedPercentage: 0.9, duePercentage: 99.1 },
-    totalStudents: { total: 928, boys: 494, girls: 434, newAdmissions: 168, oldStudents: 760, growthRate: "18.1% ↑" },
-    attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0% ↓" }
-  });
+  const { schoolId, schoolName, switchSchool } = useAuth();
 
+  const [stats, setStats] = useState(() => tenantStore.getDashboardStats(schoolId));
   const [activeReminderTab, setActiveReminderTab] = useState('Today');
+
+  useEffect(() => {
+    const data = tenantStore.getDashboardStats(schoolId);
+    setStats(data);
+  }, [schoolId]);
 
   const formatINR = (val) => {
     return Number(val || 0).toLocaleString('en-IN');
   };
 
-  // Live vehicles data from UAB
-  const vehicles = [
+  const formatShortAmount = (amount) => {
+    if (!amount || amount === 0) return '₹0';
+    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)} k`;
+    return `₹${amount}`;
+  };
+
+  const isSchoolA = schoolId === 'sch_jd_intl';
+  const isSchoolB = schoolId === 'sch_dps_branch2';
+  const isNewSchool = !isSchoolA && !isSchoolB;
+
+  const expectedAmount = stats?.feeRevenueSummary?.totalRevenue || 0;
+  const receivedAmount = stats?.feeRevenueSummary?.totalReceivedYTD || 0;
+  const dueAmount = stats?.feeRevenueSummary?.totalDue || 0;
+  const maxBar = Math.max(expectedAmount, receivedAmount, dueAmount, 1);
+  const expectedHeight = expectedAmount > 0 ? Math.max(16, Math.round((expectedAmount / maxBar) * 120)) : 8;
+  const receivedHeight = receivedAmount > 0 ? Math.max(16, Math.round((receivedAmount / maxBar) * 120)) : 8;
+  const dueHeight = dueAmount > 0 ? Math.max(16, Math.round((dueAmount / maxBar) * 120)) : 8;
+
+  const ytdCash = isSchoolA ? '43,355' : isSchoolB ? '18,500' : '0';
+  const ytdBank = isSchoolA ? '2,07,090' : isSchoolB ? '85,000' : '0';
+  const ytdTotal = isSchoolA ? '2,50,445' : isSchoolB ? '1,03,500' : '0';
+
+  // Live vehicles data strictly partitioned per school (0 dummy data for newly registered school)
+  const vehicles = isSchoolB ? [
+    { sNo: 1, name: "[DL01PA4512] School Bus 1", driver: "[1] MANOJ KUMAR", capacity: 45, status: "Active" },
+    { sNo: 2, name: "[DL01PA4513] School Bus 2", driver: "[2] SATISH CHANDRA", capacity: 40, status: "Active" }
+  ] : isSchoolA ? [
     { sNo: 1, name: "[RJ02PA2762] Bus", driver: "[5] SHAITAN SINGH", capacity: 42, status: "Active" },
     { sNo: 2, name: "[RJ14PC1019] Bus", driver: "[1] HANSRAJ JAT", capacity: 42, status: "Active" },
     { sNo: 3, name: "[RJ14PC1037] Bus", driver: "[10] PRAKASH CHOUDHARY", capacity: 50, status: "Active" },
@@ -42,23 +74,80 @@ export function DashboardPage({ onNavigate }) {
     { sNo: 5, name: "[RJ14PC5938] Bus", driver: "[8] NARESH", capacity: 45, status: "Active" },
     { sNo: 6, name: "[RJ14PC7878] Bus", driver: "[6] BABU LAL", capacity: 42, status: "Active" },
     { sNo: 7, name: "[RJ14PE0832] Van", driver: "[3] RAMESH MEENA", capacity: 25, status: "Active" }
-  ];
+  ] : [];
 
-  // Live student birthdays from UAB
-  const birthdays = [
+  // Live student birthdays strictly partitioned per school (0 dummy data for newly registered school)
+  const birthdays = isSchoolB ? [
+    { name: "ROHAN SHARMA", classSec: "Class 10-A", roll: "01" },
+    { name: "PRIYA PATEL", classSec: "Class 9-B", roll: "02" }
+  ] : isSchoolA ? [
     { name: "DHRITI YADAV", classSec: "Lower Kindergarten - PP4+-A", roll: "12" },
     { name: "ABHIMANYU DUBEY", classSec: "VI-A", roll: "04" },
     { name: "ARYA KUMARI", classSec: "IX-A", roll: "18" }
-  ];
+  ] : [];
 
   return (
     <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
+      {/* Multi-Tenant Isolation Status Banner */}
+      <div className={`p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs ${
+        isNewSchool
+          ? 'bg-gradient-to-r from-amber-50 via-orange-50 to-white border-amber-200'
+          : isSchoolB
+          ? 'bg-gradient-to-r from-emerald-50 via-teal-50 to-white border-emerald-200'
+          : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-white border-blue-200'
+      }`}>
+        <div className="flex items-center space-x-2.5">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
+            isNewSchool ? 'bg-amber-600' : isSchoolB ? 'bg-emerald-600' : 'bg-blue-600'
+          }`}>
+            <Building2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h2 className="text-sm font-bold text-slate-800">{schoolName}</h2>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                isNewSchool
+                  ? 'bg-amber-100 text-amber-800'
+                  : isSchoolB
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-blue-100 text-blue-800'
+              }`}>
+                {isNewSchool ? '✨ Fresh Registered Tenant' : isSchoolB ? 'Tenant B (Delhi Public)' : 'Tenant A (J D Intl)'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">
+              {isNewSchool ? (
+                <span>
+                  🛡️ <strong>Zero Data Sandbox:</strong> Newly registered school. Zero dummy data, 0 records from other schools. Start by registering students and fee structure.
+                </span>
+              ) : (
+                <span>
+                  🔒 <strong>Multi-Tenant Data Sandbox:</strong> School A ka data School B me nahi dikhega. Viewing strictly isolated metrics.
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* 1-Tap Switcher Pill for Testing */}
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => switchSchool(isSchoolB ? 'sch_jd_intl' : 'sch_dps_branch2')}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 flex items-center space-x-1.5 shadow-2xs transition-all cursor-pointer"
+          >
+            <span>Switch Demo: {isSchoolB ? 'School A' : 'School B'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
       {/* Breadcrumb Bar */}
       <div className="flex items-center space-x-2 text-xs text-gray-500 pt-1 pb-1">
         <span className="font-semibold text-gray-800 text-sm">Dashboard</span>
         <span>&bull;</span>
         <Home className="w-3.5 h-3.5 text-gray-400" />
-        <span className="text-gray-400">&bull; Dashboard</span>
+        <span className="text-gray-400">&bull; Dashboard ({schoolName})</span>
       </div>
 
       {/* Row 1: 4 Core Top Cards (1:1 UAB Exact Dimensions & Colors) */}
@@ -122,11 +211,11 @@ export function DashboardPage({ onNavigate }) {
                 <span>Total Due</span>
                 <span className="font-semibold">
                   {formatINR(stats.feeRevenueSummary.totalDue)}{' '}
-                  <span className="text-red-600 font-bold">&nbsp;(99.1%)</span>
+                  <span className="text-red-600 font-bold">&nbsp;({stats.feeRevenueSummary.duePercentage}%)</span>
                 </span>
               </div>
               <div className="w-full bg-zinc-200 rounded-lg h-1 mt-0.5 overflow-hidden">
-                <div className="bg-red-600 h-1 rounded-sm" style={{ width: '99.1%' }}></div>
+                <div className="bg-red-600 h-1 rounded-sm" style={{ width: `${Math.min(100, stats.feeRevenueSummary.duePercentage || 0)}%` }}></div>
               </div>
             </div>
 
@@ -136,11 +225,11 @@ export function DashboardPage({ onNavigate }) {
                 <span>Total Received (YTD)</span>
                 <span className="font-semibold">
                   {formatINR(stats.feeRevenueSummary.totalReceivedYTD)}{' '}
-                  <span className="text-green-600 font-bold">&nbsp;(0.9%)</span>
+                  <span className="text-green-600 font-bold">&nbsp;({stats.feeRevenueSummary.receivedPercentage}%)</span>
                 </span>
               </div>
               <div className="w-full bg-zinc-200 rounded-lg h-1 mt-0.5 overflow-hidden">
-                <div className="bg-green-500 h-1 rounded-sm" style={{ width: '0.9%' }}></div>
+                <div className="bg-green-500 h-1 rounded-sm" style={{ width: `${Math.min(100, stats.feeRevenueSummary.receivedPercentage || 0)}%` }}></div>
               </div>
             </div>
           </div>
@@ -152,7 +241,7 @@ export function DashboardPage({ onNavigate }) {
             <h3 className="font-medium text-xs text-slate-800">Total Student</h3>
             <span className="text-sm font-bold text-slate-900 flex items-center">
               {stats.totalStudents.total}&nbsp;
-              <span className="text-green-600 text-[10px] font-semibold">(18.1% ↑)</span>
+              <span className="text-green-600 text-[10px] font-semibold">({stats.totalStudents.growthRate})</span>
             </span>
           </div>
 
@@ -332,19 +421,19 @@ export function DashboardPage({ onNavigate }) {
             {/* Bar Visual Representation */}
             <div className="h-40 flex items-end justify-around border-b border-slate-200 pb-2 px-4">
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-7 bg-rose-500 rounded-t" style={{ height: '120px' }}></div>
+                <div className="w-7 bg-rose-500 rounded-t transition-all duration-500" style={{ height: `${expectedHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Expected</span>
-                <span className="text-[10px] font-bold">3.12 Cr</span>
+                <span className="text-[10px] font-bold">{formatShortAmount(expectedAmount)}</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-7 bg-emerald-500 rounded-t" style={{ height: '10px' }}></div>
+                <div className="w-7 bg-emerald-500 rounded-t transition-all duration-500" style={{ height: `${receivedHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Recieved</span>
-                <span className="text-[10px] font-bold">2.83 L</span>
+                <span className="text-[10px] font-bold">{formatShortAmount(receivedAmount)}</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-7 bg-amber-400 rounded-t" style={{ height: '116px' }}></div>
+                <div className="w-7 bg-amber-400 rounded-t transition-all duration-500" style={{ height: `${dueHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Due</span>
-                <span className="text-[10px] font-bold">3.09 Cr</span>
+                <span className="text-[10px] font-bold">{formatShortAmount(dueAmount)}</span>
               </div>
             </div>
           </div>
@@ -427,15 +516,15 @@ export function DashboardPage({ onNavigate }) {
               <div className="grid grid-cols-3 text-center text-xs">
                 <div className="text-green-700">
                   <p className="text-[9px] font-semibold text-slate-500">Cash</p>
-                  <p className="font-bold font-mono">43,355</p>
+                  <p className="font-bold font-mono">₹{ytdCash}</p>
                 </div>
                 <div className="text-blue-700">
                   <p className="text-[9px] font-semibold text-slate-500">Bank</p>
-                  <p className="font-bold font-mono">2,07,090</p>
+                  <p className="font-bold font-mono">₹{ytdBank}</p>
                 </div>
                 <div className="text-orange-700">
                   <p className="text-[9px] font-semibold text-slate-500">Total</p>
-                  <p className="font-bold font-mono">2,50,445</p>
+                  <p className="font-bold font-mono">₹{ytdTotal}</p>
                 </div>
               </div>
             </div>
@@ -553,23 +642,30 @@ export function DashboardPage({ onNavigate }) {
       {/* Row 5: Student Birthdays, Staff Birthdays, Leave Requests, and Live Vehicle Tracking */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Student Birthday (3) (Pink-50 Header) */}
+        {/* Student Birthday ({birthdays.length}) (Pink-50 Header) */}
         <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden">
           <div className="bg-pink-50 border-b border-pink-100 px-3 py-1 flex items-center justify-between">
             <div className="flex items-center space-x-1.5">
               <div className="w-6 h-6 rounded-full bg-pink-200 text-pink-600 flex items-center justify-center text-xs">
                 🎂
               </div>
-              <h3 className="font-semibold text-xs text-slate-800">Student Birthday (3)</h3>
+              <h3 className="font-semibold text-xs text-slate-800">Student Birthday ({birthdays.length})</h3>
             </div>
           </div>
 
           <div className="p-3 divide-y divide-slate-100 text-xs">
-            {birthdays.map((b, i) => (
-              <div key={i} className="py-2 first:pt-0 last:pb-0">
-                <p className="font-bold text-slate-900">{b.name}</p>
-                <p className="text-[11px] text-pink-600 font-medium">{b.classSec}</p>
+            {birthdays.length > 0 ? (
+              birthdays.map((b, i) => (
+                <div key={i} className="py-2 first:pt-0 last:pb-0">
+                  <p className="font-bold text-slate-900">{b.name}</p>
+                  <p className="text-[11px] text-pink-600 font-medium">{b.classSec}</p>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-slate-400">
+                No student birthdays today
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -628,14 +724,22 @@ export function DashboardPage({ onNavigate }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {vehicles.map((v) => (
-                  <tr key={v.sNo}>
-                    <td className="py-1 text-slate-400 font-mono">{v.sNo}</td>
-                    <td className="py-1 font-semibold text-slate-800">{v.name}</td>
-                    <td className="py-1 text-slate-600">{v.driver}</td>
-                    <td className="py-1 text-right font-mono font-bold text-indigo-700">{v.capacity}</td>
+                {vehicles.length > 0 ? (
+                  vehicles.map((v) => (
+                    <tr key={v.sNo}>
+                      <td className="py-1 text-slate-400 font-mono">{v.sNo}</td>
+                      <td className="py-1 font-semibold text-slate-800">{v.name}</td>
+                      <td className="py-1 text-slate-600">{v.driver}</td>
+                      <td className="py-1 text-right font-mono font-bold text-indigo-700">{v.capacity}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="text-center py-6 text-slate-400">
+                      No vehicles registered yet
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

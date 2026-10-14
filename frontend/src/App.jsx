@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
+import { LoginPage } from './modules/auth/LoginPage';
+import { SchoolRegistrationPage } from './modules/auth/SchoolRegistrationPage';
 import { DashboardPage } from './modules/dashboard/DashboardPage';
+import { StudentPortalPage } from './modules/student-portal/StudentPortalPage';
+import { StaffPortalPage } from './modules/staff-portal/StaffPortalPage';
+import { SuperAdminDashboardPage } from './modules/superadmin/SuperAdminDashboardPage';
 import { StudentRegistrationPage } from './modules/students/StudentRegistrationPage';
 import { AssignRollNumberPage } from './modules/students/AssignRollNumberPage';
 import { OnlineClassesPage } from './modules/students/OnlineClassesPage';
@@ -67,7 +73,9 @@ import {
 } from './modules/crm';
 import { Toaster } from 'react-hot-toast';
 
-function App() {
+function AppContent() {
+  const { user, isAuthenticated, role } = useAuth();
+
   const [currentPath, setCurrentPath] = useState(() => {
     return window.location.pathname && window.location.pathname !== '' ? window.location.pathname : '/';
   });
@@ -89,13 +97,62 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Route protection and canonical redirects
+  useEffect(() => {
+    if (currentPath === '/') {
+      if (isAuthenticated) {
+        handleNavigate('/dashboard');
+      } else {
+        handleNavigate('/login');
+      }
+    } else if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register') {
+      handleNavigate('/login');
+    }
+  }, [currentPath, isAuthenticated]);
+
   const handleToggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
+  };
+
+  // If navigating to /register, show self-serve SchoolRegistrationPage
+  if (currentPath === '/register') {
+    return (
+      <>
+        <Toaster position="top-right" />
+        <SchoolRegistrationPage onNavigate={handleNavigate} />
+      </>
+    );
+  }
+
+  // If unauthenticated or navigating to /login, show full LoginPage
+  if (!isAuthenticated || currentPath === '/login') {
+    return (
+      <>
+        <Toaster position="top-right" />
+        <LoginPage onNavigate={handleNavigate} />
+      </>
+    );
+  }
+
+  // Helper for root dashboard view based on active role
+  const renderDashboardByRole = () => {
+    if (role === 'STUDENT') {
+      return <StudentPortalPage onNavigate={handleNavigate} />;
+    }
+    if (role === 'STAFF') {
+      return <StaffPortalPage onNavigate={handleNavigate} />;
+    }
+    if (role === 'SUPER_ADMIN') {
+      return <SuperAdminDashboardPage onNavigate={handleNavigate} />;
+    }
+    // Default ADMIN role
+    return <DashboardPage onNavigate={handleNavigate} />;
   };
 
   return (
     <div className="flex min-h-screen bg-[#f3f4f6] text-slate-800 antialiased font-sans">
       <Toaster position="top-right" />
+
       {/* 1:1 UAB Collapsible Navigation Sidebar */}
       <Sidebar
         currentPath={currentPath}
@@ -108,9 +165,9 @@ function App() {
       <div className="flex-1 flex flex-col min-w-0 w-full overflow-hidden">
         {/* Top Navbar */}
         <Navbar
-          schoolName="J D International School"
           session="2026-2027"
           onToggleSidebar={handleToggleSidebar}
+          onNavigate={handleNavigate}
         />
 
         {/* Dynamic Canvas Routing */}
@@ -118,7 +175,16 @@ function App() {
           {(() => {
             switch (currentPath) {
               case '/':
-                return <DashboardPage onNavigate={handleNavigate} />;
+              case '/dashboard':
+                return renderDashboardByRole();
+              case '/register':
+                return <SchoolRegistrationPage onNavigate={handleNavigate} />;
+              case '/superadmin-analytics':
+                return <SuperAdminDashboardPage onNavigate={handleNavigate} />;
+              case '/student-portal':
+                return <StudentPortalPage onNavigate={handleNavigate} />;
+              case '/staff-portal':
+                return <StaffPortalPage onNavigate={handleNavigate} />;
               case '/school-info':
                 return <SchoolInfoPage onNavigate={handleNavigate} />;
               case '/whatsapp-qr-settings':
@@ -259,4 +325,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}

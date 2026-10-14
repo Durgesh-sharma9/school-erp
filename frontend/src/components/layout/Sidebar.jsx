@@ -22,15 +22,48 @@ import {
   ChevronDown,
   ChevronRight,
   Contact,
-  X
+  X,
+  Crown
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
+export const studentMenuCategories = [
+  { id: 'std-dashboard', title: 'Student Dashboard', icon: PieChart, path: '/dashboard' },
+  { id: 'std-homework', title: 'Homework & Assignments', icon: BookOpen, path: '/homework' },
+  { id: 'std-fees', title: 'Fee Details & Receipts', icon: IndianRupee, path: '/fee-collection' },
+  { id: 'std-attendance', title: 'Attendance Record', icon: ClipboardList, path: '/student-attendance' },
+  { id: 'std-datesheet', title: 'Exam Date Sheet', icon: FileSpreadsheet, path: '/exam-date-sheet' },
+  { id: 'std-marks', title: 'Report Card & Results', icon: Award, path: '/marks-entry' },
+  { id: 'std-studymaterial', title: 'Study Material', icon: BookMarked, path: '/study-material' },
+  { id: 'std-idcard', title: 'Student ID Card', icon: User, path: '/id-card-generator' },
+  { id: 'std-admitcard', title: 'Exam Admit Card', icon: Award, path: '/admit-card-generator' },
+  { id: 'std-portfolio', title: 'Student Profile', icon: Contact, path: '/student-portfolio' }
+];
+
+export const staffMenuCategories = [
+  { id: 'staff-dashboard', title: 'Staff Dashboard', icon: PieChart, path: '/dashboard' },
+  { id: 'staff-attendance', title: 'Student Attendance', icon: ClipboardList, path: '/student-attendance' },
+  { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
+  { id: 'staff-marks', title: 'Marks Entry Grid', icon: Award, path: '/marks-entry' },
+  { id: 'staff-studymaterial', title: 'Study Material', icon: BookMarked, path: '/study-material' },
+  { id: 'staff-datesheet', title: 'Exam Date Sheet', icon: FileSpreadsheet, path: '/exam-date-sheet' },
+  { id: 'staff-portfolio', title: 'Student Portfolio', icon: Contact, path: '/student-portfolio' },
+  { id: 'staff-registration', title: 'Student Registration', icon: User, path: '/student-registration' },
+  { id: 'staff-school', title: 'School Info', icon: Home, path: '/school-info' }
+];
 
 export const menuCategories = [
+  {
+    id: 'superadmin-analytics',
+    title: 'SuperAdmin Analytics',
+    icon: Crown,
+    path: '/superadmin-analytics'
+  },
   {
     id: 'dashboard',
     title: 'Dashboard',
     icon: PieChart, // donut_small in UAB
-    path: '/'
+    path: '/dashboard'
   },
   {
     id: 'school',
@@ -380,6 +413,14 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     }
   }, [currentPath]);
 
+  const { role } = useAuth();
+
+  const activeCategories = role === 'STUDENT'
+    ? studentMenuCategories
+    : role === 'STAFF'
+    ? staffMenuCategories
+    : menuCategories;
+
   if (!isOpen) return null;
 
   return (
@@ -403,7 +444,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
         {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
         <div className="flex-1 overflow-y-auto pt-2 pb-6 text-sm font-medium custom-scrollbar">
-          {menuCategories.map((item) => {
+          {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
             const isOpen = openDropdowns[item.id];

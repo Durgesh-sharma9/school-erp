@@ -1,17 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 import { ReportHeader } from './ReportHeader';
-import { SCHOOL_CLASSES, MOCK_STUDENTS } from './studentReportsData';
-import { Search } from 'lucide-react';
+import { SCHOOL_CLASSES } from './studentReportsData';
+import { Search, Building2, ShieldCheck } from 'lucide-react';
 
 export function StudentListPage({ onNavigate }) {
+  const { schoolId, schoolName } = useAuth();
+
   const [reportType, setReportType] = useState('All');
   const [sorting, setSorting] = useState('Admission No.');
   const [selectedClass, setSelectedClass] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [records, setRecords] = useState(MOCK_STUDENTS);
+  const [records, setRecords] = useState(() => tenantStore.getStudents(schoolId));
+
+  useEffect(() => {
+    setRecords(tenantStore.getStudents(schoolId));
+  }, [schoolId]);
 
   const handleSearch = () => {
-    let result = [...MOCK_STUDENTS];
+    const rawStudents = tenantStore.getStudents(schoolId);
+    let result = [...rawStudents];
 
     if (reportType === 'Class Wise' && selectedClass !== 'All') {
       result = result.filter(s => s.className === selectedClass);
@@ -24,20 +33,21 @@ export function StudentListPage({ onNavigate }) {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(s =>
-        s.name.toLowerCase().includes(q) ||
-        s.admNo.toLowerCase().includes(q) ||
-        s.fatherName.toLowerCase().includes(q) ||
-        s.contactNo.includes(q)
+        (s.name && s.name.toLowerCase().includes(q)) ||
+        (s.firstName && s.firstName.toLowerCase().includes(q)) ||
+        (s.admNo && s.admNo.toLowerCase().includes(q)) ||
+        (s.fatherName && s.fatherName.toLowerCase().includes(q)) ||
+        (s.contactNo && s.contactNo.includes(q))
       );
     }
 
     // Sort
     if (sorting === 'Name') {
-      result.sort((a, b) => a.name.localeCompare(b.name));
+      result.sort((a, b) => (a.name || a.firstName).localeCompare(b.name || b.firstName));
     } else if (sorting === 'Roll No.') {
       result.sort((a, b) => parseInt(a.rollNo || '0') - parseInt(b.rollNo || '0'));
     } else if (sorting === 'Admission No.') {
-      result.sort((a, b) => a.admNo.localeCompare(b.admNo));
+      result.sort((a, b) => String(a.admNo).localeCompare(String(b.admNo)));
     }
 
     setRecords(result);
@@ -71,6 +81,32 @@ export function StudentListPage({ onNavigate }) {
       />
 
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
+        {/* Multi-Tenant Active Sandbox Header */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center justify-between shadow-2xs">
+          <div className="flex items-center space-x-2.5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-xs ${
+              schoolId === 'sch_dps_branch2'
+                ? 'bg-emerald-600'
+                : schoolId === 'sch_jd_intl'
+                ? 'bg-blue-600'
+                : 'bg-amber-600'
+            }`}>
+              <Building2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-800">
+                {schoolName} &bull; <span className="font-normal text-slate-500">Student Directory ({records.length} Students)</span>
+              </p>
+              <p className="text-[11px] text-slate-400">
+                🔒 Strict Tenant Isolation: Only students belonging to this school are displayed.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-mono">
+            Tenant: {schoolId || 'NEW'}
+          </span>
+        </div>
+
         {/* Filter Card */}
         <div className="bg-white rounded-xl shadow-xs border border-slate-200/80 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
@@ -194,8 +230,21 @@ export function StudentListPage({ onNavigate }) {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-10 text-slate-400">
-                      No Record Found !
+                    <td colSpan="9" className="text-center py-12 text-slate-400">
+                      <div className="flex flex-col items-center justify-center space-y-2 max-w-sm mx-auto">
+                        <span className="text-3xl">📋</span>
+                        <p className="font-semibold text-slate-700 text-sm">No Student Records Found</p>
+                        <p className="text-xs text-slate-400">
+                          This school has 0 enrolled students. No dummy data or other schools' students are shown.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate && onNavigate('/student-admission')}
+                          className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 shadow-xs cursor-pointer"
+                        >
+                          + Register First Student
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )}

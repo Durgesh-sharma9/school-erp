@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { errorHandler } from './core/middleware/errorHandler.js';
+import { resolveTenant } from './core/middleware/tenant.js';
 
 const app = express();
 
@@ -13,6 +14,9 @@ app.use(cors({
 
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
+
+// Enterprise Multi-Tenant Boundary Enforcement
+app.use(resolveTenant);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -28,6 +32,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Feature Modules Routes
+import authRoutes from './modules/auth/auth.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import studentRoutes from './modules/students/students.routes.js';
 import feeRoutes from './modules/fees/fees.routes.js';
@@ -37,6 +42,7 @@ import certificateRoutes from './modules/certificates/certificates.routes.js';
 import studyMaterialRoutes from './modules/study-material/study-material.routes.js';
 import crmRoutes from './modules/crm/crm.routes.js';
 
+app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/fees', feeRoutes);
