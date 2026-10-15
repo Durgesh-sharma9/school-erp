@@ -378,14 +378,18 @@ function AppContent() {
                 return <WhatsappQrPage onNavigate={handleNavigate} />;
               case '/settings-and-permissions':
                 return <SettingsAndPermissionsPage onNavigate={handleNavigate} />;
+              case '/class-master':
               case '/class':
                 return <ClassMasterPage onNavigate={handleNavigate} />;
+              case '/group-subject-master':
               case '/subject-group':
                 return <SubjectGroupPage onNavigate={handleNavigate} />;
+              case '/subject-master':
               case '/subject':
                 return <SubjectMasterPage onNavigate={handleNavigate} />;
               case '/subject-link':
                 return <SubjectLinkPage onNavigate={handleNavigate} />;
+              case '/stream-master':
               case '/add-update-stream':
                 return <StreamMasterPage onNavigate={handleNavigate} />;
               case '/class-list':
@@ -410,6 +414,7 @@ function AppContent() {
                 return <AdmitCardGeneratorPage onNavigate={handleNavigate} />;
               case '/exam-date-sheet':
                 return <ExamDateSheetPage onNavigate={handleNavigate} />;
+              case '/fee-collect':
               case '/fee-collection':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;
               case '/fee-head-group':
