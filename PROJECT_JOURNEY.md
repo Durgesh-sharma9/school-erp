@@ -1465,29 +1465,41 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### Entry 53: 1:1 Complete Leave Management Module (Student, Staff & Apply Leave = 3 Pages)
+* **Date:** 2026-10-15
+* **Module Description:** Fully replicated the **Leave Management** module matching the live UAB portal (`schools.uabinfosol.com`) 1:1, including all 3 core workflows: Student Leave Requests, Staff Leave Requests, and Universal Leave Application with automatic day calculation and approval lifecycles.
+* **Backend Architecture (`backend/src/modules/leave-management/`):**
+  * `leave-management.controller.js`: Implemented persistent multi-tenant dataset and handlers for:
+    * Student Leaves (`/student-leaves`) with filtering by date range and class/section.
+    * Staff Leaves (`/staff-leaves`) with filtering by date range, department, and designation.
+    * Leave Status update (`/status/:id`) supporting `Approved` / `Rejected` decisions, reviewer remarks, and timestamps.
+    * Leave Application submission (`/apply`) with validation and multi-type leave categorization.
+    * Delete leave request (`/:id`).
+  * `leave-management.routes.js`: Protected Express router mapped with JWT authentication and school tenant isolation.
+  * Mounted in `backend/src/app.js` at `/api/leave-management`.
+* **Frontend Master Views (`frontend/src/modules/leave-management/`):**
+  1. **Student Leave Requests (`/all-leave-requests`):**
+     * Sticky secondary header with title `Leave Requests`, print and reload actions.
+     * Filter bar: Filter type switcher (`All`, `Date Wise`, `Class Wise`), date pickers, class and student selectors, and search trigger.
+     * Leave request records: Student name, class/sec, roll no, leave category badge, duration with total days counter, reason, attachment preview, status badge (`Pending`, `Approved`, `Rejected`), and one-click Approve/Reject modals.
+  2. **Staff Leave Requests (`/staff-leave-requests`):**
+     * Sticky secondary header: `Leave Requests` (Staff).
+     * Filter bar: Type tabs (`All`, `Date Wise`), date range selector, department and designation filters.
+     * Leave cards & data table: Staff name, employee code, department, designation, leave type, date range, total days, reason, and approval decision controls.
+  3. **Apply Leave Request (`/apply-leave-request`):**
+     * Sticky secondary header: `Add Leave Request`.
+     * Universal application form: Applicant switcher (Staff vs Student), Department / Class dropdown, Employee / Student selector, Leave type dropdown (Casual, Sick, Earned, Maternity, Duty, Academic, Medical, Emergency), Start & End date pickers with automatic dynamic day counter, reason textarea, and file attachment.
+     * Live applicant recent leaves feed with real-time status badges.
+* **Navigation & Routing Integration:**
+  * Created `frontend/src/modules/leave-management/index.js` exporting all 3 pages.
+  * Updated `Sidebar.jsx` with active route auto-expansion logic for Leave Management.
+  * Updated `App.jsx` importing and routing all 3 Leave Management pages.
+* **Build Verification:**
+  * `npm run build` executed and passed cleanly in 34.43s with 0 errors across 3,410 modules.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* Ready for user review or next module instructions (e.g., Leave Management, Admin, etc.).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* Ready for user review or next module instructions.
 

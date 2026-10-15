@@ -51,6 +51,7 @@ import libraryRoutes from './modules/library/library.routes.js';
 import stationaryRoutes from './modules/stationary/stationary.routes.js';
 import smsRoutes from './modules/sms/sms.routes.js';
 import userManagementRoutes from './modules/user-management/user-management.routes.js';
+import leaveManagementRoutes from './modules/leave-management/leave-management.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -71,6 +72,7 @@ app.use('/api/library', libraryRoutes);
 app.use('/api/stationary', stationaryRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/user-management', userManagementRoutes);
+app.use('/api/leave-management', leaveManagementRoutes);
 
 
 // Global Error Handler

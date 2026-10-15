@@ -239,6 +239,11 @@ import {
   UserPrivilegeReportPage,
   UserReportsPage
 } from './modules/user-management';
+import {
+  StudentLeaveRequestsPage,
+  StaffLeaveRequestsPage,
+  ApplyLeaveRequestPage
+} from './modules/leave-management';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -769,6 +774,14 @@ function AppContent() {
                 return <UserReportsPage onNavigate={handleNavigate} />;
               case '/user-privilege-report':
                 return <UserPrivilegeReportPage onNavigate={handleNavigate} />;
+
+              // Leave Management Module
+              case '/all-leave-requests':
+                return <StudentLeaveRequestsPage onNavigate={handleNavigate} />;
+              case '/staff-leave-requests':
+                return <StaffLeaveRequestsPage onNavigate={handleNavigate} />;
+              case '/apply-leave-request':
+                return <ApplyLeaveRequestPage onNavigate={handleNavigate} />;
 
               default:
                 return (

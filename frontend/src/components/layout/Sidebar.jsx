@@ -671,6 +671,12 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       setOpenDropdowns(prev => ({ ...prev, userManagement: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'user-management-reports': true }));
     }
+    const leaveManagementPaths = [
+      '/all-leave-requests', '/staff-leave-requests', '/apply-leave-request'
+    ];
+    if (leaveManagementPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, leaveManagement: true }));
+    }
   }, [currentPath]);
 
   const { role } = useAuth();
