@@ -43,6 +43,18 @@ import {
   CancelFeeReceiptReportPage,
   DiscountFeeReceiptReportPage
 } from './modules/fees';
+import {
+  TransportVehiclePage,
+  TransportRoutePage,
+  TransportDestinationPage,
+  TransportAssignRoutesPage,
+  TransportAssignVehiclePage,
+  EditTransportFeePage,
+  TransportSummaryReportPage,
+  TransportStudentsReportPage,
+  TransportDueReportPage,
+  TransportVehicleReportPage
+} from './modules/transport';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
 import { MarksEntryPage } from './modules/examination/MarksEntryPage';
 import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
@@ -308,6 +320,27 @@ function AppContent() {
                 return <CancelFeeReceiptReportPage onNavigate={handleNavigate} />;
               case '/discount-fee-receipt-report':
                 return <DiscountFeeReceiptReportPage onNavigate={handleNavigate} />;
+              case '/transport-vehicle':
+                return <TransportVehiclePage onNavigate={handleNavigate} />;
+              case '/transport-route':
+                return <TransportRoutePage onNavigate={handleNavigate} />;
+              case '/transport-destination':
+                return <TransportDestinationPage onNavigate={handleNavigate} />;
+              case '/transport-assign-routes':
+                return <TransportAssignRoutesPage onNavigate={handleNavigate} />;
+              case '/transport-assign-vehicle':
+                return <TransportAssignVehiclePage onNavigate={handleNavigate} />;
+              case '/edit-transport-fee':
+                return <EditTransportFeePage onNavigate={handleNavigate} />;
+              case '/transport-summary':
+                return <TransportSummaryReportPage onNavigate={handleNavigate} />;
+              case '/transport-students':
+                return <TransportStudentsReportPage onNavigate={handleNavigate} />;
+              case '/transport-due-report':
+                return <TransportDueReportPage onNavigate={handleNavigate} />;
+              case '/transport-vehicle-report':
+              case '/transport-reports':
+                return <TransportVehicleReportPage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
               case '/students-report':

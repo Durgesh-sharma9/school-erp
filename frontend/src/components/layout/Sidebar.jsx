@@ -240,7 +240,16 @@ export const menuCategories = [
       { title: 'Transport Assign Routes', path: '/transport-assign-routes' },
       { title: 'Transport Assign Vehicle', path: '/transport-assign-vehicle' },
       { title: 'Edit Transport Fee', path: '/edit-transport-fee' },
-      { title: 'Reports', path: '/transport-reports' }
+      {
+        id: 'transport-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Transport Summary', path: '/transport-summary' },
+          { title: 'Transport Students', path: '/transport-students' },
+          { title: 'Transport Due Report', path: '/transport-due-report' },
+          { title: 'Transport Vehicle Report', path: '/transport-vehicle-report' }
+        ]
+      }
     ]
   },
   {
@@ -439,6 +448,21 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (feeReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, fee: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'fee-reports': true }));
+    }
+    const transportPaths = [
+      '/transport-vehicle', '/transport-route', '/transport-destination',
+      '/transport-assign-routes', '/transport-assign-vehicle', '/edit-transport-fee'
+    ];
+    if (transportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, transport: true }));
+    }
+    const transportReportPaths = [
+      '/transport-summary', '/transport-students', '/transport-due-report',
+      '/transport-vehicle-report', '/transport-reports'
+    ];
+    if (transportReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, transport: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'transport-reports': true }));
     }
   }, [currentPath]);
 
