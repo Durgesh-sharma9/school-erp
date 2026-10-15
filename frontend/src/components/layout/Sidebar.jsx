@@ -262,7 +262,15 @@ export const menuCategories = [
       { title: 'Hostel Floor', path: '/add-update-floor' },
       { title: 'Room Type', path: '/add-update-room-type' },
       { title: 'Room Master', path: '/add-update-room' },
-      { title: 'Reports', path: '/hostel-reports' }
+      {
+        id: 'hostel-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Hostel Room List', path: '/hostel-report' },
+          { title: 'Hostel Students Report', path: '/hostel-students-report' },
+          { title: 'Hostel Due Report', path: '/hostel-due-report' }
+        ]
+      }
     ]
   },
   {
@@ -463,6 +471,20 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (transportReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, transport: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'transport-reports': true }));
+    }
+    const hostelPaths = [
+      '/add-update-hostel', '/add-update-block', '/add-update-floor',
+      '/add-update-room-type', '/add-update-room'
+    ];
+    if (hostelPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, hostel: true }));
+    }
+    const hostelReportPaths = [
+      '/hostel-report', '/hostel-students-report', '/hostel-due-report', '/hostel-reports'
+    ];
+    if (hostelReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, hostel: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'hostel-reports': true }));
     }
   }, [currentPath]);
 

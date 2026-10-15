@@ -43,6 +43,7 @@ import studyMaterialRoutes from './modules/study-material/study-material.routes.
 import crmRoutes from './modules/crm/crm.routes.js';
 import greetingCardRoutes from './modules/greeting-card/greeting-card.routes.js';
 import transportRoutes from './modules/transport/transport.routes.js';
+import hostelRoutes from './modules/hostel/hostel.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -55,6 +56,7 @@ app.use('/api/study-material', studyMaterialRoutes);
 app.use('/api/crm', crmRoutes);
 app.use('/api/greeting-card', greetingCardRoutes);
 app.use('/api/transport', transportRoutes);
+app.use('/api/hostel', hostelRoutes);
 
 
 // Global Error Handler

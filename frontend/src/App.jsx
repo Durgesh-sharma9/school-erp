@@ -53,8 +53,20 @@ import {
   TransportSummaryReportPage,
   TransportStudentsReportPage,
   TransportDueReportPage,
-  TransportVehicleReportPage
+  TransportVehicleReportPage,
+  TransportReportsPage
 } from './modules/transport';
+import {
+  HostelMasterPage,
+  HostelBlockPage,
+  HostelFloorPage,
+  HostelRoomTypePage,
+  HostelRoomMasterPage,
+  HostelRoomReportPage,
+  HostelStudentsReportPage,
+  HostelDueReportPage,
+  HostelReportsPage
+} from './modules/hostel';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
 import { MarksEntryPage } from './modules/examination/MarksEntryPage';
 import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
@@ -339,8 +351,27 @@ function AppContent() {
               case '/transport-due-report':
                 return <TransportDueReportPage onNavigate={handleNavigate} />;
               case '/transport-vehicle-report':
-              case '/transport-reports':
                 return <TransportVehicleReportPage onNavigate={handleNavigate} />;
+              case '/transport-reports':
+                return <TransportReportsPage onNavigate={handleNavigate} />;
+              case '/add-update-hostel':
+                return <HostelMasterPage onNavigate={handleNavigate} />;
+              case '/add-update-block':
+                return <HostelBlockPage onNavigate={handleNavigate} />;
+              case '/add-update-floor':
+                return <HostelFloorPage onNavigate={handleNavigate} />;
+              case '/add-update-room-type':
+                return <HostelRoomTypePage onNavigate={handleNavigate} />;
+              case '/add-update-room':
+                return <HostelRoomMasterPage onNavigate={handleNavigate} />;
+              case '/hostel-report':
+                return <HostelRoomReportPage onNavigate={handleNavigate} />;
+              case '/hostel-students-report':
+                return <HostelStudentsReportPage onNavigate={handleNavigate} />;
+              case '/hostel-due-report':
+                return <HostelDueReportPage onNavigate={handleNavigate} />;
+              case '/hostel-reports':
+                return <HostelReportsPage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
               case '/students-report':
