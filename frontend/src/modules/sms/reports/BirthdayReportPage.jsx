@@ -99,7 +99,7 @@ export function BirthdayReportPage({ onNavigate }) {
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
             <span
               className="flex items-center gap-1 hover:text-indigo-600 cursor-pointer"
-              onClick={() => onNavigate && onNavigate('dashboard')}
+              onClick={() => onNavigate && onNavigate('/')}
             >
               <Home className="w-3.5 h-3.5" /> SMS
             </span>

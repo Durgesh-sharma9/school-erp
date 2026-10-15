@@ -244,7 +244,7 @@ export function StaffListPage({ onNavigate }) {
           </h1>
           <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
             <button
-              onClick={() => onNavigate && onNavigate('dashboard')}
+              onClick={() => onNavigate && onNavigate('/')}
               className="hover:text-blue-600 flex items-center gap-1 transition-colors"
             >
               <Home size={13} />
@@ -252,7 +252,7 @@ export function StaffListPage({ onNavigate }) {
             </button>
             <span>/</span>
             <button
-              onClick={() => onNavigate && onNavigate('payroll-reports')}
+              onClick={() => onNavigate && onNavigate('/payroll-reports')}
               className="hover:text-blue-600 transition-colors"
             >
               Payroll Reports

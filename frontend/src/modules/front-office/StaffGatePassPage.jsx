@@ -167,7 +167,7 @@ export function StaffGatePassPage({ onNavigate }) {
             <span>Staff Gate Pass</span>
           </h1>
           <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
-            <button onClick={() => onNavigate && onNavigate('dashboard')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
+            <button onClick={() => onNavigate && onNavigate('/')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
               <Home size={13} />
               <span>Home</span>
             </button>

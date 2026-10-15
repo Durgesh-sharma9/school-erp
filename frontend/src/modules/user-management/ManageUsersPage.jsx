@@ -230,7 +230,7 @@ export function ManageUsersPage({ onNavigate }) {
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
             <span
               className="flex items-center gap-1 hover:text-indigo-600 cursor-pointer"
-              onClick={() => onNavigate && onNavigate('dashboard')}
+              onClick={() => onNavigate && onNavigate('/')}
             >
               <Home className="w-3.5 h-3.5" /> User Privilege
             </span>
@@ -249,7 +249,7 @@ export function ManageUsersPage({ onNavigate }) {
             <UserPlus className="w-4 h-4" /> Add User
           </button>
           <button
-            onClick={() => onNavigate && onNavigate('user-privilege-report')}
+            onClick={() => onNavigate && onNavigate('/user-privilege-report')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded text-xs font-semibold shadow-sm transition-all"
             title="View User Privilege Report"
           >

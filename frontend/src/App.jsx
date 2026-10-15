@@ -249,23 +249,37 @@ import { Toaster } from 'react-hot-toast';
 function AppContent() {
   const { user, isAuthenticated, role } = useAuth();
 
+  const normalizePath = (rawPath) => {
+    if (!rawPath) return '/';
+    let p = String(rawPath).trim();
+    try {
+      p = decodeURIComponent(p);
+    } catch {}
+    if (p === 'dashboard' || p === '/dashboard' || p === '') return '/';
+    if (!p.startsWith('/')) p = '/' + p;
+    // Normalize spaces to hyphens and lowercase
+    p = p.replace(/\s+/g, '-').toLowerCase();
+    return p;
+  };
+
   const [currentPath, setCurrentPath] = useState(() => {
-    return window.location.pathname && window.location.pathname !== '' ? window.location.pathname : '/';
+    return normalizePath(window.location.pathname);
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname || '/');
+      setCurrentPath(normalizePath(window.location.pathname));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const handleNavigate = (path) => {
-    setCurrentPath(path);
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path);
+    const normalized = normalizePath(path);
+    setCurrentPath(normalized);
+    if (window.location.pathname !== normalized) {
+      window.history.pushState({}, '', normalized);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -346,7 +360,7 @@ function AppContent() {
         {/* Dynamic Canvas Routing */}
         <main className="flex-1 overflow-y-auto">
           {(() => {
-            switch (currentPath) {
+            switch (normalizePath(currentPath)) {
               case '/':
               case '/dashboard':
                 return renderDashboardByRole();

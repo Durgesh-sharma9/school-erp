@@ -96,7 +96,7 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
             <span
               className="flex items-center gap-1 hover:text-indigo-600 cursor-pointer"
-              onClick={() => onNavigate && onNavigate('dashboard')}
+              onClick={() => onNavigate && onNavigate('/')}
             >
               <Home className="w-3.5 h-3.5" /> Home
             </span>
@@ -108,7 +108,7 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
         {/* Action Toolbar */}
         <div className="flex items-center gap-2 mt-3 md:mt-0">
           <button
-            onClick={() => onNavigate && onNavigate('apply-leave-request')}
+            onClick={() => onNavigate && onNavigate('/apply-leave-request')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-sm transition-all"
           >
             <Plus className="w-4 h-4" /> Apply Leave
