@@ -2,7 +2,7 @@ import { uploadToImageKit } from '../../core/utils/imagekitService.js';
 import prisma from '../../config/db.js';
 
 // Multi-Tenant Partitioned School Profiles Store
-const TENANT_SCHOOL_PROFILES = {
+export const TENANT_SCHOOL_PROFILES = {
   'sch_jd_intl': {
     id: 'sch_jd_intl',
     schoolName: "J D International School",
