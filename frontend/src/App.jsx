@@ -16,8 +16,20 @@ import { StudentPortfolioPage } from './modules/students/StudentPortfolioPage';
 import { IdCardGeneratorPage } from './modules/students/IdCardGeneratorPage';
 import { AdmitCardGeneratorPage } from './modules/students/AdmitCardGeneratorPage';
 import { ExamDateSheetPage } from './modules/students/ExamDateSheetPage';
-import { FeeCollectionPage } from './modules/fees/FeeCollectionPage';
-import { FeeStructurePage } from './modules/fees/FeeStructurePage';
+import {
+  FeeCollectionPage,
+  FeeHeadGroupPage,
+  FeeHeadPage,
+  FeeConcessionTypePage,
+  FeeFineMasterPage,
+  FeeStructurePage,
+  FeeEditManualPage,
+  FeeConcessionPage,
+  SiblingFeeCollectionPage,
+  FeeRefundPage,
+  BoardFeeManualCollectionPage,
+  FeeReportsPage
+} from './modules/fees';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
 import { MarksEntryPage } from './modules/examination/MarksEntryPage';
 import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
@@ -234,8 +246,37 @@ function AppContent() {
                 return <ExamDateSheetPage onNavigate={handleNavigate} />;
               case '/fee-collection':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;
+              case '/fee-head-group':
+                return <FeeHeadGroupPage onNavigate={handleNavigate} />;
+              case '/fee-head':
+                return <FeeHeadPage onNavigate={handleNavigate} />;
+              case '/fee-concession-type':
+                return <FeeConcessionTypePage onNavigate={handleNavigate} />;
+              case '/fee-fine-master':
+                return <FeeFineMasterPage onNavigate={handleNavigate} />;
               case '/fee-structure':
                 return <FeeStructurePage onNavigate={handleNavigate} />;
+              case '/fee-edit-manual':
+                return <FeeEditManualPage onNavigate={handleNavigate} />;
+              case '/fee-concession':
+                return <FeeConcessionPage onNavigate={handleNavigate} />;
+              case '/sibling-fee-collection':
+                return <SiblingFeeCollectionPage onNavigate={handleNavigate} />;
+              case '/fee-refund':
+                return <FeeRefundPage onNavigate={handleNavigate} />;
+              case '/board-fee-manual-collection':
+                return <BoardFeeManualCollectionPage onNavigate={handleNavigate} />;
+              case '/fee-reports':
+              case '/fee-collection-summary':
+              case '/online-collection-summary':
+              case '/fee-due-list':
+              case '/fee-due-list-month-wise':
+              case '/fee-concession-summary':
+              case '/fee-advance-report':
+              case '/fee-structure-report':
+              case '/student-fees-statement':
+              case '/fee-book-report':
+                return <FeeReportsPage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
               case '/students-report':

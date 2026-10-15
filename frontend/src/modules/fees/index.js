@@ -1,0 +1,12 @@
+export { FeeCollectionPage } from './FeeCollectionPage';
+export { FeeHeadGroupPage } from './FeeHeadGroupPage';
+export { FeeHeadPage } from './FeeHeadPage';
+export { FeeConcessionTypePage } from './FeeConcessionTypePage';
+export { FeeFineMasterPage } from './FeeFineMasterPage';
+export { FeeStructurePage } from './FeeStructurePage';
+export { FeeEditManualPage } from './FeeEditManualPage';
+export { FeeConcessionPage } from './FeeConcessionPage';
+export { SiblingFeeCollectionPage } from './SiblingFeeCollectionPage';
+export { FeeRefundPage } from './FeeRefundPage';
+export { BoardFeeManualCollectionPage } from './BoardFeeManualCollectionPage';
+export { FeeReportsPage } from './FeeReportsPage';
