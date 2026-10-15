@@ -147,6 +147,24 @@ import {
   CrmQrLinksPage,
   CrmThankYouCmsPage
 } from './modules/crm';
+import {
+  PayrollBranchPage,
+  PayrollDepartmentPage,
+  PayrollDesignationPage,
+  PayrollAllowancesPage,
+  PayrollLeaveSetupPage,
+  ShiftMasterPage,
+  PayrollRegistrationPage,
+  StaffAttendancePage,
+  GenerateSalaryPage,
+  AdvanceSalaryPage,
+  StaffIDCardGeneratorPage,
+  PayrollReportsPage,
+  StaffSalaryReportPage,
+  StaffListPage,
+  MonthlyStaffAttendanceReportPage,
+  StaffAttendanceTimeReportPage
+} from './modules/payroll';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -424,6 +442,38 @@ function AppContent() {
                 return <ReportCardRemarksReportPage onNavigate={handleNavigate} />;
               case '/examination-reports':
                 return <ExaminationReportsPage onNavigate={handleNavigate} />;
+              case '/payroll-branch':
+                return <PayrollBranchPage onNavigate={handleNavigate} />;
+              case '/payroll-department':
+                return <PayrollDepartmentPage onNavigate={handleNavigate} />;
+              case '/payroll-designation':
+                return <PayrollDesignationPage onNavigate={handleNavigate} />;
+              case '/payroll-allowances':
+                return <PayrollAllowancesPage onNavigate={handleNavigate} />;
+              case '/payroll-leave-setup':
+                return <PayrollLeaveSetupPage onNavigate={handleNavigate} />;
+              case '/shift-master':
+                return <ShiftMasterPage onNavigate={handleNavigate} />;
+              case '/payroll-registration':
+                return <PayrollRegistrationPage onNavigate={handleNavigate} />;
+              case '/staff-attendance':
+                return <StaffAttendancePage onNavigate={handleNavigate} />;
+              case '/generate-staff-salary':
+                return <GenerateSalaryPage onNavigate={handleNavigate} />;
+              case '/payroll-advance-payment':
+                return <AdvanceSalaryPage onNavigate={handleNavigate} />;
+              case '/staff-id-card-generator':
+                return <StaffIDCardGeneratorPage onNavigate={handleNavigate} />;
+              case '/payroll-reports':
+                return <PayrollReportsPage onNavigate={handleNavigate} />;
+              case '/payroll-staff-salary':
+                return <StaffSalaryReportPage onNavigate={handleNavigate} />;
+              case '/staff-list':
+                return <StaffListPage onNavigate={handleNavigate} />;
+              case '/staff-attendance-report':
+                return <MonthlyStaffAttendanceReportPage onNavigate={handleNavigate} />;
+              case '/staff-attendance-time-report':
+                return <StaffAttendanceTimeReportPage onNavigate={handleNavigate} />;
               case '/students-report':
               case '/student-reports':
                 return <StudentListPage onNavigate={handleNavigate} />;

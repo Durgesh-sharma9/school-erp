@@ -1267,6 +1267,37 @@ This document tracks the complete development journey of the **Unified School ER
   * `npm run build` executed and passed in 12.41s with 0 errors.
 * **Status:** ✅ Completed
 
+### 📍 [Entry #47] - 1:1 Complete Payroll Module & All 4 Reports Matching UAB
+* **Timestamp:** 2026-10-15
+* **Goal / Prompt:** Replicate the complete Payroll module and all 4 Payroll reports matching `schools.uabinfosol.com` 1:1 (`pay role vala pura bana do and report me jitne bhi tabs hai sab`).
+* **Backend Architecture (`backend/src/modules/payroll/`):**
+  * `payroll.controller.js`: Built complete CRUD controllers for Branches, Departments, Designations, Allowances, Leave Setup, Shifts, Staff Registration, Staff Attendance, Salary Generation & Slips, and Advance Salary.
+  * `payroll.routes.js`: Full REST API mounted at `/api/payroll` in `backend/src/app.js`.
+* **Frontend Payroll Masters (`frontend/src/modules/payroll/`):**
+  1. **Branch (`/payroll-branch`):** Multi-branch campus management with add/edit modal, contact info, code, and status toggle.
+  2. **Department (`/payroll-department`):** Organizational units (Teaching, Admin, Transport, Security, etc.) with code, name, and staff count.
+  3. **Designation (`/payroll-designation`):** Position hierarchy linked to departments (Principal, Teacher, Driver, etc.) with priority sorting.
+  4. **Allowances (`/payroll-allowances`):** Earnings & Deductions builder (DA, HRA, Medical, PF, ESI, TDS) with Percentage/Fixed calculation types.
+  5. **Leave Setup (`/payroll-leave-setup`):** Annual entitlement rules (Casual, Sick, Earned, Maternity) with carry-forward limits and paid/unpaid flags.
+  6. **Shift Master (`/shift-master`):** Working hours scheduler with grace times, half-day minimum hours, in/out tolerances, and status controls.
+  7. **Staff Registration (`/payroll-registration`):** Multi-step staff onboarding wizard with bio-data, statutory details, basic salary, bank accounts, and photo preview.
+  8. **Staff Attendance (`/staff-attendance`):** Daily roster marking (Present, Absent, Leave, Half Day), quick "Mark All Present", bulk save, and real-time counters.
+  9. **Generate Salary (`/generate-staff-salary`):** Monthly payroll processing engine calculating gross, total allowances, statutory deductions, net payable, payslip previews, and one-click disbursement.
+  10. **Advance Salary (`/payroll-advance-payment`):** Loan and salary advance registry with disbursement modes, monthly EMI installments, and repayment tracking.
+  11. **Staff ID Card (`/staff-id-card-generator`):** Double-sided printable identity card generator with custom themes (Modern Blue, Classic Red, Forest Green, Sleek Dark), QR code, barcode, and bulk print.
+* **Frontend Payroll Reports (`frontend/src/modules/payroll/reports/`):**
+  12. **Staff Salary Report (`/payroll-staff-salary`):** Monthly disbursement breakdown, basic pay, allowances, deductions, net salary, payment mode, and printable payslip modals.
+  13. **Staff List Directory (`/staff-list`):** Complete staff directory with filters for department, designation, and active/inactive status, with detailed bio-data modal and CSV export.
+  14. **Monthly Staff Attendance Report (`/staff-attendance-report`):** Full 1-to-31 days calendar matrix grid with color-coded P/A/L/HD/WO badges, total present, absent, leave, and payable day calculations.
+  15. **Staff Attendance Time Report (`/staff-attendance-time-report`):** Biometric punch timestamps (In Time, Out Time), total working hours, late arrivals, and overtime tracking.
+  16. **Payroll Reports Hub (`/payroll-reports`):** Overview dashboard with 4 KPI summary cards and direct navigation to all 4 reports.
+* **Navigation & Routing Integration:**
+  * Updated `Sidebar.jsx` with full Payroll submenu, nested Reports sub-dropdown with all 4 reports, and auto-expand logic in `useEffect`.
+  * Updated `App.jsx` importing and routing all 16 payroll pages cleanly.
+* **Build Verification:**
+  * `npm run build` executed and passed in 11.47s with 0 errors (all 3,332 modules transformed cleanly).
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:

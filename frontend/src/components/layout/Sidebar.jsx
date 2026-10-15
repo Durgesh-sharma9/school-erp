@@ -318,7 +318,16 @@ export const menuCategories = [
       { title: 'Generate Salary', path: '/generate-staff-salary' },
       { title: 'Advance Salary', path: '/payroll-advance-payment' },
       { title: 'Staff ID Card', path: '/staff-id-card-generator' },
-      { title: 'Reports', path: '/payroll-reports' }
+      {
+        id: 'payroll-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Staff Salary', path: '/payroll-staff-salary' },
+          { title: 'Staff List', path: '/staff-list' },
+          { title: 'Staff Attendance Report', path: '/staff-attendance-report' },
+          { title: 'Staff Attendance Time Report', path: '/staff-attendance-time-report' }
+        ]
+      }
     ]
   },
   {
@@ -514,6 +523,23 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (examReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, examination: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'examination-reports': true }));
+    }
+    const payrollPaths = [
+      '/payroll-branch', '/payroll-department', '/payroll-designation',
+      '/payroll-allowances', '/payroll-leave-setup', '/shift-master',
+      '/payroll-registration', '/staff-attendance', '/generate-staff-salary',
+      '/payroll-advance-payment', '/staff-id-card-generator'
+    ];
+    if (payrollPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, payroll: true }));
+    }
+    const payrollReportPaths = [
+      '/payroll-staff-salary', '/staff-list', '/staff-attendance-report',
+      '/staff-attendance-time-report', '/payroll-reports'
+    ];
+    if (payrollReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, payroll: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'payroll-reports': true }));
     }
   }, [currentPath]);
 
