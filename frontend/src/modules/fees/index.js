@@ -10,3 +10,4 @@ export { SiblingFeeCollectionPage } from './SiblingFeeCollectionPage';
 export { FeeRefundPage } from './FeeRefundPage';
 export { BoardFeeManualCollectionPage } from './BoardFeeManualCollectionPage';
 export { FeeReportsPage } from './FeeReportsPage';
+export * from './reports';

@@ -1,0 +1,191 @@
+import React, { useState } from 'react';
+import { IndianRupee, Search, Download, Printer, Filter, Calendar } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+export function FeeDueListReportPage() {
+  const [reportType, setReportType] = useState('Month Wise');
+  const [selectedClass, setSelectedClass] = useState('All');
+  const [studentType, setStudentType] = useState('Due Student');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [students, setStudents] = useState([
+    {
+      sNo: 1,
+      enrollNo: 'ENR-2023-01',
+      admNo: '1621',
+      srNo: '1621',
+      name: 'AADITYA SINGH CHOUDHARY',
+      className: 'Class I-A',
+      mobile: '9829012345',
+      fatherName: 'NARENDRA SINGH CHOUDHARY',
+      months: { apr: 0, may: 0, jun: 0, jul: 4000, aug: 4000, sep: 4000, oct: 1500 },
+      due: 13500
+    },
+    {
+      sNo: 2,
+      enrollNo: 'ENR-2023-02',
+      admNo: '2059',
+      srNo: '2059',
+      name: 'AADHYA CHOUDHARY',
+      className: 'Nursery - PP3+-A',
+      mobile: '6377281034',
+      fatherName: 'RAMESH CHOUDHARY',
+      months: { apr: 0, may: 0, jun: 0, jul: 3000, aug: 3000, sep: 3500, oct: 0 },
+      due: 9500
+    },
+    {
+      sNo: 3,
+      enrollNo: 'ENR-2023-03',
+      admNo: '2060',
+      srNo: '2060',
+      name: 'ROHAN SHARMA',
+      className: 'Class X-A',
+      mobile: '9829012345',
+      fatherName: 'MUKESH SHARMA',
+      months: { apr: 0, may: 5000, jun: 5000, jul: 5000, aug: 0, sep: 0, oct: 3500 },
+      due: 18500
+    }
+  ]);
+
+  const totalDues = students.reduce((sum, s) => sum + s.due, 0);
+
+  const exportCSV = () => {
+    const csvContent = "data:text/csv;charset=utf-8," +
+      ["S.No.,Enroll No,Adm No,SR No,Student Name,Class,Mobile,Father Name,Apr,May,Jun,Jul,Aug,Sep,Oct,Due Amount"].concat(
+        students.map(s => `${s.sNo},"${s.enrollNo}","${s.admNo}","${s.srNo}","${s.name}","${s.className}","${s.mobile}","${s.fatherName}",${s.months.apr},${s.months.may},${s.months.jun},${s.months.jul},${s.months.aug},${s.months.sep},${s.months.oct},${s.due}`)
+      ).join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Fee_Due_List_Month_Wise.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Exported to CSV');
+  };
+
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.admNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.className.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <IndianRupee className="w-6 h-6 text-indigo-600" />
+            Fee Due List (Month Wise)
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Fees &bull; <span className="text-indigo-600 font-medium">Month-Wise Fee Dues & Defaulters Register</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button onClick={exportCSV} className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+            <Printer className="w-4 h-4" /> Print
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Bar (1:1 with UAB) */}
+      <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Report Type</label>
+            <select value={reportType} onChange={(e) => setReportType(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <option value="Month Wise">Month Wise</option>
+              <option value="Total Due">Total Due Only</option>
+              <option value="Head Wise">Head Wise</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Class</label>
+            <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <option value="All">All Classes</option>
+              <option value="Nursery - PP3+">Nursery - PP3+</option>
+              <option value="Lower Kindergarten - PP4+">Lower Kindergarten - PP4+</option>
+              <option value="Upper Kindergarten - PP5+">Upper Kindergarten - PP5+</option>
+              <option value="I">Class I</option>
+              <option value="X">Class X</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Student Type</label>
+            <select value={studentType} onChange={(e) => setStudentType(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <option value="Due Student">Due Student</option>
+              <option value="All">All Students</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col justify-end">
+            <button onClick={() => toast.success('Filtered month wise fee due list')} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5">
+              <Search className="w-4 h-4" /> Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Table (1:1 with UAB) */}
+      <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-600 whitespace-nowrap">
+            <thead className="bg-slate-50 text-slate-500 uppercase font-semibold text-[11px] border-b border-slate-100">
+              <tr>
+                <th className="py-3 px-4">S.NO.</th>
+                <th className="py-3 px-4">ENROLL NO.</th>
+                <th className="py-3 px-4">ADM. NO.</th>
+                <th className="py-3 px-4">SR. NO.</th>
+                <th className="py-3 px-4">NAME</th>
+                <th className="py-3 px-4">CLASS</th>
+                <th className="py-3 px-4">MOBILE NO.</th>
+                <th className="py-3 px-4">FATHER'S NAME</th>
+                <th className="py-3 px-3 text-right">APR</th>
+                <th className="py-3 px-3 text-right">MAY</th>
+                <th className="py-3 px-3 text-right">JUN</th>
+                <th className="py-3 px-3 text-right">JUL</th>
+                <th className="py-3 px-3 text-right">AUG</th>
+                <th className="py-3 px-3 text-right">SEP</th>
+                <th className="py-3 px-3 text-right">OCT</th>
+                <th className="py-3 px-4 text-right font-bold text-slate-900">DUE</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filtered.map((s) => (
+                <tr key={s.admNo} className="hover:bg-slate-50/60">
+                  <td className="py-3 px-4 font-medium text-slate-800">{s.sNo}</td>
+                  <td className="py-3 px-4 font-mono text-slate-500">{s.enrollNo}</td>
+                  <td className="py-3 px-4 font-mono font-bold text-indigo-700">{s.admNo}</td>
+                  <td className="py-3 px-4 font-mono text-slate-500">{s.srNo}</td>
+                  <td className="py-3 px-4 font-bold text-slate-900">{s.name}</td>
+                  <td className="py-3 px-4 text-slate-600">{s.className}</td>
+                  <td className="py-3 px-4 font-mono text-slate-600">{s.mobile}</td>
+                  <td className="py-3 px-4 text-slate-600">{s.fatherName}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.apr}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.may}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.jun}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.jul}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.aug}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.sep}</td>
+                  <td className="py-3 px-3 text-right text-slate-500">₹{s.months.oct}</td>
+                  <td className="py-3 px-4 text-right font-black text-rose-600">₹{s.due.toLocaleString('en-IN')}</td>
+                </tr>
+              ))}
+              <tr className="bg-slate-50 font-bold border-t-2 border-slate-200">
+                <td colSpan="15" className="py-3 px-4 text-right uppercase tracking-wider text-slate-700">Total Outstanding Month Dues:</td>
+                <td className="py-3 px-4 text-right font-black text-rose-600 text-sm">₹{totalDues.toLocaleString('en-IN')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -28,7 +28,20 @@ import {
   SiblingFeeCollectionPage,
   FeeRefundPage,
   BoardFeeManualCollectionPage,
-  FeeReportsPage
+  FeeReportsPage,
+  FeeCollectionSummaryReportPage,
+  OnlineCollectionSummaryReportPage,
+  BoardCollectionSummaryReportPage,
+  BoardFeeDueListReportPage,
+  FeeDueListReportPage,
+  FeeConcessionSummaryReportPage,
+  FeeAdvanceReportPage,
+  FeeStructureReportPage,
+  FeeOpeningBalanceReportPage,
+  StudentFeeStatementReportPage,
+  FeeBookReportPage,
+  CancelFeeReceiptReportPage,
+  DiscountFeeReceiptReportPage
 } from './modules/fees';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
 import { MarksEntryPage } from './modules/examination/MarksEntryPage';
@@ -267,16 +280,34 @@ function AppContent() {
               case '/board-fee-manual-collection':
                 return <BoardFeeManualCollectionPage onNavigate={handleNavigate} />;
               case '/fee-reports':
+                return <FeeReportsPage onNavigate={handleNavigate} />;
               case '/fee-collection-summary':
+                return <FeeCollectionSummaryReportPage onNavigate={handleNavigate} />;
               case '/online-collection-summary':
+                return <OnlineCollectionSummaryReportPage onNavigate={handleNavigate} />;
+              case '/board-online-collection-summary':
+                return <BoardCollectionSummaryReportPage onNavigate={handleNavigate} />;
+              case '/board-fee-due-list':
+                return <BoardFeeDueListReportPage onNavigate={handleNavigate} />;
               case '/fee-due-list':
               case '/fee-due-list-month-wise':
+                return <FeeDueListReportPage onNavigate={handleNavigate} />;
               case '/fee-concession-summary':
+                return <FeeConcessionSummaryReportPage onNavigate={handleNavigate} />;
               case '/fee-advance-report':
+                return <FeeAdvanceReportPage onNavigate={handleNavigate} />;
               case '/fee-structure-report':
+                return <FeeStructureReportPage onNavigate={handleNavigate} />;
+              case '/fee-opening-balance-report':
+                return <FeeOpeningBalanceReportPage onNavigate={handleNavigate} />;
               case '/student-fees-statement':
+                return <StudentFeeStatementReportPage onNavigate={handleNavigate} />;
               case '/fee-book-report':
-                return <FeeReportsPage onNavigate={handleNavigate} />;
+                return <FeeBookReportPage onNavigate={handleNavigate} />;
+              case '/cancel-fee-receipt-report':
+                return <CancelFeeReceiptReportPage onNavigate={handleNavigate} />;
+              case '/discount-fee-receipt-report':
+                return <DiscountFeeReceiptReportPage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
               case '/students-report':

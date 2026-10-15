@@ -208,7 +208,25 @@ export const menuCategories = [
       { title: 'Sibling Fee Entry', path: '/sibling-fee-collection' },
       { title: 'Cancel Fee', path: '/fee-refund' },
       { title: 'Board Fee Manual Entry', path: '/board-fee-manual-collection' },
-      { title: 'Reports', path: '/fee-reports' }
+      {
+        id: 'fee-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Fee Collection Summary', path: '/fee-collection-summary' },
+          { title: 'Online Collection Summary', path: '/online-collection-summary' },
+          { title: 'Board Collection Summary', path: '/board-online-collection-summary' },
+          { title: 'Board Fee Due List', path: '/board-fee-due-list' },
+          { title: 'Fee Due List', path: '/fee-due-list-month-wise' },
+          { title: 'Fee Concession Summary', path: '/fee-concession-summary' },
+          { title: 'Advance Report', path: '/fee-advance-report' },
+          { title: 'Fee Structure Report', path: '/fee-structure-report' },
+          { title: 'Fee Opening Balance Report', path: '/fee-opening-balance-report' },
+          { title: 'Student Fees Statement', path: '/student-fees-statement' },
+          { title: 'Fee Book Report', path: '/fee-book-report' },
+          { title: 'Cancel Fee Receipt Report', path: '/cancel-fee-receipt-report' },
+          { title: 'Discount Fee Receipt Report', path: '/discount-fee-receipt-report' }
+        ]
+      }
     ]
   },
   {
@@ -410,6 +428,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     }
     if (currentPath === '/crm' || currentPath.startsWith('/crm/')) {
       setOpenDropdowns(prev => ({ ...prev, crm: true }));
+    }
+    const feeReportPaths = [
+      '/fee-reports', '/fee-collection-summary', '/online-collection-summary',
+      '/board-online-collection-summary', '/board-fee-due-list', '/fee-due-list',
+      '/fee-due-list-month-wise', '/fee-concession-summary', '/fee-advance-report',
+      '/fee-structure-report', '/fee-opening-balance-report', '/student-fees-statement',
+      '/fee-book-report', '/cancel-fee-receipt-report', '/discount-fee-receipt-report'
+    ];
+    if (feeReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, fee: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'fee-reports': true }));
     }
   }, [currentPath]);
 

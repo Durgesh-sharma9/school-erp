@@ -1116,6 +1116,64 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+---
+
+### 📍 [Entry #43] - 1:1 Replication & Implementation of All 13 Fee Reports Matching UAB Portal
+* **Timestamp:** 2026-10-15
+* **Goal / Prompt:** Replicate and implement all 13 Fee Reports under the Fee -> Reports submenu from `schools.uabinfosol.com` with complete filters, data tables, summary stat cards, Excel CSV export, and print capability.
+* **Reports Implemented (`frontend/src/modules/fees/reports/`):**
+  1. **Fee Collection Summary (`/fee-collection-summary`):**
+     * Filters: Date Range (From/To), Payment Mode, Fee Category.
+     * Summary: Cash, UPI, Cheque, Bank, Total Collections.
+     * Columns: S.No, Receipt No, Date, Adm No, Student Name, Class, Pay Mode, Paid Amount (₹).
+  2. **Online Collection Summary (`/online-collection-summary`):**
+     * Filters: Date Range, Gateway, Status.
+     * Summary: Gateway total, Surcharge/Txn fees, Settled Net amount.
+     * Columns: S.No, Order ID, Gateway Txn ID, Date & Time, Adm No, Student Name, Class, Gateway, Status, Amount (₹).
+  3. **Board Collection Summary (`/board-online-collection-summary`):**
+     * Filters: Date Range, Board (CBSE/State), Exam Category.
+     * Columns: S.No, Roll No, Adm No, Student Name, Class, Board Registration No, Amount Paid (₹), Date, Pay Mode.
+  4. **Board Fee Due List (`/board-fee-due-list`):**
+     * Filters: Class (X / XII), Section, Stream.
+     * Columns: S.No, Adm No, SR No, Student Name, Class, Board Reg No, Father Name, Mobile, Due Amount (₹).
+  5. **Fee Due List (`/fee-due-list-month-wise` / `/fee-due-list`):**
+     * Filters: Class, Division, Month/Quarter, Balance Threshold.
+     * Columns: S.No, Adm No, SR No, Student Name, Class, Father Name, Mobile, Route Name, Total Due (₹), Paid (₹), Balance (₹).
+  6. **Fee Concession Summary (`/fee-concession-summary`):**
+     * Filters: Category, Class, Approval Authority.
+     * Columns: S.No, Adm No, SR No, Student Name, Class, Concession Type, Standard Fee (₹), Concession (₹), Net Payable (₹), Approved By.
+  7. **Advance Report (`/fee-advance-report`):**
+     * Filters: Report Type, Class.
+     * Columns: S.No, Adm No, SR No, Student Name, Class, Date Received, Pay Mode, Remarks, Advance (₹).
+  8. **Fee Structure Report (`/fee-structure-report`):**
+     * Filters: Type (Fees Structure / Head Wise), Class, Apply For (Both / Old / New).
+     * Columns: S.No, Class, Tuition Fee, Annual Charges, Development Fee, Exam Fee, Computer Fee, Admission Fee, Grand Total (₹).
+  9. **Fee Opening Balance Report (`/fee-opening-balance-report`):**
+     * Filters: Report Type, Class, Division.
+     * Columns: S.No, Adm No, SR No, Student Name, Class, Father's Name, Mobile No, Route Name, Opening Due (₹), Paid (₹), Balance (₹).
+  10. **Student Fees Statement (`/student-fees-statement`):**
+      * Top Student Profile Header (Student Name, Adm No, Class, Father, Mobile, Route).
+      * Filters: Class, Division, Student selector.
+      * Columns: S.No, Rec No, Rec Date, Period, Pay Mode, Payable Amt (₹), Paid Amt (₹), Due Amt (₹), Adv Amt (₹), Remarks.
+  11. **Fee Book Report (`/fee-book-report`):**
+      * Filters: Class, Division, Report (Fee / Bus / Hostel).
+      * Full Month-by-Month Grid: S.No, Adm No, Student Name, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, Jan, Feb, Mar, Demand, Paid, Balance.
+  12. **Cancel Fee Receipt Report (`/cancel-fee-receipt-report`):**
+      * Filters: Date Range, Report Type, Class.
+      * Columns: S.No, Adm No, SR No, Name, Class, Rec No, Rec Date, Cancel Date, Remark, Amount (₹), Paid (₹), Cancel By, User.
+  13. **Discount Fee Receipt Report (`/discount-fee-receipt-report`):**
+      * Filters: Date Range, Report Type, Class.
+      * Columns: S.No, Adm No, SR No, Name, Class, Rec No, Rec Date, Discount Type, Remark, Discount Amt. (₹).
+* **Sidebar & App Routing:**
+  * Updated `Sidebar.jsx` Fee section with nested `children` under `Reports` containing all 13 items.
+  * Added auto-open handling for all 13 fee report paths.
+  * Routed all 13 paths in `App.jsx` to their respective components.
+* **Build Verification:**
+  * `npm run build` executed and passed in 35s with 0 errors.
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
 * Ready for user review or next instructions.
 
