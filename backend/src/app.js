@@ -44,6 +44,7 @@ import crmRoutes from './modules/crm/crm.routes.js';
 import greetingCardRoutes from './modules/greeting-card/greeting-card.routes.js';
 import transportRoutes from './modules/transport/transport.routes.js';
 import hostelRoutes from './modules/hostel/hostel.routes.js';
+import examinationRoutes from './modules/examination/examination.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -57,6 +58,7 @@ app.use('/api/crm', crmRoutes);
 app.use('/api/greeting-card', greetingCardRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/hostel', hostelRoutes);
+app.use('/api/examination', examinationRoutes);
 
 
 // Global Error Handler

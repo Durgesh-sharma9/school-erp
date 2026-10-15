@@ -68,7 +68,25 @@ import {
   HostelReportsPage
 } from './modules/hostel';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
-import { MarksEntryPage } from './modules/examination/MarksEntryPage';
+import {
+  ExamTermsPage,
+  ExamNamesPage,
+  ExamGroupMasterPage,
+  ExamGradeMasterPage,
+  LinkStudentSubjectPage,
+  MarksEntryPage,
+  StudentWiseMarksEntryPage,
+  PrcCommentPage,
+  MarksEntryLockingPage,
+  BlankExamFormatReportPage,
+  StudentSignatureSheetReportPage,
+  ToppersListReportPage,
+  ConsolidatedReportPage,
+  ProgressReportCardReportPage,
+  PerformanceSheetReportPage,
+  ReportCardRemarksReportPage,
+  ExaminationReportsPage
+} from './modules/examination';
 import { SchoolInfoPage } from './modules/school/SchoolInfoPage';
 import { WhatsappQrPage } from './modules/school/WhatsappQrPage';
 import { SettingsAndPermissionsPage } from './modules/school/SettingsAndPermissionsPage';
@@ -372,8 +390,40 @@ function AppContent() {
                 return <HostelDueReportPage onNavigate={handleNavigate} />;
               case '/hostel-reports':
                 return <HostelReportsPage onNavigate={handleNavigate} />;
+              case '/exam-terms':
+                return <ExamTermsPage onNavigate={handleNavigate} />;
+              case '/exam-names':
+                return <ExamNamesPage onNavigate={handleNavigate} />;
+              case '/group-master':
+                return <ExamGroupMasterPage onNavigate={handleNavigate} />;
+              case '/grade-master':
+                return <ExamGradeMasterPage onNavigate={handleNavigate} />;
+              case '/link-student-with-subject':
+                return <LinkStudentSubjectPage onNavigate={handleNavigate} />;
               case '/marks-entry':
                 return <MarksEntryPage onNavigate={handleNavigate} />;
+              case '/student-wise-marks-entry':
+                return <StudentWiseMarksEntryPage onNavigate={handleNavigate} />;
+              case '/prc-comment':
+                return <PrcCommentPage onNavigate={handleNavigate} />;
+              case '/marks-entry-locking':
+                return <MarksEntryLockingPage onNavigate={handleNavigate} />;
+              case '/blank-exam-format':
+                return <BlankExamFormatReportPage onNavigate={handleNavigate} />;
+              case '/student-signature-sheet':
+                return <StudentSignatureSheetReportPage onNavigate={handleNavigate} />;
+              case '/toppers-list':
+                return <ToppersListReportPage onNavigate={handleNavigate} />;
+              case '/consolidated-report':
+                return <ConsolidatedReportPage onNavigate={handleNavigate} />;
+              case '/progress-report-card':
+                return <ProgressReportCardReportPage onNavigate={handleNavigate} />;
+              case '/performance-sheet':
+                return <PerformanceSheetReportPage onNavigate={handleNavigate} />;
+              case '/report-card-remark-report':
+                return <ReportCardRemarksReportPage onNavigate={handleNavigate} />;
+              case '/examination-reports':
+                return <ExaminationReportsPage onNavigate={handleNavigate} />;
               case '/students-report':
               case '/student-reports':
                 return <StudentListPage onNavigate={handleNavigate} />;

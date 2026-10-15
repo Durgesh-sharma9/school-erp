@@ -1,0 +1,10 @@
+export { ExamTermsPage } from './ExamTermsPage';
+export { ExamNamesPage } from './ExamNamesPage';
+export { ExamGroupMasterPage } from './ExamGroupMasterPage';
+export { ExamGradeMasterPage } from './ExamGradeMasterPage';
+export { LinkStudentSubjectPage } from './LinkStudentSubjectPage';
+export { MarksEntryPage } from './MarksEntryPage';
+export { StudentWiseMarksEntryPage } from './StudentWiseMarksEntryPage';
+export { PrcCommentPage } from './PrcCommentPage';
+export { MarksEntryLockingPage } from './MarksEntryLockingPage';
+export * from './reports';

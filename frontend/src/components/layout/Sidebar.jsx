@@ -287,7 +287,19 @@ export const menuCategories = [
       { title: 'Student Wise Marks Entry', path: '/student-wise-marks-entry' },
       { title: 'PRC Comment', path: '/prc-comment' },
       { title: 'Lock Marks Entry', path: '/marks-entry-locking' },
-      { title: 'Reports', path: '/examination-reports' }
+      {
+        id: 'examination-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Blank Exam Format', path: '/blank-exam-format' },
+          { title: 'Student Signature Sheet', path: '/student-signature-sheet' },
+          { title: 'Toppers List', path: '/toppers-list' },
+          { title: 'Consolidated Report', path: '/consolidated-report' },
+          { title: 'Progress Report Card', path: '/progress-report-card' },
+          { title: 'Performance Sheet', path: '/performance-sheet' },
+          { title: 'Report Card Remarks', path: '/report-card-remark-report' }
+        ]
+      }
     ]
   },
   {
@@ -485,6 +497,23 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (hostelReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, hostel: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'hostel-reports': true }));
+    }
+    const examPaths = [
+      '/exam-terms', '/exam-names', '/group-master', '/grade-master',
+      '/link-student-with-subject', '/marks-entry', '/student-wise-marks-entry',
+      '/prc-comment', '/marks-entry-locking'
+    ];
+    if (examPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, examination: true }));
+    }
+    const examReportPaths = [
+      '/blank-exam-format', '/student-signature-sheet', '/toppers-list',
+      '/consolidated-report', '/progress-report-card', '/performance-sheet',
+      '/report-card-remark-report', '/examination-reports'
+    ];
+    if (examReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, examination: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'examination-reports': true }));
     }
   }, [currentPath]);
 
