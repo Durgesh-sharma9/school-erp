@@ -50,6 +50,7 @@ import frontOfficeRoutes from './modules/front-office/front-office.routes.js';
 import libraryRoutes from './modules/library/library.routes.js';
 import stationaryRoutes from './modules/stationary/stationary.routes.js';
 import smsRoutes from './modules/sms/sms.routes.js';
+import userManagementRoutes from './modules/user-management/user-management.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -69,6 +70,7 @@ app.use('/api/front-office', frontOfficeRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/stationary', stationaryRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/user-management', userManagementRoutes);
 
 
 // Global Error Handler

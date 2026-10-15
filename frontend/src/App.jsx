@@ -234,6 +234,11 @@ import {
   BirthdayReportPage as SmsBirthdayReportPage,
   SmsReportsPage
 } from './modules/sms';
+import {
+  ManageUsersPage,
+  UserPrivilegeReportPage,
+  UserReportsPage
+} from './modules/user-management';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -756,6 +761,14 @@ function AppContent() {
                 return <SmsStatusReportPage onNavigate={handleNavigate} />;
               case '/birthday-report':
                 return <SmsBirthdayReportPage onNavigate={handleNavigate} />;
+
+              // User Management Module
+              case '/user-privilege':
+                return <ManageUsersPage onNavigate={handleNavigate} />;
+              case '/user-reports':
+                return <UserReportsPage onNavigate={handleNavigate} />;
+              case '/user-privilege-report':
+                return <UserPrivilegeReportPage onNavigate={handleNavigate} />;
 
               default:
                 return (

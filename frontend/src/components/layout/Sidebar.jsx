@@ -445,7 +445,13 @@ export const menuCategories = [
     icon: Settings, // manage_accounts in UAB
     subItems: [
       { title: 'Manage Users', path: '/user-privilege' },
-      { title: 'Reports', path: '/user-reports' }
+      {
+        id: 'user-management-reports',
+        title: 'Reports',
+        children: [
+          { title: 'User Privilege Report', path: '/user-privilege-report' }
+        ]
+      }
     ]
   },
   {
@@ -651,6 +657,19 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (smsReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, sms: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'sms-reports': true }));
+    }
+    const userManagementPaths = [
+      '/user-privilege'
+    ];
+    if (userManagementPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, userManagement: true }));
+    }
+    const userManagementReportPaths = [
+      '/user-privilege-report', '/user-reports'
+    ];
+    if (userManagementReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, userManagement: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'user-management-reports': true }));
     }
   }, [currentPath]);
 
