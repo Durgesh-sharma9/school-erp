@@ -205,6 +205,24 @@ import {
   DamagedBooksReportPage,
   LibraryReportsPage
 } from './modules/library';
+import {
+  SchoolShopInfoPage,
+  SupplierShopMasterPage,
+  CategoryMasterPage,
+  ItemsMasterPage,
+  SetMasterPage,
+  IssueItemsPage,
+  DuePaymentPage,
+  PurchaseItemsPage,
+  CategoryItemsReportPage,
+  SetMasterReportPage,
+  IssueSetsReportPage,
+  SupplierReportPage,
+  PurchaseItemsReportPage,
+  StockReportPage,
+  LowStockReportPage,
+  StationaryReportsPage
+} from './modules/stationary';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -670,6 +688,42 @@ function AppContent() {
                 return <PurchasedBooksReportPage onNavigate={handleNavigate} />;
               case '/get-damaged-books-report':
                 return <DamagedBooksReportPage onNavigate={handleNavigate} />;
+
+              // Stationary Module Masters
+              case '/shop-info':
+                return <SchoolShopInfoPage onNavigate={handleNavigate} />;
+              case '/supplier-master':
+                return <SupplierShopMasterPage onNavigate={handleNavigate} />;
+              case '/category-master':
+                return <CategoryMasterPage onNavigate={handleNavigate} />;
+              case '/items-master':
+                return <ItemsMasterPage onNavigate={handleNavigate} />;
+              case '/set-master':
+                return <SetMasterPage onNavigate={handleNavigate} />;
+              case '/issue-items':
+                return <IssueItemsPage onNavigate={handleNavigate} />;
+              case '/due-payment':
+                return <DuePaymentPage onNavigate={handleNavigate} />;
+              case '/purchase-items':
+                return <PurchaseItemsPage onNavigate={handleNavigate} />;
+
+              // Stationary Module Reports & Hub
+              case '/stationary-reports':
+                return <StationaryReportsPage onNavigate={handleNavigate} />;
+              case '/category-items-report':
+                return <CategoryItemsReportPage onNavigate={handleNavigate} />;
+              case '/set-master-report':
+                return <SetMasterReportPage onNavigate={handleNavigate} />;
+              case '/issue-sets-report':
+                return <IssueSetsReportPage onNavigate={handleNavigate} />;
+              case '/supplier-report':
+                return <SupplierReportPage onNavigate={handleNavigate} />;
+              case '/purchase-items-report':
+                return <PurchaseItemsReportPage onNavigate={handleNavigate} />;
+              case '/stock-report':
+                return <StockReportPage onNavigate={handleNavigate} />;
+              case '/low-stock-report':
+                return <LowStockReportPage onNavigate={handleNavigate} />;
 
               default:
                 return (

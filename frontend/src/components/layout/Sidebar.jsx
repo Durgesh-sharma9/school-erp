@@ -403,7 +403,19 @@ export const menuCategories = [
       { title: 'Issue Items', path: '/issue-items' },
       { title: 'Due Payment', path: '/due-payment' },
       { title: 'Purchase Items', path: '/purchase-items' },
-      { title: 'Reports', path: '/stationary-reports' }
+      {
+        id: 'stationary-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Category Items Report', path: '/category-items-report' },
+          { title: 'Set Master Report', path: '/set-master-report' },
+          { title: 'Issue Sets Report', path: '/issue-sets-report' },
+          { title: 'Supplier Report', path: '/supplier-report' },
+          { title: 'Purchase Items Report', path: '/purchase-items-report' },
+          { title: 'Stock Report', path: '/stock-report' },
+          { title: 'Low Stock Report', path: '/low-stock-report' }
+        ]
+      }
     ]
   },
   {
@@ -602,6 +614,22 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (libraryReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, library: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'library-reports': true }));
+    }
+    const stationaryPaths = [
+      '/shop-info', '/supplier-master', '/category-master', '/items-master',
+      '/set-master', '/issue-items', '/due-payment', '/purchase-items'
+    ];
+    if (stationaryPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, stationary: true }));
+    }
+    const stationaryReportPaths = [
+      '/category-items-report', '/set-master-report', '/issue-sets-report',
+      '/supplier-report', '/purchase-items-report', '/stock-report',
+      '/low-stock-report', '/stationary-reports'
+    ];
+    if (stationaryReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, stationary: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'stationary-reports': true }));
     }
   }, [currentPath]);
 

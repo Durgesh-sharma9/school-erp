@@ -48,6 +48,7 @@ import examinationRoutes from './modules/examination/examination.routes.js';
 import payrollRoutes from './modules/payroll/payroll.routes.js';
 import frontOfficeRoutes from './modules/front-office/front-office.routes.js';
 import libraryRoutes from './modules/library/library.routes.js';
+import stationaryRoutes from './modules/stationary/stationary.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -65,6 +66,7 @@ app.use('/api/examination', examinationRoutes);
 app.use('/api/payroll', payrollRoutes);
 app.use('/api/front-office', frontOfficeRoutes);
 app.use('/api/library', libraryRoutes);
+app.use('/api/stationary', stationaryRoutes);
 
 
 // Global Error Handler
