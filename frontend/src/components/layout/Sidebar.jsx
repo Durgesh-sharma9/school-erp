@@ -376,7 +376,18 @@ export const menuCategories = [
       { title: 'Purchase Books', path: '/purchase-book' },
       { title: 'Damaged Books', path: '/damaged-book' },
       { title: 'Library Supplier Master', path: '/library-supplier-master' },
-      { title: 'Reports', path: '/library-reports' }
+      {
+        id: 'library-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Books Summary', path: '/get-books-report' },
+          { title: 'Issued Books Report', path: '/get-issued-books-report' },
+          { title: 'Pending Books Report', path: '/get-pending-books-report' },
+          { title: 'Books Stock Report', path: '/get-books-stock-report' },
+          { title: 'Purchased Books Report', path: '/get-purchase-books-report' },
+          { title: 'Damaged Books Report', path: '/get-damaged-books-report' }
+        ]
+      }
     ]
   },
   {
@@ -575,6 +586,22 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (frontOfficeReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, frontOffice: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'front-office-reports': true }));
+    }
+    const libraryPaths = [
+      '/library-master', '/add-books', '/issue-book', '/return-book',
+      '/purchase-book', '/damaged-book', '/library-supplier-master'
+    ];
+    if (libraryPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, library: true }));
+    }
+    const libraryReportPaths = [
+      '/get-books-report', '/get-issued-books-report', '/get-pending-books-report',
+      '/get-books-stock-report', '/get-purchase-books-report', '/get-damaged-books-report',
+      '/library-reports'
+    ];
+    if (libraryReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, library: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'library-reports': true }));
     }
   }, [currentPath]);
 

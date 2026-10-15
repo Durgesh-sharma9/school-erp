@@ -1,5 +1,3 @@
-import { prisma } from '../../config/database.js';
-
 // Realistic mock store fallback for seamless operation when db tables are pending migration
 const mockStore = {
   terms: [

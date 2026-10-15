@@ -1,5 +1,3 @@
-import { prisma } from '../../config/database.js';
-
 // In-memory persistent mock store for payroll with multi-tenant readiness
 const mockStore = {
   branches: [

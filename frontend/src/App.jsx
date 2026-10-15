@@ -189,6 +189,22 @@ import {
   StudentComplaintReportPage,
   StaffGatePassReportPage
 } from './modules/front-office';
+import {
+  LibraryMasterPage,
+  AddBooksPage,
+  IssueBooksPage,
+  ReturnBooksPage,
+  PurchaseBooksPage,
+  DamagedBooksPage,
+  LibrarySupplierMasterPage,
+  BooksSummaryReportPage,
+  IssuedBooksReportPage,
+  PendingBooksReportPage,
+  BooksStockReportPage,
+  PurchasedBooksReportPage,
+  DamagedBooksReportPage,
+  LibraryReportsPage
+} from './modules/library';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -622,6 +638,39 @@ function AppContent() {
                 return <StudentComplaintReportPage onNavigate={handleNavigate} />;
               case '/staff-gate-pass-report':
                 return <StaffGatePassReportPage onNavigate={handleNavigate} />;
+
+              // Library Module Masters
+              case '/library-master':
+                return <LibraryMasterPage onNavigate={handleNavigate} />;
+              case '/add-books':
+                return <AddBooksPage onNavigate={handleNavigate} />;
+              case '/issue-book':
+                return <IssueBooksPage onNavigate={handleNavigate} />;
+              case '/return-book':
+                return <ReturnBooksPage onNavigate={handleNavigate} />;
+              case '/purchase-book':
+                return <PurchaseBooksPage onNavigate={handleNavigate} />;
+              case '/damaged-book':
+                return <DamagedBooksPage onNavigate={handleNavigate} />;
+              case '/library-supplier-master':
+                return <LibrarySupplierMasterPage onNavigate={handleNavigate} />;
+
+              // Library Module Reports & Hub
+              case '/library-reports':
+                return <LibraryReportsPage onNavigate={handleNavigate} />;
+              case '/get-books-report':
+                return <BooksSummaryReportPage onNavigate={handleNavigate} />;
+              case '/get-issued-books-report':
+                return <IssuedBooksReportPage onNavigate={handleNavigate} />;
+              case '/get-pending-books-report':
+                return <PendingBooksReportPage onNavigate={handleNavigate} />;
+              case '/get-books-stock-report':
+                return <BooksStockReportPage onNavigate={handleNavigate} />;
+              case '/get-purchase-books-report':
+                return <PurchasedBooksReportPage onNavigate={handleNavigate} />;
+              case '/get-damaged-books-report':
+                return <DamagedBooksReportPage onNavigate={handleNavigate} />;
+
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">
