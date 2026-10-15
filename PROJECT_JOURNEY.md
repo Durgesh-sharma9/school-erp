@@ -1034,6 +1034,38 @@ This document tracks the complete development journey of the **Unified School ER
     * Ran `npm run build` in `frontend`: Compiled cleanly with **0 errors**.
 * **Status:** ✅ Completed
 
+### 📍 [Entry #41] - 1:1 Implementation of 5 Core Academic & Administration Pages
+* **Timestamp:** 2026-10-15
+* **Goal / Prompt:** Replicate 5 live UAB portal pages with 100% working functionality:
+  1. `/get-homework-status-report` (Homework Status & Seen Report)
+  2. `/send-greeting-card-msg` (Send Greeting Card Msg)
+  3. `/birthday-report` (Birthday Master Report)
+  4. `/add-edit-bulk-students` (Add / Edit Bulk Students)
+  5. `/student-photo-management` (Student Photo Management)
+* **Actions Taken:**
+  * **Reverse-Engineered UAB Angular Chunks:**
+    * Chunk `506.d7e1a1ce2abf3c80.js` (`HomeworkSeenReportComponent`)
+    * Chunk `9522.33ce6b54ba5f4710.js` (`SendGreetingCardComponent`)
+    * Chunk `9969.670b0b41601ee5d1.js` (`BirthdayReportComponent`)
+    * Chunk `5992.d89731e82fb09e98.js` (`AddEditBulkStudentsComponent`)
+    * Chunk `49.a4e3a98407bf0bd9.js` (`StudentPhotoManagementComponent`)
+  * **Backend APIs Created & Live:**
+    * `GET /api/study-material/homework-status-report` with KPI counts and student-by-student homework read/unread states.
+    * `GET /api/greeting-card/recipients`, `POST /api/greeting-card/send`, and `GET /api/greeting-card/birthday-report` with automated status tracking.
+    * `GET /api/students/bulk`, `POST /api/students/bulk`, `GET /api/students/photos`, and `POST /api/students/photos/:id`.
+  * **Frontend Pages Built & Polished:**
+    * `HomeworkStatusReportPage.jsx`: Filter criteria, KPI cards, student status table, nested homework subject breakdown, Excel CSV export, and print.
+    * `SendGreetingCardPage.jsx`: Multi-channel toggles (SMS, WhatsApp, Card Push), tab selector (Student, Staff, Father, Mother), animated greeting card preview modal, customizable message composer with dynamic tags.
+    * `BirthdayReportPage.jsx`: Month dropdown, role filters, class filters, celebratory birthday badge indicators, Excel export, print, and bulk "Send Birthday Wishes".
+    * `AddEditBulkStudentsPage.jsx`: High-performance spreadsheet grid, dynamic inline cell editing (SR No, Adm No, PEN, DOB, Gender, Blood Grp, 12-digit Aadhaar, Category, House, Father & Mother details), Auto Generate SR No, Add Row, Sample Template download, Excel import/export, and validation.
+    * `StudentPhotoManagementPage.jsx`: Upload/Missing metrics, live webcam photo studio modal (`vex-take-photo`) with video stream, 1:1 square crop capture, file upload, full preview modal, and zip archive download.
+  * **Router & Navigation Integration:**
+    * Configured route aliases in `App.jsx` for both direct URLs and sidebar paths (`/get-homework-status-report`, `/study-material-reports`, `/send-greeting-card-msg`, `/birthday-report`, `/greeting-card-reports`, `/add-edit-bulk-students`, `/student-photo-management`).
+  * **Build Verification:**
+    * Ran `npm run build` with Vite: 0 errors, compiled cleanly.
+    * Verified in headless browser with live auth session across all 5 pages.
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:

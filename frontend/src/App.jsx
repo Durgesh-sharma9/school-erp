@@ -60,8 +60,17 @@ import {
 import {
   StudyMaterialPage,
   HomeworkPage,
-  PreviousYearPaperPage
+  PreviousYearPaperPage,
+  HomeworkStatusReportPage
 } from './modules/study-material';
+import {
+  SendGreetingCardPage,
+  BirthdayReportPage
+} from './modules/greeting-card';
+import {
+  AddEditBulkStudentsPage,
+  StudentPhotoManagementPage
+} from './modules/bulk-editing';
 import {
   CrmDashboardPage,
   CrmEnquiriesPage,
@@ -282,6 +291,18 @@ function AppContent() {
                 return <HomeworkPage onNavigate={handleNavigate} />;
               case '/upload-pre-year-paper':
                 return <PreviousYearPaperPage onNavigate={handleNavigate} />;
+              case '/get-homework-status-report':
+              case '/study-material-reports':
+                return <HomeworkStatusReportPage onNavigate={handleNavigate} />;
+              case '/send-greeting-card-msg':
+                return <SendGreetingCardPage onNavigate={handleNavigate} />;
+              case '/birthday-report':
+              case '/greeting-card-reports':
+                return <BirthdayReportPage onNavigate={handleNavigate} />;
+              case '/add-edit-bulk-students':
+                return <AddEditBulkStudentsPage onNavigate={handleNavigate} />;
+              case '/student-photo-management':
+                return <StudentPhotoManagementPage onNavigate={handleNavigate} />;
               case '/crm':
               case '/crm/dashboard':
                 return <CrmDashboardPage onNavigate={handleNavigate} />;

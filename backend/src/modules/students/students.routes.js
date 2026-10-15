@@ -12,7 +12,11 @@ import {
   createOnlineClass,
   promoteStudents,
   getExamDateSheets,
-  createExamDateSheet
+  createExamDateSheet,
+  getBulkStudents,
+  saveBulkStudents,
+  getStudentPhotosList,
+  saveSingleStudentPhoto
 } from './students.controller.js';
 
 const router = express.Router();
@@ -32,6 +36,14 @@ const upload = multer({
 
 // Photo upload
 router.post('/upload-photo', upload.single('photo'), uploadStudentPhoto);
+
+// Bulk Students (1:1 with UAB add-edit-bulk-students)
+router.get('/bulk', getBulkStudents);
+router.post('/bulk-save', saveBulkStudents);
+
+// Student Photo Management (1:1 with UAB student-photo-management)
+router.get('/photos-list', getStudentPhotosList);
+router.post('/save-student-photo', saveSingleStudentPhoto);
 
 // Roll Number Assignment
 router.post('/assign-roll', assignRollNumbers);
@@ -57,3 +69,4 @@ router.get('/', getStudentsList);
 router.get('/:admNo', getStudentByAdmNo);
 
 export default router;
+

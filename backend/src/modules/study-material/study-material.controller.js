@@ -149,3 +149,187 @@ export const createPreviousYearPaper = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// Homework Status Seen Report (1:1 with UAB get-homework-status-report)
+export const getHomeworkStatusReport = async (req, res) => {
+  try {
+    const { class_id, division_id, current_date } = req.query;
+
+    const sampleReportData = [
+      {
+        id: 1,
+        sr_no: "2059",
+        adm_no: "ADM-2023-01",
+        student_name: "Aadhya Choudhary",
+        contact_no_sms: "6377281034",
+        fathers_name: "Ramesh Choudhary",
+        class_name: class_id || "X",
+        division_name: division_id || "A",
+        homework: [
+          {
+            subject_name: "Mathematics Standard",
+            status_id: 1,
+            details: {
+              homework_title: "Exercise 4.2 Quadratic Equations Q1 to Q6"
+            }
+          },
+          {
+            subject_name: "Science",
+            status_id: 1,
+            details: {
+              homework_title: "Chapter 5 Cell Structure Diagram & NCERT Worksheet"
+            }
+          },
+          {
+            subject_name: "English",
+            status_id: 0,
+            details: {
+              homework_title: "Letter to Editor Practice in Fair Notebook"
+            }
+          }
+        ]
+      },
+      {
+        id: 2,
+        sr_no: "2060",
+        adm_no: "ADM-2023-02",
+        student_name: "Rohan Sharma",
+        contact_no_sms: "9829012345",
+        fathers_name: "Mukesh Sharma",
+        class_name: class_id || "X",
+        division_name: division_id || "A",
+        homework: [
+          {
+            subject_name: "Mathematics Standard",
+            status_id: 1,
+            details: {
+              homework_title: "Exercise 4.2 Quadratic Equations Q1 to Q6"
+            }
+          },
+          {
+            subject_name: "Science",
+            status_id: 0,
+            details: {
+              homework_title: "Chapter 5 Cell Structure Diagram & NCERT Worksheet"
+            }
+          },
+          {
+            subject_name: "English",
+            status_id: 0,
+            details: {
+              homework_title: "Letter to Editor Practice in Fair Notebook"
+            }
+          }
+        ]
+      },
+      {
+        id: 3,
+        sr_no: "2061",
+        adm_no: "ADM-2023-03",
+        student_name: "Priya Kumawat",
+        contact_no_sms: "9876543210",
+        fathers_name: "Surendra Kumawat",
+        class_name: class_id || "X",
+        division_name: division_id || "A",
+        homework: [
+          {
+            subject_name: "Mathematics Standard",
+            status_id: 1,
+            details: {
+              homework_title: "Exercise 4.2 Quadratic Equations Q1 to Q6"
+            }
+          },
+          {
+            subject_name: "Science",
+            status_id: 1,
+            details: {
+              homework_title: "Chapter 5 Cell Structure Diagram & NCERT Worksheet"
+            }
+          },
+          {
+            subject_name: "English",
+            status_id: 1,
+            details: {
+              homework_title: "Letter to Editor Practice in Fair Notebook"
+            }
+          }
+        ]
+      },
+      {
+        id: 4,
+        sr_no: "2062",
+        adm_no: "ADM-2023-04",
+        student_name: "Aditya Singh Rathore",
+        contact_no_sms: "9414011223",
+        fathers_name: "Bhawani Singh",
+        class_name: class_id || "X",
+        division_name: division_id || "A",
+        homework: [
+          {
+            subject_name: "Mathematics Standard",
+            status_id: 0,
+            details: {
+              homework_title: "Exercise 4.2 Quadratic Equations Q1 to Q6"
+            }
+          },
+          {
+            subject_name: "Science",
+            status_id: 0,
+            details: {
+              homework_title: "Chapter 5 Cell Structure Diagram & NCERT Worksheet"
+            }
+          },
+          {
+            subject_name: "English",
+            status_id: 0,
+            details: {
+              homework_title: "Letter to Editor Practice in Fair Notebook"
+            }
+          }
+        ]
+      },
+      {
+        id: 5,
+        sr_no: "2063",
+        adm_no: "ADM-2023-05",
+        student_name: "Kavya Meena",
+        contact_no_sms: "9828114455",
+        fathers_name: "Rajendra Meena",
+        class_name: class_id || "X",
+        division_name: division_id || "A",
+        homework: [
+          {
+            subject_name: "Mathematics Standard",
+            status_id: 1,
+            details: {
+              homework_title: "Exercise 4.2 Quadratic Equations Q1 to Q6"
+            }
+          },
+          {
+            subject_name: "Science",
+            status_id: 1,
+            details: {
+              homework_title: "Chapter 5 Cell Structure Diagram & NCERT Worksheet"
+            }
+          },
+          {
+            subject_name: "English",
+            status_id: 0,
+            details: {
+              homework_title: "Letter to Editor Practice in Fair Notebook"
+            }
+          }
+        ]
+      }
+    ];
+
+    res.status(200).json({
+      success: true,
+      message: 'Homework status seen report fetched successfully',
+      data: sampleReportData
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

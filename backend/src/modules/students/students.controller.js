@@ -637,3 +637,224 @@ export const getStudentByAdmNo = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get bulk students for spreadsheet editing (1:1 with UAB add-edit-bulk-students)
+ */
+export const getBulkStudents = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { className, section } = req.query;
+    let pool = TENANT_STUDENTS[schoolId] || [];
+
+    if (className) {
+      pool = pool.filter(s => s.className.toLowerCase() === className.toLowerCase());
+    }
+    if (section) {
+      pool = pool.filter(s => s.section.toLowerCase() === section.toLowerCase());
+    }
+
+    const bulkData = pool.map((s, idx) => ({
+      id: s.id || `std_${schoolId}_${idx + 1}`,
+      sr_no: s.srNo || `${1600 + idx}`,
+      adm_no: s.admNo || `ADM-${idx + 1}`,
+      permanent_edu_no: s.pen || `PEN${2026000 + idx}`,
+      enroll_no: s.enrollNo || `ENR-${idx + 1}`,
+      adm_date: s.admissionDate || s.createdAt?.split('T')[0] || '2024-04-01',
+      class_id: s.className,
+      division_id: s.section,
+      first_name: s.firstName,
+      last_name: s.lastName || '',
+      dob: s.dob || '2015-05-10',
+      gender: s.gender || 'Male',
+      blood_group: s.bloodGroup || 'B+',
+      aadhaar: s.aadhaar || '123456789012',
+      nationality: 'Indian',
+      religion: s.religion || 'Hindu',
+      category: s.category || 'General',
+      house: s.house || 'Blue',
+      fathers_name: s.fatherName || '',
+      fathers_mobile_no: s.fatherMobile || s.smsWhatsappNo || '9829012345',
+      fathers_aadhaar: s.fatherAadhaar || '987654321012',
+      mothers_name: s.motherName || '',
+      mothers_mobile_no: s.motherMobile || '9829012346',
+      mothers_aadhaar: s.motherAadhaar || '876543210987'
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: bulkData.length,
+      data: bulkData
+    });
+  } catch (error) {
+    console.error('[Get Bulk Students Error]:', error);
+    next(error);
+  }
+};
+
+/**
+ * Save Bulk Students edits (1:1 with UAB add-edit-bulk-students)
+ */
+export const saveBulkStudents = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { students = [] } = req.body;
+
+    if (!Array.isArray(students) || students.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No student records provided for saving'
+      });
+    }
+
+    // Server-side validation
+    const errors = [];
+    students.forEach((s, idx) => {
+      if (!s.adm_no) errors.push(`Row ${idx + 1}: Adm No is required`);
+      if (!s.first_name) errors.push(`Row ${idx + 1}: First Name is required`);
+      if (s.aadhaar && s.aadhaar.length !== 12) errors.push(`Row ${idx + 1}: Student Aadhaar must be 12 digits`);
+      if (s.fathers_mobile_no && s.fathers_mobile_no.length !== 10) errors.push(`Row ${idx + 1}: Father mobile must be 10 digits`);
+    });
+
+    if (errors.length > 0) {
+      return res.status(422).json({
+        success: false,
+        message: 'Validation failed on student records',
+        errors
+      });
+    }
+
+    if (!TENANT_STUDENTS[schoolId]) {
+      TENANT_STUDENTS[schoolId] = [];
+    }
+
+    // Merge or insert records
+    students.forEach((s) => {
+      const existingIdx = TENANT_STUDENTS[schoolId].findIndex(x => x.admNo === s.adm_no || (s.id && x.id === s.id));
+      const mappedRecord = {
+        id: s.id || `std_${schoolId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        schoolId,
+        srNo: s.sr_no || '0',
+        admNo: s.adm_no,
+        pen: s.permanent_edu_no,
+        enrollNo: s.enroll_no,
+        admissionDate: s.adm_date,
+        className: s.class_id,
+        section: s.division_id,
+        firstName: s.first_name,
+        lastName: s.last_name || '',
+        dob: s.dob,
+        gender: s.gender,
+        bloodGroup: s.blood_group,
+        aadhaar: s.aadhaar,
+        religion: s.religion,
+        category: s.category,
+        house: s.house,
+        fatherName: s.fathers_name,
+        fatherMobile: s.fathers_mobile_no,
+        fatherAadhaar: s.fathers_aadhaar,
+        motherName: s.mothers_name,
+        motherMobile: s.mothers_mobile_no,
+        motherAadhaar: s.mothers_aadhaar,
+        smsWhatsappNo: s.fathers_mobile_no,
+        status: 'Studying',
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIdx !== -1) {
+        TENANT_STUDENTS[schoolId][existingIdx] = {
+          ...TENANT_STUDENTS[schoolId][existingIdx],
+          ...mappedRecord
+        };
+      } else {
+        TENANT_STUDENTS[schoolId].push(mappedRecord);
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully updated ${students.length} student record(s) in database!`,
+      savedCount: students.length
+    });
+  } catch (error) {
+    console.error('[Save Bulk Students Error]:', error);
+    next(error);
+  }
+};
+
+/**
+ * Get student photo management list (1:1 with UAB student-photo-management)
+ */
+export const getStudentPhotosList = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { className, section } = req.query;
+    let pool = TENANT_STUDENTS[schoolId] || [];
+
+    if (className) {
+      pool = pool.filter(s => s.className.toLowerCase() === className.toLowerCase());
+    }
+    if (section) {
+      pool = pool.filter(s => s.section.toLowerCase() === section.toLowerCase());
+    }
+
+    const data = pool.map(s => ({
+      id: s.id,
+      sr_no: s.srNo,
+      adm_no: s.admNo,
+      roll_no: s.rollNo || '-',
+      student_name: `${s.firstName} ${s.lastName || ''}`.trim(),
+      class_name: s.className,
+      division_name: s.section,
+      gender: s.gender,
+      photo_url: s.photoUrl || '',
+      has_photo: Boolean(s.photoUrl && s.photoUrl.trim() !== ''),
+      father_name: s.fatherName || ''
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      data
+    });
+  } catch (error) {
+    console.error('[Get Student Photos List Error]:', error);
+    next(error);
+  }
+};
+
+/**
+ * Save single student photo from upload or webcam capture
+ */
+export const saveSingleStudentPhoto = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { studentId, admNo, photoUrl } = req.body;
+
+    if (!photoUrl) {
+      return res.status(400).json({ success: false, message: 'Photo image data is required' });
+    }
+
+    const pool = TENANT_STUDENTS[schoolId] || [];
+    const student = pool.find(s => s.id === studentId || s.admNo === admNo);
+
+    if (student) {
+      student.photoUrl = photoUrl;
+      student.photoUpdatedAt = new Date().toISOString();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Student photo updated successfully',
+      data: {
+        id: student?.id || studentId,
+        admNo: student?.admNo || admNo,
+        photoUrl
+      }
+    });
+  } catch (error) {
+    console.error('[Save Student Photo Error]:', error);
+    next(error);
+  }
+};
+

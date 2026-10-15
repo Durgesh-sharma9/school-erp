@@ -41,6 +41,7 @@ import academicRoutes from './modules/academics/academics.routes.js';
 import certificateRoutes from './modules/certificates/certificates.routes.js';
 import studyMaterialRoutes from './modules/study-material/study-material.routes.js';
 import crmRoutes from './modules/crm/crm.routes.js';
+import greetingCardRoutes from './modules/greeting-card/greeting-card.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -51,6 +52,8 @@ app.use('/api/academics', academicRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/study-material', studyMaterialRoutes);
 app.use('/api/crm', crmRoutes);
+app.use('/api/greeting-card', greetingCardRoutes);
+
 
 // Global Error Handler
 app.use(errorHandler);
