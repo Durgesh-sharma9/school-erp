@@ -1,26 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ClipboardList,
+  Briefcase,
   Search,
   Home,
   CheckCircle2,
   XCircle,
   Clock,
   Trash2,
-  Briefcase,
-  Plus
+  Calendar,
+  Filter,
+  User,
+  Plus,
+  Download,
+  Printer,
+  RotateCw,
+  Eye,
+  X,
+  FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function StaffLeaveRequestsPage({ onNavigate }) {
   const [leaves, setLeaves] = useState([]);
   const [summary, setSummary] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
-  const [filterType, setFilterType] = useState('All');
+  const [filterType, setFilterType] = useState('All'); // 'All', 'Date Wise'
   const [fromDate, setFromDate] = useState('2026-04-01');
   const [toDate, setToDate] = useState('2026-04-30');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState(null);
 
   const fetchLeaves = () => {
+    setLoading(true);
     const params = new URLSearchParams({
       type: filterType,
       fromDate,
@@ -34,12 +45,17 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
           setSummary(d.summary || { total: 0, approved: 0, pending: 0, rejected: 0 });
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        toast.error('Failed to load staff leave records');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchLeaves();
-  }, []);
+  }, [filterType]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -55,33 +71,74 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Staff leave request ${status.toLowerCase()}`);
+        toast.success(`Staff leave request marked as ${status}`);
         fetchLeaves();
+        if (selectedLeave && selectedLeave.id === id) {
+          setSelectedLeave({ ...selectedLeave, status });
+        }
       }
     } catch {
-      toast.error('Failed to update status');
+      toast.error('Failed to update leave status');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this staff leave record?')) return;
+    if (!window.confirm('Are you sure you want to delete this staff leave request?')) return;
     try {
       const res = await fetch(`/api/leave-management/staff-leaves/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        toast.success('Staff leave record deleted');
+        toast.success('Staff leave record deleted successfully');
         fetchLeaves();
+        if (selectedLeave && selectedLeave.id === id) {
+          setSelectedLeave(null);
+        }
       }
     } catch {
-      toast.error('Failed to delete leave');
+      toast.error('Failed to delete staff leave');
     }
   };
 
+  const handleExportCSV = () => {
+    if (leaves.length === 0) {
+      toast.error('No records to export');
+      return;
+    }
+    const headers = ['S.NO', 'STAFF NAME', 'EMP CODE', 'DEPARTMENT', 'DESIGNATION', 'LEAVE TYPE', 'FROM DATE', 'TO DATE', 'TOTAL DAYS', 'REASON', 'STATUS', 'APPROVED BY'];
+    const rows = leaves.map((l, i) => [
+      i + 1,
+      `"${l.staffName || ''}"`,
+      l.empCode || '',
+      `"${l.department || ''}"`,
+      `"${l.designation || ''}"`,
+      `"${l.leaveType || ''}"`,
+      l.fromDate || '',
+      l.toDate || '',
+      l.totalDays || 1,
+      `"${(l.reason || '').replace(/"/g, '""')}"`,
+      l.status || 'Pending',
+      `"${l.approvedBy || '-'}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Staff_Leave_Requests_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Staff leave CSV exported');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const filteredLeaves = leaves.filter(l =>
-    l.staffName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.reason.toLowerCase().includes(searchQuery.toLowerCase())
+    (l.staffName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.department || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.designation || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.reason || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -106,7 +163,29 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
         </div>
 
         {/* Action Toolbar */}
-        <div className="flex items-center gap-2 mt-3 md:mt-0">
+        <div className="flex items-center gap-2 mt-3 md:mt-0 flex-wrap">
+          <button
+            onClick={fetchLeaves}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold border border-slate-200 transition-all"
+            title="Refresh List"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded text-xs font-semibold border border-emerald-200 transition-all"
+            title="Export CSV"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold border border-slate-200 transition-all"
+            title="Print List"
+          >
+            <Printer className="w-3.5 h-3.5" /> Print
+          </button>
           <button
             onClick={() => onNavigate && onNavigate('/apply-leave-request')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-sm transition-all"
@@ -124,7 +203,7 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
+              className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium bg-white"
             >
               <option value="All">All</option>
               <option value="Date Wise">Date Wise</option>
@@ -189,7 +268,7 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
               placeholder="Search staff, dept, reason..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full text-xs pl-3 pr-3 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full text-xs pl-3 pr-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -227,10 +306,10 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
                     <td className="py-2.5 px-3 text-slate-500">{index + 1}</td>
                     <td className="py-2.5 px-3">
                       <div className="font-bold text-slate-800">{leave.staffName}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{leave.empCode}</div>
+                      <div className="text-[10px] text-slate-400">Code: {leave.empCode}</div>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 font-medium">{leave.department}</td>
-                    <td className="py-2.5 px-3 text-slate-600">{leave.designation}</td>
+                    <td className="py-2.5 px-3 text-slate-600 font-medium">{leave.department}</td>
+                    <td className="py-2.5 px-3 text-slate-600 font-medium">{leave.designation}</td>
                     <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
                         {leave.leaveType}
@@ -258,6 +337,13 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => setSelectedLeave(leave)}
+                          className="p-1 hover:bg-slate-200 text-slate-400 hover:text-indigo-600 rounded transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
                         {leave.status === 'Pending' && (
                           <>
                             <button
@@ -278,8 +364,8 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
                         )}
                         <button
                           onClick={() => handleDelete(leave.id)}
-                          className="p-1 hover:bg-slate-200 text-slate-400 hover:text-rose-600 rounded"
-                          title="Delete Record"
+                          className="p-1 hover:bg-slate-200 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                          title="Delete Request"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -292,7 +378,104 @@ export function StaffLeaveRequestsPage({ onNavigate }) {
           </table>
         </div>
       </div>
+
+      {/* Staff Leave Details Modal */}
+      {selectedLeave && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-150">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-bold text-slate-800 text-sm">Staff Leave Request Details</h3>
+              </div>
+              <button
+                onClick={() => setSelectedLeave(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 pb-3 border-b border-slate-100">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Staff Name</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedLeave.staffName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Emp Code / Dept</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedLeave.empCode} ({selectedLeave.department})</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Leave Type</span>
+                  <span className="font-semibold text-indigo-600">{selectedLeave.leaveType}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Duration</span>
+                  <span className="font-semibold text-slate-700">{selectedLeave.fromDate} to {selectedLeave.toDate}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Total Days</span>
+                  <span className="font-bold text-slate-800">{selectedLeave.totalDays} Day(s)</span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-slate-400 block mb-1">Reason for Leave</span>
+                <p className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 leading-relaxed font-medium">
+                  {selectedLeave.reason}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Current Status</span>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    selectedLeave.status === 'Approved'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : selectedLeave.status === 'Rejected'
+                      ? 'bg-rose-100 text-rose-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {selectedLeave.status}
+                  </span>
+                </div>
+
+                {selectedLeave.status === 'Pending' && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleUpdateStatus(selectedLeave.id, 'Approved')}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-xs"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedLeave.id, 'Rejected')}
+                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold shadow-xs"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setSelectedLeave(null)}
+                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 export default StaffLeaveRequestsPage;

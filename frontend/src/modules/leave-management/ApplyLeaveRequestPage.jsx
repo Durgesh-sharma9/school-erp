@@ -1,51 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import {
   FilePlus,
-  Send,
   Home,
-  Calendar,
-  User,
-  Briefcase,
-  GraduationCap,
-  Paperclip,
-  Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  Clock,
+  Briefcase,
+  GraduationCap,
+  Calendar,
+  Send,
+  RotateCcw,
+  Trash2,
+  ArrowLeft,
+  Eye,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const ALL_CLASSES = ['Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+const ALL_SECTIONS = ['A', 'B', 'C', 'D'];
 
 const LEAVE_TYPES = [
   'Casual Leave (CL)',
   'Medical / Sick Leave (ML)',
   'Earned Leave (EL)',
-  'Urgent Personal Work',
-  'Half Day Leave',
-  'Family Emergency',
-  'Maternity / Paternity Leave'
+  'Maternity Leave',
+  'Duty Leave',
+  'Academic Leave',
+  'Special Casual Leave',
+  'Emergency Personal Leave'
 ];
-
-const ALL_CLASSES = ['Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
 export function ApplyLeaveRequestPage({ onNavigate }) {
   const [applicantType, setApplicantType] = useState('Staff'); // 'Staff' or 'Student'
   const [applicantName, setApplicantName] = useState('');
-  const [className, setClassName] = useState('I');
+  const [className, setClassName] = useState('X');
   const [section, setSection] = useState('A');
   const [leaveType, setLeaveType] = useState('Casual Leave (CL)');
-  const [fromDate, setFromDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [fromDate, setFromDate] = useState('2026-04-20');
+  const [toDate, setToDate] = useState('2026-04-21');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [myLeaves, setMyLeaves] = useState([]);
+  const [selectedFeedItem, setSelectedFeedItem] = useState(null);
 
-  // Calculate days
   const calculateDays = () => {
-    if (!fromDate || !toDate) return 1;
-    const d1 = new Date(fromDate);
-    const d2 = new Date(toDate);
-    const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
-    return diff > 0 ? diff : 1;
+    try {
+      const d1 = new Date(fromDate);
+      const d2 = new Date(toDate);
+      if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 1;
+      const diffTime = d2.getTime() - d1.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      return diffDays > 0 ? diffDays : 1;
+    } catch {
+      return 1;
+    }
   };
 
   const totalDays = calculateDays();
@@ -65,6 +74,14 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
   useEffect(() => {
     fetchMyLeaves();
   }, [applicantType]);
+
+  const handleReset = () => {
+    setApplicantName('');
+    setReason('');
+    setLeaveType('Casual Leave (CL)');
+    setFromDate('2026-04-20');
+    setToDate('2026-04-21');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,15 +113,35 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
       const data = await res.json();
       if (data.success) {
         toast.success(data.message || 'Leave application submitted successfully!');
-        setReason('');
+        handleReset();
         fetchMyLeaves();
       } else {
         toast.error(data.message || 'Failed to submit leave');
       }
     } catch {
-      toast.error('Network error');
+      toast.error('Network error. Failed to reach server.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteFeedItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this leave application?')) return;
+    try {
+      const endpoint = applicantType === 'Staff'
+        ? `/api/leave-management/staff-leaves/${id}`
+        : `/api/leave-management/student-leaves/${id}`;
+      const res = await fetch(endpoint, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Leave application removed');
+        fetchMyLeaves();
+        if (selectedFeedItem && selectedFeedItem.id === id) {
+          setSelectedFeedItem(null);
+        }
+      }
+    } catch {
+      toast.error('Failed to delete application');
     }
   };
 
@@ -127,7 +164,7 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
             <span>/</span>
             <span
               className="hover:text-indigo-600 cursor-pointer"
-              onClick={() => onNavigate && onNavigate(applicantType === 'Staff' ? 'staff-leave-requests' : 'all-leave-requests')}
+              onClick={() => onNavigate && onNavigate(applicantType === 'Staff' ? '/staff-leave-requests' : '/all-leave-requests')}
             >
               Leave Management
             </span>
@@ -139,10 +176,10 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
         {/* Quick link button to view requests */}
         <div className="flex items-center gap-2 mt-3 md:mt-0">
           <button
-            onClick={() => onNavigate && onNavigate(applicantType === 'Staff' ? 'staff-leave-requests' : 'all-leave-requests')}
+            onClick={() => onNavigate && onNavigate(applicantType === 'Staff' ? '/staff-leave-requests' : '/all-leave-requests')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded text-xs font-semibold shadow-sm transition-all"
           >
-            View Leave Records &rarr;
+            <ArrowLeft className="w-3.5 h-3.5" /> View {applicantType} Requests
           </button>
         </div>
       </div>
@@ -188,7 +225,7 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
             {/* Applicant Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                {applicantType === 'Staff' ? 'Staff Full Name' : 'Student Full Name'}
+                {applicantType === 'Staff' ? 'Staff Full Name *' : 'Student Full Name *'}
               </label>
               <input
                 type="text"
@@ -208,7 +245,7 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
                   <select
                     value={className}
                     onChange={e => setClassName(e.target.value)}
-                    className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                   >
                     {ALL_CLASSES.map(cls => (
                       <option key={cls} value={cls}>{cls}</option>
@@ -220,9 +257,9 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
                   <select
                     value={section}
                     onChange={e => setSection(e.target.value)}
-                    className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                   >
-                    {['A', 'B', 'C'].map(sec => (
+                    {ALL_SECTIONS.map(sec => (
                       <option key={sec} value={sec}>{sec}</option>
                     ))}
                   </select>
@@ -232,22 +269,22 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
 
             {/* Leave Type */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Leave Type</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Leave Type *</label>
               <select
                 value={leaveType}
                 onChange={e => setLeaveType(e.target.value)}
-                className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
               >
-                {LEAVE_TYPES.map(lt => (
-                  <option key={lt} value={lt}>{lt}</option>
+                {LEAVE_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </div>
 
-            {/* Dates: From Date and To Date */}
+            {/* Date Pickers */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">From Date</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">From Date *</label>
                 <input
                   type="date"
                   value={fromDate}
@@ -258,7 +295,7 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">To Date</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">To Date *</label>
                 <input
                   type="date"
                   value={toDate}
@@ -279,7 +316,7 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
 
             {/* Reason */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Reason / Description</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Reason / Description *</label>
               <textarea
                 rows={3}
                 placeholder="Explain the detailed purpose or medical condition..."
@@ -290,25 +327,24 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
               />
             </div>
 
-            {/* Optional Attachment */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Supporting Document / Medical Slip (Optional)
-              </label>
-              <input
-                type="file"
-                className="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-              />
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="flex-1 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border border-slate-200"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Reset Form
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex-2 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+                {submitting ? 'Submitting...' : 'Submit Leave Request'}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-              {submitting ? 'Submitting Application...' : 'Submit Leave Request'}
-            </button>
           </form>
         </div>
 
@@ -342,20 +378,29 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
                         {item.leaveType} &bull; {item.totalDays} {item.totalDays === 1 ? 'Day' : 'Days'}
                       </div>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        item.status === 'Approved'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : item.status === 'Rejected'
-                          ? 'bg-rose-100 text-rose-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {item.status === 'Approved' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                      {item.status === 'Rejected' && <XCircle className="w-3 h-3 text-rose-600" />}
-                      {item.status === 'Pending' && <Clock className="w-3 h-3 text-amber-600" />}
-                      {item.status}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          item.status === 'Approved'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : item.status === 'Rejected'
+                            ? 'bg-rose-100 text-rose-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {item.status === 'Approved' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                        {item.status === 'Rejected' && <XCircle className="w-3 h-3 text-rose-600" />}
+                        {item.status === 'Pending' && <Clock className="w-3 h-3 text-amber-600" />}
+                        {item.status}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteFeedItem(item.id)}
+                        className="p-1 text-slate-400 hover:text-rose-600 rounded"
+                        title="Delete this request"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   <p className="text-xs text-slate-600 mt-2 bg-slate-50 p-2 rounded">
@@ -375,4 +420,5 @@ export function ApplyLeaveRequestPage({ onNavigate }) {
     </div>
   );
 }
+
 export default ApplyLeaveRequestPage;

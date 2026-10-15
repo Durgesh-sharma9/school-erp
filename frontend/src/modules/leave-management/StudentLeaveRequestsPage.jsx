@@ -11,7 +11,12 @@ import {
   Calendar,
   Filter,
   User,
-  Plus
+  Plus,
+  Download,
+  Printer,
+  RotateCw,
+  Eye,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -25,8 +30,11 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
   const [toDate, setToDate] = useState('2026-04-30');
   const [selectedClass, setSelectedClass] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState(null);
 
   const fetchLeaves = () => {
+    setLoading(true);
     const params = new URLSearchParams({
       type: filterType,
       fromDate,
@@ -41,12 +49,17 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
           setSummary(d.summary || { total: 0, approved: 0, pending: 0, rejected: 0 });
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        toast.error('Failed to load leave records');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchLeaves();
-  }, []);
+  }, [filterType, selectedClass]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -62,8 +75,11 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Leave request ${status.toLowerCase()}`);
+        toast.success(`Leave request marked as ${status}`);
         fetchLeaves();
+        if (selectedLeave && selectedLeave.id === id) {
+          setSelectedLeave({ ...selectedLeave, status });
+        }
       }
     } catch {
       toast.error('Failed to update leave status');
@@ -76,18 +92,55 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
       const res = await fetch(`/api/leave-management/student-leaves/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        toast.success('Leave record deleted');
+        toast.success('Leave record deleted successfully');
         fetchLeaves();
+        if (selectedLeave && selectedLeave.id === id) {
+          setSelectedLeave(null);
+        }
       }
     } catch {
       toast.error('Failed to delete leave');
     }
   };
 
+  const handleExportCSV = () => {
+    if (leaves.length === 0) {
+      toast.error('No records to export');
+      return;
+    }
+    const headers = ['S.NO', 'STUDENT NAME', 'ROLL NO', 'CLASS', 'SECTION', 'LEAVE TYPE', 'FROM DATE', 'TO DATE', 'TOTAL DAYS', 'REASON', 'STATUS'];
+    const rows = leaves.map((l, i) => [
+      i + 1,
+      `"${l.studentName || ''}"`,
+      l.rollNo || '',
+      l.className || '',
+      l.section || '',
+      `"${l.leaveType || ''}"`,
+      l.fromDate || '',
+      l.toDate || '',
+      l.totalDays || 1,
+      `"${(l.reason || '').replace(/"/g, '""')}"`,
+      l.status || 'Pending'
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Student_Leave_Requests_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('CSV exported successfully');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const filteredLeaves = leaves.filter(l =>
-    l.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.reason.toLowerCase().includes(searchQuery.toLowerCase())
+    (l.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.className || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.reason || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -112,7 +165,29 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
         </div>
 
         {/* Action Toolbar */}
-        <div className="flex items-center gap-2 mt-3 md:mt-0">
+        <div className="flex items-center gap-2 mt-3 md:mt-0 flex-wrap">
+          <button
+            onClick={fetchLeaves}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold border border-slate-200 transition-all"
+            title="Refresh List"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded text-xs font-semibold border border-emerald-200 transition-all"
+            title="Export CSV"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold border border-slate-200 transition-all"
+            title="Print List"
+          >
+            <Printer className="w-3.5 h-3.5" /> Print
+          </button>
           <button
             onClick={() => onNavigate && onNavigate('/apply-leave-request')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-sm transition-all"
@@ -130,7 +205,7 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
+              className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium bg-white"
             >
               <option value="All">All</option>
               <option value="Date Wise">Date Wise</option>
@@ -169,7 +244,7 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
                 <select
                   value={selectedClass}
                   onChange={e => setSelectedClass(e.target.value)}
-                  className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                 >
                   {ALL_CLASSES.map(cls => (
                     <option key={cls} value={cls}>{cls}</option>
@@ -178,10 +253,10 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Students</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Student</label>
                 <select
                   defaultValue="All"
-                  className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                 >
                   <option value="All">All Students</option>
                 </select>
@@ -223,7 +298,7 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
               placeholder="Search student, reason..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full text-xs pl-3 pr-3 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full text-xs pl-3 pr-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -278,13 +353,12 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
                       {leave.reason}
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      {leave.attachment ? (
-                        <span className="text-[10px] text-indigo-600 hover:underline cursor-pointer flex items-center justify-center gap-1">
-                          <FileText className="w-3.5 h-3.5" /> View
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
+                      <button
+                        onClick={() => setSelectedLeave(leave)}
+                        className="text-[10px] text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center gap-1 font-semibold"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> View
+                      </button>
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -322,7 +396,7 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
                         )}
                         <button
                           onClick={() => handleDelete(leave.id)}
-                          className="p-1 hover:bg-slate-200 text-slate-400 hover:text-rose-600 rounded"
+                          className="p-1 hover:bg-slate-200 text-slate-400 hover:text-rose-600 rounded transition-colors"
                           title="Delete Request"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -336,7 +410,104 @@ export function StudentLeaveRequestsPage({ onNavigate }) {
           </table>
         </div>
       </div>
+
+      {/* Details / Attachment Modal */}
+      {selectedLeave && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-150">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-bold text-slate-800 text-sm">Leave Request Details</h3>
+              </div>
+              <button
+                onClick={() => setSelectedLeave(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 pb-3 border-b border-slate-100">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Student Name</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedLeave.studentName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Class & Section</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedLeave.className} - {selectedLeave.section} (Roll: {selectedLeave.rollNo})</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Leave Type</span>
+                  <span className="font-semibold text-indigo-600">{selectedLeave.leaveType}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Duration</span>
+                  <span className="font-semibold text-slate-700">{selectedLeave.fromDate} to {selectedLeave.toDate}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Total Days</span>
+                  <span className="font-bold text-slate-800">{selectedLeave.totalDays} Day(s)</span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-slate-400 block mb-1">Reason for Leave</span>
+                <p className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 leading-relaxed font-medium">
+                  {selectedLeave.reason}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Current Status</span>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    selectedLeave.status === 'Approved'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : selectedLeave.status === 'Rejected'
+                      ? 'bg-rose-100 text-rose-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {selectedLeave.status}
+                  </span>
+                </div>
+
+                {selectedLeave.status === 'Pending' && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleUpdateStatus(selectedLeave.id, 'Approved')}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-xs"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedLeave.id, 'Rejected')}
+                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold shadow-xs"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setSelectedLeave(null)}
+                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 export default StudentLeaveRequestsPage;
