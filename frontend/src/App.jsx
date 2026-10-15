@@ -223,6 +223,17 @@ import {
   LowStockReportPage,
   StationaryReportsPage
 } from './modules/stationary';
+import {
+  StudentSmsPage,
+  StaffSmsPage,
+  BirthdaySmsPage,
+  IndividualSmsPage,
+  VisitorSmsPage,
+  CreateWhatsappTemplatesPage,
+  SmsStatusReportPage,
+  BirthdayReportPage as SmsBirthdayReportPage,
+  SmsReportsPage
+} from './modules/sms';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -590,7 +601,6 @@ function AppContent() {
                 return <HomeworkStatusReportPage onNavigate={handleNavigate} />;
               case '/send-greeting-card-msg':
                 return <SendGreetingCardPage onNavigate={handleNavigate} />;
-              case '/birthday-report':
               case '/greeting-card-reports':
                 return <BirthdayReportPage onNavigate={handleNavigate} />;
               case '/add-edit-bulk-students':
@@ -724,6 +734,28 @@ function AppContent() {
                 return <StockReportPage onNavigate={handleNavigate} />;
               case '/low-stock-report':
                 return <LowStockReportPage onNavigate={handleNavigate} />;
+
+              // SMS Module Action Pages
+              case '/student-sms':
+                return <StudentSmsPage onNavigate={handleNavigate} />;
+              case '/staff-sms':
+                return <StaffSmsPage onNavigate={handleNavigate} />;
+              case '/birthday-sms':
+                return <BirthdaySmsPage onNavigate={handleNavigate} />;
+              case '/individual-sms':
+                return <IndividualSmsPage onNavigate={handleNavigate} />;
+              case '/visitor-sms':
+                return <VisitorSmsPage onNavigate={handleNavigate} />;
+              case '/create-whatsapp-templates':
+                return <CreateWhatsappTemplatesPage onNavigate={handleNavigate} />;
+
+              // SMS Module Reports & Hub
+              case '/sms-reports':
+                return <SmsReportsPage onNavigate={handleNavigate} />;
+              case '/sms-status-report':
+                return <SmsStatusReportPage onNavigate={handleNavigate} />;
+              case '/birthday-report':
+                return <SmsBirthdayReportPage onNavigate={handleNavigate} />;
 
               default:
                 return (

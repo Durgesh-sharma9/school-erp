@@ -429,7 +429,14 @@ export const menuCategories = [
       { title: 'Individual SMS', path: '/individual-sms' },
       { title: 'Visitor SMS', path: '/visitor-sms' },
       { title: 'Create Whatsapp Templates', path: '/create-whatsapp-templates' },
-      { title: 'Reports', path: '/sms-reports' }
+      {
+        id: 'sms-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Message Report', path: '/sms-status-report' },
+          { title: 'Birthday Report', path: '/birthday-report' }
+        ]
+      }
     ]
   },
   {
@@ -630,6 +637,20 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (stationaryReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, stationary: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'stationary-reports': true }));
+    }
+    const smsPaths = [
+      '/student-sms', '/staff-sms', '/birthday-sms', '/individual-sms',
+      '/visitor-sms', '/create-whatsapp-templates'
+    ];
+    if (smsPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, sms: true }));
+    }
+    const smsReportPaths = [
+      '/sms-status-report', '/birthday-report', '/sms-reports'
+    ];
+    if (smsReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, sms: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'sms-reports': true }));
     }
   }, [currentPath]);
 
