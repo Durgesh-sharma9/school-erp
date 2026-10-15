@@ -161,7 +161,8 @@ function StudentAvatar({
         </button>
         <button
           type="button"
-          className="bg-gray-800 hover:bg-gray-900 transition-colors px-2 py-1.5 flex items-center justify-center text-xs"
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-gray-800 hover:bg-gray-900 transition-colors px-2 py-1.5 flex items-center justify-center text-xs cursor-pointer"
           title="Take Photo"
         >
           <Camera className="w-3.5 h-3.5" />
@@ -228,6 +229,7 @@ function DocumentCard({
         </button>
         <button
           type="button"
+          onClick={() => fileRef.current?.click()}
           className="bg-gray-800 hover:bg-gray-900 transition-colors px-2 py-1.5 flex items-center justify-center text-xs shrink-0"
           title="Camera Upload"
         >

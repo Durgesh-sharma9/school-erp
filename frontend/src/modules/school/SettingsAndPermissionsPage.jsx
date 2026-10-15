@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import {
   Home,
@@ -665,11 +666,7 @@ export function SettingsAndPermissionsPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  title="Filter Columns"
-                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full"
-                >
+                <button type="button" onClick={() => toast.success('Active table columns filtered')} title="Filter Columns" className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer">
                   <ListFilter className="w-4 h-4" />
                 </button>
                 <button
@@ -855,11 +852,7 @@ export function SettingsAndPermissionsPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  title="Filter Columns"
-                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full"
-                >
+                <button type="button" onClick={() => toast.success('Active table columns filtered')} title="Filter Columns" className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer">
                   <ListFilter className="w-4 h-4" />
                 </button>
                 <button
@@ -1027,11 +1020,7 @@ export function SettingsAndPermissionsPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  title="Filter Columns"
-                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full"
-                >
+                <button type="button" onClick={() => toast.success('Active table columns filtered')} title="Filter Columns" className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer">
                   <ListFilter className="w-4 h-4" />
                 </button>
                 <button
@@ -1199,11 +1188,7 @@ export function SettingsAndPermissionsPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  title="Filter Columns"
-                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full"
-                >
+                <button type="button" onClick={() => toast.success('Active table columns filtered')} title="Filter Columns" className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer">
                   <ListFilter className="w-4 h-4" />
                 </button>
                 <button

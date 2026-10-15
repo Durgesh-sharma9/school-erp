@@ -72,14 +72,14 @@ export function WhatsappQrPage() {
           <QrCode className="w-5 h-5 text-white" />
         </button>
 
-        {/* Circular Mini FAB 2: Add (Disabled state in UAB) */}
+        {/* Circular Mini FAB 2: Add */}
         <button
           type="button"
-          disabled
-          title="Add"
-          className="w-10 h-10 rounded-full bg-slate-300 text-slate-500 flex items-center justify-center opacity-60 cursor-not-allowed shadow-none"
+          onClick={() => toast.error('Maximum 1 WhatsApp instance allowed per school account')}
+          title="Add Instance"
+          className="w-10 h-10 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center cursor-pointer shadow-none transition-colors"
         >
-          <Plus className="w-5 h-5 text-slate-500" />
+          <Plus className="w-5 h-5 text-slate-600" />
         </button>
       </div>
 

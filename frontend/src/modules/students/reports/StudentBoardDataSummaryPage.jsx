@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES } from './studentReportsData';
@@ -16,6 +17,11 @@ export function StudentBoardDataSummaryPage({ onNavigate }) {
   const filtered = boardDataRows.filter(r =>
     selectedClass !== 'All' ? r.className === selectedClass : true
   );
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
 
   const handleExport = () => {
     const csvContent =
@@ -84,7 +90,7 @@ export function StudentBoardDataSummaryPage({ onNavigate }) {
             <div>
               <button
                 className="w-full bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow-xs transition-colors"
-              >
+               onClick={handleSearch} type="button">
                 Search
               </button>
             </div>

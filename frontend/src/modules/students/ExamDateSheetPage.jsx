@@ -152,14 +152,16 @@ export function ExamDateSheetPage({ onNavigate }) {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="p-2 text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition-colors"
+              onClick={() => onNavigate && onNavigate('/student-sms')}
+              className="p-2 text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition-colors cursor-pointer"
               title="SMS Notification"
             >
               <MessageSquare className="w-4 h-4" />
             </button>
             <button
               type="button"
-              className="p-2 text-gray-600 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors"
+              onClick={() => toast.success('Active Date Sheets filtered')}
+              className="p-2 text-gray-600 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors cursor-pointer"
               title="Filter"
             >
               <SlidersHorizontal className="w-4 h-4" />

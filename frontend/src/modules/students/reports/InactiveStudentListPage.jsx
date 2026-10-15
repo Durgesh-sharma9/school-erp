@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES, MOCK_STUDENTS } from './studentReportsData';
@@ -13,6 +14,11 @@ export function InactiveStudentListPage({ onNavigate }) {
 
   const filtered = inactiveStudents.filter(r => {
     const matchesClass = selectedClass === 'All' || r.className === selectedClass;
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
     const matchesQuery = !searchQuery ||
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.admNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,7 +90,7 @@ export function InactiveStudentListPage({ onNavigate }) {
             <div>
               <button
                 className="w-full bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow-xs transition-colors"
-              >
+               onClick={handleSearch} type="button">
                 Search
               </button>
             </div>

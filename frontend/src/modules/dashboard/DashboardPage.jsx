@@ -397,7 +397,15 @@ export function DashboardPage({ onNavigate }) {
                 Estimated Fee Collection
               </h3>
             </div>
-            <button className="text-slate-400 hover:text-slate-700">
+            <button
+              type="button"
+              onClick={() => {
+                const refreshed = tenantStore.getDashboardStats(schoolId);
+                setStats(refreshed);
+              }}
+              title="Refresh Estimates"
+              className="text-slate-400 hover:text-slate-700 cursor-pointer p-1 rounded"
+            >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
           </div>

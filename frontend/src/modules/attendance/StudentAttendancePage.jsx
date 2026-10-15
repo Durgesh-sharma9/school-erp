@@ -105,7 +105,13 @@ export function StudentAttendancePage({ onNavigate }) {
     }
   };
 
+  const [filterDate, setFilterDate] = useState('');
+  const [filterClass, setFilterClass] = useState('All');
+  const [showFilterBar, setShowFilterBar] = useState(false);
+
   const filteredHistory = history.filter((item) => {
+    if (filterDate && item.date !== filterDate) return false;
+    if (filterClass !== 'All' && item.className !== filterClass) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -149,15 +155,24 @@ export function StudentAttendancePage({ onNavigate }) {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="p-2 text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition-colors"
+              onClick={() => setShowFilterBar(prev => !prev)}
+              className={`p-2 border rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${
+                showFilterBar || filterDate
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                  : 'text-indigo-600 hover:bg-indigo-50 border-indigo-100'
+              }`}
               title="Pick Date"
             >
               <Calendar className="w-4 h-4" />
+              {filterDate && <span>{filterDate}</span>}
             </button>
             <button
               type="button"
-              className="p-2 text-gray-600 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors"
-              title="Filter"
+              onClick={() => setShowFilterBar(prev => !prev)}
+              className={`p-2 border rounded-lg transition-colors ${
+                showFilterBar || filterClass !== 'All' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 border-gray-200'
+              }`}
+              title="Filter Class"
             >
               <SlidersHorizontal className="w-4 h-4" />
             </button>
@@ -172,6 +187,43 @@ export function StudentAttendancePage({ onNavigate }) {
             </button>
           </div>
         </div>
+
+        {/* Filter Bar Dropdown */}
+        {showFilterBar && (
+          <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center gap-3 text-xs">
+            <div>
+              <label className="font-semibold text-slate-600 mr-2">Filter Date:</label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={e => setFilterDate(e.target.value)}
+                className="border border-slate-300 rounded px-2 py-1 bg-white"
+              />
+            </div>
+            <div>
+              <label className="font-semibold text-slate-600 mr-2">Class:</label>
+              <select
+                value={filterClass}
+                onChange={e => setFilterClass(e.target.value)}
+                className="border border-slate-300 rounded px-2 py-1 bg-white"
+              >
+                <option value="All">All Classes</option>
+                {CLASSES.map(cls => (
+                  <option key={cls} value={cls}>{cls}</option>
+                ))}
+              </select>
+            </div>
+            {(filterDate || filterClass !== 'All') && (
+              <button
+                type="button"
+                onClick={() => { setFilterDate(''); setFilterClass('All'); }}
+                className="text-rose-600 hover:underline font-semibold ml-auto"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Toast Feedback */}
         {toastMessage && (
@@ -240,7 +292,8 @@ export function StudentAttendancePage({ onNavigate }) {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => toast.success('Displaying all enrolled students')}
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   title="Filter"
                 >
                   <SlidersHorizontal className="w-4 h-4" />

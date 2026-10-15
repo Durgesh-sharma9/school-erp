@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { ReportHeader } from './ReportHeader';
 import { MOCK_STUDENTS } from './studentReportsData';
@@ -16,6 +17,11 @@ export function SiblingReportPage({ onNavigate }) {
     r.fatherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.siblingGroup.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
 
   const handleExport = () => {
     const csvContent =
@@ -66,7 +72,7 @@ export function SiblingReportPage({ onNavigate }) {
             <div>
               <button
                 className="w-full bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow-xs transition-colors"
-              >
+               onClick={handleSearch} type="button">
                 Search
               </button>
             </div>

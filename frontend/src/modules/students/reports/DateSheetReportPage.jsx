@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES, MOCK_DATE_SHEET_ROWS } from './studentReportsData';
@@ -102,7 +103,7 @@ export function DateSheetReportPage({ onNavigate }) {
             <div>
               <button
                 className="w-full bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow-xs transition-colors"
-              >
+               onClick={handleSearch} type="button">
                 Search
               </button>
             </div>

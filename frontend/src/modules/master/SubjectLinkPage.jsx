@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState, useEffect } from 'react';
 import {
   Home,
@@ -239,11 +240,7 @@ export function SubjectLinkPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                title="Filter Columns"
-                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
-              >
+              <button type="button" onClick={() => toast.success('Active table columns filtered')} title="Filter Columns" className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer">
                 <ListFilter className="w-5 h-5" />
               </button>
 

@@ -353,8 +353,16 @@ export function FeeCollectionPage({ onNavigate }) {
       {/* Main Container Card */}
       <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4 space-y-4">
         {/* Navigation Tabs Header */}
-        <div className="flex items-center space-x-1 border-b border-slate-200 pb-1 overflow-x-auto text-xs font-semibold">
-          <button className="p-1 text-slate-400 hover:text-slate-600">
+        <div id="fee-nav-tabs" className="flex items-center space-x-1 border-b border-slate-200 pb-1 overflow-x-auto text-xs font-semibold scroll-smooth">
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('fee-nav-tabs');
+              if (el) el.scrollBy({ left: -150, behavior: 'smooth' });
+            }}
+            className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+            title="Scroll Left"
+          >
             <ChevronLeft className="w-4 h-4" />
           </button>
           {tabs.map((tab) => {
@@ -373,7 +381,15 @@ export function FeeCollectionPage({ onNavigate }) {
               </button>
             );
           })}
-          <button className="p-1 text-slate-400 hover:text-slate-600">
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('fee-nav-tabs');
+              if (el) el.scrollBy({ left: 150, behavior: 'smooth' });
+            }}
+            className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+            title="Scroll Right"
+          >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -528,9 +544,10 @@ export function FeeCollectionPage({ onNavigate }) {
             <div className="flex justify-end pt-2">
               <button
                 type="button"
-                className="px-4 py-2 rounded bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-colors"
+                onClick={() => onNavigate && onNavigate('/due-list')}
+                className="px-4 py-2 rounded bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
-                Show Receipts
+                Show Receipts / Due List
               </button>
             </div>
           </div>
@@ -582,8 +599,11 @@ export function FeeCollectionPage({ onNavigate }) {
         {/* Bottom Save Action Bar */}
         <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
           <button
-            type="reset"
-            className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            type="button"
+            onClick={() => {
+              setFeeHeads(prev => prev.map(h => ({ ...h, checked: false })));
+            }}
+            className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
           >
             Reset
           </button>
