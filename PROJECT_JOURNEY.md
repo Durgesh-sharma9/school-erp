@@ -1298,6 +1298,43 @@ This document tracks the complete development journey of the **Unified School ER
   * `npm run build` executed and passed in 11.47s with 0 errors (all 3,332 modules transformed cleanly).
 * **Status:** ✅ Completed
 
+### 📍 [Entry #48] - 1:1 Complete Front Office Module & All 10 Reports Matching UAB
+* **Timestamp:** 2026-10-15
+* **Goal / Prompt:** Replicate the complete Front Office module and all 10 Front Office reports matching `schools.uabinfosol.com` 1:1 (`ye bhi bana do abd iss me sare tabs report vale bhi`).
+* **Backend Architecture (`backend/src/modules/front-office/`):**
+  * `front-office.controller.js`: Built complete CRUD controllers for App Users & Permissions, Reminders, Student Gate Passes, Visitor Enquiries, Pre-Admissions, Calendar Planning, Student App Popups, Staff Gate Passes, Visit Staff Meetings, Student Complaints (by & against), and Staff Complaints.
+  * `front-office.routes.js`: Full REST API mounted at `/api/front-office` in `backend/src/app.js`.
+* **Frontend Front Office Masters (`frontend/src/modules/front-office/`):**
+  1. **App Users (`/app-users`):** Student app portal permissions, password visibility toggle, push notification toggles, class/all filters, and batch saving.
+  2. **Reminder (`/reminder`):** Administrative reminders scheduler with From/To dates, description modal, edit/delete actions, and quick filters.
+  3. **Student Gate Pass (`/gate-pass`):** Early exit gate pass issuer with student link, visitor bio, reason, approval status, and printable gate pass slip.
+  4. **Visitor Enquiry (`/visitor-enquiry`):** Campus visitor log with contact info, purpose of visit, address, student linkage, details modal, and CSV export.
+  5. **Pre-Admission (`/pre-admission`):** Prospective student registration wizard with parents' occupation, previous school, counselor feedback, and status tracking.
+  6. **Calendar Planning (`/calendar-planning`):** Annual academic calendar with Planning/Event modes, multi-class assignment, description, and holiday declaration flags.
+  7. **Student App Popup (`/student-app-popup`):** Mobile app greeting and announcement popups with image banners, dates, video links, and modal preview.
+  8. **Staff Gate Pass (`/staff-gate-pass`):** Faculty and staff departure gate pass with department, designation, out/in times, reason, and printable pass slip.
+  9. **Visit Staff Meeting (`/payroll-visit-staff-meeting`):** Staff official delegations to external institutions and conferences with date range, venue, and minutes.
+  10. **Student Complaint (`/get-complaint`):** Two-tab complaint management (`Complaints Against Students` and `Complaints By Student`) with type categorizations and status toggles.
+  11. **Staff Complaint (`/manual-complaint`):** Staff grievance and misconduct register with complaint types, investigation logs, and resolution tracking.
+* **Frontend Front Office Reports (`frontend/src/modules/front-office/reports/`):**
+  12. **Staff Complaint Report (`/manual-complaint-reports`):** Staff grievance audit log with resolution status, departments, and action notes.
+  13. **Notification Count Report (`/class-wise-notification-count-report`):** Class-wise app push vs. SMS dispatch breakdown with delivery totals.
+  14. **Visitor Enquiry Report (`/visitor-enquiry-report`):** Comprehensive visitor log with visitor types, contact numbers, purposes, and addresses.
+  15. **Pre-Admission Report (`/pre-admission-report`):** Candidate enrollment directory with class applied, gender, birth date, and parents' details.
+  16. **Visit Staff Meeting Report (`/payroll-visit-staff-meeting-report`):** Historical log of faculty delegations and inter-school academic summits.
+  17. **Gate Pass Report (`/gate-pass-report`):** Complete student exit audit trail with pass numbers, exit/return times, and guardian relations.
+  18. **Calendar Planning Report (`/calendar-planning-report`):** Academic events and official holidays roadmap for current session.
+  19. **Reminder Report (`/reminder-report`):** Administrative reminder schedule with active/upcoming/expired status filters.
+  20. **Student Complaint Report (`/complaint-report`):** Student discipline incident log with resolution status and parental actions.
+  21. **Staff Gate Pass Report (`/staff-gate-pass-report`):** Complete faculty movement register with pass numbers and reasons for leaving.
+  22. **Front Office Reports Hub (`/front-office-reports`):** Overview dashboard with 10 visual cards for one-click access to all reports.
+* **Navigation & Routing Integration:**
+  * Updated `Sidebar.jsx` with full Front Office submenu, nested Reports sub-dropdown with all 10 reports, and auto-expand logic in `useEffect`.
+  * Updated `App.jsx` importing and routing all 22 front office pages cleanly.
+* **Build Verification:**
+  * `npm run build` executed and passed in 18.59s with 0 errors (all 3,356 modules transformed cleanly).
+* **Status:** ✅ Completed
+
 ---
 
 ## 🔜 Current Next Task in Queue:

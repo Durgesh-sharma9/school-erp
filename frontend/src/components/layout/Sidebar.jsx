@@ -346,7 +346,22 @@ export const menuCategories = [
       { title: 'Visit Staff Meeting', path: '/payroll-visit-staff-meeting' },
       { title: 'Student Complaint', path: '/get-complaint' },
       { title: 'Staff Complaint', path: '/manual-complaint' },
-      { title: 'Reports', path: '/front-office-reports' }
+      {
+        id: 'front-office-reports',
+        title: 'Reports',
+        children: [
+          { title: 'Staff Complaint Report', path: '/manual-complaint-reports' },
+          { title: 'Notification Count Report', path: '/class-wise-notification-count-report' },
+          { title: 'Visitor Report', path: '/visitor-enquiry-report' },
+          { title: 'Pre Admission Report', path: '/pre-admission-report' },
+          { title: 'Visit Staff Meeting Report', path: '/payroll-visit-staff-meeting-report' },
+          { title: 'Gate Pass Report', path: '/gate-pass-report' },
+          { title: 'Calendar Planning Report', path: '/calendar-planning-report' },
+          { title: 'Reminder Report', path: '/reminder-report' },
+          { title: 'Student Complaint Report', path: '/complaint-report' },
+          { title: 'Staff Gate Pass Report', path: '/staff-gate-pass-report' }
+        ]
+      }
     ]
   },
   {
@@ -540,6 +555,26 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (payrollReportPaths.includes(currentPath)) {
       setOpenDropdowns(prev => ({ ...prev, payroll: true }));
       setOpenSubDropdowns(prev => ({ ...prev, 'payroll-reports': true }));
+    }
+    const frontOfficePaths = [
+      '/app-users', '/reminder', '/gate-pass', '/visitor-enquiry',
+      '/pre-admission', '/calendar-planning', '/student-app-popup',
+      '/staff-gate-pass', '/payroll-visit-staff-meeting', '/get-complaint',
+      '/manual-complaint'
+    ];
+    if (frontOfficePaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, frontOffice: true }));
+    }
+    const frontOfficeReportPaths = [
+      '/manual-complaint-reports', '/class-wise-notification-count-report',
+      '/visitor-enquiry-report', '/pre-admission-report',
+      '/payroll-visit-staff-meeting-report', '/gate-pass-report',
+      '/calendar-planning-report', '/reminder-report', '/complaint-report',
+      '/staff-gate-pass-report', '/front-office-reports'
+    ];
+    if (frontOfficeReportPaths.includes(currentPath)) {
+      setOpenDropdowns(prev => ({ ...prev, frontOffice: true }));
+      setOpenSubDropdowns(prev => ({ ...prev, 'front-office-reports': true }));
     }
   }, [currentPath]);
 

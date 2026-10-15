@@ -165,6 +165,30 @@ import {
   MonthlyStaffAttendanceReportPage,
   StaffAttendanceTimeReportPage
 } from './modules/payroll';
+import {
+  AppUsersPage,
+  ReminderPage,
+  StudentGatePassPage,
+  VisitorEnquiryPage,
+  PreAdmissionPage,
+  CalendarPlanningPage,
+  StudentAppPopupPage,
+  StaffGatePassPage,
+  VisitStaffMeetingPage,
+  StudentComplaintPage,
+  StaffComplaintPage,
+  FrontOfficeReportsPage,
+  ManualComplaintReportPage,
+  NotificationCountReportPage,
+  VisitorEnquiryReportPage,
+  PreAdmissionReportPage,
+  StaffVisitReportPage,
+  GatePassReportPage,
+  CalendarPlanningReportPage,
+  ReminderReportPage,
+  StudentComplaintReportPage,
+  StaffGatePassReportPage
+} from './modules/front-office';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
@@ -554,6 +578,50 @@ function AppContent() {
                 return <CrmQrLinksPage onNavigate={handleNavigate} />;
               case '/crm/thankyou-cms':
                 return <CrmThankYouCmsPage onNavigate={handleNavigate} />;
+              case '/app-users':
+                return <AppUsersPage onNavigate={handleNavigate} />;
+              case '/reminder':
+                return <ReminderPage onNavigate={handleNavigate} />;
+              case '/gate-pass':
+                return <StudentGatePassPage onNavigate={handleNavigate} />;
+              case '/visitor-enquiry':
+                return <VisitorEnquiryPage onNavigate={handleNavigate} />;
+              case '/pre-admission':
+                return <PreAdmissionPage onNavigate={handleNavigate} />;
+              case '/calendar-planning':
+                return <CalendarPlanningPage onNavigate={handleNavigate} />;
+              case '/student-app-popup':
+                return <StudentAppPopupPage onNavigate={handleNavigate} />;
+              case '/staff-gate-pass':
+                return <StaffGatePassPage onNavigate={handleNavigate} />;
+              case '/payroll-visit-staff-meeting':
+                return <VisitStaffMeetingPage onNavigate={handleNavigate} />;
+              case '/get-complaint':
+                return <StudentComplaintPage onNavigate={handleNavigate} />;
+              case '/manual-complaint':
+                return <StaffComplaintPage onNavigate={handleNavigate} />;
+              case '/front-office-reports':
+                return <FrontOfficeReportsPage onNavigate={handleNavigate} />;
+              case '/manual-complaint-reports':
+                return <ManualComplaintReportPage onNavigate={handleNavigate} />;
+              case '/class-wise-notification-count-report':
+                return <NotificationCountReportPage onNavigate={handleNavigate} />;
+              case '/visitor-enquiry-report':
+                return <VisitorEnquiryReportPage onNavigate={handleNavigate} />;
+              case '/pre-admission-report':
+                return <PreAdmissionReportPage onNavigate={handleNavigate} />;
+              case '/payroll-visit-staff-meeting-report':
+                return <StaffVisitReportPage onNavigate={handleNavigate} />;
+              case '/gate-pass-report':
+                return <GatePassReportPage onNavigate={handleNavigate} />;
+              case '/calendar-planning-report':
+                return <CalendarPlanningReportPage onNavigate={handleNavigate} />;
+              case '/reminder-report':
+                return <ReminderReportPage onNavigate={handleNavigate} />;
+              case '/complaint-report':
+                return <StudentComplaintReportPage onNavigate={handleNavigate} />;
+              case '/staff-gate-pass-report':
+                return <StaffGatePassReportPage onNavigate={handleNavigate} />;
               default:
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">

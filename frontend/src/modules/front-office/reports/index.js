@@ -1,0 +1,11 @@
+export { ManualComplaintReportPage } from './ManualComplaintReportPage';
+export { NotificationCountReportPage } from './NotificationCountReportPage';
+export { VisitorEnquiryReportPage } from './VisitorEnquiryReportPage';
+export { PreAdmissionReportPage } from './PreAdmissionReportPage';
+export { StaffVisitReportPage } from './StaffVisitReportPage';
+export { GatePassReportPage } from './GatePassReportPage';
+export { CalendarPlanningReportPage } from './CalendarPlanningReportPage';
+export { ReminderReportPage } from './ReminderReportPage';
+export { StudentComplaintReportPage } from './StudentComplaintReportPage';
+export { StaffGatePassReportPage } from './StaffGatePassReportPage';
+export { FrontOfficeReportsPage } from './FrontOfficeReportsPage';

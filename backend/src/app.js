@@ -46,6 +46,7 @@ import transportRoutes from './modules/transport/transport.routes.js';
 import hostelRoutes from './modules/hostel/hostel.routes.js';
 import examinationRoutes from './modules/examination/examination.routes.js';
 import payrollRoutes from './modules/payroll/payroll.routes.js';
+import frontOfficeRoutes from './modules/front-office/front-office.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -61,6 +62,7 @@ app.use('/api/transport', transportRoutes);
 app.use('/api/hostel', hostelRoutes);
 app.use('/api/examination', examinationRoutes);
 app.use('/api/payroll', payrollRoutes);
+app.use('/api/front-office', frontOfficeRoutes);
 
 
 // Global Error Handler
