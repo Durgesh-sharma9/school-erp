@@ -286,107 +286,107 @@ export function TransportDashboardPage({ onNavigate }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-      {/* 1:1 UAB Breadcrumb & Hero Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
+    <div className="p-3.5 sm:p-4 max-w-7xl mx-auto space-y-3.5">
+      {/* 1:1 UAB Breadcrumb & Hero Header (Compact) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 px-4 rounded-xl shadow-xs border border-slate-200">
         <div>
-          <div className="flex items-center space-x-2 text-xs text-slate-400 mb-1">
+          <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mb-0.5">
             <span className="cursor-pointer hover:text-slate-600" onClick={() => onNavigate && onNavigate('/dashboard')}>Home</span>
             <span>&gt;</span>
             <span className="text-indigo-600 font-medium">Transport Dashboard</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-              <Bus className="w-5 h-5" />
+          <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+              <Bus className="w-4 h-4" />
             </div>
             <span>Transport Dashboard & Fleet Operations</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-[11px] text-slate-500 mt-0.5">
             Real-time tracking, vehicle capacities, route assignments & transport fee health overview
           </p>
         </div>
 
         {/* Quick Action Shortcuts */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleRefresh}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3 h-3 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Sync GPS ({lastUpdated})</span>
           </button>
           <button
             onClick={() => onNavigate && onNavigate('/transport-vehicle')}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-200 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg border border-indigo-200 transition-colors"
           >
-            <Bus className="w-3.5 h-3.5" />
+            <Bus className="w-3 h-3" />
             <span>Vehicles</span>
           </button>
           <button
             onClick={() => onNavigate && onNavigate('/transport-assign-routes')}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-200 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg border border-indigo-200 transition-colors"
           >
-            <Route className="w-3.5 h-3.5" />
+            <Route className="w-3 h-3" />
             <span>Routes</span>
           </button>
           <button
             onClick={() => onNavigate && onNavigate('/transport-due-report')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+            className="flex items-center gap-1 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors"
           >
-            <CreditCard className="w-3.5 h-3.5" />
+            <CreditCard className="w-3 h-3" />
             <span>Due Report</span>
           </button>
         </div>
       </div>
 
-      {/* Top Key Metrics KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Top Key Metrics KPI Grid (Compact 4-Cols) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* KPI 1: Fleet Overview */}
-        <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 flex flex-col justify-between">
+        <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fleet Status</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Bus className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fleet Status</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Bus className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900">{totalVehicles} Vehicles</div>
-            <div className="flex items-center gap-2 mt-1.5 text-xs">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+          <div className="mt-2">
+            <div className="text-xl font-extrabold text-slate-900">{totalVehicles} Vehicles</div>
+            <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 text-[10px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 {activeEnRoute} En Route
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200 text-[10px]">
                 {reachedSchool} At Campus
               </span>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Standby / Service:</span>
             <span className="font-bold text-amber-600">{inMaintenance} Bus</span>
           </div>
         </div>
 
         {/* KPI 2: Seating Capacity & Occupancy */}
-        <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 flex flex-col justify-between">
+        <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Student Occupancy</span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Users className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Student Occupancy</span>
+            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Users className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900">{totalOccupied} Students</div>
-            <p className="text-xs text-slate-500 mt-1">Total capacity: {totalSeats} seats</p>
+          <div className="mt-2">
+            <div className="text-xl font-extrabold text-slate-900">{totalOccupied} Students</div>
+            <p className="text-[11px] text-slate-500 mt-0.5">Total capacity: {totalSeats} seats</p>
           </div>
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs font-semibold mb-1">
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-[10px] font-semibold mb-1">
               <span className="text-slate-600">Capacity Utilization</span>
-              <span className="text-indigo-600">{occupancyPercentage}%</span>
+              <span className="text-indigo-600 font-bold">{occupancyPercentage}%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+                className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500"
                 style={{ width: `${occupancyPercentage}%` }}
               ></div>
             </div>
@@ -394,64 +394,64 @@ export function TransportDashboardPage({ onNavigate }) {
         </div>
 
         {/* KPI 3: Transport Fee Collection */}
-        <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 flex flex-col justify-between">
+        <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Transport Revenue</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CreditCard className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Transport Revenue</span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CreditCard className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-emerald-600">₹{totalCollected.toLocaleString('en-IN')}</div>
-            <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+          <div className="mt-2">
+            <div className="text-xl font-extrabold text-emerald-600">₹{totalCollected.toLocaleString('en-IN')}</div>
+            <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500">
               <span>Total Demand:</span>
               <span className="font-bold text-slate-800">₹{totalDemand.toLocaleString('en-IN')}</span>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
             <span className="text-slate-500">Pending Dues:</span>
             <span className="font-bold text-rose-600">₹{totalDue.toLocaleString('en-IN')}</span>
           </div>
         </div>
 
         {/* KPI 4: Compliance & Document Alerts */}
-        <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 flex flex-col justify-between">
+        <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Compliance & Health</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <ShieldAlert className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Compliance & Health</span>
+            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-amber-600">{complianceAlerts.length} Expiries</div>
-            <p className="text-xs text-slate-500 mt-1">Upcoming within 30-60 days</p>
+          <div className="mt-2">
+            <div className="text-xl font-extrabold text-amber-600">{complianceAlerts.length} Expiries</div>
+            <p className="text-[11px] text-slate-500 mt-0.5">Upcoming within 30-60 days</p>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
             <span className="text-slate-500">GPS Live Status:</span>
             <span className="font-bold text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 100% Online
+              <CheckCircle2 className="w-3 h-3" /> 100% Online
             </span>
           </div>
         </div>
       </div>
 
-      {/* Compliance Warning Banner if any urgent items */}
+      {/* Compliance Warning Banner if any urgent items (Compact) */}
       {complianceAlerts.some(a => a.daysLeft <= 15) && (
-        <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <AlertTriangle className="w-5 h-5" />
+        <div className="bg-gradient-to-r from-amber-50 via-orange-50/60 to-amber-50 border border-amber-200 rounded-xl p-2.5 px-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+              <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider">Regulatory Compliance Alert</h4>
-              <p className="text-xs text-amber-800 mt-0.5">
+              <h4 className="text-[11px] font-bold text-amber-900 uppercase tracking-wider">Regulatory Compliance Alert</h4>
+              <p className="text-[11px] text-amber-800 mt-0.5">
                 Vehicles <span className="font-mono font-bold">RJ14PC2278</span> and <span className="font-mono font-bold">RJ19PB7511</span> have PUC Certificates expiring within 14 days. Please renew promptly.
               </p>
             </div>
           </div>
           <button
             onClick={() => onNavigate && onNavigate('/transport-vehicle')}
-            className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl whitespace-nowrap self-start sm:self-auto shadow-2xs cursor-pointer transition-colors"
+            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg whitespace-nowrap self-start sm:self-auto shadow-2xs cursor-pointer transition-colors"
           >
             Manage Documents
           </button>
@@ -459,29 +459,29 @@ export function TransportDashboardPage({ onNavigate }) {
       )}
 
       {/* Main Interactive Fleet Grid / Operations View */}
-      <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
-        {/* Header & Filter Controls */}
-        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+      <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+        {/* Header & Filter Controls (Compact) */}
+        <div className="p-3 px-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
           <div>
-            <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-indigo-600" />
               <span>Live Fleet Operations & Route Status</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Real-time telemetry, driver contacts, ETA, passenger count, and route destinations
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Search Filter */}
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search bus, driver, route..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 w-56 outline-none"
+                className="pl-8 pr-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 w-48 outline-none"
               />
             </div>
 
@@ -489,7 +489,7 @@ export function TransportDashboardPage({ onNavigate }) {
             <select
               value={filterRoute}
               onChange={(e) => setFilterRoute(e.target.value)}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
             >
               <option value="All">All Routes (10)</option>
               {Array.from(new Set(fleetData.map(f => f.route))).map(r => (
@@ -499,8 +499,8 @@ export function TransportDashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* Bus Card Grid */}
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Bus Card Grid (Compact & High Information Density) */}
+        <div className="p-3.5 grid grid-cols-1 md:grid-cols-2 gap-3">
           {filteredFleet.map((bus) => {
             const isEnRoute = bus.status === 'En Route';
             const isAtSchool = bus.status === 'Reached School';
@@ -508,34 +508,34 @@ export function TransportDashboardPage({ onNavigate }) {
             return (
               <div
                 key={bus.id}
-                className="border border-slate-200 hover:border-indigo-300 rounded-2xl p-4 transition-all duration-200 hover:shadow-sm bg-white flex flex-col justify-between space-y-3"
+                className="border border-slate-200 hover:border-indigo-300 rounded-xl p-3 transition-all duration-200 hover:shadow-xs bg-white flex flex-col justify-between space-y-2.5"
               >
                 {/* Bus Title & Live Status */}
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
                       isEnRoute ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                       isAtSchool ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                       'bg-slate-100 text-slate-700 border border-slate-200'
                     }`}>
-                      <Bus className="w-5 h-5" />
+                      <Bus className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-black text-slate-900 text-sm">{bus.vehicleNo}</span>
-                        <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-slate-900 text-xs">{bus.vehicleNo}</span>
+                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                           {bus.type}
                         </span>
                       </div>
-                      <p className="text-xs font-semibold text-indigo-700 mt-0.5 flex items-center gap-1">
+                      <p className="text-[11px] font-semibold text-indigo-700 mt-0.5 flex items-center gap-1">
                         <Route className="w-3 h-3 text-indigo-500 shrink-0" />
-                        <span className="truncate max-w-[220px]">{bus.route}</span>
+                        <span className="truncate max-w-[200px]">{bus.route}</span>
                       </p>
                     </div>
                   </div>
 
                   {/* Status Pill */}
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                     isEnRoute ? 'bg-emerald-100/80 text-emerald-800' :
                     isAtSchool ? 'bg-blue-100/80 text-blue-800' :
                     'bg-slate-100 text-slate-700'
@@ -546,43 +546,43 @@ export function TransportDashboardPage({ onNavigate }) {
                 </div>
 
                 {/* Telemetry & Stop Details */}
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl text-xs border border-slate-100">
+                <div className="grid grid-cols-2 gap-1.5 bg-slate-50/80 p-2.5 rounded-lg text-[11px] border border-slate-100">
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Current Location:</span>
-                    <span className="font-semibold text-slate-800 truncate block mt-0.5" title={bus.currentLocation}>
+                    <span className="text-slate-400 block text-[10px]">Current Location:</span>
+                    <span className="font-semibold text-slate-800 truncate block" title={bus.currentLocation}>
                       {bus.currentLocation}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Next Stop / ETA:</span>
-                    <span className="font-semibold text-slate-800 block mt-0.5">
+                    <span className="text-slate-400 block text-[10px]">Next Stop / ETA:</span>
+                    <span className="font-semibold text-slate-800 block">
                       {bus.nextStop} ({bus.eta})
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Driver & Phone:</span>
-                    <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                      <PhoneCall className="w-3 h-3 text-emerald-600" />
+                    <span className="text-slate-400 block text-[10px]">Driver:</span>
+                    <span className="font-semibold text-slate-800 flex items-center gap-1">
+                      <PhoneCall className="w-2.5 h-2.5 text-emerald-600" />
                       <span>{bus.driver}</span>
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Passenger Occupancy:</span>
-                    <span className="font-semibold text-slate-800 block mt-0.5">
-                      {bus.occupied} / {bus.capacity} Seats ({Math.round((bus.occupied / bus.capacity) * 100)}%)
+                    <span className="text-slate-400 block text-[10px]">Occupancy:</span>
+                    <span className="font-semibold text-slate-800 block">
+                      {bus.occupied} / {bus.capacity} ({Math.round((bus.occupied / bus.capacity) * 100)}%)
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar of Occupancy */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[11px] text-slate-500 font-medium">
-                    <span>Capacity Fill Rate</span>
+                <div className="space-y-0.5">
+                  <div className="flex justify-between text-[10px] text-slate-500 font-medium">
+                    <span>Fill Rate</span>
                     <span>{Math.round((bus.occupied / bus.capacity) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
                     <div
-                      className={`h-1.5 rounded-full ${
+                      className={`h-1 rounded-full ${
                         (bus.occupied / bus.capacity) > 0.9 ? 'bg-amber-500' : 'bg-emerald-500'
                       }`}
                       style={{ width: `${(bus.occupied / bus.capacity) * 100}%` }}
@@ -591,29 +591,29 @@ export function TransportDashboardPage({ onNavigate }) {
                 </div>
 
                 {/* Card Action Footer */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-500">
+                    <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">
                       {bus.gpsId}
                     </span>
                     {isEnRoute && (
-                      <span className="text-emerald-600 font-bold flex items-center gap-1">
-                        <Navigation className="w-3 h-3" /> {bus.speed}
+                      <span className="text-emerald-600 font-bold flex items-center gap-0.5 text-[11px]">
+                        <Navigation className="w-2.5 h-2.5" /> {bus.speed}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setTrackingModalBus(bus)}
-                      className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors flex items-center gap-1 text-xs cursor-pointer"
+                      className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-md transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
                     >
-                      <Navigation className="w-3 h-3" />
+                      <Navigation className="w-2.5 h-2.5" />
                       <span>Live GPS</span>
                     </button>
                     <button
                       onClick={() => onNavigate && onNavigate('/transport-due-report')}
-                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors text-xs cursor-pointer"
+                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md transition-colors text-[11px] cursor-pointer"
                     >
                       Fee Due
                     </button>
@@ -625,49 +625,49 @@ export function TransportDashboardPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* Route-Wise Financial Summary & Compliance Summary Side-by-Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Route-Wise Financial Summary & Compliance Summary Side-by-Side (Compact) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Left (2 Cols): Route-Wise Collection Table */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-xs border border-slate-200 p-5 space-y-4">
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-slate-200 p-3.5 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <h3 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Route-Wise Fee Collection & Due Metrics</span>
               </h3>
-              <p className="text-xs text-slate-500">Financial health across 10 active transport routes</p>
+              <p className="text-[11px] text-slate-500">Financial health across 10 active transport routes</p>
             </div>
             <button
               onClick={() => onNavigate && onNavigate('/transport-due-report')}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5"
             >
               <span>Full Due Report</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="overflow-x-auto border border-slate-100 rounded-xl">
+          <div className="overflow-x-auto border border-slate-100 rounded-lg">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] border-b border-slate-200">
+              <thead className="bg-slate-50 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
                 <tr>
-                  <th className="py-2.5 px-3">Route Name</th>
-                  <th className="py-2.5 px-3">Bus No.</th>
-                  <th className="py-2.5 px-3 text-right">Demand (₹)</th>
-                  <th className="py-2.5 px-3 text-right">Collected (₹)</th>
-                  <th className="py-2.5 px-3 text-right">Due (₹)</th>
-                  <th className="py-2.5 px-3 text-center">Status</th>
+                  <th className="py-2 px-2.5">Route Name</th>
+                  <th className="py-2 px-2.5">Bus No.</th>
+                  <th className="py-2 px-2.5 text-right">Demand (₹)</th>
+                  <th className="py-2 px-2.5 text-right">Collected (₹)</th>
+                  <th className="py-2 px-2.5 text-right">Due (₹)</th>
+                  <th className="py-2 px-2.5 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 text-[11px]">
                 {fleetData.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">{item.route}</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-indigo-700">{item.vehicleNo}</td>
-                    <td className="py-2.5 px-3 text-right font-medium">₹{item.collection.demand.toLocaleString('en-IN')}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-emerald-600">₹{item.collection.collected.toLocaleString('en-IN')}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-rose-600">₹{item.collection.due.toLocaleString('en-IN')}</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <td className="py-1.5 px-2.5 font-semibold text-slate-800">{item.route}</td>
+                    <td className="py-1.5 px-2.5 font-mono font-bold text-indigo-700">{item.vehicleNo}</td>
+                    <td className="py-1.5 px-2.5 text-right font-medium">₹{item.collection.demand.toLocaleString('en-IN')}</td>
+                    <td className="py-1.5 px-2.5 text-right font-bold text-emerald-600">₹{item.collection.collected.toLocaleString('en-IN')}</td>
+                    <td className="py-1.5 px-2.5 text-right font-bold text-rose-600">₹{item.collection.due.toLocaleString('en-IN')}</td>
+                    <td className="py-1.5 px-2.5 text-center">
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                         {Math.round((item.collection.collected / item.collection.demand) * 100)}% Paid
                       </span>
                     </td>
@@ -679,35 +679,35 @@ export function TransportDashboardPage({ onNavigate }) {
         </div>
 
         {/* Right (1 Col): Vehicle Document Expiry Tracker */}
-        <div className="bg-white rounded-2xl shadow-xs border border-slate-200 p-5 space-y-4">
+        <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-3.5 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-indigo-600" />
+              <h3 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Document Expiry Watch</span>
               </h3>
-              <p className="text-xs text-slate-500">Upcoming vehicle fitness, PUC & permits</p>
+              <p className="text-[11px] text-slate-500">Upcoming vehicle fitness, PUC & permits</p>
             </div>
             <button
               onClick={() => onNavigate && onNavigate('/transport-vehicle')}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5"
             >
               <span>View All</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {complianceAlerts.map((alert, idx) => (
-              <div key={idx} className={`p-3.5 rounded-xl border ${alert.color} space-y-1`}>
+              <div key={idx} className={`p-2.5 rounded-lg border ${alert.color} space-y-0.5`}>
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-xs">{alert.vehicleNo}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/80 shadow-2xs">
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/80 shadow-2xs">
                     {alert.daysLeft} Days Left
                   </span>
                 </div>
-                <div className="text-xs font-semibold">{alert.doc}</div>
-                <div className="flex items-center justify-between text-[11px] opacity-80 pt-1">
+                <div className="text-[11px] font-semibold">{alert.doc}</div>
+                <div className="flex items-center justify-between text-[10px] opacity-80 pt-0.5">
                   <span>Due Date: {alert.date}</span>
                   <span className="underline font-bold cursor-pointer" onClick={() => onNavigate && onNavigate('/transport-vehicle')}>Renew</span>
                 </div>
@@ -716,7 +716,7 @@ export function TransportDashboardPage({ onNavigate }) {
           </div>
 
           {/* Quick Info Box */}
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 space-y-1">
+          <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 space-y-0.5">
             <div className="font-bold text-slate-800">Transport Help Desk</div>
             <p className="text-[11px] text-slate-500">
               Transport Incharge: <span className="font-semibold text-slate-700">Mr. Vikramaditya Singh</span>
