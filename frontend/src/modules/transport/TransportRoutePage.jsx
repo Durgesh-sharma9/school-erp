@@ -4,13 +4,7 @@ import toast from 'react-hot-toast';
 
 export function TransportRoutePage({ initialTab = 'routes' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [expandedRouteIds, setExpandedRouteIds] = useState([1]);
-
-  const toggleExpandRoute = (routeId) => {
-    setExpandedRouteIds(prev =>
-      prev.includes(routeId) ? prev.filter(id => id !== routeId) : [...prev, routeId]
-    );
-  };
+  const [viewingRouteStops, setViewingRouteStops] = useState(null);
 
   // --- Initial Routes & Destinations Linked Data ---
   const initialRoutes = [
@@ -417,227 +411,78 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filteredRoutes.map((r, idx) => {
                   const routeDests = destinations.filter(d => d.routeName === r.routeName);
-                  const isExpanded = expandedRouteIds.includes(r.id);
                   return (
-                    <React.Fragment key={r.id || idx}>
-                      <tr
-                        onClick={() => toggleExpandRoute(r.id)}
-                        className={`transition-colors cursor-pointer select-none ${
-                          isExpanded ? 'bg-indigo-50/50 hover:bg-indigo-50/70' : 'hover:bg-slate-50/80'
-                        }`}
-                      >
-                        <td className="py-2.5 px-3 text-center">
+                    <tr
+                      key={r.id || idx}
+                      onClick={() => setViewingRouteStops(r)}
+                      className="hover:bg-indigo-50/40 transition-colors cursor-pointer select-none"
+                    >
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px] text-slate-400">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2.5 px-4 font-bold text-slate-900">
+                        <div className="flex items-center gap-2">
+                          <Navigation className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                          <span className="hover:text-indigo-600 transition-colors">{r.routeName}</span>
+                          <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.2 rounded font-normal">
+                            {routeDests.length} {routeDests.length === 1 ? 'stop' : 'stops'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {routeDests.slice(0, 3).map((d, dIdx) => (
+                            <span key={dIdx} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 rounded text-[11px] font-medium text-slate-700">
+                              <MapPin className="w-2.5 h-2.5 text-slate-500" />
+                              {d.destination}
+                            </span>
+                          ))}
+                          {routeDests.length > 3 && (
+                            <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">
+                              +{routeDests.length - 3} more
+                            </span>
+                          )}
+                          {routeDests.length === 0 && (
+                            <span className="text-[11px] text-slate-400 italic">No stoppages mapped</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="inline-flex items-center gap-1 font-mono font-bold text-slate-800 text-[11px] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                          <Bus className="w-3 h-3 text-indigo-600" />
+                          {r.vehicle || 'RJ14PC1019'}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpandRoute(r.id);
-                            }}
-                            className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-indigo-100 text-slate-400 hover:text-indigo-700 transition cursor-pointer"
-                            title={isExpanded ? 'Collapse Stoppages' : 'Expand Stoppages'}
+                            onClick={() => setViewingRouteStops(r)}
+                            className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200/60 transition cursor-pointer shadow-2xs"
+                            title="View Stoppages & Fare"
                           >
-                            {isExpanded ? (
-                              <ChevronDown className="w-4 h-4 text-indigo-600" />
-                            ) : (
-                              <ChevronRight className="w-4 h-4 text-slate-400" />
-                            )}
+                            <RouteIcon className="w-3 h-3" />
+                            <span>Stoppages ({routeDests.length})</span>
                           </button>
-                        </td>
-                        <td className="py-2.5 px-4 font-bold text-slate-900">
-                          <div className="flex items-center gap-2">
-                            <Navigation className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                            <span className="hover:text-indigo-600 transition-colors">{r.routeName}</span>
-                            <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.2 rounded font-normal">
-                              {routeDests.length} {routeDests.length === 1 ? 'stop' : 'stops'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-4">
-                          <div className="flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            {routeDests.slice(0, 3).map((d, dIdx) => (
-                              <span key={dIdx} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 rounded text-[11px] font-medium text-slate-700">
-                                <MapPin className="w-2.5 h-2.5 text-slate-500" />
-                                {d.destination}
-                              </span>
-                            ))}
-                            {routeDests.length > 3 && (
-                              <button
-                                type="button"
-                                onClick={() => toggleExpandRoute(r.id)}
-                                className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold hover:bg-indigo-100 transition cursor-pointer"
-                              >
-                                +{routeDests.length - 3} more
-                              </button>
-                            )}
-                            {routeDests.length === 0 && (
-                              <span className="text-[11px] text-slate-400 italic">No stoppages mapped</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-4">
-                          <span className="inline-flex items-center gap-1 font-mono font-bold text-slate-800 text-[11px] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                            <Bus className="w-3 h-3 text-indigo-600" />
-                            {r.vehicle || 'RJ14PC1019'}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => toggleExpandRoute(r.id)}
-                              className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg transition cursor-pointer ${
-                                isExpanded
-                                  ? 'bg-indigo-600 text-white shadow-2xs'
-                                  : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200/60'
-                              }`}
-                              title={isExpanded ? 'Hide Stoppages' : 'View Stoppages'}
-                            >
-                              <span>{isExpanded ? 'Hide Stops' : 'Stoppages'}</span>
-                              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEditRouteModal(r)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
-                              title="Edit Route"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteRoute(r.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                              title="Delete Route"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {/* --- EXPANDED ACCORDION ROW FOR STOPPAGES & FARES --- */}
-                      {isExpanded && (
-                        <tr className="bg-indigo-50/20 border-b-2 border-indigo-200/50">
-                          <td colSpan={5} className="py-3 px-4 sm:px-6">
-                            <div className="bg-white rounded-xl border border-indigo-100 shadow-xs overflow-hidden">
-                              {/* Sub-header Bar */}
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-indigo-100/60">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
-                                    <RouteIcon className="w-3.5 h-3.5" />
-                                  </div>
-                                  <div>
-                                    <span className="text-xs font-bold text-slate-800">
-                                      Stoppages & Fare Schedule &bull; {r.routeName}
-                                    </span>
-                                    <span className="ml-2 text-[11px] text-slate-500 font-medium">
-                                      ({routeDests.length} {routeDests.length === 1 ? 'stop' : 'stops'} mapped, Vehicle: {r.vehicle || 'RJ14PC1019'})
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => openAddDestModal(r.routeName)}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-[11px] font-bold shadow-2xs transition cursor-pointer"
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                    <span>Add Stop to Route</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setDestRouteFilter(r.routeName);
-                                      setActiveTab('destinations');
-                                    }}
-                                    className="px-2 py-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                                  >
-                                    View in All Stoppages Tab &rarr;
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Nested Stoppages List */}
-                              {routeDests.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                  <table className="w-full text-left text-xs">
-                                    <thead className="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] border-b border-slate-100">
-                                      <tr>
-                                        <th className="py-2 px-4 w-12 text-center">#</th>
-                                        <th className="py-2 px-4">STOPPAGE / DESTINATION</th>
-                                        <th className="py-2 px-4">DISTANCE FROM SCHOOL</th>
-                                        <th className="py-2 px-4">MONTHLY TRANSPORT FARE</th>
-                                        <th className="py-2 px-4 text-right w-24">ACTIONS</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 text-xs">
-                                      {routeDests.map((dest, dIdx) => (
-                                        <tr key={dest.id || dIdx} className="hover:bg-indigo-50/30 transition-colors">
-                                          <td className="py-2 px-4 text-center font-mono text-[11px] text-slate-400">
-                                            {dIdx + 1}
-                                          </td>
-                                          <td className="py-2 px-4 font-semibold text-slate-800">
-                                            <div className="flex items-center gap-1.5">
-                                              <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                              <span>{dest.destination}</span>
-                                            </div>
-                                          </td>
-                                          <td className="py-2 px-4 text-slate-600">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium font-mono">
-                                              {dest.distance || 0} km
-                                            </span>
-                                          </td>
-                                          <td className="py-2 px-4 font-bold text-slate-900">
-                                            <span className="text-emerald-700 font-semibold font-mono">
-                                              ₹{Number(dest.fare || 0).toLocaleString()}
-                                            </span>
-                                            <span className="text-[10px] text-slate-400 font-normal ml-1">/ month</span>
-                                          </td>
-                                          <td className="py-2 px-4 text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                              <button
-                                                type="button"
-                                                onClick={() => openEditDestModal(dest, r.routeName)}
-                                                className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
-                                                title="Edit Stoppage"
-                                              >
-                                                <Edit2 className="w-3 h-3" />
-                                              </button>
-                                              <button
-                                                type="button"
-                                                onClick={() => handleDeleteDest(dest.id)}
-                                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                                                title="Delete Stoppage"
-                                              >
-                                                <Trash2 className="w-3 h-3" />
-                                              </button>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              ) : (
-                                <div className="py-6 px-4 text-center bg-slate-50/50">
-                                  <p className="text-xs text-slate-500 mb-2">
-                                    No stoppages have been added to this route yet.
-                                  </p>
-                                  <button
-                                    type="button"
-                                    onClick={() => openAddDestModal(r.routeName)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition cursor-pointer"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
-                                    <span>Add First Stoppage</span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                          <button
+                            type="button"
+                            onClick={() => openEditRouteModal(r)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
+                            title="Edit Route"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRoute(r.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Delete Route"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -777,8 +622,8 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
 
       {/* Destination Modal */}
       {isDestModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150">
             <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-600" />
@@ -866,6 +711,180 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
           </div>
         </div>
       )}
+
+      {/* --- POPUP MODAL: ROUTE STOPPAGES & FARE SCHEDULE --- */}
+      {viewingRouteStops && (() => {
+        const routeDests = destinations.filter(d => d.routeName === viewingRouteStops.routeName);
+        const fares = routeDests.map(d => Number(d.fare) || 0).filter(f => f > 0);
+        const minFare = fares.length ? Math.min(...fares) : 0;
+        const maxFare = fares.length ? Math.max(...fares) : 0;
+        const maxDistance = routeDests.length ? Math.max(...routeDests.map(d => Number(d.distance) || 0)) : 0;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/40 border-b border-slate-200 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                    <Navigation className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                        {viewingRouteStops.routeName}
+                      </h2>
+                      <span className="inline-flex items-center gap-1 font-mono font-bold text-indigo-700 text-[10px] bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                        <Bus className="w-3 h-3 text-indigo-600" />
+                        {viewingRouteStops.vehicle || 'RJ14PC1019'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Route Stoppages, Pick-up Points & Monthly Fare Schedule
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openAddDestModal(viewingRouteStops.routeName)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs transition cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Stoppage</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewingRouteStops(null)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Metric Highlights Strip */}
+              <div className="grid grid-cols-3 divide-x divide-slate-100 bg-slate-50/60 border-b border-slate-100 text-center py-2.5 px-4 shrink-0">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Total Stoppages</div>
+                  <div className="text-sm font-black text-slate-800 mt-0.5">{routeDests.length} Stops</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Max Distance</div>
+                  <div className="text-sm font-black text-indigo-700 font-mono mt-0.5">{maxDistance} km</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Fare Range</div>
+                  <div className="text-sm font-black text-emerald-700 font-mono mt-0.5">
+                    {fares.length > 0 ? (minFare === maxFare ? `₹${minFare.toLocaleString()}` : `₹${minFare.toLocaleString()} - ₹${maxFare.toLocaleString()}`) : '₹0'}
+                    <span className="text-[10px] font-normal text-slate-400 ml-1">/mo</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrollable Stoppages Table */}
+              <div className="flex-1 overflow-y-auto p-4">
+                {routeDests.length > 0 ? (
+                  <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] border-b border-slate-100">
+                        <tr>
+                          <th className="py-2.5 px-3.5 w-12 text-center">#</th>
+                          <th className="py-2.5 px-4">STOPPAGE / DESTINATION</th>
+                          <th className="py-2.5 px-4">DISTANCE FROM SCHOOL</th>
+                          <th className="py-2.5 px-4">MONTHLY TRANSPORT FARE</th>
+                          <th className="py-2.5 px-4 text-right w-24">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {routeDests.map((dest, dIdx) => (
+                          <tr key={dest.id || dIdx} className="hover:bg-indigo-50/30 transition-colors">
+                            <td className="py-2.5 px-3.5 text-center font-mono text-[11px] text-slate-400">
+                              {dIdx + 1}
+                            </td>
+                            <td className="py-2.5 px-4 font-bold text-slate-800">
+                              <div className="flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <span>{dest.destination}</span>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-4 text-slate-600">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium font-mono">
+                                {dest.distance || 0} km
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-4 font-bold text-slate-900">
+                              <span className="text-emerald-700 font-semibold font-mono">
+                                ₹{Number(dest.fare || 0).toLocaleString()}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-normal ml-1">/ month</span>
+                            </td>
+                            <td className="py-2.5 px-4 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditDestModal(dest, viewingRouteStops.routeName)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
+                                  title="Edit Stoppage"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteDest(dest.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                                  title="Delete Stoppage"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-12 px-4 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 mx-auto flex items-center justify-center mb-2.5">
+                      <RouteIcon className="w-5 h-5" />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-700 mb-1">
+                      No stoppages mapped for {viewingRouteStops.routeName}
+                    </p>
+                    <p className="text-[11px] text-slate-400 mb-3">
+                      Add student pick-up points and monthly fare amounts for this route.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => openAddDestModal(viewingRouteStops.routeName)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add First Stoppage</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-t border-slate-100 shrink-0">
+                <span className="text-[11px] text-slate-500">
+                  Tip: All updates reflect immediately in Transport Route and Student Allocation lists.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setViewingRouteStops(null)}
+                  className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
