@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
+  ChevronsLeft,
   ArrowLeft,
   Printer,
   FileCheck,
@@ -69,8 +70,8 @@ import toast from 'react-hot-toast';
 export function StudentPortalPage({ onNavigate, currentPath }) {
   const { user, schoolName } = useAuth();
 
-  // Active view or modal: null (dashboard) or route identifier
-  const [activeModal, setActiveModal] = useState(null);
+  // Active view: null (dashboard) or route identifier
+  const [activeView, setActiveView] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState('October 2026');
   const [showAllCategories, setShowAllCategories] = useState(false);
 
@@ -92,8 +93,8 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
 
   // Payment Gateway Modal State
   const [paymentGatewayOpen, setPaymentGatewayOpen] = useState(false);
-  const [payingItem, setPayingItem] = useState(null); // { month, amt, label }
-  const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' | 'CARD' | 'NETBANKING'
+  const [payingItem, setPayingItem] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [upiId, setUpiId] = useState('6377281034@upi');
   const [cardDetails, setCardDetails] = useState({ number: '4532 •••• •••• 9012', exp: '08/29', cvv: '•••' });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -106,7 +107,8 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
   ]);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
 
-  // Homework & Assignments State
+  // Homework State
+  const [homeworkDateFilter, setHomeworkDateFilter] = useState('');
   const [homeworkStatus, setHomeworkStatus] = useState({
     1: 'Submitted',
     2: 'Pending',
@@ -146,92 +148,91 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
   const [studyMaterialFilter, setStudyMaterialFilter] = useState('All');
   const [batchmateSearch, setBatchmateSearch] = useState('');
   const [galleryAlbum, setGalleryAlbum] = useState('Annual Day 2026');
-  const [newsDetailModal, setNewsDetailModal] = useState(null);
-  const [commTab, setCommTab] = useState('notifications'); // 'notifications' | 'sms' | 'voice'
+  const [commTab, setCommTab] = useState('notifications');
 
-  // Synchronize route paths with active student views
+  // Synchronize route paths with active student full page views
   useEffect(() => {
     if (!currentPath || currentPath === '/' || currentPath === '/dashboard' || currentPath === '/student-portal') {
-      setActiveModal(null);
+      setActiveView(null);
     } else if (currentPath === '/get-homework' || currentPath === '/homework') {
-      setActiveModal('homework');
+      setActiveView('homework');
     } else if (currentPath === '/get-fee' || currentPath === '/822' || currentPath === '/pay-fee') {
-      setActiveModal('fee');
+      setActiveView('fee');
     } else if (currentPath === '/get-fee-receipt') {
-      setActiveModal('fee-receipt');
+      setActiveView('fee-receipt');
     } else if (currentPath === '/get-datesheet') {
-      setActiveModal('datesheet');
+      setActiveView('datesheet');
     } else if (currentPath === '/student-admit-card') {
-      setActiveModal('admit-card');
+      setActiveView('admit-card');
     } else if (currentPath === '/get-result') {
-      setActiveModal('result');
+      setActiveView('result');
     } else if (currentPath === '/get-attendance') {
-      setActiveModal('attendance');
+      setActiveView('attendance');
     } else if (currentPath === '/leave-request') {
-      setActiveModal('leave-request');
+      setActiveView('leave-request');
     } else if (currentPath === '/get-gate-pass') {
-      setActiveModal('gate-pass');
+      setActiveView('gate-pass');
     } else if (currentPath === '/profile') {
-      setActiveModal('profile');
+      setActiveView('profile');
     } else if (currentPath === '/student-id-card') {
-      setActiveModal('id-card');
+      setActiveView('id-card');
     } else if (currentPath === '/get-transport') {
-      setActiveModal('transport');
+      setActiveView('transport');
     } else if (currentPath === '/get-circular') {
-      setActiveModal('circular');
+      setActiveView('circular');
     } else if (currentPath === '/get-online-classes') {
-      setActiveModal('online-classes');
+      setActiveView('online-classes');
     } else if (currentPath === '/get-syllabus') {
-      setActiveModal('syllabus');
+      setActiveView('syllabus');
     } else if (currentPath === '/get-study-material') {
-      setActiveModal('study-material');
+      setActiveView('study-material');
     } else if (currentPath === '/get-assignment') {
-      setActiveModal('assignment');
+      setActiveView('assignment');
     } else if (currentPath === '/get-sms') {
-      setActiveModal('notifications');
+      setActiveView('notifications');
       setCommTab('sms');
     } else if (currentPath === '/all-notifications') {
-      setActiveModal('notifications');
+      setActiveView('notifications');
       setCommTab('notifications');
     } else if (currentPath === '/get-voice-sms') {
-      setActiveModal('notifications');
+      setActiveView('notifications');
       setCommTab('voice');
     } else if (currentPath === '/get-complaint') {
-      setActiveModal('complaint');
+      setActiveView('complaint');
     } else if (currentPath === '/get-calendar-planing') {
-      setActiveModal('calendar-planning');
+      setActiveView('calendar-planning');
     } else if (currentPath === '/student-birthday' || currentPath === '/get-birthday') {
-      setActiveModal('birthday');
+      setActiveView('birthday');
     } else if (currentPath === '/get-batch-mate') {
-      setActiveModal('batchmate');
+      setActiveView('batchmate');
     } else if (currentPath === '/get-news') {
-      setActiveModal('news');
+      setActiveView('news');
     } else if (currentPath === '/get-gallary') {
-      setActiveModal('gallery');
+      setActiveView('gallery');
     } else if (currentPath === '/get-social-media') {
-      setActiveModal('social-media');
+      setActiveView('social-media');
     }
   }, [currentPath]);
 
   const closeModal = () => {
-    setActiveModal(null);
-    if (onNavigate && currentPath && currentPath !== '/' && currentPath !== '/dashboard' && currentPath !== '/student-portal') {
+    setActiveView(null);
+    if (onNavigate) {
       onNavigate('/dashboard');
     }
   };
 
-  const navigateTo = (path, modalId) => {
-    setActiveModal(modalId);
+  const navigateTo = (path, viewId) => {
+    setActiveView(viewId);
     if (onNavigate) onNavigate(path);
   };
 
-  // Dynamic fee calculation
+  // Fee calculation
   const totalFeesAmount = 21700;
   const currentPaidAmount = monthWiseFees.reduce((acc, m) => acc + (m.paid || 0), 0);
   const currentDueAmount = monthWiseFees.reduce((acc, m) => acc + (m.due || 0), 0);
   const isAllPaid = currentDueAmount === 0;
 
-  // Student Profile Metadata (1:1 with UAB production student 6377281034)
+  // Authentic Student Metadata (1:1 with UAB production student 6377281034)
   const student = {
     name: user?.name || 'AADHYA CHOUDHARY',
     className: user?.className || 'Nursery - PP3+',
@@ -638,29 +639,1444 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
     toast.success(`Complaint registered successfully! Ticket ID: ${newTicket.id}`);
   };
 
-  return (
-    <div className="bg-[#f3f6fa] min-h-screen px-3 sm:px-6 py-4 font-sans text-slate-800">
-      <div className="max-w-6xl mx-auto space-y-4">
+  // Helper Header Component (1:1 with Live UAB Secondary Toolbar)
+  const renderPageHeader = (title) => (
+    <div className="flex items-center gap-3 mb-4">
+      <button
+        onClick={closeModal}
+        className="w-8 h-8 rounded bg-indigo-700 hover:bg-indigo-800 text-white flex items-center justify-center cursor-pointer shadow-xs transition-colors shrink-0"
+        title="Back to Dashboard"
+      >
+        <ChevronsLeft className="w-5 h-5" />
+      </button>
+      <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+        {title}
+      </h1>
+    </div>
+  );
 
-        {/* Top Breadcrumb Navigation when viewing subpages */}
-        {activeModal && (
-          <div className="bg-white rounded-2xl px-4 py-2.5 shadow-xs border border-slate-200/80 flex items-center justify-between">
-            <button
-              onClick={closeModal}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-900 cursor-pointer transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Student Dashboard</span>
-            </button>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">{student.name}</span>
-              <span>&bull;</span>
-              <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-bold uppercase text-[10px]">
-                {activeModal}
-              </span>
+  // =========================================================================
+  // ==================== FULL INLINE PAGES RENDERING (1:1 UAB) ====================
+  // =========================================================================
+
+  // If a subpage is active, render it as a full dedicated page (NOT a popup modal!)
+  if (activeView) {
+    return (
+      <div className="bg-[#f3f6fa] min-h-[calc(100vh-64px)] p-3 sm:p-6 font-sans text-slate-800">
+        <div className="max-w-6xl mx-auto space-y-4">
+
+          {/* 1. HOMEWORK FULL PAGE (1:1 with schools.uabinfosol.com/get-homework) */}
+          {activeView === 'homework' && (
+            <div>
+              {renderPageHeader('Homework')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 space-y-4">
+                {/* Date Range Picker Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Date Range"
+                        value={homeworkDateFilter}
+                        onChange={(e) => setHomeworkDateFilter(e.target.value)}
+                        className="pl-3 pr-9 py-2 border border-slate-300 rounded-lg text-xs font-medium w-64 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      />
+                      <Calendar className="w-4 h-4 text-indigo-600 absolute right-3 top-2.5 pointer-events-none" />
+                    </div>
+                    {homeworkDateFilter && (
+                      <button
+                        onClick={() => setHomeworkDateFilter('')}
+                        className="text-xs text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-500">
+                    Class: <strong>{student.className} - {student.division}</strong>
+                  </span>
+                </div>
+
+                {/* Homework List or No Data */}
+                {homeworkDateFilter && !homeworkList.some(h => h.dueDate.includes(homeworkDateFilter)) ? (
+                  <div className="text-center py-16 text-slate-400 font-semibold text-sm">
+                    No Data Found
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {homeworkList.map((hw) => (
+                      <div key={hw.id} className="border border-slate-200 rounded-xl p-4 bg-white hover:border-indigo-300 transition-colors shadow-2xs space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase">
+                              {hw.subject}
+                            </span>
+                            <h4 className="font-bold text-sm text-slate-900 mt-1">{hw.title}</h4>
+                            <p className="text-xs text-slate-600 mt-0.5">{hw.desc}</p>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            homeworkStatus[hw.id] === 'Submitted'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {homeworkStatus[hw.id]}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+                          <span>Teacher: <strong>{hw.teacher}</strong> &bull; Due: {hw.dueDate}</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toast.success(`Worksheet downloaded for ${hw.subject}!`)}
+                              className="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>Worksheet</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSubmitHwModal(hw);
+                                setHwRemarks('');
+                              }}
+                              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold cursor-pointer"
+                            >
+                              {homeworkStatus[hw.id] === 'Submitted' ? 'Re-Submit' : 'Submit'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 2. FEE DETAILS FULL PAGE (1:1 with schools.uabinfosol.com/get-fee) */}
+          {activeView === 'fee' && (
+            <div>
+              {renderPageHeader('Fee')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 space-y-4">
+                {/* Metric Strip (Fee 21700, Paid 0, Due 21700, Paid: 0%, Due: 100%) */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-bold">
+                    <span className="text-slate-700">Fee: <strong className="text-slate-900 text-sm">₹{totalFeesAmount.toLocaleString()}</strong></span>
+                    <span className="text-emerald-700">Paid: <strong className="text-emerald-800 text-sm">₹{currentPaidAmount.toLocaleString()}</strong></span>
+                    <span className="text-rose-700">Due: <strong className="text-rose-800 text-sm">₹{currentDueAmount.toLocaleString()}</strong></span>
+                    <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-[11px]">
+                      Paid: {Math.round((currentPaidAmount / totalFeesAmount) * 100)}%
+                    </span>
+                    <span className="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full text-[11px]">
+                      Due: {Math.round((currentDueAmount / totalFeesAmount) * 100)}%
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigateTo('/get-fee-receipt', 'fee-receipt')}
+                      className="px-4 py-2 border border-slate-300 hover:bg-white bg-white text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                    >
+                      View Receipt
+                    </button>
+                    {currentDueAmount > 0 && (
+                      <button
+                        onClick={() => handleInitiatePayment({ month: 'All', amt: currentDueAmount, label: 'Full Academic Year Fees (All Quarters)', isAll: true })}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Pay Full ₹{currentDueAmount.toLocaleString()}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 12-Month Table (1:1 with Live UAB /get-fee table) */}
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase text-[11px]">
+                      <tr>
+                        <th className="p-3">MONTH</th>
+                        <th className="p-3 text-right">AMT.</th>
+                        <th className="p-3 text-right">PAID</th>
+                        <th className="p-3 text-right">DUE</th>
+                        <th className="p-3 text-center">STATUS</th>
+                        <th className="p-3 text-right">ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {monthWiseFees.map((row, i) => (
+                        <tr key={i} className="hover:bg-slate-50/60">
+                          <td className="p-3 font-bold text-slate-800">
+                            {row.month}
+                            <span className="block text-[10px] text-slate-400 font-normal">{row.label}</span>
+                          </td>
+                          <td className="p-3 text-right font-medium">{row.amt > 0 ? `₹${row.amt.toLocaleString()}` : '0'}</td>
+                          <td className="p-3 text-right font-bold text-emerald-600">{row.paid > 0 ? `₹${row.paid.toLocaleString()}` : '0'}</td>
+                          <td className="p-3 text-right font-bold text-rose-600">{row.due > 0 ? `₹${row.due.toLocaleString()}` : '0'}</td>
+                          <td className="p-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                              row.status === 'Paid'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : row.status === 'Due'
+                                ? 'bg-rose-100 text-rose-800'
+                                : 'text-slate-400'
+                            }`}>
+                              {row.status === 'N/A' ? '-' : row.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
+                            {row.amt > 0 && row.due > 0 ? (
+                              <button
+                                onClick={() => handleInitiatePayment({ month: row.month, amt: row.due, label: row.label })}
+                                className="px-3.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
+                              >
+                                Pay
+                              </button>
+                            ) : row.paid > 0 ? (
+                              <button
+                                onClick={() => navigateTo('/get-fee-receipt', 'fee-receipt')}
+                                className="px-3 py-1 border border-emerald-300 text-emerald-700 hover:bg-emerald-50 rounded-lg text-xs font-semibold cursor-pointer"
+                              >
+                                Receipt
+                              </button>
+                            ) : (
+                              <span className="text-slate-300 text-xs">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3. PROFILE FULL PAGE (1:1 with schools.uabinfosol.com/profile) */}
+          {activeView === 'profile' && (
+            <div>
+              {renderPageHeader('Profile')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b border-slate-100 pb-5">
+                  <img src={student.avatar} alt={student.name} className="w-24 h-24 rounded-full border-4 border-indigo-600 object-cover shadow-md" />
+                  <div className="space-y-1 text-center sm:text-left">
+                    <span className="font-mono text-xs text-indigo-600 font-bold">[ {student.srNo} ]</span>
+                    <h2 className="text-2xl font-black text-slate-900">{student.name}</h2>
+                    <p className="text-xs font-bold text-slate-600">{student.className} - {student.division}</p>
+                    <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                      Active Student &bull; Session 2026-27
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">D.O.B:</span>
+                    <strong className="text-slate-900 text-sm">{student.dob}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Gender:</span>
+                    <strong className="text-slate-900 text-sm">{student.gender}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Contact No:</span>
+                    <strong className="text-slate-900 text-sm">{student.contactNo}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Father's Name:</span>
+                    <strong className="text-slate-900 text-sm">{student.fatherName}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Mother's Name:</span>
+                    <strong className="text-slate-900 text-sm">{student.motherName}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Blood Group:</span>
+                    <strong className="text-slate-900 text-sm">{student.bloodGroup}</strong>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 md:col-span-2">
+                    <span className="text-slate-500 font-semibold block mb-0.5">Address:</span>
+                    <strong className="text-slate-900 text-sm">{student.address}</strong>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => navigateTo('/student-id-card', 'id-card')}
+                    className="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    View Digital ID Card
+                  </button>
+                  <button
+                    onClick={() => toast.success('Profile details update request submitted to school office!')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Request Profile Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 4. ATTENDANCE FULL PAGE (1:1 with schools.uabinfosol.com/get-attendance) */}
+          {activeView === 'attendance' && (
+            <div>
+              {renderPageHeader('Attendance')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5">
+                <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-5 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold">Hello, {student.name} 👋</h3>
+                    <p className="text-xs text-blue-200 mt-0.5">Let's keep your attendance perfect! Great job, you're on the right track.</p>
+                  </div>
+                  <div className="flex gap-3 text-center">
+                    <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
+                      <span className="text-[10px] text-blue-200 block uppercase font-bold">Overall</span>
+                      <span className="text-base font-black">92%</span>
+                    </div>
+                    <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
+                      <span className="text-[10px] text-emerald-300 block uppercase font-bold">Present</span>
+                      <span className="text-base font-black">23</span>
+                    </div>
+                    <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
+                      <span className="text-[10px] text-rose-300 block uppercase font-bold">Absent</span>
+                      <span className="text-base font-black">2</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-sm text-slate-800">Monthly Attendance Matrix</span>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="text-xs border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-700"
+                  >
+                    <option>October 2026</option>
+                    <option>September 2026</option>
+                    <option>August 2026</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5 text-xs">
+                  {attendanceCalendar.map((item) => (
+                    <div
+                      key={item.day}
+                      className={`p-3 rounded-xl border text-center transition-all ${
+                        item.status === 'P'
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-bold'
+                          : item.status === 'Ab'
+                          ? 'bg-rose-50 border-rose-200 text-rose-800 font-bold'
+                          : item.status === 'H'
+                          ? 'bg-amber-50 border-amber-200 text-amber-800 font-medium'
+                          : item.status === 'Sun'
+                          ? 'bg-slate-100 border-slate-200 text-slate-600 font-medium'
+                          : 'bg-slate-50 border-slate-100 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-[10px] text-slate-500 font-semibold">{item.day} Oct</div>
+                      <div className="text-sm font-extrabold mt-0.5">
+                        {item.status === 'P' ? '● P' : item.status === 'Ab' ? '● Ab' : item.status === 'H' ? 'Holiday' : item.status === 'Sun' ? 'Sun' : '-'}
+                      </div>
+                      {item.timeIn && (
+                        <div className="text-[9px] text-emerald-700 mt-1">{item.timeIn}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 5. SYLLABUS FULL PAGE (/get-syllabus) */}
+          {activeView === 'syllabus' && (
+            <div>
+              {renderPageHeader('Syllabus')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {['English', 'Mathematics', 'Hindi', 'Rhymes & EVS'].map((subj) => (
+                    <button
+                      key={subj}
+                      onClick={() => setSyllabusSubject(subj)}
+                      className={`px-4 py-2 rounded-xl font-bold cursor-pointer transition-all ${
+                        syllabusSubject === subj ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {subj}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  {syllabusData[syllabusSubject]?.map((item, idx) => (
+                    <div key={idx} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-bold text-slate-900 text-sm">{item.unit}</h4>
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                          {item.progress}% Covered
+                        </span>
+                      </div>
+                      <p className="text-slate-600">{item.topics}</p>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${item.progress}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-3 flex justify-between items-center border-t border-slate-100">
+                  <span className="text-slate-500">CBSE Affiliation Curriculum Aligned</span>
+                  <button
+                    onClick={() => toast.success(`Downloading complete ${syllabusSubject} Syllabus PDF...`)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Full Syllabus PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 6. STUDY MATERIAL FULL PAGE (/get-study-material) */}
+          {activeView === 'study-material' && (
+            <div>
+              {renderPageHeader('Study Material')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-3 text-xs">
+                {studyMaterials.map((sm) => (
+                  <div key={sm.id} className="border border-slate-200 rounded-xl p-4 hover:border-teal-300 transition-colors bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-bold text-[10px] uppercase">
+                        {sm.subject} &bull; {sm.type}
+                      </span>
+                      <h4 className="font-bold text-slate-900 text-sm mt-1">{sm.title}</h4>
+                      <span className="text-[10px] text-slate-400">Uploaded: {sm.date} &bull; File Size: {sm.size}</span>
+                    </div>
+                    <button
+                      onClick={() => toast.success(`Downloading ${sm.title}...`)}
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 7. ASSIGNMENT FULL PAGE (/get-assignment) */}
+          {activeView === 'assignment' && (
+            <div>
+              {renderPageHeader('Assignment')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assignmentsList.map((asg) => (
+                    <div key={asg.id} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2.5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-bold uppercase">
+                            {asg.subject}
+                          </span>
+                          <h4 className="font-bold text-sm text-slate-900 mt-1">{asg.title}</h4>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          asg.status === 'Submitted' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {asg.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-slate-500 text-[11px]">
+                        <span>Due Date: <strong>{asg.dueDate}</strong> &bull; Max Marks: {asg.maxMarks}</span>
+                        <span className="font-bold text-purple-700">Score: {asg.score}</span>
+                      </div>
+                      <div className="bg-slate-50 p-2.5 rounded-lg text-slate-600 text-[11px]">
+                        <strong>Teacher Feedback:</strong> {asg.feedback}
+                      </div>
+                      <div className="flex justify-end pt-1">
+                        <button
+                          onClick={() => toast.success(`Solution uploaded for ${asg.subject}!`)}
+                          className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold cursor-pointer"
+                        >
+                          {asg.status === 'Submitted' ? 'Re-Upload Solution' : 'Submit Solution'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 8. ONLINE CLASSES FULL PAGE (/get-online-classes) */}
+          {activeView === 'online-classes' && (
+            <div>
+              {renderPageHeader('Online Classes')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-8 text-center max-w-xl mx-auto space-y-4">
+                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
+                  <Video className="w-8 h-8 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900">Nursery Rhymes & Storytelling</h3>
+                  <p className="text-xs text-slate-500 mt-1">Teacher: Sunita Kumari &bull; Google Meet / Zoom Classroom</p>
+                </div>
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 font-bold text-xs inline-block">
+                  ● Scheduled Live: 08:30 AM - 09:15 AM
+                </div>
+                <button
+                  onClick={() => toast.success('Connecting to School Virtual Classroom meeting...')}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-md text-sm"
+                >
+                  Join Live Classroom Meeting
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 9. DATESHEET FULL PAGE (/get-datesheet) */}
+          {activeView === 'datesheet' && (
+            <div>
+              {renderPageHeader('DateSheet')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase text-[11px]">
+                      <tr>
+                        <th className="p-3">Date & Day</th>
+                        <th className="p-3">Subject</th>
+                        <th className="p-3">Time</th>
+                        <th className="p-3">Room</th>
+                        <th className="p-3">Syllabus Portion</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {dateSheet.map((ds, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="p-3 font-bold text-slate-800 whitespace-nowrap">
+                            {ds.date} <span className="block text-[10px] text-slate-500 font-normal">{ds.day}</span>
+                          </td>
+                          <td className="p-3 font-semibold text-rose-700">{ds.subject}</td>
+                          <td className="p-3 font-medium text-slate-600 whitespace-nowrap">{ds.time}</td>
+                          <td className="p-3 font-medium text-slate-600">{ds.room}</td>
+                          <td className="p-3 text-[11px] text-slate-500">{ds.syllabus}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => toast.success('Downloading Examination DateSheet PDF...')}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download DateSheet PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 10. ADMIT CARD FULL PAGE (/student-admit-card) */}
+          {activeView === 'admit-card' && (
+            <div>
+              {renderPageHeader('Admit Card')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 max-w-2xl mx-auto space-y-4 text-xs">
+                <div className="text-center border-b border-slate-200 pb-3">
+                  <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">{student.schoolName}</h2>
+                  <p className="text-xs text-slate-500">Center Code: {student.schoolCode} &bull; Affiliation: {student.afflNo}</p>
+                  <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-[10px] uppercase">
+                    Candidate Examination Hall Ticket 2026-27
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 border border-slate-200 rounded-xl p-4 bg-slate-50">
+                  <img src={student.avatar} alt={student.name} className="w-16 h-16 rounded-lg object-cover border" />
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 w-full">
+                    <div><span className="text-slate-500">Candidate:</span> <strong>{student.name}</strong></div>
+                    <div><span className="text-slate-500">Roll No:</span> <strong>{student.rollNo}</strong></div>
+                    <div><span className="text-slate-500">Class & Sec:</span> <strong>{student.className} - {student.division}</strong></div>
+                    <div><span className="text-slate-500">SR No:</span> <strong>{student.srNo}</strong></div>
+                    <div><span className="text-slate-500">Father:</span> <strong>{student.fatherName}</strong></div>
+                    <div><span className="text-slate-500">DOB:</span> <strong>{student.dob}</strong></div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                  <span className="text-slate-500">Controller of Examinations</span>
+                  <button
+                    onClick={() => toast.success('Printing Official Exam Admit Card PDF...')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Admit Card</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 11. RESULT FULL PAGE (/get-result) */}
+          {activeView === 'result' && (
+            <div>
+              {renderPageHeader('Result')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="text-center border-b border-slate-200 pb-3">
+                  <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">{student.schoolName}</h2>
+                  <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                    Overall Result: PASSED (Grade A1 &bull; 95%)
+                  </span>
+                </div>
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Subject</th>
+                        <th className="p-3 text-right">Max Marks</th>
+                        <th className="p-3 text-right">Obtained</th>
+                        <th className="p-3 text-center">Grade</th>
+                        <th className="p-3">Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {results.map((r, i) => (
+                        <tr key={i} className="hover:bg-slate-50/50">
+                          <td className="p-3 font-bold text-slate-800">{r.subject}</td>
+                          <td className="p-3 text-right text-slate-500">{r.maxMarks}</td>
+                          <td className="p-3 text-right font-extrabold text-blue-700">{r.obtained}</td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">{r.grade}</span>
+                          </td>
+                          <td className="p-3 text-[11px] text-slate-600">{r.remarks}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => toast.success('Printing Official Marksheet PDF...')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Marksheet</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 12. LEAVE REQUEST FULL PAGE (/leave-request) */}
+          {activeView === 'leave-request' && (
+            <div>
+              {renderPageHeader('Leave Request')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5 text-xs">
+                <form onSubmit={handleLeaveSubmit} className="space-y-4 max-w-xl">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Leave Type</label>
+                    <select
+                      value={leaveForm.type}
+                      onChange={(e) => setLeaveForm({ ...leaveForm, type: e.target.value })}
+                      className="w-full border border-slate-300 rounded-lg p-2 font-medium"
+                    >
+                      <option>Sick Leave</option>
+                      <option>Family Function</option>
+                      <option>Medical Emergency</option>
+                      <option>Casual Leave</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">From Date</label>
+                      <input
+                        type="date"
+                        value={leaveForm.from}
+                        onChange={(e) => setLeaveForm({ ...leaveForm, from: e.target.value })}
+                        className="w-full border border-slate-300 rounded-lg p-2 font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">To Date</label>
+                      <input
+                        type="date"
+                        value={leaveForm.to}
+                        onChange={(e) => setLeaveForm({ ...leaveForm, to: e.target.value })}
+                        className="w-full border border-slate-300 rounded-lg p-2 font-medium"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Reason for Leave</label>
+                    <textarea
+                      rows="3"
+                      value={leaveForm.reason}
+                      onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
+                      placeholder="State reason for absence..."
+                      className="w-full border border-slate-300 rounded-lg p-2 font-medium"
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-xs"
+                  >
+                    Submit Leave Application
+                  </button>
+                </form>
+
+                <div className="pt-4 border-t border-slate-200">
+                  <span className="font-bold text-slate-700 block mb-2 text-sm">Past Applications:</span>
+                  <div className="space-y-2">
+                    {leaveHistory.map((lh) => (
+                      <div key={lh.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <div>
+                          <span className="font-semibold text-slate-900">{lh.type} ({lh.from} to {lh.to})</span>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{lh.reason}</p>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                          {lh.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 13. GATE PASS FULL PAGE (/get-gate-pass) */}
+          {activeView === 'gate-pass' && (
+            <div>
+              {renderPageHeader('Gate Pass')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-800 text-sm">Authorized Gate Passes</span>
+                  <button
+                    onClick={() => setShowGatePassModal(true)}
+                    className="px-4 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl font-bold cursor-pointer shadow-xs"
+                  >
+                    + Apply New Gate Pass
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {gatePasses.map((gp) => (
+                    <div key={gp.id} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-bold text-cyan-800 text-sm">{gp.passNo}</span>
+                          <p className="text-[11px] text-slate-500">Date: {gp.date} &bull; Exit Time: {gp.exitTime}</p>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                          {gp.status}
+                        </span>
+                      </div>
+                      <div className="bg-slate-50 p-2.5 rounded-lg">
+                        <p className="text-slate-700"><strong>Authorized Escort:</strong> {gp.escort}</p>
+                        <p className="text-slate-500 text-[11px]"><strong>Reason:</strong> {gp.reason}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 14. TRANSPORT FULL PAGE (/get-transport) */}
+          {activeView === 'transport' && (
+            <div>
+              {renderPageHeader('Transport')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs max-w-2xl">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center">
+                  <div>
+                    <span className="text-amber-800 font-bold text-base block">Route #04 &bull; Mahapura - Ajmer Road</span>
+                    <span className="text-slate-600 text-xs">Vehicle: RJ-14-PA-2026 (Tata Starbus)</span>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                    ● GPS Active
+                  </span>
+                </div>
+                <div className="space-y-2 border border-slate-200 rounded-xl p-4">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Driver Name:</span>
+                    <strong className="text-slate-800">Ramphal Gurjar</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Driver Mobile:</span>
+                    <strong className="text-slate-800">+91 98290 12345</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Morning Pickup:</span>
+                    <strong className="text-slate-800">07:45 AM (Mahapura Bus Stop)</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Afternoon Drop:</span>
+                    <strong className="text-slate-800">02:25 PM (Mahapura Bus Stop)</strong>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toast.success('Live Bus GPS refreshed: Current speed 34 km/h, reaching Mahapura in 6 mins')}
+                  className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-xs"
+                >
+                  Refresh Live Bus GPS
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 15. NOTIFICATIONS FULL PAGE (/all-notifications, /get-sms, /get-voice-sms) */}
+          {activeView === 'notifications' && (
+            <div>
+              {renderPageHeader('Notifications')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="flex gap-2 border-b border-slate-200 pb-2">
+                  <button
+                    onClick={() => setCommTab('notifications')}
+                    className={`px-4 py-2 rounded-xl font-bold cursor-pointer transition-all ${
+                      commTab === 'notifications' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    All Notifications
+                  </button>
+                  <button
+                    onClick={() => setCommTab('sms')}
+                    className={`px-4 py-2 rounded-xl font-bold cursor-pointer transition-all ${
+                      commTab === 'sms' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    SMS Alerts (6377281034)
+                  </button>
+                  <button
+                    onClick={() => setCommTab('voice')}
+                    className={`px-4 py-2 rounded-xl font-bold cursor-pointer transition-all ${
+                      commTab === 'voice' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    Voice SMS
+                  </button>
+                </div>
+                {commTab === 'notifications' && (
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60">
+                      <div className="flex justify-between items-start">
+                        <span className="font-bold text-blue-900 text-sm">Term Assessment 2026 Timetable Released</span>
+                        <span className="text-[10px] text-slate-500">14-Oct-2026</span>
+                      </div>
+                      <p className="text-slate-600 mt-1">Please check the Exam DateSheet section for junior wing examination details.</p>
+                    </div>
+                  </div>
+                )}
+                {commTab === 'sms' && (
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                      <div className="flex justify-between text-slate-500">
+                        <span>Sender: <strong>JDIS-JAIPUR</strong></span>
+                        <span className="text-emerald-600 font-bold">● Delivered</span>
+                      </div>
+                      <p className="text-slate-800 font-mono">"Dear Parent, Aadhya Choudhary (Roll 14) is marked Absent today (16-Oct-2026)."</p>
+                    </div>
+                  </div>
+                )}
+                {commTab === 'voice' && (
+                  <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-2">
+                    <span className="font-bold text-indigo-950 text-sm">Principal's Address: Autumn Break & Diwali Safety</span>
+                    <button
+                      onClick={() => {
+                        setPlayingVoiceId(playingVoiceId === 1 ? null : 1);
+                        toast.success('Playing School Voice Announcement...');
+                      }}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 cursor-pointer shadow-xs"
+                    >
+                      {playingVoiceId === 1 ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      <span>{playingVoiceId === 1 ? 'Pause Voice Note' : 'Play Voice Message'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 16. CIRCULAR FULL PAGE (/get-circular) */}
+          {activeView === 'circular' && (
+            <div>
+              {renderPageHeader('Circular')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-3 text-xs">
+                {circulars.map((c) => (
+                  <div key={c.id} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-slate-900 text-sm">{c.title}</h4>
+                      <span className="text-slate-500">{c.date}</span>
+                    </div>
+                    <p className="text-slate-600">{c.desc}</p>
+                    <button
+                      onClick={() => toast.success(`Downloading circular ${c.file}...`)}
+                      className="px-3 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download PDF Attachment</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 17. COMPLAINTS FULL PAGE (/get-complaint) */}
+          {activeView === 'complaint' && (
+            <div>
+              {renderPageHeader('Complaint')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5 text-xs">
+                <form onSubmit={handleComplaintSubmit} className="space-y-4 max-w-xl bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <h4 className="font-bold text-slate-800 text-sm">Register Grievance / Complaint</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Category</label>
+                      <select
+                        value={complaintForm.category}
+                        onChange={(e) => setComplaintForm({ ...complaintForm, category: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium"
+                      >
+                        <option>Bus / Transport</option>
+                        <option>Academics & Teaching</option>
+                        <option>Hygiene & Sanitation</option>
+                        <option>Fee & Accounts</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Priority</label>
+                      <select
+                        value={complaintForm.priority}
+                        onChange={(e) => setComplaintForm({ ...complaintForm, priority: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium"
+                      >
+                        <option>Normal</option>
+                        <option>High</option>
+                        <option>Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Subject</label>
+                    <input
+                      type="text"
+                      value={complaintForm.subject}
+                      onChange={(e) => setComplaintForm({ ...complaintForm, subject: e.target.value })}
+                      placeholder="Brief topic..."
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Description</label>
+                    <textarea
+                      rows="3"
+                      value={complaintForm.desc}
+                      onChange={(e) => setComplaintForm({ ...complaintForm, desc: e.target.value })}
+                      placeholder="Detailed explanation..."
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2"
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold cursor-pointer"
+                  >
+                    Submit Grievance Ticket
+                  </button>
+                </form>
+
+                <div className="space-y-3 pt-2 border-t border-slate-200">
+                  <span className="font-bold text-slate-800 text-sm block">Previous Grievance Tickets:</span>
+                  {complaints.map((c) => (
+                    <div key={c.id} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-bold text-slate-900 text-sm">{c.subject}</span>
+                          <p className="text-[10px] text-slate-500">Ticket: <strong>{c.id}</strong> &bull; Category: {c.category} &bull; Date: {c.date}</p>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="bg-slate-50 p-2.5 rounded-lg text-slate-600">
+                        <strong>Admin Resolution Note:</strong> {c.adminReply}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 18. ID CARD FULL PAGE (/student-id-card) */}
+          {activeView === 'id-card' && (
+            <div>
+              {renderPageHeader('Id Card')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 max-w-sm mx-auto text-center space-y-4 text-xs">
+                <div className="border-b border-slate-200 pb-2">
+                  <h3 className="font-extrabold text-slate-900 text-sm uppercase">{student.schoolName}</h3>
+                  <p className="text-[10px] text-slate-500">Mahapura, Ajmer Road, Jaipur &bull; Code: {student.schoolCode}</p>
+                </div>
+                <img src={student.avatar} alt={student.name} className="w-24 h-24 rounded-full border-4 border-indigo-600 object-cover shadow-md mx-auto" />
+                <div>
+                  <h4 className="text-base font-black text-slate-900">{student.name}</h4>
+                  <p className="text-xs font-bold text-indigo-700">{student.className} - {student.division}</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-left space-y-1">
+                  <div className="flex justify-between"><span>SR No:</span><strong>{student.srNo}</strong></div>
+                  <div className="flex justify-between"><span>Roll No:</span><strong>{student.rollNo}</strong></div>
+                  <div className="flex justify-between"><span>Father:</span><strong>{student.fatherName}</strong></div>
+                  <div className="flex justify-between"><span>Phone:</span><strong>{student.contactNo}</strong></div>
+                </div>
+                <button
+                  onClick={() => toast.success('Printing Official Student ID Card PDF...')}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold cursor-pointer transition-colors"
+                >
+                  Print Student ID Card
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 19. CALENDAR PLANNING FULL PAGE (/get-calendar-planing) */}
+          {activeView === 'calendar-planning' && (
+            <div>
+              {renderPageHeader('Calendar Planing')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="border border-indigo-200 bg-indigo-50/50 p-4 rounded-xl">
+                    <span className="font-bold text-indigo-900 block text-sm">October 2026</span>
+                    <ul className="mt-2 space-y-1 text-slate-700">
+                      <li>&bull; <strong>02 Oct:</strong> Gandhi Jayanti (Holiday)</li>
+                      <li>&bull; <strong>20-24 Oct:</strong> Autumn & Dussehra Break</li>
+                      <li>&bull; <strong>27-31 Oct:</strong> Term 1 Assessment Exams</li>
+                    </ul>
+                  </div>
+                  <div className="border border-slate-200 bg-slate-50 p-4 rounded-xl">
+                    <span className="font-bold text-slate-900 block text-sm">November 2026</span>
+                    <ul className="mt-2 space-y-1 text-slate-700">
+                      <li>&bull; <strong>14 Nov:</strong> Children's Day Gala Carnival</li>
+                      <li>&bull; <strong>28 Nov:</strong> Annual Athletic Sports Meet</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => toast.success('Downloading Annual Calendar PDF...')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Annual Calendar PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 20. BIRTHDAY FULL PAGE (/student-birthday, /get-birthday) */}
+          {activeView === 'birthday' && (
+            <div>
+              {renderPageHeader('Birthday')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5 text-xs text-center max-w-xl mx-auto">
+                <div className="p-6 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl text-white shadow-md space-y-2">
+                  <div className="text-3xl">🎂</div>
+                  <h4 className="text-xl font-black">{student.name}</h4>
+                  <p className="text-xs text-pink-100">Birthday: <strong>20th December</strong></p>
+                </div>
+                <div className="text-left space-y-2">
+                  <span className="font-bold text-slate-800 text-sm block">Upcoming Classmate Birthdays:</span>
+                  <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <div>
+                      <strong className="text-slate-900">Aarav Sharma (Roll 01)</strong>
+                      <p className="text-[10px] text-slate-500">18th October &bull; Turning 4 Years Old</p>
+                    </div>
+                    <button
+                      onClick={() => toast.success('Birthday wish sent to Aarav Sharma!')}
+                      className="px-3.5 py-1.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold cursor-pointer"
+                    >
+                      Send Wish
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 21. BATCHMATES FULL PAGE (/get-batch-mate) */}
+          {activeView === 'batchmate' && (
+            <div>
+              {renderPageHeader('Batchmate')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="relative max-w-md">
+                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={batchmateSearch}
+                    onChange={(e) => setBatchmateSearch(e.target.value)}
+                    placeholder="Search classmate by name or roll number..."
+                    className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {classmates
+                    .filter(c => c.name.toLowerCase().includes(batchmateSearch.toLowerCase()) || c.roll.includes(batchmateSearch))
+                    .map((c) => (
+                      <div key={c.roll} className="border border-slate-200 rounded-xl p-3.5 bg-white flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
+                          {c.roll}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-xs">{c.name}</h4>
+                          <p className="text-[10px] text-slate-500">Father: {c.father}</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 22. NEWS FULL PAGE (/get-news) */}
+          {activeView === 'news' && (
+            <div>
+              {renderPageHeader('News')}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                {schoolNews.map((n) => (
+                  <div key={n.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs space-y-2">
+                    <img src={n.image} alt={n.title} className="w-full h-40 object-cover" />
+                    <div className="p-4 space-y-2">
+                      <span className="text-[10px] text-slate-400">{n.date} &bull; By {n.author}</span>
+                      <h4 className="font-bold text-sm text-slate-900">{n.title}</h4>
+                      <p className="text-slate-600">{n.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 23. GALLERY FULL PAGE (/get-gallary) */}
+          {activeView === 'gallery' && (
+            <div>
+              {renderPageHeader('Gallery')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {Object.keys(galleryAlbums).map((album) => (
+                    <button
+                      key={album}
+                      onClick={() => setGalleryAlbum(album)}
+                      className={`px-4 py-2 rounded-xl font-bold cursor-pointer whitespace-nowrap ${
+                        galleryAlbum === album ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      {album}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {galleryAlbums[galleryAlbum]?.map((imgUrl, i) => (
+                    <div key={i} className="rounded-xl overflow-hidden border border-slate-200 aspect-video shadow-xs">
+                      <img src={imgUrl} alt="Gallery" className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 24. SOCIAL MEDIA FULL PAGE (/get-social-media) */}
+          {activeView === 'social-media' && (
+            <div>
+              {renderPageHeader('Social Media')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 max-w-xl mx-auto space-y-3 text-xs">
+                <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/50 flex justify-between items-center">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-sm">YouTube Channel</h4>
+                    <span className="text-[11px] text-slate-500">@JDInternationalSchoolJaipur</span>
+                  </div>
+                  <button onClick={() => toast.success('Visiting YouTube...')} className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold">Visit</button>
+                </div>
+                <div className="p-4 rounded-xl border border-pink-200 bg-pink-50/50 flex justify-between items-center">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-sm">Instagram Handle</h4>
+                    <span className="text-[11px] text-slate-500">@jdis_jaipur</span>
+                  </div>
+                  <button onClick={() => toast.success('Visiting Instagram...')} className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold">Visit</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 25. FEE RECEIPT FULL PAGE (/get-fee-receipt) */}
+          {activeView === 'fee-receipt' && (
+            <div>
+              {renderPageHeader('Fee Receipt')}
+              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs">
+                {feeReceipts.map((rcpt, idx) => (
+                  <div key={idx} className="border border-slate-200 rounded-xl p-4 bg-white space-y-3">
+                    <div className="flex justify-between items-start border-b border-slate-100 pb-2">
+                      <div>
+                        <span className="font-bold text-indigo-700 text-sm">{rcpt.receiptNo}</span>
+                        <p className="text-[11px] text-slate-500">Date: {rcpt.date} &bull; Mode: {rcpt.mode}</p>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">{rcpt.status}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-semibold text-slate-800">{rcpt.head}</span>
+                        <p className="text-[10px] text-slate-500">Student: {student.name} ({student.className})</p>
+                      </div>
+                      <span className="text-lg font-black text-emerald-700">₹{rcpt.amount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-end pt-1 border-t border-slate-100">
+                      <button
+                        onClick={() => toast.success(`Downloading Receipt ${rcpt.receiptNo} PDF...`)}
+                        className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>Print Receipt</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ==================== ACTION-SPECIFIC DIALOGS ==================== */}
+
+        {/* Atom Payment Gateway Dialog */}
+        {paymentGatewayOpen && (
+          <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+              <div className="bg-slate-900 text-white px-5 py-4 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <div>
+                    <h3 className="font-bold text-sm">Atom Technologies Gateway</h3>
+                    <p className="text-[10px] text-slate-400">J D International School &bull; Merchant Portal</p>
+                  </div>
+                </div>
+                <button onClick={() => setPaymentGatewayOpen(false)} className="p-1 rounded text-slate-400 hover:text-white cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {paymentSuccess ? (
+                <div className="p-6 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-10 h-10 animate-bounce" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-slate-900">Payment Successful!</h4>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Amount of <strong>₹{payingItem?.amt?.toLocaleString()}</strong> received for {payingItem?.label}.
+                    </p>
+                  </div>
+                  <div className="pt-3 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setPaymentGatewayOpen(false);
+                        setActiveView('fee-receipt');
+                      }}
+                      className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                    >
+                      View Receipt
+                    </button>
+                    <button
+                      onClick={() => setPaymentGatewayOpen(false)}
+                      className="flex-1 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-5 space-y-4 text-xs">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex justify-between items-center">
+                    <div>
+                      <span className="text-emerald-800 font-semibold text-xs block">{payingItem?.label}</span>
+                      <span className="text-[11px] text-slate-500">Aadhya Choudhary (SR #2059)</span>
+                    </div>
+                    <span className="text-lg font-black text-emerald-900">₹{payingItem?.amt?.toLocaleString()}</span>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-slate-700 block mb-2">Choose Payment Option:</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['UPI', 'CARD', 'NETBANKING'].map((method) => (
+                        <button
+                          key={method}
+                          onClick={() => setPaymentMethod(method)}
+                          className={`p-2 rounded-xl border text-center font-bold text-xs cursor-pointer transition-all ${
+                            paymentMethod === method
+                              ? 'border-emerald-600 bg-emerald-50/80 text-emerald-800 shadow-xs'
+                              : 'border-slate-200 hover:bg-slate-50 text-slate-600'
+                          }`}
+                        >
+                          {method === 'UPI' ? 'UPI / QR' : method === 'CARD' ? 'Debit/Credit' : 'NetBanking'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {paymentMethod === 'UPI' && (
+                    <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      <label className="font-bold text-slate-700 block text-[11px]">Virtual Payment Address (VPA / UPI ID)</label>
+                      <input
+                        type="text"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono"
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    disabled={isProcessingPayment}
+                    onClick={handleProcessAtomPayment}
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-md flex items-center justify-center gap-2"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Verifying with Atom Gateway...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4" />
+                        <span>Pay Securely ₹{payingItem?.amt?.toLocaleString()}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
+
+        {/* Homework Submission Modal */}
+        {submitHwModal && (
+          <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 className="font-bold text-sm text-slate-900">Submit Homework: {submitHwModal.subject}</h4>
+                <button onClick={() => setSubmitHwModal(null)} className="p-1 rounded text-slate-400">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-600">{submitHwModal.title}</p>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Upload Homework Photo / PDF</label>
+                <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50">
+                  <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+                  <span className="text-xs text-slate-600 font-semibold">Choose photo or scanned PDF</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Student / Parent Remarks</label>
+                <textarea
+                  rows="2"
+                  value={hwRemarks}
+                  onChange={(e) => setHwRemarks(e.target.value)}
+                  placeholder="Completed pages nicely..."
+                  className="w-full text-xs border border-slate-300 rounded-lg p-2"
+                ></textarea>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSubmitHwModal(null)}
+                  className="flex-1 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setHomeworkStatus({ ...homeworkStatus, [submitHwModal.id]: 'Submitted' });
+                    setSubmitHwModal(null);
+                    toast.success(`Homework for ${submitHwModal.subject} submitted to ${submitHwModal.teacher}!`);
+                  }}
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold"
+                >
+                  Upload & Mark Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Apply Gate Pass Dialog */}
+        {showGatePassModal && (
+          <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-3 text-xs animate-in fade-in zoom-in-95">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 className="font-bold text-sm text-slate-900">Request Gate Pass</h4>
+                <button onClick={() => setShowGatePassModal(false)} className="p-1 rounded text-slate-400">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <form onSubmit={handleGatePassSubmit} className="space-y-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Escort / Guardian Name</label>
+                  <input
+                    type="text"
+                    value={gatePassForm.escort}
+                    onChange={(e) => setGatePassForm({ ...gatePassForm, escort: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg p-2"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Exit Time</label>
+                    <input
+                      type="text"
+                      value={gatePassForm.exitTime}
+                      onChange={(e) => setGatePassForm({ ...gatePassForm, exitTime: e.target.value })}
+                      className="w-full border border-slate-300 rounded-lg p-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Contact No</label>
+                    <input
+                      type="text"
+                      value={gatePassForm.contact}
+                      onChange={(e) => setGatePassForm({ ...gatePassForm, contact: e.target.value })}
+                      className="w-full border border-slate-300 rounded-lg p-2"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Reason for Leaving Early</label>
+                  <textarea
+                    rows="2"
+                    value={gatePassForm.reason}
+                    onChange={(e) => setGatePassForm({ ...gatePassForm, reason: e.target.value })}
+                    placeholder="Doctor appointment, sudden fever, etc."
+                    className="w-full border border-slate-300 rounded-lg p-2"
+                  ></textarea>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowGatePassModal(false)}
+                    className="flex-1 py-2 border border-slate-300 rounded-xl font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl font-bold"
+                  >
+                    Issue Pass
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // ==================== DEFAULT / ROOT DASHBOARD VIEW ====================
+  // =========================================================================
+  return (
+    <div className="bg-[#f3f6fa] min-h-screen px-3 sm:px-6 py-4 font-sans text-slate-800">
+      <div className="max-w-6xl mx-auto space-y-4">
 
         {/* ==================== TOP SIBLING SELECTOR BAR ==================== */}
         <div className="relative w-full">
@@ -851,7 +2267,6 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
                 <div className="font-bold text-blue-600 text-2xl leading-none mt-1">92%</div>
               </div>
             </div>
-            {/* Progress Bar */}
             <div className="mt-3 h-2 rounded-full bg-blue-100 overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-700 transition-all duration-500"
@@ -1021,1894 +2436,6 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
           </div>
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* ==================== 1:1 INTERACTIVE SUBMODULE MODALS ==================== */}
-      {/* ========================================================================= */}
-
-      {/* 1. STUDENT PROFILE MODAL (/profile) */}
-      {activeModal === 'profile' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="w-6 h-6 text-yellow-400" />
-                <div>
-                  <h3 className="font-bold text-base leading-tight">Student Profile Information</h3>
-                  <p className="text-xs text-indigo-200">Academic Year 2026-2027 &bull; {student.schoolName}</p>
-                </div>
-              </div>
-              <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-                <img src={student.avatar} alt={student.name} className="w-16 h-16 rounded-full border-2 border-indigo-600 object-cover" />
-                <div>
-                  <h4 className="text-lg font-bold text-slate-900">{student.name}</h4>
-                  <p className="text-xs text-indigo-700 font-semibold">{student.className} - Section {student.division}</p>
-                  <p className="text-xs text-slate-500">SR No: {student.srNo} &bull; Roll No: {student.rollNo}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 font-medium">Father's Name:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.fatherName}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 font-medium">Mother's Name:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.motherName}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 font-medium">Date of Birth:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.dob} (Age: 3 yrs 10 mos)</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 font-medium">Gender & Blood Group:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.gender} &bull; {student.bloodGroup}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 sm:col-span-2">
-                  <span className="text-slate-500 font-medium">Registered SMS Mobile:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.contactNo}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 sm:col-span-2">
-                  <span className="text-slate-500 font-medium">Permanent Address:</span>
-                  <p className="font-bold text-slate-800 text-sm">{student.address}</p>
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-between items-center border-t border-slate-100">
-                <button
-                  onClick={() => navigateTo('/student-id-card', 'id-card')}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                >
-                  View Digital ID Card
-                </button>
-                <button
-                  onClick={() => toast.success('Profile details update request sent to administration!')}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Request Detail Update
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. ATTENDANCE REGISTER MODAL (/get-attendance) */}
-      {activeModal === 'attendance' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="relative h-44 overflow-hidden bg-gradient-to-r from-blue-900 to-indigo-900">
-              <img src="/attendance-bg.png" alt="Attendance Banner" className="absolute inset-0 w-full h-full object-cover opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-              <div className="relative z-10 p-5 text-white flex justify-between items-start">
-                <div>
-                  <button onClick={closeModal} className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white cursor-pointer mb-2">
-                    <ArrowLeft className="w-4 h-4" />
-                  </button>
-                  <h3 className="text-xl font-bold">Attendance Register</h3>
-                  <p className="text-xs text-blue-200">Session 2026-2027 &bull; {student.name}</p>
-                </div>
-                <div className="text-right">
-                  <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-md">
-                    92% Present
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Attendance Counters Pill Box */}
-            <div className="bg-white rounded-2xl shadow-lg p-3 -mt-6 mx-5 relative z-20 border border-slate-100 grid grid-cols-4 gap-2 text-center">
-              <div className="bg-green-50 p-2 rounded-xl">
-                <span className="text-[10px] font-bold text-green-700 block uppercase">Present</span>
-                <span className="text-lg font-extrabold text-green-700">23 Days</span>
-              </div>
-              <div className="bg-red-50 p-2 rounded-xl">
-                <span className="text-[10px] font-bold text-red-700 block uppercase">Absent</span>
-                <span className="text-lg font-extrabold text-red-700">2 Days</span>
-              </div>
-              <div className="bg-amber-50 p-2 rounded-xl">
-                <span className="text-[10px] font-bold text-amber-700 block uppercase">Holiday</span>
-                <span className="text-lg font-extrabold text-amber-700">5 Days</span>
-              </div>
-              <div className="bg-blue-50 p-2 rounded-xl">
-                <span className="text-[10px] font-bold text-blue-700 block uppercase">Working Days</span>
-                <span className="text-lg font-extrabold text-blue-700">25 Days</span>
-              </div>
-            </div>
-
-            <div className="p-5 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-sm text-slate-800">Monthly Attendance Matrix: {selectedMonth}</span>
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="text-xs border border-slate-300 rounded-lg px-2.5 py-1 font-semibold text-slate-700"
-                >
-                  <option>October 2026</option>
-                  <option>September 2026</option>
-                  <option>August 2026</option>
-                  <option>July 2026</option>
-                </select>
-              </div>
-
-              {/* Day Badges Grid */}
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 text-xs">
-                {attendanceCalendar.map((item) => (
-                  <div
-                    key={item.day}
-                    className={`p-2 rounded-xl border text-center transition-all ${
-                      item.status === 'P'
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-bold'
-                        : item.status === 'Ab'
-                        ? 'bg-rose-50 border-rose-200 text-rose-800 font-bold'
-                        : item.status === 'H'
-                        ? 'bg-amber-50 border-amber-200 text-amber-800 font-medium'
-                        : item.status === 'Sun'
-                        ? 'bg-slate-100 border-slate-200 text-slate-600 font-medium'
-                        : 'bg-slate-50 border-slate-100 text-slate-400'
-                    }`}
-                  >
-                    <div className="text-[10px] text-slate-500 font-semibold">{item.day} Oct</div>
-                    <div className="text-xs font-extrabold mt-0.5">
-                      {item.status === 'P' ? '● P' : item.status === 'Ab' ? '● Ab' : item.status === 'H' ? 'Holiday' : item.status === 'Sun' ? 'Sun' : '-'}
-                    </div>
-                    {item.timeIn && (
-                      <div className="text-[9px] text-emerald-700 mt-0.5">{item.timeIn}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3. 1:1 LIVE UAB MONTH-WISE FEE & ATOM PAYMENT MODAL (/get-fee, /822, /pay-fee) */}
-      {(activeModal === 'fee' || activeModal === 'pay-online') && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="bg-emerald-800 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Fee Details & Online Payment Center</h3>
-                <p className="text-xs text-emerald-200">{student.schoolName} &bull; {student.name} ({student.className})</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Fee Body */}
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Total Annual Fee</span>
-                  <span className="text-xl font-black text-slate-900">₹{totalFeesAmount.toLocaleString()}</span>
-                </div>
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <span className="text-[11px] text-emerald-700 font-semibold block uppercase">Total Paid</span>
-                  <span className="text-xl font-black text-emerald-700">₹{currentPaidAmount.toLocaleString()}</span>
-                </div>
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl">
-                  <span className="text-[11px] text-rose-700 font-semibold block uppercase">Total Balance Due</span>
-                  <span className="text-xl font-black text-rose-700">₹{currentDueAmount.toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Pay Full Year Banner */}
-              {currentDueAmount > 0 && (
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-xl p-3.5 text-white flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm">
-                  <div>
-                    <h4 className="font-bold text-sm">Pay All Outstanding Fees at Once</h4>
-                    <p className="text-xs text-emerald-100">Clear all 4 quarters via Atom Payment Gateway (Instant Receipt)</p>
-                  </div>
-                  <button
-                    onClick={() => handleInitiatePayment({ month: 'All', amt: currentDueAmount, label: 'Full Academic Year Fees (All Quarters)', isAll: true })}
-                    className="px-5 py-2 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-black shadow-md cursor-pointer transition-all flex items-center gap-1.5"
-                  >
-                    <CreditCard className="w-4 h-4 text-emerald-700" />
-                    <span>Pay Full ₹{currentDueAmount.toLocaleString()}</span>
-                  </button>
-                </div>
-              )}
-
-              {/* 12-Month Breakdown Table (1:1 with Live UAB Table) */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">Month</th>
-                      <th className="p-2.5 text-right">Amt.</th>
-                      <th className="p-2.5 text-right">Paid</th>
-                      <th className="p-2.5 text-right">Due</th>
-                      <th className="p-2.5 text-center">Status</th>
-                      <th className="p-2.5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {monthWiseFees.map((row, i) => (
-                      <tr key={i} className="hover:bg-slate-50/60">
-                        <td className="p-2.5 font-bold text-slate-800">
-                          {row.month}
-                          <span className="block text-[10px] text-slate-400 font-normal">{row.label}</span>
-                        </td>
-                        <td className="p-2.5 text-right font-medium">₹{row.amt.toLocaleString()}</td>
-                        <td className="p-2.5 text-right font-bold text-emerald-600">₹{row.paid.toLocaleString()}</td>
-                        <td className="p-2.5 text-right font-bold text-rose-600">₹{row.due.toLocaleString()}</td>
-                        <td className="p-2.5 text-center">
-                          <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                            row.status === 'Paid'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : row.status === 'Due'
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-slate-100 text-slate-500'
-                          }`}>
-                            {row.status}
-                          </span>
-                        </td>
-                        <td className="p-2.5 text-right">
-                          {row.amt > 0 && row.due > 0 ? (
-                            <button
-                              onClick={() => handleInitiatePayment({ month: row.month, amt: row.due, label: row.label })}
-                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs inline-flex items-center gap-1"
-                            >
-                              <span>Pay ₹{row.due.toLocaleString()}</span>
-                            </button>
-                          ) : row.paid > 0 ? (
-                            <button
-                              onClick={() => {
-                                setSelectedReceipt(feeReceipts[0]);
-                                setActiveModal('fee-receipt');
-                              }}
-                              className="px-2.5 py-1 border border-emerald-300 text-emerald-700 hover:bg-emerald-50 rounded-lg text-xs font-semibold cursor-pointer"
-                            >
-                              Receipt
-                            </button>
-                          ) : (
-                            <span className="text-slate-400 text-xs">-</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Bottom Actions */}
-              <div className="pt-2 flex justify-between items-center border-t border-slate-100">
-                <button
-                  onClick={() => navigateTo('/get-fee-receipt', 'fee-receipt')}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                >
-                  View Receipts Archive
-                </button>
-                <div className="text-right text-xs text-slate-500">
-                  <span>Secured by <strong>Atom Technologies</strong> 256-bit SSL</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. ATOM PAYMENT GATEWAY SIMULATOR MODAL */}
-      {paymentGatewayOpen && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="bg-slate-900 text-white px-5 py-4 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                <div>
-                  <h3 className="font-bold text-sm">Atom Technologies Gateway</h3>
-                  <p className="text-[10px] text-slate-400">J D International School &bull; Merchant Portal</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setPaymentGatewayOpen(false)}
-                className="p-1 rounded hover:bg-white/20 text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {paymentSuccess ? (
-              <div className="p-6 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-10 h-10 animate-bounce" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-black text-slate-900">Payment Successful!</h4>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Amount of <strong>₹{payingItem?.amt?.toLocaleString()}</strong> successfully received for {payingItem?.label}.
-                  </p>
-                  <p className="text-[11px] font-mono text-slate-400 mt-1">Transaction Ref: ATOM-TXN-{Date.now().toString().slice(-8)}</p>
-                </div>
-                <div className="pt-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setPaymentGatewayOpen(false);
-                      setActiveModal('fee-receipt');
-                    }}
-                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
-                  >
-                    View Official Receipt
-                  </button>
-                  <button
-                    onClick={() => setPaymentGatewayOpen(false)}
-                    className="flex-1 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-5 space-y-4 text-xs">
-                {/* Bill Amount Card */}
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex justify-between items-center">
-                  <div>
-                    <span className="text-emerald-800 font-semibold text-xs block">{payingItem?.label}</span>
-                    <span className="text-[11px] text-slate-500">Candidate: Aadhya Choudhary (SR #2059)</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-black text-emerald-900">₹{payingItem?.amt?.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Payment Methods */}
-                <div>
-                  <span className="font-bold text-slate-700 block mb-2">Choose Payment Option:</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['UPI', 'CARD', 'NETBANKING'].map((method) => (
-                      <button
-                        key={method}
-                        onClick={() => setPaymentMethod(method)}
-                        className={`p-2 rounded-xl border text-center font-bold text-xs cursor-pointer transition-all ${
-                          paymentMethod === method
-                            ? 'border-emerald-600 bg-emerald-50/80 text-emerald-800 shadow-xs'
-                            : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                        }`}
-                      >
-                        {method === 'UPI' ? 'UPI / QR' : method === 'CARD' ? 'Debit/Credit' : 'NetBanking'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Method Details */}
-                {paymentMethod === 'UPI' && (
-                  <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <label className="font-bold text-slate-700 block text-[11px]">Virtual Payment Address (VPA / UPI ID)</label>
-                    <input
-                      type="text"
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono"
-                    />
-                    <div className="flex gap-2 pt-1 text-[10px] text-slate-500">
-                      <span className="bg-white px-2 py-0.5 rounded border">Google Pay</span>
-                      <span className="bg-white px-2 py-0.5 rounded border">PhonePe</span>
-                      <span className="bg-white px-2 py-0.5 rounded border">Paytm</span>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'CARD' && (
-                  <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <div>
-                      <label className="font-bold text-slate-700 block text-[11px]">Card Number</label>
-                      <input
-                        type="text"
-                        value={cardDetails.number}
-                        onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                        className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="font-bold text-slate-700 block text-[11px]">Expiry</label>
-                        <input
-                          type="text"
-                          value={cardDetails.exp}
-                          onChange={(e) => setCardDetails({ ...cardDetails, exp: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono"
-                        />
-                      </div>
-                      <div>
-                        <label className="font-bold text-slate-700 block text-[11px]">CVV</label>
-                        <input
-                          type="password"
-                          value={cardDetails.cvv}
-                          onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'NETBANKING' && (
-                  <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <label className="font-bold text-slate-700 block text-[11px]">Select Bank</label>
-                    <select className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold">
-                      <option>State Bank of India (SBI)</option>
-                      <option>HDFC Bank</option>
-                      <option>ICICI Bank</option>
-                      <option>Punjab National Bank</option>
-                      <option>Axis Bank</option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Submit Payment Button */}
-                <button
-                  disabled={isProcessingPayment}
-                  onClick={handleProcessAtomPayment}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-md flex items-center justify-center gap-2"
-                >
-                  {isProcessingPayment ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Verifying with Atom Gateway...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-4 h-4" />
-                      <span>Pay Securely ₹{payingItem?.amt?.toLocaleString()}</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 5. FEE RECEIPT MODAL (/get-fee-receipt) */}
-      {activeModal === 'fee-receipt' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">Official School Fee Receipts History</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              {feeReceipts.map((rcpt, idx) => (
-                <div key={idx} className="border border-slate-200 rounded-xl p-4 bg-white hover:border-indigo-300 transition-colors space-y-3">
-                  <div className="flex justify-between items-start border-b border-slate-100 pb-2">
-                    <div>
-                      <span className="font-bold text-indigo-700 text-sm">{rcpt.receiptNo}</span>
-                      <p className="text-[11px] text-slate-500">Date: {rcpt.date} &bull; Mode: {rcpt.mode}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                      {rcpt.status}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="font-semibold text-slate-800">{rcpt.head}</span>
-                      <p className="text-[10px] text-slate-500">Student: {student.name} ({student.className})</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-base font-black text-emerald-700">₹{rcpt.amount.toLocaleString()}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-100">
-                    <button
-                      onClick={() => toast.success(`Downloading Receipt ${rcpt.receiptNo} PDF...`)}
-                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      <span>Print Receipt</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 6. HOMEWORK MODAL (/get-homework) */}
-      {activeModal === 'homework' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-blue-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Class Homework & Worksheets</h3>
-                <p className="text-xs text-blue-200">{student.className} &bull; Daily Learning Tasks</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto">
-              {homeworkList.map((hw) => (
-                <div key={hw.id} className="border border-slate-200 rounded-xl p-4 hover:border-blue-300 transition-colors bg-white">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold uppercase">
-                        {hw.subject}
-                      </span>
-                      <h4 className="font-bold text-sm text-slate-900 mt-1">{hw.title}</h4>
-                      <p className="text-xs text-slate-600 mt-0.5">{hw.desc}</p>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      homeworkStatus[hw.id] === 'Submitted'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {homeworkStatus[hw.id]}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-100">
-                    <span>Teacher: <strong>{hw.teacher}</strong> &bull; Due: {hw.dueDate}</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => toast.success(`Worksheet downloaded for ${hw.subject}!`)}
-                        className="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                      >
-                        <Download className="w-3 h-3" />
-                        <span>Worksheet</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSubmitHwModal(hw);
-                          setHwRemarks('');
-                        }}
-                        className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold cursor-pointer"
-                      >
-                        {homeworkStatus[hw.id] === 'Submitted' ? 'Re-Submit' : 'Submit'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Homework Submission Sub-Modal */}
-      {submitHwModal && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h4 className="font-bold text-sm text-slate-900">Submit Homework: {submitHwModal.subject}</h4>
-              <button onClick={() => setSubmitHwModal(null)} className="p-1 rounded text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-slate-600">{submitHwModal.title}</p>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Upload Homework Photo / PDF</label>
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50">
-                <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                <span className="text-xs text-slate-600 font-semibold">Choose photo from phone or computer</span>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Student / Parent Remarks</label>
-              <textarea
-                rows="2"
-                value={hwRemarks}
-                onChange={(e) => setHwRemarks(e.target.value)}
-                placeholder="Completed page 12 to 14 nicely..."
-                className="w-full text-xs border border-slate-300 rounded-lg p-2"
-              ></textarea>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSubmitHwModal(null)}
-                className="flex-1 py-2 border border-slate-300 hover:bg-slate-50 rounded-xl text-xs font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setHomeworkStatus({ ...homeworkStatus, [submitHwModal.id]: 'Submitted' });
-                  setSubmitHwModal(null);
-                  toast.success(`Homework for ${submitHwModal.subject} submitted to ${submitHwModal.teacher}!`);
-                }}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
-              >
-                Upload & Mark Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 7. SYLLABUS MODAL (/get-syllabus) */}
-      {activeModal === 'syllabus' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Class Syllabus & Course Outline</h3>
-                <p className="text-xs text-indigo-200">{student.className} &bull; Academic Curriculum 2026-27</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              {/* Subject Tabs */}
-              <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                {['English', 'Mathematics', 'Hindi', 'Rhymes & EVS'].map((subj) => (
-                  <button
-                    key={subj}
-                    onClick={() => setSyllabusSubject(subj)}
-                    className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-all whitespace-nowrap ${
-                      syllabusSubject === subj
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {subj}
-                  </button>
-                ))}
-              </div>
-
-              {/* Units List */}
-              <div className="space-y-3">
-                {syllabusData[syllabusSubject]?.map((item, idx) => (
-                  <div key={idx} className="border border-slate-200 rounded-xl p-3.5 bg-white">
-                    <div className="flex justify-between items-start mb-1.5">
-                      <h4 className="font-bold text-slate-900 text-sm">{item.unit}</h4>
-                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                        {item.progress}% Covered
-                      </span>
-                    </div>
-                    <p className="text-slate-600 text-xs mb-2">{item.topics}</p>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${item.progress}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-2 flex justify-between items-center border-t border-slate-100">
-                <span className="text-slate-500">CBSE Affiliation Curriculum Aligned</span>
-                <button
-                  onClick={() => toast.success(`Downloading complete ${syllabusSubject} Syllabus PDF...`)}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download Full Syllabus PDF</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 8. STUDY MATERIAL MODAL (/get-study-material) */}
-      {activeModal === 'study-material' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-teal-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">E-Learning & Study Materials</h3>
-                <p className="text-xs text-teal-200">{student.className} &bull; Worksheets, Notes & Videos</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto text-xs">
-              {studyMaterials.map((sm) => (
-                <div key={sm.id} className="border border-slate-200 rounded-xl p-3.5 hover:border-teal-300 transition-colors bg-white flex justify-between items-center">
-                  <div>
-                    <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-bold text-[10px] uppercase">
-                      {sm.subject} &bull; {sm.type}
-                    </span>
-                    <h4 className="font-bold text-slate-900 text-sm mt-1">{sm.title}</h4>
-                    <span className="text-[10px] text-slate-400">Uploaded: {sm.date} &bull; File Size: {sm.size}</span>
-                  </div>
-                  <button
-                    onClick={() => toast.success(`Downloading ${sm.title}...`)}
-                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 9. ASSIGNMENTS MODAL (/get-assignment) */}
-      {activeModal === 'assignment' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-purple-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Student Assignments & Assessments</h3>
-                <p className="text-xs text-purple-200">{student.className} &bull; Weekly Home Evaluations</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto text-xs">
-              {assignmentsList.map((asg) => (
-                <div key={asg.id} className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-bold uppercase">
-                        {asg.subject}
-                      </span>
-                      <h4 className="font-bold text-sm text-slate-900 mt-1">{asg.title}</h4>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      asg.status === 'Submitted' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {asg.status}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-slate-500 pt-1 text-[11px]">
-                    <span>Due Date: <strong>{asg.dueDate}</strong> &bull; Max Marks: {asg.maxMarks}</span>
-                    <span className="font-bold text-purple-700">Score: {asg.score}</span>
-                  </div>
-
-                  <div className="bg-slate-50 p-2 rounded-lg text-slate-600 text-[11px]">
-                    <strong>Teacher Feedback:</strong> {asg.feedback}
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      onClick={() => toast.success(`Assignment uploaded for ${asg.subject}!`)}
-                      className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold cursor-pointer"
-                    >
-                      {asg.status === 'Submitted' ? 'Update Submission' : 'Upload Submission'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 10. ONLINE CLASSES MODAL (/get-online-classes) */}
-      {activeModal === 'online-classes' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-blue-900 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">Live Virtual Classrooms</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 text-xs text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
-                <Video className="w-6 h-6 animate-pulse" />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900">Nursery Rhymes & Storytelling</h4>
-              <p className="text-slate-500">Teacher: Sunita Kumari &bull; Google Meet / Zoom Classroom</p>
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 font-bold">
-                ● Live Now &bull; 08:30 AM - 09:15 AM
-              </div>
-              <button
-                onClick={() => toast.success('Connecting to School Virtual Classroom...')}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-md"
-              >
-                Join Live Classroom Meeting
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 11. DATESHEET MODAL (/get-datesheet) */}
-      {activeModal === 'datesheet' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-rose-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Examination DateSheet & Schedule</h3>
-                <p className="text-xs text-rose-200">Term Assessment 2026-27 &bull; {student.className}</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 text-xs">
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">Date & Day</th>
-                      <th className="p-2.5">Subject</th>
-                      <th className="p-2.5">Time</th>
-                      <th className="p-2.5">Room</th>
-                      <th className="p-2.5">Syllabus Portion</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {dateSheet.map((ds, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="p-2.5 font-bold text-slate-800 whitespace-nowrap">
-                          {ds.date} <span className="block text-[10px] text-slate-500 font-normal">{ds.day}</span>
-                        </td>
-                        <td className="p-2.5 font-semibold text-rose-700">{ds.subject}</td>
-                        <td className="p-2.5 font-medium text-slate-600 whitespace-nowrap">{ds.time}</td>
-                        <td className="p-2.5 font-medium text-slate-600">{ds.room}</td>
-                        <td className="p-2.5 text-[11px] text-slate-500">{ds.syllabus}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => toast.success('Downloading Examination DateSheet PDF...')}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download DateSheet PDF</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 12. ADMIT CARD MODAL (/student-admit-card) */}
-      {activeModal === 'admit-card' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-950 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">Official Examination Admit Card &bull; Term Assessment</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs">
-              <div className="text-center border-b border-slate-200 pb-3">
-                <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">{student.schoolName}</h2>
-                <p className="text-xs text-slate-500">Center Code: {student.schoolCode} &bull; Affiliation: {student.afflNo}</p>
-                <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-[10px] uppercase">
-                  Candidate Admit Card 2026-27
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4 border border-slate-200 rounded-xl p-3 bg-slate-50">
-                <img src={student.avatar} alt={student.name} className="w-16 h-16 rounded-lg object-cover border" />
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 w-full">
-                  <div><span className="text-slate-500">Candidate:</span> <strong>{student.name}</strong></div>
-                  <div><span className="text-slate-500">Roll No:</span> <strong>{student.rollNo}</strong></div>
-                  <div><span className="text-slate-500">Class & Sec:</span> <strong>{student.className} - {student.division}</strong></div>
-                  <div><span className="text-slate-500">SR No:</span> <strong>{student.srNo}</strong></div>
-                  <div><span className="text-slate-500">Father:</span> <strong>{student.fatherName}</strong></div>
-                  <div><span className="text-slate-500">DOB:</span> <strong>{student.dob}</strong></div>
-                </div>
-              </div>
-
-              <p className="text-xs text-slate-600 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                <strong>Notice:</strong> Please arrive in complete school uniform with official ID card and pencil box 15 mins prior to exam start.
-              </p>
-
-              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                <span className="text-slate-500">Controller of Examinations &bull; Seal Affixed</span>
-                <button
-                  onClick={() => toast.success('Printing Official Exam Admit Card PDF...')}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Print Admit Card</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 13. RESULT / MARKSHEET MODAL (/get-result) */}
-      {activeModal === 'result' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Progress Report Card & Academic Evaluation</h3>
-                <p className="text-xs text-slate-300">Term 1 Assessment &bull; {student.name}</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="text-center border-b border-slate-200 pb-3">
-                <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">{student.schoolName}</h2>
-                <p className="text-xs text-slate-500">Mahapura, Ajmer Road, Jaipur &bull; Affiliation: {student.afflNo}</p>
-                <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
-                  Overall Result: PASSED (Grade A1 &bull; 95%)
-                </span>
-              </div>
-
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">Subject</th>
-                      <th className="p-2.5 text-right">Max Marks</th>
-                      <th className="p-2.5 text-right">Obtained</th>
-                      <th className="p-2.5 text-center">Grade</th>
-                      <th className="p-2.5">Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {results.map((r, i) => (
-                      <tr key={i} className="hover:bg-slate-50/50">
-                        <td className="p-2.5 font-bold text-slate-800">{r.subject}</td>
-                        <td className="p-2.5 text-right text-slate-500">{r.maxMarks}</td>
-                        <td className="p-2.5 text-right font-extrabold text-blue-700">{r.obtained}</td>
-                        <td className="p-2.5 text-center">
-                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
-                            {r.grade}
-                          </span>
-                        </td>
-                        <td className="p-2.5 text-[11px] text-slate-600">{r.remarks}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                <span className="text-slate-500">Teacher: Sunita Kumari &bull; Principal Seal: Affixed</span>
-                <button
-                  onClick={() => toast.success('Printing Official Marksheet PDF...')}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Print Marksheet</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 14. DIGITAL ID CARD MODAL (/student-id-card) */}
-      {activeModal === 'id-card' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-4 py-3 flex justify-between items-center">
-              <span className="font-bold text-xs uppercase tracking-wider">Digital Student ID Card</span>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 text-center space-y-3 bg-gradient-to-b from-orange-50/50 to-white text-xs">
-              <div className="border-b border-slate-200 pb-2">
-                <h3 className="font-extrabold text-slate-900 text-sm leading-tight uppercase">{student.schoolName}</h3>
-                <p className="text-[10px] text-slate-500">Mahapura, Ajmer Road, Jaipur &bull; Code: {student.schoolCode}</p>
-              </div>
-
-              <div className="flex justify-center">
-                <img src={student.avatar} alt={student.name} className="w-24 h-24 rounded-full border-4 border-indigo-600 object-cover shadow-md" />
-              </div>
-
-              <div>
-                <h4 className="text-base font-black text-slate-900">{student.name}</h4>
-                <p className="text-xs font-bold text-indigo-700">{student.className} - {student.division}</p>
-              </div>
-
-              <div className="bg-white border border-slate-200 rounded-xl p-3 text-left space-y-1 shadow-2xs">
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">SR No:</span>
-                  <strong className="text-slate-800">{student.srNo}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Roll No:</span>
-                  <strong className="text-slate-800">{student.rollNo}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Father:</span>
-                  <strong className="text-slate-800">{student.fatherName}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Phone:</span>
-                  <strong className="text-slate-800">{student.contactNo}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Blood Group:</span>
-                  <strong className="text-slate-800">{student.bloodGroup}</strong>
-                </div>
-              </div>
-
-              <button
-                onClick={() => toast.success('Printing Official Student ID Card PDF...')}
-                className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold cursor-pointer transition-colors"
-              >
-                Print Student ID Card
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 15. LEAVE REQUEST MODAL (/leave-request) */}
-      {activeModal === 'leave-request' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">Apply for Student Leave</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleLeaveSubmit} className="p-5 space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Leave Type</label>
-                <select
-                  value={leaveForm.type}
-                  onChange={(e) => setLeaveForm({ ...leaveForm, type: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2 font-medium"
-                >
-                  <option>Sick Leave</option>
-                  <option>Family Function</option>
-                  <option>Medical Emergency</option>
-                  <option>Casual Leave</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">From Date</label>
-                  <input
-                    type="date"
-                    value={leaveForm.from}
-                    onChange={(e) => setLeaveForm({ ...leaveForm, from: e.target.value })}
-                    className="w-full border border-slate-300 rounded-lg p-2 font-medium"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">To Date</label>
-                  <input
-                    type="date"
-                    value={leaveForm.to}
-                    onChange={(e) => setLeaveForm({ ...leaveForm, to: e.target.value })}
-                    className="w-full border border-slate-300 rounded-lg p-2 font-medium"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Reason for Leave</label>
-                <textarea
-                  rows="3"
-                  value={leaveForm.reason}
-                  onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
-                  placeholder="State reason for absence..."
-                  className="w-full border border-slate-300 rounded-lg p-2 font-medium"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold cursor-pointer transition-colors"
-              >
-                Submit Leave Application
-              </button>
-
-              <div className="pt-2 border-t border-slate-200">
-                <span className="font-bold text-slate-700 block mb-1">Past Applications:</span>
-                {leaveHistory.map((lh) => (
-                  <div key={lh.id} className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center mb-1">
-                    <div>
-                      <span className="font-semibold">{lh.type} ({lh.from} to {lh.to})</span>
-                      <p className="text-[10px] text-slate-500">{lh.reason}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                      {lh.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 16. GATE PASS MODAL (/get-gate-pass) */}
-      {activeModal === 'gate-pass' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-cyan-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Student Gate Pass & Security Exit</h3>
-                <p className="text-xs text-cyan-200">{student.className} &bull; Security Guard Authorizations</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-800">Issued Gate Passes</span>
-                <button
-                  onClick={() => setShowGatePassModal(true)}
-                  className="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl font-bold cursor-pointer"
-                >
-                  + Apply New Gate Pass
-                </button>
-              </div>
-
-              {gatePasses.map((gp) => (
-                <div key={gp.id} className="border border-slate-200 rounded-xl p-3.5 bg-white space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="font-bold text-cyan-800 text-sm">{gp.passNo}</span>
-                      <p className="text-[11px] text-slate-500">Date: {gp.date} &bull; Exit Time: {gp.exitTime}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                      {gp.status}
-                    </span>
-                  </div>
-                  <div className="bg-slate-50 p-2 rounded-lg">
-                    <p className="text-slate-700"><strong>Authorized Escort:</strong> {gp.escort}</p>
-                    <p className="text-slate-500 text-[11px]"><strong>Reason:</strong> {gp.reason}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Apply Gate Pass Dialog */}
-      {showGatePassModal && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-3 text-xs animate-in fade-in zoom-in-95">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h4 className="font-bold text-sm text-slate-900">Request Gate Pass</h4>
-              <button onClick={() => setShowGatePassModal(false)} className="p-1 rounded text-slate-400">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <form onSubmit={handleGatePassSubmit} className="space-y-3">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Escort / Guardian Name</label>
-                <input
-                  type="text"
-                  value={gatePassForm.escort}
-                  onChange={(e) => setGatePassForm({ ...gatePassForm, escort: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Expected Exit Time</label>
-                  <input
-                    type="text"
-                    value={gatePassForm.exitTime}
-                    onChange={(e) => setGatePassForm({ ...gatePassForm, exitTime: e.target.value })}
-                    className="w-full border border-slate-300 rounded-lg p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Contact No</label>
-                  <input
-                    type="text"
-                    value={gatePassForm.contact}
-                    onChange={(e) => setGatePassForm({ ...gatePassForm, contact: e.target.value })}
-                    className="w-full border border-slate-300 rounded-lg p-2"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Reason for Leaving Early</label>
-                <textarea
-                  rows="2"
-                  value={gatePassForm.reason}
-                  onChange={(e) => setGatePassForm({ ...gatePassForm, reason: e.target.value })}
-                  placeholder="Doctor appointment, sudden fever, etc."
-                  className="w-full border border-slate-300 rounded-lg p-2"
-                ></textarea>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowGatePassModal(false)}
-                  className="flex-1 py-2 border border-slate-300 rounded-xl font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl font-bold"
-                >
-                  Issue Pass
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 17. TRANSPORT / BUS ROUTE MODAL (/get-transport) */}
-      {activeModal === 'transport' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-amber-600 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">School Bus Route & Live GPS Transport</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 text-xs">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex justify-between items-center">
-                <div>
-                  <span className="text-amber-800 font-bold text-sm block">Route #04 &bull; Mahapura - Ajmer Road</span>
-                  <span className="text-slate-600 text-xs">Vehicle: RJ-14-PA-2026 (Tata Starbus)</span>
-                </div>
-                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                  ● GPS Active
-                </span>
-              </div>
-
-              <div className="space-y-2 border border-slate-200 rounded-xl p-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Driver Name:</span>
-                  <strong className="text-slate-800">Ramphal Gurjar</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Driver Mobile:</span>
-                  <strong className="text-slate-800">+91 98290 12345</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Bus Attendant:</span>
-                  <strong className="text-slate-800">Sunita Devi (+91 98290 54321)</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Morning Pickup:</span>
-                  <strong className="text-slate-800">07:45 AM (Mahapura Bus Stop)</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Afternoon Drop:</span>
-                  <strong className="text-slate-800">02:25 PM (Mahapura Bus Stop)</strong>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 text-white p-3 rounded-xl space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-emerald-400">Live GPS Location</span>
-                  <span className="text-[10px] text-slate-300">Speed: 34 km/h</span>
-                </div>
-                <p className="text-xs text-slate-300">Currently near Bhankrota Flyover (Approx 6 mins to Mahapura stop)</p>
-              </div>
-
-              <button
-                onClick={() => toast.success('Live Bus GPS refreshed: Current speed 34 km/h, reaching Mahapura in 6 mins')}
-                className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold cursor-pointer transition-colors"
-              >
-                Refresh Live Bus Location
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 18. CIRCULAR & NOTICES MODAL (/get-circular) */}
-      {activeModal === 'circular' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-sky-900 text-white px-5 py-3.5 flex justify-between items-center">
-              <h3 className="font-bold text-sm">Official School Circulars & Notices</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto text-xs">
-              {circulars.map((c) => (
-                <div key={c.id} className="border border-slate-200 rounded-xl p-3.5 hover:bg-slate-50/50 transition-colors">
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-bold text-slate-900 text-xs">{c.title}</h4>
-                    <span className="text-[10px] text-slate-500 whitespace-nowrap">{c.date}</span>
-                  </div>
-                  <p className="text-slate-600 mb-2">{c.desc}</p>
-                  <button
-                    onClick={() => toast.success(`Downloading circular ${c.file}...`)}
-                    className="px-2.5 py-1 rounded bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold text-[10px] flex items-center gap-1 cursor-pointer"
-                  >
-                    <Download className="w-3 h-3" />
-                    <span>Download PDF Attachment</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 19. COMMUNICATION HUB MODAL (/all-notifications, /get-sms, /get-voice-sms) */}
-      {activeModal === 'notifications' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-sm">Communication Center & Alerts</h3>
-                <p className="text-[11px] text-slate-400">Mobile SMS, Push Notices & Voice Calls</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              {/* Tabs */}
-              <div className="flex gap-2 border-b border-slate-200 pb-2">
-                <button
-                  onClick={() => setCommTab('notifications')}
-                  className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-all ${
-                    commTab === 'notifications' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  All Notifications
-                </button>
-                <button
-                  onClick={() => setCommTab('sms')}
-                  className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-all ${
-                    commTab === 'sms' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  SMS Log (6377281034)
-                </button>
-                <button
-                  onClick={() => setCommTab('voice')}
-                  className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-all ${
-                    commTab === 'voice' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  Voice SMS
-                </button>
-              </div>
-
-              {/* Tab 1: App Notifications */}
-              {commTab === 'notifications' && (
-                <div className="space-y-2">
-                  <div className="p-3 rounded-xl border border-blue-200 bg-blue-50/60">
-                    <div className="flex justify-between items-start">
-                      <span className="font-bold text-blue-900">Term Assessment 2026 Timetable Released</span>
-                      <span className="text-[10px] text-slate-500">14-Oct-2026</span>
-                    </div>
-                    <p className="text-slate-600 mt-1">Please check the Exam DateSheet section for junior wing examination details.</p>
-                  </div>
-                  <div className="p-3 rounded-xl border border-slate-200 bg-white">
-                    <div className="flex justify-between items-start">
-                      <span className="font-bold text-slate-900">Autumn Break Notice</span>
-                      <span className="text-[10px] text-slate-500">10-Oct-2026</span>
-                    </div>
-                    <p className="text-slate-600 mt-1">School will observe vacation from 20th to 24th October for Dussehra festival.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: SMS Log */}
-              {commTab === 'sms' && (
-                <div className="space-y-2">
-                  <div className="p-3 rounded-xl border border-slate-200 bg-white space-y-1">
-                    <div className="flex justify-between text-[11px] text-slate-500">
-                      <span>Sender: <strong>JDIS-JAIPUR</strong></span>
-                      <span className="text-emerald-600 font-bold">● Delivered</span>
-                    </div>
-                    <p className="text-slate-800 font-mono text-[11px]">
-                      "Dear Parent, Aadhya Choudhary (Roll 14) is marked Absent today (16-Oct-2026). In case of leave, please submit through ERP portal."
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-xl border border-slate-200 bg-white space-y-1">
-                    <div className="flex justify-between text-[11px] text-slate-500">
-                      <span>Sender: <strong>JDIS-FEE</strong></span>
-                      <span className="text-emerald-600 font-bold">● Delivered</span>
-                    </div>
-                    <p className="text-slate-800 font-mono text-[11px]">
-                      "Dear Parent, 3rd quarter fee for Aadhya Choudhary is due. Pay seamlessly online via school ERP to avoid late charges."
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 3: Voice SMS */}
-              {commTab === 'voice' && (
-                <div className="space-y-3">
-                  <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-indigo-950">Principal's Address: Autumn Break & Diwali Safety</span>
-                      <span className="text-[10px] text-indigo-600 font-semibold">0:45 mins</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-indigo-100">
-                      <button
-                        onClick={() => {
-                          if (playingVoiceId === 1) {
-                            setPlayingVoiceId(null);
-                          } else {
-                            setPlayingVoiceId(1);
-                            toast.success('Playing School Voice Announcement...');
-                          }
-                        }}
-                        className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center cursor-pointer shadow-xs"
-                      >
-                        {playingVoiceId === 1 ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
-                      </button>
-                      <div className="flex-1">
-                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                          <div className={`h-full bg-indigo-600 rounded-full ${playingVoiceId === 1 ? 'w-2/3 animate-pulse' : 'w-0'}`}></div>
-                        </div>
-                        <span className="text-[10px] text-slate-500 mt-1 block">
-                          {playingVoiceId === 1 ? 'Playing: JDIS_Principal_Announcement.mp3' : 'Click to play voice note'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 20. COMPLAINTS & GRIEVANCES MODAL (/get-complaint) */}
-      {activeModal === 'complaint' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-rose-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Grievance Registration & Feedback</h3>
-                <p className="text-xs text-rose-200">{student.schoolName} &bull; Parent Support Desk</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              {/* Form */}
-              <form onSubmit={handleComplaintSubmit} className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <h4 className="font-bold text-slate-800 text-sm">Register New Grievance</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Grievance Category</label>
-                    <select
-                      value={complaintForm.category}
-                      onChange={(e) => setComplaintForm({ ...complaintForm, category: e.target.value })}
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium"
-                    >
-                      <option>Bus / Transport</option>
-                      <option>Academics & Teaching</option>
-                      <option>Hygiene & Sanitation</option>
-                      <option>Fee & Accounts</option>
-                      <option>Infrastructure & Security</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Priority</label>
-                    <select
-                      value={complaintForm.priority}
-                      onChange={(e) => setComplaintForm({ ...complaintForm, priority: e.target.value })}
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium"
-                    >
-                      <option>Normal</option>
-                      <option>High</option>
-                      <option>Urgent</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Subject</label>
-                  <input
-                    type="text"
-                    value={complaintForm.subject}
-                    onChange={(e) => setComplaintForm({ ...complaintForm, subject: e.target.value })}
-                    placeholder="Brief description of the issue..."
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Detailed Grievance Note</label>
-                  <textarea
-                    rows="3"
-                    value={complaintForm.desc}
-                    onChange={(e) => setComplaintForm({ ...complaintForm, desc: e.target.value })}
-                    placeholder="Provide specific details so our team can resolve promptly..."
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2"
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold cursor-pointer"
-                >
-                  Submit Grievance Ticket
-                </button>
-              </form>
-
-              {/* History */}
-              <div className="space-y-2">
-                <span className="font-bold text-slate-800 block">Previous Tickets Status:</span>
-                {complaints.map((c) => (
-                  <div key={c.id} className="border border-slate-200 rounded-xl p-3.5 bg-white space-y-1.5">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="font-bold text-slate-900 text-sm">{c.subject}</span>
-                        <p className="text-[10px] text-slate-500">Ticket: <strong>{c.id}</strong> &bull; Category: {c.category} &bull; Date: {c.date}</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                        {c.status}
-                      </span>
-                    </div>
-                    <div className="bg-slate-50 p-2 rounded-lg text-slate-600 text-[11px]">
-                      <strong>Admin Resolution Note:</strong> {c.adminReply}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 21. CALENDAR PLANNING MODAL (/get-calendar-planing) */}
-      {activeModal === 'calendar-planning' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Academic Year Calendar Planner 2026-27</h3>
-                <p className="text-xs text-indigo-200">{student.schoolName} &bull; Events, Holidays & Celebrations</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="border border-indigo-200 bg-indigo-50/50 p-3 rounded-xl">
-                  <span className="font-bold text-indigo-900 block text-sm">October 2026</span>
-                  <ul className="mt-2 space-y-1 text-slate-700">
-                    <li>&bull; <strong>02 Oct:</strong> Gandhi Jayanti (Holiday)</li>
-                    <li>&bull; <strong>20-24 Oct:</strong> Autumn & Dussehra Break</li>
-                    <li>&bull; <strong>27-31 Oct:</strong> Term 1 Assessment Exams</li>
-                  </ul>
-                </div>
-                <div className="border border-slate-200 bg-slate-50 p-3 rounded-xl">
-                  <span className="font-bold text-slate-900 block text-sm">November 2026</span>
-                  <ul className="mt-2 space-y-1 text-slate-700">
-                    <li>&bull; <strong>14 Nov:</strong> Children's Day Gala Carnival</li>
-                    <li>&bull; <strong>28 Nov:</strong> Annual Athletic Sports Meet</li>
-                  </ul>
-                </div>
-                <div className="border border-slate-200 bg-slate-50 p-3 rounded-xl">
-                  <span className="font-bold text-slate-900 block text-sm">December 2026</span>
-                  <ul className="mt-2 space-y-1 text-slate-700">
-                    <li>&bull; <strong>18 Dec:</strong> Grand Annual Day Function</li>
-                    <li>&bull; <strong>20 Dec:</strong> Aadhya's Birthday Celebration</li>
-                    <li>&bull; <strong>25 Dec - 05 Jan:</strong> Winter Vacation</li>
-                  </ul>
-                </div>
-                <div className="border border-slate-200 bg-slate-50 p-3 rounded-xl">
-                  <span className="font-bold text-slate-900 block text-sm">January 2027</span>
-                  <ul className="mt-2 space-y-1 text-slate-700">
-                    <li>&bull; <strong>06 Jan:</strong> School Reopens after Winter Break</li>
-                    <li>&bull; <strong>26 Jan:</strong> Republic Day Celebrations</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  onClick={() => toast.success('Downloading Annual Academic Calendar Planner PDF...')}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download Annual Calendar PDF</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 22. BIRTHDAY CELEBRATIONS MODAL (/student-birthday, /get-birthday) */}
-      {activeModal === 'birthday' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-pink-700 text-white px-5 py-4 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Cake className="w-5 h-5 text-yellow-300" />
-                <h3 className="font-bold text-base">Birthday Celebrations Corner</h3>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 text-xs text-center">
-              {/* Student Birthday Banner */}
-              <div className="p-5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl text-white shadow-md space-y-2">
-                <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white flex items-center justify-center mx-auto text-2xl">
-                  🎂
-                </div>
-                <h4 className="text-lg font-black">{student.name}</h4>
-                <p className="text-xs text-pink-100 font-medium">Birthday: <strong>20th December</strong> (Upcoming)</p>
-                <span className="inline-block px-3 py-1 bg-white text-pink-700 rounded-full font-bold text-xs shadow-xs">
-                  Sweet 4th Birthday Countdown
-                </span>
-              </div>
-
-              {/* October Classmate Birthdays */}
-              <div className="text-left space-y-2">
-                <span className="font-bold text-slate-800 text-sm block">October Classmate Birthdays:</span>
-                <div className="space-y-2">
-                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <div>
-                      <strong className="text-slate-900">Aarav Sharma (Roll 01)</strong>
-                      <p className="text-[10px] text-slate-500">18th October &bull; Turning 4 Years Old</p>
-                    </div>
-                    <button
-                      onClick={() => toast.success('Birthday greeting & virtual balloons sent to Aarav Sharma!')}
-                      className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold cursor-pointer"
-                    >
-                      Send Wish
-                    </button>
-                  </div>
-                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <div>
-                      <strong className="text-slate-900">Divya Rathore (Roll 04)</strong>
-                      <p className="text-[10px] text-slate-500">26th October &bull; Turning 4 Years Old</p>
-                    </div>
-                    <button
-                      onClick={() => toast.success('Birthday greeting & virtual balloons sent to Divya Rathore!')}
-                      className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold cursor-pointer"
-                    >
-                      Send Wish
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 23. BATCHMATES / CLASSMATES MODAL (/get-batch-mate) */}
-      {activeModal === 'batchmate' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Class Batchmates Directory</h3>
-                <p className="text-xs text-indigo-200">{student.className} - Section {student.division} &bull; Classmates List</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="text"
-                  value={batchmateSearch}
-                  onChange={(e) => setBatchmateSearch(e.target.value)}
-                  placeholder="Search classmate by name or roll number..."
-                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {classmates
-                  .filter(c => c.name.toLowerCase().includes(batchmateSearch.toLowerCase()) || c.roll.includes(batchmateSearch))
-                  .map((c) => (
-                    <div key={c.roll} className="border border-slate-200 rounded-xl p-3 bg-white flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
-                        {c.roll}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-xs">{c.name}</h4>
-                        <p className="text-[10px] text-slate-500">Father: {c.father}</p>
-                        <p className="text-[10px] text-indigo-600 font-medium">B'day: {c.bday}</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 24. SCHOOL NEWS MODAL (/get-news) */}
-      {activeModal === 'news' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-blue-950 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">J D International School News Bulletin</h3>
-                <p className="text-xs text-blue-200">Campus Happenings & Achievements</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              {schoolNews.map((n) => (
-                <div key={n.id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
-                  <img src={n.image} alt={n.title} className="w-full h-36 object-cover" />
-                  <div className="p-4 space-y-2">
-                    <div className="flex justify-between items-center text-[10px] text-slate-400">
-                      <span>{n.date} &bull; By {n.author}</span>
-                      <span className="text-indigo-600 font-bold">Campus News</span>
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">{n.title}</h4>
-                    <p className="text-slate-600 text-xs">{n.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 25. PHOTO GALLERY MODAL (/get-gallary) */}
-      {activeModal === 'gallery' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-amber-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base">Campus Life Photo Gallery</h3>
-                <p className="text-xs text-amber-200">School Memories & Annual Celebrations</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                {Object.keys(galleryAlbums).map((album) => (
-                  <button
-                    key={album}
-                    onClick={() => setGalleryAlbum(album)}
-                    className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer whitespace-nowrap ${
-                      galleryAlbum === album ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {album}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {galleryAlbums[galleryAlbum]?.map((imgUrl, i) => (
-                  <div key={i} className="group relative rounded-xl overflow-hidden border border-slate-200 aspect-video shadow-xs cursor-pointer">
-                    <img src={imgUrl} alt="Gallery" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 26. SOCIAL MEDIA MODAL (/get-social-media) */}
-      {activeModal === 'social-media' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-sm">Official School Social Channels</h3>
-                <p className="text-[11px] text-indigo-200">{student.schoolName}</p>
-              </div>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-white/20 text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 text-xs">
-              <div className="p-3 rounded-xl border border-rose-200 bg-rose-50/50 flex justify-between items-center">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold">YT</div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">YouTube Channel</h4>
-                    <span className="text-[10px] text-slate-500">@JDInternationalSchoolJaipur</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toast.success('Opening official School YouTube channel...')}
-                  className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold"
-                >
-                  Visit
-                </button>
-              </div>
-
-              <div className="p-3 rounded-xl border border-pink-200 bg-pink-50/50 flex justify-between items-center">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-pink-600 text-white flex items-center justify-center font-bold">IG</div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">Instagram Handle</h4>
-                    <span className="text-[10px] text-slate-500">@jdis_jaipur</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toast.success('Opening official School Instagram handle...')}
-                  className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold"
-                >
-                  Visit
-                </button>
-              </div>
-
-              <div className="p-3 rounded-xl border border-blue-200 bg-blue-50/50 flex justify-between items-center">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">FB</div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">Facebook Page</h4>
-                    <span className="text-[10px] text-slate-500">/jdisjaipurofficial</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toast.success('Opening official School Facebook page...')}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold"
-                >
-                  Visit
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
