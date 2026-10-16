@@ -792,7 +792,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         </div>
 
         {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
-        <div className="flex-1 overflow-y-auto pt-2 pb-6 text-sm font-medium custom-scrollbar">
+        <div className="flex-1 overflow-y-auto pt-2 pb-32 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
@@ -968,11 +968,6 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
         )}
-
-        {/* Bottom subtle session indicator */}
-        <div className="py-2 text-[10px] text-slate-400 text-center border-t border-slate-200/60 bg-slate-50 shrink-0">
-          UAB Portal &bull; Session 2026-2027
-        </div>
       </aside>
     </>
   );
