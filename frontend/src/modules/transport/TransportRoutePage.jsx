@@ -70,6 +70,7 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
 
   const [isDestModalOpen, setIsDestModalOpen] = useState(false);
   const [editingDest, setEditingDest] = useState(null);
+  const [destPresetRoute, setDestPresetRoute] = useState('');
   const [destForm, setDestForm] = useState({ destination: '', routeName: '', distance: '', fare: '' });
 
   useEffect(() => {
@@ -153,20 +154,22 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
   // --- Destination Handlers ---
   const openAddDestModal = (presetRouteName = '') => {
     setEditingDest(null);
+    setDestPresetRoute(presetRouteName);
     setDestForm({
       destination: '',
-      routeName: presetRouteName || routes[0]?.routeName || 'Kalwara, Ajairajpura',
-      distance: '12',
-      fare: '2500'
+      routeName: presetRouteName || routes[0]?.routeName || '',
+      distance: '',
+      fare: ''
     });
     setIsDestModalOpen(true);
   };
 
-  const openEditDestModal = (d) => {
+  const openEditDestModal = (d, presetRouteName = '') => {
     setEditingDest(d);
+    setDestPresetRoute(presetRouteName || d.routeName || '');
     setDestForm({
       destination: d.destination,
-      routeName: d.routeName || routes[0]?.routeName || '',
+      routeName: d.routeName || presetRouteName || '',
       distance: String(d.distance || ''),
       fare: String(d.fare || '')
     });
@@ -204,6 +207,17 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
         const json = await res.json().catch(() => ({}));
         const newDest = json.data || { id: Date.now(), ...payload };
         setDestinations(prev => [...prev, newDest]);
+
+        // Keep routes stoppage list updated
+        if (payload.routeName) {
+          setRoutes(prev => prev.map(r => {
+            if (r.routeName === payload.routeName && !r.destinations?.includes(payload.destination)) {
+              return { ...r, destinations: [...(r.destinations || []), payload.destination] };
+            }
+            return r;
+          }));
+        }
+
         toast.success('Destination added successfully');
       }
       setIsDestModalOpen(false);
@@ -216,7 +230,19 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
     if (!window.confirm('Are you sure you want to delete this destination?')) return;
     try {
       await fetch(`/api/transport/destinations/${id}`, { method: 'DELETE' });
+      const targetDest = destinations.find(d => d.id === id);
       setDestinations(prev => prev.filter(d => d.id !== id));
+      if (targetDest?.routeName) {
+        setRoutes(prev => prev.map(r => {
+          if (r.routeName === targetDest.routeName) {
+            return {
+              ...r,
+              destinations: (r.destinations || []).filter(name => name !== targetDest.destination)
+            };
+          }
+          return r;
+        }));
+      }
       toast.success('Destination deleted');
     } catch {
       toast.error('Failed to delete destination');
@@ -571,7 +597,7 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
                                             <div className="flex items-center justify-end gap-1">
                                               <button
                                                 type="button"
-                                                onClick={() => openEditDestModal(dest)}
+                                                onClick={() => openEditDestModal(dest, r.routeName)}
                                                 className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
                                                 title="Edit Stoppage"
                                               >
@@ -757,6 +783,11 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-600" />
                 <span>{editingDest ? 'Edit Destination' : 'Add New Destination'}</span>
+                {destPresetRoute && (
+                  <span className="text-[11px] font-semibold normal-case text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full ml-1">
+                    Route: {destPresetRoute}
+                  </span>
+                )}
               </h2>
               <button onClick={() => setIsDestModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-4 h-4" />
@@ -776,18 +807,21 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Belongs To Route *</label>
-                <select
-                  value={destForm.routeName}
-                  onChange={(e) => setDestForm(prev => ({ ...prev, routeName: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
-                >
-                  {routes.map(r => (
-                    <option key={r.id} value={r.routeName}>{r.routeName}</option>
-                  ))}
-                </select>
-              </div>
+              {!destPresetRoute && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Belongs To Route *</label>
+                  <select
+                    value={destForm.routeName}
+                    onChange={(e) => setDestForm(prev => ({ ...prev, routeName: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="">-- Select Route --</option>
+                    {routes.map(r => (
+                      <option key={r.id} value={r.routeName}>{r.routeName}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
