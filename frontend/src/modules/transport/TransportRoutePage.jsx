@@ -405,7 +405,7 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
                   <th className="py-2.5 px-4">ROUTE NAME</th>
                   <th className="py-2.5 px-4">MAPPED STOPPAGES / DESTINATIONS</th>
                   <th className="py-2.5 px-4">ASSIGNED VEHICLE</th>
-                  <th className="py-2.5 px-4 text-right w-44">ACTION</th>
+                  <th className="py-2.5 px-4 text-right w-52 whitespace-nowrap">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
@@ -453,16 +453,17 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
                           {r.vehicle || 'RJ14PC1019'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => setViewingRouteStops(r)}
-                            className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200/60 transition cursor-pointer shadow-2xs"
-                            title="View Stoppages & Fare"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 hover:text-indigo-900 border border-indigo-200/80 rounded-lg transition cursor-pointer whitespace-nowrap shrink-0 shadow-2xs"
+                            title="View Stoppages & Fare Schedule"
                           >
-                            <RouteIcon className="w-3 h-3" />
+                            <RouteIcon className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                             <span>Stoppages ({routeDests.length})</span>
+                            <ChevronRight className="w-3 h-3 text-indigo-400 shrink-0" />
                           </button>
                           <button
                             type="button"
