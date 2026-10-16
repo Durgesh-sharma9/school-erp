@@ -319,7 +319,6 @@ export const menuCategories = [
       { title: 'Transport Dashboard', path: '/transport-dashboard' },
       { title: 'Transport Vehicle', path: '/transport-vehicle' },
       { title: 'Transport Route & Destination', path: '/transport-route' },
-      { title: 'Transport Assign Vehicle', path: '/transport-assign-vehicle' },
       { title: 'Edit Transport Fee', path: '/edit-transport-fee' },
       {
         id: 'transport-reports',
@@ -635,7 +634,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     }
     const transportPaths = [
       '/transport', '/transport-dashboard', '/transport-vehicle', '/transport-route', '/transport-destination',
-      '/transport-assign-vehicle', '/edit-transport-fee'
+      '/edit-transport-fee'
     ];
     if (transportPaths.includes(currentPath)) {
       activeKey = 'transport';
