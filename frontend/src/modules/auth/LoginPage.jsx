@@ -96,7 +96,9 @@ export function LoginPage({ onNavigate }) {
 
     // Client-side fallback authentication strictly scoped to active tenant
     let targetUser = DEMO_USERS.ADMIN;
-    if (username === 'superadmin') {
+    if (username.trim() === '6377281034' || activeTab === 'student') {
+      targetUser = selectedTenant === 'sch_dps_branch2' ? DEMO_USERS.STUDENT_B : DEMO_USERS.STUDENT;
+    } else if (username === 'superadmin') {
       targetUser = DEMO_USERS.SUPER_ADMIN;
     } else if (selectedTenant === 'sch_dps_branch2') {
       targetUser = activeTab === 'admin' ? DEMO_USERS.ADMIN_B : activeTab === 'staff' ? DEMO_USERS.STAFF_B : DEMO_USERS.STUDENT_B;

@@ -45,8 +45,7 @@ export const studentMenuCategories = [
       { title: 'Homework', path: '/get-homework' },
       { title: 'Syllabus', path: '/get-syllabus' },
       { title: 'Study Material', path: '/get-study-material' },
-      { title: 'Assignment', path: '/get-assignment' },
-      { title: 'Online Classes', path: '/get-online-classes' }
+      { title: 'Assignment', path: '/get-assignment' }
     ]
   },
   {
@@ -864,21 +863,21 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                               onClick={() => toggleSubDropdown(subId)}
                               style={{
                                 margin: '0px 12px 4px 12px',
-                                height: '40px',
-                                paddingLeft: '52px',
+                                minHeight: '40px',
+                                paddingLeft: item.id === 'transport' ? '16px' : '52px',
                                 paddingRight: '12px'
                               }}
-                              className={`w-[calc(100%-24px)] flex items-center justify-between rounded-lg text-[14px] transition-colors ${
+                              className={`w-[calc(100%-24px)] flex items-center justify-between rounded-xl text-[13.5px] transition-colors ${
                                 isSubOpen || isAnyChildActive
-                                  ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
-                                  : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal'
+                                  ? (item.id === 'transport' ? 'bg-[#dde4fa] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
+                                  : (item.id === 'transport' ? 'bg-[#f4f6fa] text-[#030712] hover:bg-slate-200/70 font-medium' : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal')
                               }`}
                             >
-                              <span>{sub.title}</span>
+                              <span className={item.id === 'transport' ? 'flex-1 text-center pl-4' : ''}>{sub.title}</span>
                               <ChevronDown className={`w-3.5 h-3.5 text-slate-700 transition-transform ${isSubOpen ? 'rotate-0' : '-rotate-90'}`} />
                             </button>
 
-                            {/* Nested children (Class List, Subject List) */}
+                            {/* Nested children (Class List, Subject List, Transport Reports) */}
                             {isSubOpen && (
                               <div className="space-y-1">
                                 {sub.children.map((child) => {
@@ -892,14 +891,14 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                       }}
                                       style={{
                                         margin: '0px 12px 4px 12px',
-                                        height: '40px',
-                                        paddingLeft: '64px',
+                                        minHeight: '38px',
+                                        paddingLeft: item.id === 'transport' ? '12px' : '64px',
                                         paddingRight: '12px'
                                       }}
-                                      className={`w-[calc(100%-24px)] text-left flex items-center rounded-lg text-[14px] transition-colors ${
+                                      className={`w-[calc(100%-24px)] flex items-center justify-center text-center rounded-xl text-[13.5px] transition-colors leading-tight ${
                                         isChildActive
-                                          ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
-                                          : 'text-[#030712] hover:bg-slate-200/70 font-normal'
+                                          ? (item.id === 'transport' ? 'bg-[#e8edf7] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
+                                          : (item.id === 'transport' ? 'text-[#030712] hover:bg-slate-100 font-normal' : 'text-[#030712] hover:bg-slate-200/70 font-normal')
                                       }`}
                                     >
                                       {child.title}
@@ -922,14 +921,16 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                           }}
                           style={{
                             margin: '0px 12px 4px 12px',
-                            height: '40px',
-                            paddingLeft: '52px',
+                            minHeight: '40px',
+                            paddingLeft: item.id === 'transport' ? '12px' : '52px',
                             paddingRight: '12px'
                           }}
-                          className={`w-[calc(100%-24px)] text-left flex items-center rounded-lg text-[14px] transition-colors ${
+                          className={`w-[calc(100%-24px)] flex items-center rounded-xl text-[13.5px] transition-colors leading-snug ${
+                            item.id === 'transport' ? 'justify-center text-center' : 'text-left'
+                          } ${
                             isSubActive
-                              ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
-                              : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal'
+                              ? (item.id === 'transport' ? 'bg-[#dde4fa] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
+                              : (item.id === 'transport' ? 'bg-[#f4f6fa] text-[#030712] hover:bg-slate-200/70 font-medium' : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal')
                           }`}
                         >
                           {sub.title}

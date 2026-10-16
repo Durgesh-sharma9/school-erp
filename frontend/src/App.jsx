@@ -373,7 +373,6 @@ function AppContent() {
               case '/get-syllabus':
               case '/get-study-material':
               case '/get-assignment':
-              case '/get-online-classes':
               case '/get-fee':
               case '/get-fee-receipt':
               case '/822':

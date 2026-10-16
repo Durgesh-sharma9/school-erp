@@ -180,8 +180,6 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
       setActiveView('transport');
     } else if (currentPath === '/get-circular') {
       setActiveView('circular');
-    } else if (currentPath === '/get-online-classes') {
-      setActiveView('online-classes');
     } else if (currentPath === '/get-syllabus') {
       setActiveView('syllabus');
     } else if (currentPath === '/get-study-material') {
@@ -450,8 +448,7 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
         { id: 'homework', label: 'Homework', icon: BookOpen, path: '/get-homework' },
         { id: 'syllabus', label: 'Syllabus', icon: BookMarked, path: '/get-syllabus' },
         { id: 'study-material', label: 'Study Material', icon: FileSpreadsheet, path: '/get-study-material' },
-        { id: 'assignment', label: 'Assignment', icon: FileEdit, path: '/get-assignment' },
-        { id: 'online-classes', label: 'Online Classes', icon: Video, path: '/get-online-classes' }
+        { id: 'assignment', label: 'Assignment', icon: FileEdit, path: '/get-assignment' }
       ]
     },
     {
@@ -1106,30 +1103,6 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
             </div>
           )}
 
-          {/* 8. ONLINE CLASSES FULL PAGE (/get-online-classes) */}
-          {activeView === 'online-classes' && (
-            <div>
-              {renderPageHeader('Online Classes')}
-              <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-8 text-center max-w-xl mx-auto space-y-4">
-                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
-                  <Video className="w-8 h-8 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-slate-900">Nursery Rhymes & Storytelling</h3>
-                  <p className="text-xs text-slate-500 mt-1">Teacher: Sunita Kumari &bull; Google Meet / Zoom Classroom</p>
-                </div>
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 font-bold text-xs inline-block">
-                  ● Scheduled Live: 08:30 AM - 09:15 AM
-                </div>
-                <button
-                  onClick={() => toast.success('Connecting to School Virtual Classroom meeting...')}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-md text-sm"
-                >
-                  Join Live Classroom Meeting
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* 9. DATESHEET FULL PAGE (/get-datesheet) */}
           {activeView === 'datesheet' && (
@@ -2134,14 +2107,6 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
             <ChevronRight className="w-3 h-3 opacity-80" />
           </div>
 
-          {/* Top-Right Pulse Button */}
-          <button
-            onClick={() => navigateTo('/get-online-classes', 'online-classes')}
-            className="absolute top-3.5 right-4 z-20 bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-1.5 rounded-full shadow-md transition-all duration-200 animate-pulse font-semibold flex items-center gap-1.5 cursor-pointer"
-          >
-            <Video className="w-3.5 h-3.5" />
-            <span>Join Live Class</span>
-          </button>
 
           {/* Hero Card Grid */}
           <div className="grid grid-cols-12 h-full relative z-10 pt-16 pb-6 px-4 sm:px-6 gap-4 items-center">
