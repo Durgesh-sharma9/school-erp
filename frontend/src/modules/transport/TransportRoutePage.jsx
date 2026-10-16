@@ -60,7 +60,11 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
   // Modals
   const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
-  const [routeForm, setRouteForm] = useState({ routeName: '', vehicle: '' });
+  const [routeForm, setRouteForm] = useState({
+    routeName: '',
+    vehicle: 'RJ14PC1019',
+    stoppages: [{ destination: '', distance: '', fare: '' }]
+  });
 
   const [isDestModalOpen, setIsDestModalOpen] = useState(false);
   const [editingDest, setEditingDest] = useState(null);
@@ -91,42 +95,150 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
   // --- Route Handlers ---
   const openAddRouteModal = () => {
     setEditingRoute(null);
-    setRouteForm({ routeName: '', vehicle: 'RJ14PC1019' });
+    setRouteForm({
+      routeName: '',
+      vehicle: 'RJ14PC1019',
+      stoppages: [{ destination: '', distance: '', fare: '' }]
+    });
     setIsRouteModalOpen(true);
   };
 
   const openEditRouteModal = (r) => {
     setEditingRoute(r);
-    setRouteForm({ routeName: r.routeName, vehicle: r.vehicle || 'RJ14PC1019' });
+    const existingStops = destinations
+      .filter(d => d.routeName === r.routeName)
+      .map(d => ({
+        id: d.id,
+        destination: d.destination,
+        distance: String(d.distance ?? ''),
+        fare: String(d.fare ?? '')
+      }));
+
+    setRouteForm({
+      routeName: r.routeName,
+      vehicle: r.vehicle || 'RJ14PC1019',
+      stoppages: existingStops.length > 0 ? existingStops : [{ destination: '', distance: '', fare: '' }]
+    });
     setIsRouteModalOpen(true);
+  };
+
+  const handleAddStopToForm = () => {
+    setRouteForm(prev => ({
+      ...prev,
+      stoppages: [...(prev.stoppages || []), { destination: '', distance: '', fare: '' }]
+    }));
+  };
+
+  const handleRemoveStopFromForm = (index) => {
+    setRouteForm(prev => {
+      const updated = [...(prev.stoppages || [])];
+      updated.splice(index, 1);
+      return {
+        ...prev,
+        stoppages: updated.length > 0 ? updated : [{ destination: '', distance: '', fare: '' }]
+      };
+    });
+  };
+
+  const handleStopChange = (index, field, value) => {
+    setRouteForm(prev => {
+      const updated = [...(prev.stoppages || [])];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, stoppages: updated };
+    });
   };
 
   const handleSaveRoute = async (e) => {
     e.preventDefault();
-    if (!routeForm.routeName.trim()) {
+    const routeNameTrimmed = routeForm.routeName.trim();
+    if (!routeNameTrimmed) {
       toast.error('Route name is required');
       return;
     }
+
+    const validStoppages = (routeForm.stoppages || [])
+      .map(s => ({
+        ...s,
+        destination: (s.destination || '').trim(),
+        distance: Number(s.distance) || 0,
+        fare: Number(s.fare) || 0
+      }))
+      .filter(s => s.destination);
 
     try {
       if (editingRoute) {
         await fetch(`/api/transport/routes/${editingRoute.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(routeForm)
+          body: JSON.stringify({
+            routeName: routeNameTrimmed,
+            vehicle: routeForm.vehicle,
+            destinations: validStoppages.map(s => s.destination)
+          })
+        }).catch(() => null);
+
+        setRoutes(prev => prev.map(r => r.id === editingRoute.id ? {
+          ...r,
+          routeName: routeNameTrimmed,
+          vehicle: routeForm.vehicle,
+          destinations: validStoppages.map(s => s.destination)
+        } : r));
+
+        setDestinations(prev => {
+          const others = prev.filter(d => d.routeName !== editingRoute.routeName);
+          const newDests = validStoppages.map((s, idx) => ({
+            id: s.id || Date.now() + idx,
+            destination: s.destination,
+            routeName: routeNameTrimmed,
+            distance: s.distance,
+            fare: s.fare
+          }));
+          return [...others, ...newDests];
         });
-        setRoutes(prev => prev.map(r => r.id === editingRoute.id ? { ...r, ...routeForm } : r));
-        toast.success('Route updated successfully');
+
+        if (viewingRouteStops?.id === editingRoute.id || viewingRouteStops?.routeName === editingRoute.routeName) {
+          setViewingRouteStops({
+            ...editingRoute,
+            routeName: routeNameTrimmed,
+            vehicle: routeForm.vehicle,
+            destinations: validStoppages.map(s => s.destination)
+          });
+        }
+
+        toast.success(`Route updated with ${validStoppages.length} stoppages`);
       } else {
         const res = await fetch('/api/transport/routes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(routeForm)
-        });
-        const json = await res.json().catch(() => ({}));
-        const newRoute = json.data || { id: Date.now(), ...routeForm, destinations: [] };
+          body: JSON.stringify({
+            routeName: routeNameTrimmed,
+            vehicle: routeForm.vehicle,
+            destinations: validStoppages.map(s => s.destination)
+          })
+        }).catch(() => null);
+
+        const json = res ? await res.json().catch(() => ({})) : {};
+        const newRouteId = json?.data?.id || Date.now();
+        const newRoute = {
+          id: newRouteId,
+          routeName: routeNameTrimmed,
+          vehicle: routeForm.vehicle,
+          destinations: validStoppages.map(s => s.destination)
+        };
         setRoutes(prev => [...prev, newRoute]);
-        toast.success('Route created successfully');
+
+        if (validStoppages.length > 0) {
+          const newDests = validStoppages.map((s, idx) => ({
+            id: Date.now() + idx + 10,
+            destination: s.destination,
+            routeName: routeNameTrimmed,
+            distance: s.distance,
+            fare: s.fare
+          }));
+          setDestinations(prev => [...prev, ...newDests]);
+        }
+
+        toast.success(`Route '${routeNameTrimmed}' created with ${validStoppages.length} stoppages`);
       }
       setIsRouteModalOpen(false);
     } catch {
@@ -556,64 +668,180 @@ export function TransportRoutePage({ initialTab = 'routes' }) {
 
       {/* Route Modal */}
       {isRouteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                <Navigation className="w-4 h-4 text-indigo-600" />
-                <span>{editingRoute ? 'Edit Transport Route' : 'Add New Transport Route'}</span>
-              </h2>
-              <button onClick={() => setIsRouteModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-slate-50 to-indigo-50/40 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  <Navigation className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                    {editingRoute ? 'Edit Transport Route' : 'Add New Transport Route'}
+                  </h2>
+                  <p className="text-[11px] text-slate-500">
+                    Define route name, assigned bus, and pick-up stoppages with monthly fares
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRouteModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveRoute} className="p-5 space-y-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Route Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Kalwara, Ajairajpura"
-                  value={routeForm.routeName}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, routeName: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
-                />
+            <form onSubmit={handleSaveRoute} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 space-y-4 overflow-y-auto flex-1">
+                {/* Route Basic Info (2 columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Route Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Kalwara, Ajairajpura"
+                      value={routeForm.routeName}
+                      onChange={(e) => setRouteForm(prev => ({ ...prev, routeName: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Assigned Vehicle
+                    </label>
+                    <select
+                      value={routeForm.vehicle}
+                      onChange={(e) => setRouteForm(prev => ({ ...prev, vehicle: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                    >
+                      <option value="RJ14PC1019">RJ14PC1019 (Bus - 42 Seats)</option>
+                      <option value="RJ40PA1179">RJ40PA1179 (Bus - 42 Seats)</option>
+                      <option value="RJ02PA2762">RJ02PA2762 (Bus - 42 Seats)</option>
+                      <option value="RJ20PA9932">RJ20PA9932 (Bus - 50 Seats)</option>
+                      <option value="RJ14PC1037">RJ14PC1037 (Bus - 42 Seats)</option>
+                      <option value="RJ14PC7878">RJ14PC7878 (Bus - 45 Seats)</option>
+                      <option value="RJ14PC5938">RJ14PC5938 (Bus - 45 Seats)</option>
+                      <option value="RJ19PB7511">RJ19PB7511 (Bus - 45 Seats)</option>
+                      <option value="RJ14PC2278">RJ14PC2278 (Bus - 40 Seats)</option>
+                      <option value="RJ14PE0832">RJ14PE0832 (Bus - 42 Seats)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Stoppages Section */}
+                <div className="pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-xs font-bold text-slate-800">
+                          Route Stoppages & Fare Schedule
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                          Optional
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Add pick-up points along this route with distances and monthly fares
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleAddStopToForm}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold transition cursor-pointer shadow-2xs"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>Add Stop</span>
+                    </button>
+                  </div>
+
+                  {/* Stoppages dynamic rows */}
+                  <div className="space-y-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/80">
+                    <div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-slate-400 px-1">
+                      <div className="col-span-5 sm:col-span-5">Stoppage / Destination</div>
+                      <div className="col-span-3 sm:col-span-3">Distance (km)</div>
+                      <div className="col-span-3 sm:col-span-3">Monthly Fare (₹)</div>
+                      <div className="col-span-1 text-center"></div>
+                    </div>
+
+                    {(routeForm.stoppages || []).map((stop, sIdx) => (
+                      <div key={sIdx} className="grid grid-cols-12 gap-2 items-center bg-white p-2 rounded-lg border border-slate-200/90 shadow-2xs">
+                        <div className="col-span-5 sm:col-span-5">
+                          <input
+                            type="text"
+                            placeholder={`e.g. Stop ${sIdx + 1} Name`}
+                            value={stop.destination}
+                            onChange={(e) => handleStopChange(sIdx, 'destination', e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="col-span-3 sm:col-span-3">
+                          <input
+                            type="number"
+                            placeholder="e.g. 15"
+                            value={stop.distance}
+                            onChange={(e) => handleStopChange(sIdx, 'distance', e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="col-span-3 sm:col-span-3">
+                          <input
+                            type="number"
+                            placeholder="e.g. 3000"
+                            value={stop.fare}
+                            onChange={(e) => handleStopChange(sIdx, 'fare', e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStopFromForm(sIdx)}
+                            className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Remove Stop"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="pt-1 flex justify-start">
+                      <button
+                        type="button"
+                        onClick={handleAddStopToForm}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Add another stoppage row</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Vehicle</label>
-                <select
-                  value={routeForm.vehicle}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, vehicle: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
-                >
-                  <option value="RJ14PC1019">RJ14PC1019 (Bus - 42 Seats)</option>
-                  <option value="RJ40PA1179">RJ40PA1179 (Bus - 42 Seats)</option>
-                  <option value="RJ02PA2762">RJ02PA2762 (Bus - 42 Seats)</option>
-                  <option value="RJ20PA9932">RJ20PA9932 (Bus - 50 Seats)</option>
-                  <option value="RJ14PC1037">RJ14PC1037 (Bus - 42 Seats)</option>
-                  <option value="RJ14PC7878">RJ14PC7878 (Bus - 45 Seats)</option>
-                  <option value="RJ14PC5938">RJ14PC5938 (Bus - 45 Seats)</option>
-                  <option value="RJ19PB7511">RJ19PB7511 (Bus - 45 Seats)</option>
-                  <option value="RJ14PC2278">RJ14PC2278 (Bus - 40 Seats)</option>
-                  <option value="RJ14PE0832">RJ14PE0832 (Bus - 42 Seats)</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-2 px-5 py-3 bg-slate-50 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsRouteModalOpen(false)}
-                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs cursor-pointer"
+                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs transition cursor-pointer"
                 >
-                  {editingRoute ? 'Update Route' : 'Save Route'}
+                  {editingRoute ? 'Update Route & Stoppages' : 'Save Route & Stoppages'}
                 </button>
               </div>
             </form>
