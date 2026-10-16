@@ -323,7 +323,7 @@ export function TransportDashboardPage({ onNavigate }) {
             <span>Vehicles</span>
           </button>
           <button
-            onClick={() => onNavigate && onNavigate('/transport-assign-routes')}
+            onClick={() => onNavigate && onNavigate('/transport-route')}
             className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg border border-indigo-200 transition-colors"
           >
             <Route className="w-3 h-3" />
