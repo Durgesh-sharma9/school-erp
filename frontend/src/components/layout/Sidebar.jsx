@@ -550,18 +550,38 @@ export const menuCategories = [
 ];
 
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
-  const [openDropdowns, setOpenDropdowns] = useState({
-    student: false,
-    school: false,
-    fee: false,
-    master: true
-  });
+  const getInitialActiveDropdown = (path) => {
+    if (path.includes('transport')) return { transport: true };
+    if (path.includes('student') || path.includes('admission')) return { student: true };
+    if (path.includes('fee')) return { fee: true };
+    if (path.includes('hostel')) return { hostel: true };
+    if (path.includes('exam')) return { examination: true };
+    if (path.includes('payroll')) return { payroll: true };
+    if (path.includes('library')) return { library: true };
+    if (path.includes('stationary')) return { stationary: true };
+    if (path.includes('sms')) return { sms: true };
+    if (path.includes('user')) return { userManagement: true };
+    if (path.includes('leave')) return { leaveManagement: true };
+    if (path === '/class-list' || path === '/subject-list' || path.includes('master')) return { master: true };
+    return {};
+  };
+
+  const [openDropdowns, setOpenDropdowns] = useState(() => getInitialActiveDropdown(currentPath));
   const [openSubDropdowns, setOpenSubDropdowns] = useState({
-    'master-reports': true
+    'master-reports': true,
+    'transport-reports': true
   });
+  const sidebarNavRef = React.useRef(null);
 
   const toggleDropdown = (id) => {
-    setOpenDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
+    setOpenDropdowns(prev => {
+      const willOpen = !prev[id];
+      if (willOpen) {
+        // Accordion behavior: close other main categories to keep sidebar compact & fixed
+        return { [id]: true };
+      }
+      return {};
+    });
   };
 
   const toggleSubDropdown = (id) => {
@@ -569,9 +589,12 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
   };
 
   React.useEffect(() => {
+    let activeKey = null;
+    let activeSubKey = null;
+
     if (currentPath === '/class-list' || currentPath === '/subject-list') {
-      setOpenDropdowns(prev => ({ ...prev, master: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'master-reports': true }));
+      activeKey = 'master';
+      activeSubKey = 'master-reports';
     }
     const studentReportPaths = [
       '/students-report', '/donation-collection-report', '/student-upload-data-summary',
@@ -582,24 +605,24 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/student-call-list', '/subject-wise-student-details'
     ];
     if (studentReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, student: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'student-reports': true }));
+      activeKey = 'student';
+      activeSubKey = 'student-reports';
     }
     const certificatePaths = [
       '/certificate-generater-new', '/transfer-certificate',
       '/generate-manual-tc', '/add-update-tc-bulk', '/manual-cc-bc'
     ];
     if (certificatePaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, certificates: true }));
+      activeKey = 'certificates';
     }
     const studyMaterialPaths = [
       '/study-material', '/homework', '/upload-pre-year-paper', '/study-material-reports'
     ];
     if (studyMaterialPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, studyMaterial: true }));
+      activeKey = 'studyMaterial';
     }
     if (currentPath === '/crm' || currentPath.startsWith('/crm/')) {
-      setOpenDropdowns(prev => ({ ...prev, crm: true }));
+      activeKey = 'crm';
     }
     const feeReportPaths = [
       '/fee-reports', '/fee-collection-summary', '/online-collection-summary',
@@ -609,37 +632,37 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/fee-book-report', '/cancel-fee-receipt-report', '/discount-fee-receipt-report'
     ];
     if (feeReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, fee: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'fee-reports': true }));
+      activeKey = 'fee';
+      activeSubKey = 'fee-reports';
     }
     const transportPaths = [
       '/transport', '/transport-dashboard', '/transport-vehicle', '/transport-route', '/transport-destination',
       '/transport-assign-routes', '/transport-assign-vehicle', '/edit-transport-fee'
     ];
     if (transportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, transport: true }));
+      activeKey = 'transport';
     }
     const transportReportPaths = [
       '/transport-summary', '/transport-students', '/transport-due-report',
       '/transport-vehicle-report', '/transport-reports'
     ];
     if (transportReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, transport: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'transport-reports': true }));
+      activeKey = 'transport';
+      activeSubKey = 'transport-reports';
     }
     const hostelPaths = [
       '/add-update-hostel', '/add-update-block', '/add-update-floor',
       '/add-update-room-type', '/add-update-room'
     ];
     if (hostelPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, hostel: true }));
+      activeKey = 'hostel';
     }
     const hostelReportPaths = [
       '/hostel-report', '/hostel-students-report', '/hostel-due-report', '/hostel-reports'
     ];
     if (hostelReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, hostel: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'hostel-reports': true }));
+      activeKey = 'hostel';
+      activeSubKey = 'hostel-reports';
     }
     const examPaths = [
       '/exam-terms', '/exam-names', '/group-master', '/grade-master',
@@ -647,7 +670,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/prc-comment', '/marks-entry-locking'
     ];
     if (examPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, examination: true }));
+      activeKey = 'examination';
     }
     const examReportPaths = [
       '/blank-exam-format', '/student-signature-sheet', '/toppers-list',
@@ -655,8 +678,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/report-card-remark-report', '/examination-reports'
     ];
     if (examReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, examination: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'examination-reports': true }));
+      activeKey = 'examination';
+      activeSubKey = 'examination-reports';
     }
     const payrollPaths = [
       '/payroll-branch', '/payroll-department', '/payroll-designation',
@@ -665,15 +688,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/payroll-advance-payment', '/staff-id-card-generator'
     ];
     if (payrollPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, payroll: true }));
+      activeKey = 'payroll';
     }
     const payrollReportPaths = [
       '/payroll-staff-salary', '/staff-list', '/staff-attendance-report',
       '/staff-attendance-time-report', '/payroll-reports'
     ];
     if (payrollReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, payroll: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'payroll-reports': true }));
+      activeKey = 'payroll';
+      activeSubKey = 'payroll-reports';
     }
     const frontOfficePaths = [
       '/app-users', '/reminder', '/gate-pass', '/visitor-enquiry',
@@ -682,7 +705,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/manual-complaint'
     ];
     if (frontOfficePaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, frontOffice: true }));
+      activeKey = 'frontOffice';
     }
     const frontOfficeReportPaths = [
       '/manual-complaint-reports', '/class-wise-notification-count-report',
@@ -692,15 +715,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/staff-gate-pass-report', '/front-office-reports'
     ];
     if (frontOfficeReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, frontOffice: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'front-office-reports': true }));
+      activeKey = 'frontOffice';
+      activeSubKey = 'front-office-reports';
     }
     const libraryPaths = [
       '/library-master', '/add-books', '/issue-book', '/return-book',
       '/purchase-book', '/damaged-book', '/library-supplier-master'
     ];
     if (libraryPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, library: true }));
+      activeKey = 'library';
     }
     const libraryReportPaths = [
       '/get-books-report', '/get-issued-books-report', '/get-pending-books-report',
@@ -708,15 +731,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/library-reports'
     ];
     if (libraryReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, library: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'library-reports': true }));
+      activeKey = 'library';
+      activeSubKey = 'library-reports';
     }
     const stationaryPaths = [
       '/shop-info', '/supplier-master', '/category-master', '/items-master',
       '/set-master', '/issue-items', '/due-payment', '/purchase-items'
     ];
     if (stationaryPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, stationary: true }));
+      activeKey = 'stationary';
     }
     const stationaryReportPaths = [
       '/category-items-report', '/set-master-report', '/issue-sets-report',
@@ -724,42 +747,61 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       '/low-stock-report', '/stationary-reports'
     ];
     if (stationaryReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, stationary: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'stationary-reports': true }));
+      activeKey = 'stationary';
+      activeSubKey = 'stationary-reports';
     }
     const smsPaths = [
       '/student-sms', '/staff-sms', '/birthday-sms', '/individual-sms',
       '/visitor-sms', '/create-whatsapp-templates'
     ];
     if (smsPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, sms: true }));
+      activeKey = 'sms';
     }
     const smsReportPaths = [
       '/sms-status-report', '/birthday-report', '/sms-reports'
     ];
     if (smsReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, sms: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'sms-reports': true }));
+      activeKey = 'sms';
+      activeSubKey = 'sms-reports';
     }
     const userManagementPaths = [
       '/user-privilege'
     ];
     if (userManagementPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, userManagement: true }));
+      activeKey = 'userManagement';
     }
     const userManagementReportPaths = [
       '/user-privilege-report', '/user-reports'
     ];
     if (userManagementReportPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, userManagement: true }));
-      setOpenSubDropdowns(prev => ({ ...prev, 'user-management-reports': true }));
+      activeKey = 'userManagement';
+      activeSubKey = 'user-management-reports';
     }
     const leaveManagementPaths = [
       '/all-leave-requests', '/staff-leave-requests', '/apply-leave-request'
     ];
     if (leaveManagementPaths.includes(currentPath)) {
-      setOpenDropdowns(prev => ({ ...prev, leaveManagement: true }));
+      activeKey = 'leaveManagement';
     }
+
+    if (activeKey) {
+      setOpenDropdowns({ [activeKey]: true });
+    }
+    if (activeSubKey) {
+      setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
+    }
+
+    // Auto-scroll active item into view within the sidebar
+    setTimeout(() => {
+      if (sidebarNavRef.current) {
+        const activeBtn = sidebarNavRef.current.querySelector('.bg-\\[\\#dde4fa\\], .bg-\\[rgba\\(99\\,102\\,241\\,0\\.2\\)\\]');
+        if (activeBtn) {
+          activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+          sidebarNavRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    }, 50);
   }, [currentPath]);
 
   const { role, user } = useAuth();
@@ -792,7 +834,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         </div>
 
         {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
-        <div className="flex-1 overflow-y-auto pt-2 pb-32 text-sm font-medium custom-scrollbar">
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto pt-2 pb-6 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;

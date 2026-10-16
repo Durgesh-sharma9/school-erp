@@ -41,8 +41,8 @@ code, pre {
 
 /* Sleek UAB Modern Sidebar Scrollbar (1:1 with reference screenshot) */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -50,15 +50,20 @@ code, pre {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #94a3b8;
 }
 
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #94a3b8 transparent;
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
 }
