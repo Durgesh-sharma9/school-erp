@@ -472,7 +472,76 @@ let studentTransportFees = [
 
 // --- VEHICLES CONTROLLERS ---
 export const getVehicles = (req, res) => {
-  res.status(200).json({ success: true, count: vehicles.length, data: vehicles });
+  const enriched = vehicles.map(v => {
+    // Find assigned route
+    const r = routes.find(rt => rt.vehicle === v.vehicleNo) ||
+              assignedVehicles.find(av => av.vehicleNo === v.vehicleNo);
+    const routeName = r?.routeName || (r?.routes ? r.routes[0] : 'Kalwara, Ajairajpura');
+    const routeObj = routes.find(rt => rt.routeName === routeName);
+    const dests = routeObj?.destinations || ['Kalwara', 'Ajairajpura', '7R Resort'];
+
+    return {
+      ...v,
+      assignedRoute: routeName,
+      destinations: dests,
+      driverPhone: v.driverPhone || '98290' + Math.floor(10000 + (v.id * 739) % 90000),
+      driverLicense: v.driverLicense || `RJ14-${2015 + (v.id % 5)}00${v.id}2`,
+      model: v.model || `${v.vehicleType || 'Bus'} - ${v.capacity} Seater`,
+      fuelType: v.fuelType || 'Diesel (BS-VI)',
+      documents: v.documents || [
+        {
+          id: `doc-${v.id}-1`,
+          type: 'PUC / Pollution Certificate',
+          title: 'Pollution Under Control (PUC)',
+          certificateNo: `PUC-RJ-${v.vehicleNo.replace(/\D/g, '') || '1019'}-26`,
+          fileName: `PUC_${v.vehicleNo}.pdf`,
+          fileSize: '1.2 MB',
+          uploadDate: '2026-06-10',
+          expiryDate: v.pucValidity || '2026-12-31',
+          status: 'Valid',
+          fileUrl: '#'
+        },
+        {
+          id: `doc-${v.id}-2`,
+          type: 'Registration Certificate (RC)',
+          title: 'RC Smart Card Copy',
+          certificateNo: `RC-${v.vehicleNo}`,
+          fileName: `RC_${v.vehicleNo}.pdf`,
+          fileSize: '2.1 MB',
+          uploadDate: '2025-02-15',
+          expiryDate: v.regCertValidity || '2028-05-15',
+          status: 'Valid',
+          fileUrl: '#'
+        },
+        {
+          id: `doc-${v.id}-3`,
+          type: 'Insurance Policy',
+          title: 'Commercial Comprehensive Insurance',
+          certificateNo: `POL-ICICI-${v.id}9923`,
+          fileName: `Insurance_${v.vehicleNo}.pdf`,
+          fileSize: '3.4 MB',
+          uploadDate: '2025-11-01',
+          expiryDate: v.insuranceValidity || '2026-11-10',
+          status: 'Valid',
+          fileUrl: '#'
+        },
+        {
+          id: `doc-${v.id}-4`,
+          type: 'Fitness Certificate',
+          title: 'RTO Annual Fitness Certificate',
+          certificateNo: `FIT-RTO-${v.vehicleNo.slice(-4) || '1019'}`,
+          fileName: `Fitness_${v.vehicleNo}.pdf`,
+          fileSize: '1.5 MB',
+          uploadDate: '2026-01-20',
+          expiryDate: v.fitnessValidity || '2027-01-20',
+          status: 'Valid',
+          fileUrl: '#'
+        }
+      ]
+    };
+  });
+
+  res.status(200).json({ success: true, count: enriched.length, data: enriched });
 };
 
 export const createVehicle = (req, res) => {
@@ -492,7 +561,8 @@ export const createVehicle = (req, res) => {
     insuranceValidity: insuranceValidity || '',
     permitValidity: permitValidity || '',
     trackNo: trackNo || '',
-    trackApi: trackApi || ''
+    trackApi: trackApi || '',
+    documents: []
   };
   vehicles.push(newVehicle);
   res.status(201).json({ success: true, message: 'Vehicle added successfully', data: newVehicle });
@@ -510,6 +580,35 @@ export const deleteVehicle = (req, res) => {
   const { id } = req.params;
   vehicles = vehicles.filter(v => v.id !== Number(id));
   res.status(200).json({ success: true, message: 'Vehicle deleted' });
+};
+
+export const addVehicleDocument = (req, res) => {
+  const { id } = req.params;
+  const vehicle = vehicles.find(v => v.id === Number(id));
+  if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
+  if (!vehicle.documents) vehicle.documents = [];
+  const newDoc = {
+    id: 'doc-' + Date.now(),
+    type: req.body.type || 'PUC / Pollution Certificate',
+    title: req.body.title || req.body.type || 'Document',
+    certificateNo: req.body.certificateNo || '',
+    fileName: req.body.fileName || `${req.body.type || 'Doc'}_${vehicle.vehicleNo}.pdf`,
+    fileSize: req.body.fileSize || '1.4 MB',
+    uploadDate: new Date().toISOString().split('T')[0],
+    expiryDate: req.body.expiryDate || '',
+    fileUrl: req.body.fileUrl || '#',
+    status: 'Valid'
+  };
+  vehicle.documents.push(newDoc);
+  res.status(201).json({ success: true, message: 'Document attached successfully', data: newDoc });
+};
+
+export const deleteVehicleDocument = (req, res) => {
+  const { id, docId } = req.params;
+  const vehicle = vehicles.find(v => v.id === Number(id));
+  if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
+  vehicle.documents = (vehicle.documents || []).filter(d => d.id !== docId);
+  res.status(200).json({ success: true, message: 'Document deleted successfully' });
 };
 
 // --- ROUTES CONTROLLERS ---

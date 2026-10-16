@@ -4,6 +4,8 @@ import {
   createVehicle,
   updateVehicle,
   deleteVehicle,
+  addVehicleDocument,
+  deleteVehicleDocument,
   getRoutes,
   createRoute,
   updateRoute,
@@ -31,6 +33,9 @@ router.route('/vehicles')
 router.route('/vehicles/:id')
   .put(updateVehicle)
   .delete(deleteVehicle);
+
+router.post('/vehicles/:id/documents', addVehicleDocument);
+router.delete('/vehicles/:id/documents/:docId', deleteVehicleDocument);
 
 // Routes
 router.route('/routes')
