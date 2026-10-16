@@ -23,21 +23,104 @@ import {
   ChevronRight,
   Contact,
   X,
-  Crown
+  Crown,
+  CalendarDays,
+  CalendarCheck,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const studentMenuCategories = [
-  { id: 'std-dashboard', title: 'Student Dashboard', icon: PieChart, path: '/dashboard' },
-  { id: 'std-homework', title: 'Homework & Assignments', icon: BookOpen, path: '/homework' },
-  { id: 'std-fees', title: 'Fee Details & Receipts', icon: IndianRupee, path: '/fee-collection' },
-  { id: 'std-attendance', title: 'Attendance Record', icon: ClipboardList, path: '/student-attendance' },
-  { id: 'std-datesheet', title: 'Exam Date Sheet', icon: FileSpreadsheet, path: '/exam-date-sheet' },
-  { id: 'std-marks', title: 'Report Card & Results', icon: Award, path: '/marks-entry' },
-  { id: 'std-studymaterial', title: 'Study Material', icon: BookMarked, path: '/study-material' },
-  { id: 'std-idcard', title: 'Student ID Card', icon: User, path: '/id-card-generator' },
-  { id: 'std-admitcard', title: 'Exam Admit Card', icon: Award, path: '/admit-card-generator' },
-  { id: 'std-portfolio', title: 'Student Profile', icon: Contact, path: '/student-portfolio' }
+  {
+    id: 'std-dashboard',
+    title: 'Dashboard',
+    icon: PieChart,
+    path: '/dashboard'
+  },
+  {
+    id: 'std-academics',
+    title: 'Academics',
+    icon: BookOpen,
+    subItems: [
+      { title: 'Homework', path: '/get-homework' },
+      { title: 'Syllabus', path: '/get-syllabus' },
+      { title: 'Study Material', path: '/get-study-material' },
+      { title: 'Assignment', path: '/get-assignment' },
+      { title: 'Online Classes', path: '/get-online-classes' }
+    ]
+  },
+  {
+    id: 'std-fees',
+    title: 'Fees & Payments',
+    icon: IndianRupee,
+    subItems: [
+      { title: 'Fee', path: '/get-fee' },
+      { title: 'Fee Receipt', path: '/get-fee-receipt' }
+    ]
+  },
+  {
+    id: 'std-exam',
+    title: 'Exam & Result',
+    icon: Award,
+    subItems: [
+      { title: 'DateSheet', path: '/get-datesheet' },
+      { title: 'Admit Card', path: '/student-admit-card' },
+      { title: 'Result', path: '/get-result' }
+    ]
+  },
+  {
+    id: 'std-attendance',
+    title: 'Attendance & Discipline',
+    icon: CalendarCheck,
+    subItems: [
+      { title: 'Attendance', path: '/get-attendance' },
+      { title: 'Gate Pass', path: '/get-gate-pass' },
+      { title: 'Leave Request', path: '/leave-request' }
+    ]
+  },
+  {
+    id: 'std-comm',
+    title: 'Communication',
+    icon: MessageSquare,
+    subItems: [
+      { title: 'Sms', path: '/get-sms' },
+      { title: 'Notifications', path: '/all-notifications' },
+      { title: 'Voice Sms', path: '/get-voice-sms' },
+      { title: 'Circular', path: '/get-circular' },
+      { title: 'Complaint', path: '/get-complaint' }
+    ]
+  },
+  {
+    id: 'std-info',
+    title: 'Student Information',
+    icon: User,
+    subItems: [
+      { title: 'Profile', path: '/profile' },
+      { title: 'Id Card', path: '/student-id-card' },
+      { title: 'Transport', path: '/get-transport' }
+    ]
+  },
+  {
+    id: 'std-planning',
+    title: 'Planning & Scheduling',
+    icon: CalendarDays,
+    subItems: [
+      { title: 'Calendar Planing', path: '/get-calendar-planing' }
+    ]
+  },
+  {
+    id: 'std-social',
+    title: 'Social & Community',
+    icon: Users,
+    subItems: [
+      { title: 'Student Birthday', path: '/student-birthday' },
+      { title: 'Birthday', path: '/get-birthday' },
+      { title: 'Batchmate', path: '/get-batch-mate' },
+      { title: 'News', path: '/get-news' },
+      { title: 'Gallery', path: '/get-gallary' },
+      { title: 'Social Media', path: '/get-social-media' }
+    ]
+  }
 ];
 
 export const staffMenuCategories = [
@@ -679,7 +762,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     }
   }, [currentPath]);
 
-  const { role } = useAuth();
+  const { role, user } = useAuth();
 
   const activeCategories = role === 'STUDENT'
     ? studentMenuCategories
@@ -713,7 +796,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
-            const isOpen = openDropdowns[item.id];
+            const isOpen = openDropdowns[item.id] ?? (hasChildren && item.subItems.some(sub => sub.path === currentPath || (sub.children && sub.children.some(c => c.path === currentPath))));
             const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => {
               if (sub.path === currentPath) return true;
               if (sub.children && sub.children.some(c => c.path === currentPath)) return true;
@@ -859,6 +942,30 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             );
           })}
         </div>
+
+        {/* Student Bottom Profile Card matching UAB Screenshot */}
+        {role === 'STUDENT' && (
+          <div 
+            onClick={() => onNavigate && onNavigate('/profile')}
+            className="p-3 border-t border-slate-200 bg-white/70 hover:bg-white cursor-pointer transition-colors flex items-center justify-between shrink-0"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="relative shrink-0">
+                <img
+                  src={user?.avatar || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=150'}
+                  alt={user?.name || 'Student'}
+                  className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-bold text-slate-800 truncate">{user?.name || 'AADHYA CHOUDHARY'}</p>
+                <p className="text-[10px] text-slate-500 truncate">{user?.className || 'Nursery - PP3+ - A'}</p>
+              </div>
+            </div>
+            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+          </div>
+        )}
 
         {/* Bottom subtle session indicator */}
         <div className="py-2 text-[10px] text-slate-400 text-center border-t border-slate-200/60 bg-slate-50 shrink-0">

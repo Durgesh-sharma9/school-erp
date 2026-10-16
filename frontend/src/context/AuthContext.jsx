@@ -73,8 +73,11 @@ export const DEMO_USERS = {
     sessionId: '2026-2027',
     avatar: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=150',
     attendancePercent: 92,
-    feeStatus: 'Paid',
-    dueAmount: 0
+    todayStatus: 'Ab',
+    feeStatus: 'Due',
+    totalFees: 21700,
+    paidFees: 0,
+    dueAmount: 21700
   },
 
   // ==================== SCHOOL B: DELHI PUBLIC ACADEMY ====================

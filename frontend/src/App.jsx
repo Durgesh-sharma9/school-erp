@@ -324,7 +324,7 @@ function AppContent() {
   // Helper for root dashboard view based on active role
   const renderDashboardByRole = () => {
     if (role === 'STUDENT') {
-      return <StudentPortalPage onNavigate={handleNavigate} />;
+      return <StudentPortalPage onNavigate={handleNavigate} currentPath={normalizePath(currentPath)} />;
     }
     if (role === 'STAFF') {
       return <StaffPortalPage onNavigate={handleNavigate} />;
@@ -369,7 +369,42 @@ function AppContent() {
               case '/superadmin-analytics':
                 return <SuperAdminDashboardPage onNavigate={handleNavigate} />;
               case '/student-portal':
-                return <StudentPortalPage onNavigate={handleNavigate} />;
+              case '/get-homework':
+              case '/get-syllabus':
+              case '/get-study-material':
+              case '/get-assignment':
+              case '/get-online-classes':
+              case '/get-fee':
+              case '/get-fee-receipt':
+              case '/822':
+              case '/pay-fee':
+              case '/get-datesheet':
+              case '/student-admit-card':
+              case '/get-result':
+              case '/get-attendance':
+              case '/get-gate-pass':
+              case '/leave-request':
+              case '/get-sms':
+              case '/all-notifications':
+              case '/get-voice-sms':
+              case '/get-circular':
+              case '/get-complaint':
+                return role === 'STUDENT' ? (
+                  <StudentPortalPage onNavigate={handleNavigate} currentPath={normalizePath(currentPath)} />
+                ) : (
+                  <StudentComplaintPage onNavigate={handleNavigate} />
+                );
+              case '/profile':
+              case '/student-id-card':
+              case '/get-transport':
+              case '/get-calendar-planing':
+              case '/student-birthday':
+              case '/get-birthday':
+              case '/get-batch-mate':
+              case '/get-news':
+              case '/get-gallary':
+              case '/get-social-media':
+                return <StudentPortalPage onNavigate={handleNavigate} currentPath={normalizePath(currentPath)} />;
               case '/staff-portal':
                 return <StaffPortalPage onNavigate={handleNavigate} />;
               case '/school-info':
@@ -669,8 +704,6 @@ function AppContent() {
                 return <StaffGatePassPage onNavigate={handleNavigate} />;
               case '/payroll-visit-staff-meeting':
                 return <VisitStaffMeetingPage onNavigate={handleNavigate} />;
-              case '/get-complaint':
-                return <StudentComplaintPage onNavigate={handleNavigate} />;
               case '/manual-complaint':
                 return <StaffComplaintPage onNavigate={handleNavigate} />;
               case '/front-office-reports':
