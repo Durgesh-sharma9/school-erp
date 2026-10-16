@@ -32,7 +32,7 @@ export function Navbar({
   const isSchoolB = schoolId === 'sch_dps_branch2';
 
   return (
-    <header className="h-14 bg-slate-50 border-b border-slate-200 px-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <header className="h-14 bg-slate-50 border-b border-slate-200 px-3 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-xs">
       {/* Left: School Logo + Hamburger + Name & Session */}
       <div className="flex items-center space-x-2">
         {/* Dynamic School Logo */}

@@ -282,6 +282,10 @@ function AppContent() {
     if (window.location.pathname !== normalized) {
       window.history.pushState({}, '', normalized);
     }
+    const mainEl = document.getElementById('main-content');
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -338,7 +342,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f3f4f6] text-slate-800 antialiased font-sans">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f6] text-slate-800 antialiased font-sans">
       <Toaster position="top-right" />
 
       {/* 1:1 UAB Collapsible Navigation Sidebar */}
@@ -350,7 +354,7 @@ function AppContent() {
       />
 
       {/* Main Full-Width Canvas Container */}
-      <div className="flex-1 flex flex-col min-w-0 w-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full min-w-0 w-full overflow-hidden">
         {/* Top Navbar */}
         <Navbar
           session="2026-2027"
@@ -359,7 +363,7 @@ function AppContent() {
         />
 
         {/* Dynamic Canvas Routing */}
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto custom-scrollbar">
           {(() => {
             switch (normalizePath(currentPath)) {
               case '/':

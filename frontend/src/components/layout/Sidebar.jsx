@@ -781,7 +781,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       />
 
       {/* 1:1 UAB Exact Left Sidenav (Width 250px, border-r, seamless background) */}
-      <aside className="fixed md:static inset-y-0 left-0 z-50 w-[250px] bg-slate-50 border-r border-slate-200 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-md md:shadow-none transition-transform duration-300">
+      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-[250px] bg-slate-50 border-r border-slate-200 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-md md:shadow-none transition-all duration-300">
         
         {/* Top Spacer matching UAB navbar height (56px) */}
         <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/60 bg-slate-50 shrink-0 md:hidden">
