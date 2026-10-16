@@ -1,3 +1,4 @@
+export { TransportDashboardPage } from './TransportDashboardPage';
 export { TransportVehiclePage } from './TransportVehiclePage';
 export { TransportRoutePage } from './TransportRoutePage';
 export { TransportDestinationPage } from './TransportDestinationPage';

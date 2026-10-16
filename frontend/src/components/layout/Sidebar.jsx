@@ -316,6 +316,7 @@ export const menuCategories = [
     title: 'Transport',
     icon: Bus, // airport_shuttle in UAB
     subItems: [
+      { title: 'Transport Dashboard', path: '/transport-dashboard' },
       { title: 'Transport Vehicle', path: '/transport-vehicle' },
       { title: 'Transport Route', path: '/transport-route' },
       { title: 'Transport Destination', path: '/transport-destination' },
@@ -612,7 +613,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       setOpenSubDropdowns(prev => ({ ...prev, 'fee-reports': true }));
     }
     const transportPaths = [
-      '/transport-vehicle', '/transport-route', '/transport-destination',
+      '/transport', '/transport-dashboard', '/transport-vehicle', '/transport-route', '/transport-destination',
       '/transport-assign-routes', '/transport-assign-vehicle', '/edit-transport-fee'
     ];
     if (transportPaths.includes(currentPath)) {

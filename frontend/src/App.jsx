@@ -44,6 +44,7 @@ import {
   DiscountFeeReceiptReportPage
 } from './modules/fees';
 import {
+  TransportDashboardPage,
   TransportVehiclePage,
   TransportRoutePage,
   TransportDestinationPage,
@@ -500,6 +501,9 @@ function AppContent() {
                 return <CancelFeeReceiptReportPage onNavigate={handleNavigate} />;
               case '/discount-fee-receipt-report':
                 return <DiscountFeeReceiptReportPage onNavigate={handleNavigate} />;
+              case '/transport':
+              case '/transport-dashboard':
+                return <TransportDashboardPage onNavigate={handleNavigate} />;
               case '/transport-vehicle':
                 return <TransportVehiclePage onNavigate={handleNavigate} />;
               case '/transport-route':

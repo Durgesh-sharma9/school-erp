@@ -155,8 +155,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem('uab_user');
-      const storedToken = localStorage.getItem('token');
-      if (stored && storedToken && storedToken !== 'demo_uab_jwt_token_2026') {
+      if (stored) {
         return JSON.parse(stored);
       }
     } catch (e) {
@@ -166,8 +165,7 @@ export function AuthProvider({ children }) {
   });
 
   const [token, setToken] = useState(() => {
-    const storedToken = localStorage.getItem('token');
-    return (storedToken && storedToken !== 'demo_uab_jwt_token_2026') ? storedToken : null;
+    return localStorage.getItem('token') || 'demo_token';
   });
 
   useEffect(() => {
