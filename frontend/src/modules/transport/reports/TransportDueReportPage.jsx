@@ -10,11 +10,16 @@ export function TransportDueReportPage() {
   const [selectedStudentForPass, setSelectedStudentForPass] = useState(null);
 
   const [records] = useState([
-    { sNo: 1, admNo: '1621', srNo: '1621', name: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', fatherName: 'VIKRAM SINGH', contactNo: '8947919195', vehicle: 'RJ02PA2762', route: 'Jaisinghpura, Rampura', total: 28050, paid: 12750, balance: 15300 },
-    { sNo: 2, admNo: '2059', srNo: '2059', name: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', fatherName: 'RAMESH CHOUDHARY', contactNo: '6377281034', vehicle: 'RJ14PC1019', route: 'Kalwara, Ajairajpura', total: 33000, paid: 6000, balance: 27000 },
-    { sNo: 3, admNo: '1204', srNo: '1204', name: 'AARAV SHARMA', className: 'Class I-A', fatherName: 'RAJESH SHARMA', contactNo: '9876543210', vehicle: 'RJ14PC2278', route: 'Bhankrota, Mojika, Hanging Gardens', total: 31350, paid: 11400, balance: 19950 },
-    { sNo: 4, admNo: '1245', srNo: '1245', name: 'BHAVYA VERMA', className: 'Class II-B', fatherName: 'MANISH VERMA', contactNo: '9829012345', vehicle: 'RJ14PC1037', route: 'Mangalam Grand City', total: 28050, paid: 12750, balance: 15300 },
-    { sNo: 5, admNo: '1310', srNo: '1310', name: 'CHETAN MEENA', className: 'Class X-A', fatherName: 'RAMESHWAR MEENA', contactNo: '9414054321', vehicle: 'RJ40PA1179', route: 'Thikriya, Vatika', total: 39600, paid: 14400, balance: 25200 }
+    { sNo: 1, admNo: '1621', srNo: '1621', name: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', fatherName: 'VIKRAM SINGH', contactNo: '8947919195', vehicle: 'RJ02PA2762', route: 'Jaisinghpura, Rampura', total: 28050, paid: 18700, balance: 9350 },
+    { sNo: 2, admNo: '2059', srNo: '2059', name: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', fatherName: 'RAMESH CHOUDHARY', contactNo: '6377281034', vehicle: 'RJ14PC1019', route: 'Kalwara, Ajairajpura', total: 33000, paid: 21000, balance: 12000 },
+    { sNo: 3, admNo: '1204', srNo: '1204', name: 'AARAV SHARMA', className: 'Class I-A', fatherName: 'RAJESH SHARMA', contactNo: '9876543210', vehicle: 'RJ14PC2278', route: 'Bhankrota, Mojika, Hanging Gardens', total: 31350, paid: 21000, balance: 10350 },
+    { sNo: 4, admNo: '1245', srNo: '1245', name: 'BHAVYA VERMA', className: 'Class II-B', fatherName: 'MANISH VERMA', contactNo: '9829012345', vehicle: 'RJ14PC1037', route: 'Mangalam Grand City', total: 28050, paid: 18700, balance: 9350 },
+    { sNo: 5, admNo: '1310', srNo: '1310', name: 'CHETAN MEENA', className: 'Class X-A', fatherName: 'RAMESHWAR MEENA', contactNo: '9414054321', vehicle: 'RJ40PA1179', route: 'Thikriya, Vatika', total: 39600, paid: 26400, balance: 13200 },
+    { sNo: 6, admNo: '1455', srNo: '1455', name: 'KAVYA JANGID', className: 'Class II-A', fatherName: 'BHARAT JANGID', contactNo: '9828884422', vehicle: 'RJ20PA9932', route: 'Auric City & Shub Nilay', total: 26400, paid: 17600, balance: 8800 },
+    { sNo: 7, admNo: '1532', srNo: '1532', name: 'MANVI RATHORE', className: 'Class III-B', fatherName: 'MAHENDRA RATHORE', contactNo: '9782110022', vehicle: 'RJ14PC7878', route: 'Manglam Aangan', total: 28050, paid: 18700, balance: 9350 },
+    { sNo: 8, admNo: '1689', srNo: '1689', name: 'RIDDHI GURJAR', className: 'Class V-A', fatherName: 'RAJU GURJAR', contactNo: '9982445566', vehicle: 'RJ19PB7511', route: 'Narsinghpura, Ramchandrapura', total: 31350, paid: 21000, balance: 10350 },
+    { sNo: 9, admNo: '1740', srNo: '1740', name: 'TANMAY SAINI', className: 'Class VIII-B', fatherName: 'NARESH SAINI', contactNo: '9414223344', vehicle: 'RJ14PC5938', route: 'Aasra, J K Lakshmipat University', total: 29700, paid: 19800, balance: 9900 },
+    { sNo: 10, admNo: '1812', srNo: '1812', name: 'ZOYA KHAN', className: 'Class II-A', fatherName: 'ASLAM KHAN', contactNo: '9602441188', vehicle: 'RJ14PE0832', route: 'Khatwara', total: 28050, paid: 18700, balance: 9350 }
   ]);
 
   const filteredRecords = records.filter(r =>

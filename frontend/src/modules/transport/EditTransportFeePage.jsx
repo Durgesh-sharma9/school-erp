@@ -7,19 +7,103 @@ export function EditTransportFeePage() {
   const [selectedDivision, setSelectedDivision] = useState('A');
   const [selectedStudent, setSelectedStudent] = useState('1621 - AADITYA SINGH CHOUDHARY');
 
-  const [monthsData, setMonthsData] = useState([
-    { month: 'April', fare: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'May', fare: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'July', fare: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'August', fare: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'September', fare: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'October', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'November', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'December', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'January', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'February', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-    { month: 'March', fare: 2550, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' }
-  ]);
+  const studentPresets = {
+    '1621 - AADITYA SINGH CHOUDHARY': {
+      class: 'Class I',
+      division: 'A',
+      vehicle: 'RJ02PA2762',
+      destination: 'Abhinandan Enclave Jaisinghpura',
+      fare: 2550,
+      paidMonths: 5
+    },
+    '2059 - AADHYA CHOUDHARY': {
+      class: 'Nursery - PP3+',
+      division: 'A',
+      vehicle: 'RJ14PC1019',
+      destination: 'Kalwara',
+      fare: 3000,
+      paidMonths: 7
+    },
+    '1204 - AARAV SHARMA': {
+      class: 'Class II',
+      division: 'A',
+      vehicle: 'RJ14PC1037',
+      destination: 'Vatika',
+      fare: 2400,
+      paidMonths: 6
+    },
+    '1985 - KABIR VERMA': {
+      class: 'Class III',
+      division: 'A',
+      vehicle: 'RJ14PC2278',
+      destination: 'Muhana Mandi',
+      fare: 2600,
+      paidMonths: 7
+    },
+    '1540 - TANISHQ JAIN': {
+      class: 'Class V',
+      division: 'B',
+      vehicle: 'RJ14PC5938',
+      destination: 'Neerja Modi / Mansarovar',
+      fare: 3200,
+      paidMonths: 6
+    },
+    '2201 - ANANYA SHARMA': {
+      class: 'Class VI',
+      division: 'A',
+      vehicle: 'RJ14PC7878',
+      destination: 'Mahapura',
+      fare: 2500,
+      paidMonths: 6
+    },
+    '1319 - DAKSH SINGH': {
+      class: 'Class VII',
+      division: 'A',
+      vehicle: 'RJ14PE0832',
+      destination: '7R Resort',
+      fare: 2800,
+      paidMonths: 8
+    },
+    '1442 - MANVI PATEL': {
+      class: 'Class VIII',
+      division: 'B',
+      vehicle: 'RJ19PB7511',
+      destination: 'Auric City Homes',
+      fare: 2900,
+      paidMonths: 7
+    },
+    '2105 - ROHAN GUPTA': {
+      class: 'Class IX',
+      division: 'A',
+      vehicle: 'RJ20PA9932',
+      destination: 'Sanganer Bridge',
+      fare: 3100,
+      paidMonths: 6
+    },
+    '1842 - PRIYANSH MEENA': {
+      class: 'Class X',
+      division: 'B',
+      vehicle: 'RJ40PA1179',
+      destination: 'Bhankrota',
+      fare: 3600,
+      paidMonths: 8
+    }
+  };
+
+  const getInitialSchedule = (studentKey) => {
+    const months = ['April', 'May', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
+    const p = studentPresets[studentKey] || studentPresets['1621 - AADITYA SINGH CHOUDHARY'];
+    return months.map((m, idx) => ({
+      month: m,
+      fare: p.fare,
+      balance: idx < p.paidMonths ? 0 : p.fare,
+      applied: true,
+      destination: p.destination,
+      vehicle: p.vehicle
+    }));
+  };
+
+  const [monthsData, setMonthsData] = useState(getInitialSchedule('1621 - AADITYA SINGH CHOUDHARY'));
 
   const destinationsList = [
     '7R Resort',
@@ -27,6 +111,10 @@ export function EditTransportFeePage() {
     'Auric City Homes',
     'Bhankrota',
     'Kalwara',
+    'Mahapura',
+    'Muhana Mandi',
+    'Neerja Modi / Mansarovar',
+    'Sanganer Bridge',
     'Thikariya',
     'Vatika'
   ];
@@ -37,8 +125,22 @@ export function EditTransportFeePage() {
     'RJ14PC1037',
     'RJ14PC2278',
     'RJ14PC5938',
+    'RJ14PC7878',
+    'RJ14PE0832',
+    'RJ19PB7511',
+    'RJ20PA9932',
     'RJ40PA1179'
   ];
+
+  const handleStudentChange = (e) => {
+    const student = e.target.value;
+    setSelectedStudent(student);
+    if (studentPresets[student]) {
+      setSelectedClass(studentPresets[student].class);
+      setSelectedDivision(studentPresets[student].division);
+      setMonthsData(getInitialSchedule(student));
+    }
+  };
 
   const toggleApply = (idx) => {
     setMonthsData(prev => prev.map((m, i) => i === idx ? { ...m, applied: !m.applied } : m));
@@ -50,10 +152,12 @@ export function EditTransportFeePage() {
 
   const handleModify = async () => {
     try {
+      const admMatch = selectedStudent.match(/^(\d+)/);
+      const admNo = admMatch ? admMatch[1] : '1621';
       await fetch('/api/transport/student-fee', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ admNo: '1621', schedule: monthsData })
+        body: JSON.stringify({ admNo, schedule: monthsData })
       });
       toast.success('Transport fee schedule updated successfully');
     } catch {
@@ -94,6 +198,12 @@ export function EditTransportFeePage() {
               <option value="Nursery - PP3+">Nursery - PP3+</option>
               <option value="Class I">Class I</option>
               <option value="Class II">Class II</option>
+              <option value="Class III">Class III</option>
+              <option value="Class V">Class V</option>
+              <option value="Class VI">Class VI</option>
+              <option value="Class VII">Class VII</option>
+              <option value="Class VIII">Class VIII</option>
+              <option value="Class IX">Class IX</option>
               <option value="Class X">Class X</option>
             </select>
           </div>
@@ -114,18 +224,25 @@ export function EditTransportFeePage() {
             <label className="block text-xs font-semibold text-slate-700 mb-1">Student</label>
             <select
               value={selectedStudent}
-              onChange={(e) => setSelectedStudent(e.target.value)}
+              onChange={handleStudentChange}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
             >
-              <option value="1621 - AADITYA SINGH CHOUDHARY">1621 - AADITYA SINGH CHOUDHARY</option>
-              <option value="2059 - AADHYA CHOUDHARY">2059 - AADHYA CHOUDHARY</option>
-              <option value="1204 - AARAV SHARMA">1204 - AARAV SHARMA</option>
+              {Object.keys(studentPresets).map((sKey) => (
+                <option key={sKey} value={sKey}>
+                  {sKey}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="flex flex-col justify-end">
             <button
-              onClick={() => toast.success('Student transport data loaded')}
+              onClick={() => {
+                if (studentPresets[selectedStudent]) {
+                  setMonthsData(getInitialSchedule(selectedStudent));
+                }
+                toast.success(`Loaded schedule for ${selectedStudent}`);
+              }}
               className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5"
             >
               <Search className="w-4 h-4" /> Load Schedule

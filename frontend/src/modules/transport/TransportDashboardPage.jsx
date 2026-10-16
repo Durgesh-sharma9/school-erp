@@ -31,7 +31,7 @@ export function TransportDashboardPage({ onNavigate }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('Just now');
 
-  // Comprehensive Fleet Dataset
+  // Comprehensive Fleet Dataset (Realistic School Fleet Data with authentic fares & occupancy)
   const fleetData = [
     {
       id: 1,
@@ -52,7 +52,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-11-30',
       fitnessValidity: '2026-12-15',
       insuranceValidity: '2027-04-10',
-      collection: { demand: 33000, collected: 14000, due: 19000 }
+      collection: { demand: 1140000, collected: 760000, due: 380000 }
     },
     {
       id: 2,
@@ -73,7 +73,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-11-15',
       fitnessValidity: '2026-12-10',
       insuranceValidity: '2027-03-25',
-      collection: { demand: 39600, collected: 14400, due: 25200 }
+      collection: { demand: 1296000, collected: 864000, due: 432000 }
     },
     {
       id: 3,
@@ -94,7 +94,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-12-31',
       fitnessValidity: '2027-01-20',
       insuranceValidity: '2027-06-15',
-      collection: { demand: 28050, collected: 12750, due: 15300 }
+      collection: { demand: 1122000, collected: 748000, due: 374000 }
     },
     {
       id: 4,
@@ -115,7 +115,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2027-02-10',
       fitnessValidity: '2027-04-15',
       insuranceValidity: '2027-05-20',
-      collection: { demand: 24000, collected: 9600, due: 14400 }
+      collection: { demand: 1161600, collected: 774400, due: 387200 }
     },
     {
       id: 5,
@@ -136,7 +136,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-11-20',
       fitnessValidity: '2026-12-28',
       insuranceValidity: '2027-01-18',
-      collection: { demand: 25500, collected: 8000, due: 17500 }
+      collection: { demand: 897600, collected: 598400, due: 299200 }
     },
     {
       id: 6,
@@ -157,7 +157,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2027-01-15',
       fitnessValidity: '2026-12-05',
       insuranceValidity: '2027-07-22',
-      collection: { demand: 28050, collected: 12750, due: 15300 }
+      collection: { demand: 1178100, collected: 785400, due: 392700 }
     },
     {
       id: 7,
@@ -175,10 +175,10 @@ export function TransportDashboardPage({ onNavigate }) {
       nextStop: 'Ramchandrapura Stand',
       eta: '15 mins',
       gpsId: 'GPS-RJ19-751',
-      pucValidity: '2026-10-30', // Expiring very soon!
+      pucValidity: '2026-10-30', // Expiring in 14 days
       fitnessValidity: '2026-11-30',
       insuranceValidity: '2027-02-14',
-      collection: { demand: 22800, collected: 7600, due: 15200 }
+      collection: { demand: 1097250, collected: 731500, due: 365750 }
     },
     {
       id: 8,
@@ -199,7 +199,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-12-15',
       fitnessValidity: '2027-02-15',
       insuranceValidity: '2027-08-10',
-      collection: { demand: 27000, collected: 10800, due: 16200 }
+      collection: { demand: 1158300, collected: 772200, due: 386100 }
     },
     {
       id: 9,
@@ -217,10 +217,10 @@ export function TransportDashboardPage({ onNavigate }) {
       nextStop: 'Bhankrota Circle',
       eta: '9 mins',
       gpsId: 'GPS-RJ14-227',
-      pucValidity: '2026-10-25', // Expiring in 9 days!
+      pucValidity: '2026-10-25', // Expiring in 9 days
       fitnessValidity: '2026-11-18',
       insuranceValidity: '2027-03-30',
-      collection: { demand: 31350, collected: 11400, due: 19950 }
+      collection: { demand: 1065900, collected: 710600, due: 355300 }
     },
     {
       id: 10,
@@ -241,7 +241,7 @@ export function TransportDashboardPage({ onNavigate }) {
       pucValidity: '2026-12-05',
       fitnessValidity: '2027-03-10',
       insuranceValidity: '2027-09-05',
-      collection: { demand: 25500, collected: 8500, due: 17000 }
+      collection: { demand: 785400, collected: 523600, due: 261800 }
     }
   ];
 
@@ -659,7 +659,7 @@ export function TransportDashboardPage({ onNavigate }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {fleetData.slice(0, 6).map((item) => (
+                {fleetData.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-2.5 px-3 font-semibold text-slate-800">{item.route}</td>
                     <td className="py-2.5 px-3 font-mono font-bold text-indigo-700">{item.vehicleNo}</td>

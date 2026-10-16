@@ -314,6 +314,19 @@ let assignedVehicles = [
   }
 ];
 
+const createStudentSchedule = (fare, paidMonths, destination, vehicle) => {
+  const months = ['April', 'May', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
+  return months.map((m, idx) => ({
+    month: m,
+    fare,
+    paid: idx < paidMonths ? fare : 0,
+    balance: idx < paidMonths ? 0 : fare,
+    applied: true,
+    destination,
+    vehicle
+  }));
+};
+
 let studentTransportFees = [
   {
     studentId: '1621',
@@ -327,19 +340,7 @@ let studentTransportFees = [
     routeName: 'Jaisinghpura, Rampura',
     destination: 'Abhinandan Enclave Jaisinghpura',
     monthlyFare: 2550,
-    schedule: [
-      { month: 'April', fare: 2550, paid: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'May', fare: 2550, paid: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'July', fare: 2550, paid: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'August', fare: 2550, paid: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'September', fare: 2550, paid: 2550, balance: 0, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'October', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'November', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'December', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'January', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'February', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' },
-      { month: 'March', fare: 2550, paid: 0, balance: 2550, applied: true, destination: 'Abhinandan Enclave Jaisinghpura', vehicle: 'RJ02PA2762' }
-    ]
+    schedule: createStudentSchedule(2550, 7, 'Abhinandan Enclave Jaisinghpura', 'RJ02PA2762')
   },
   {
     studentId: '2059',
@@ -353,19 +354,119 @@ let studentTransportFees = [
     routeName: 'Kalwara, Ajairajpura',
     destination: 'Kalwara',
     monthlyFare: 3000,
-    schedule: [
-      { month: 'April', fare: 3000, paid: 3000, balance: 0, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'May', fare: 3000, paid: 3000, balance: 0, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'July', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'August', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'September', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'October', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'November', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'December', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'January', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'February', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' },
-      { month: 'March', fare: 3000, paid: 0, balance: 3000, applied: true, destination: 'Kalwara', vehicle: 'RJ14PC1019' }
-    ]
+    schedule: createStudentSchedule(3000, 7, 'Kalwara', 'RJ14PC1019')
+  },
+  {
+    studentId: '1204',
+    admNo: '1204',
+    srNo: '1204',
+    name: 'AARAV SHARMA',
+    className: 'Class I-A',
+    fatherName: 'RAJESH SHARMA',
+    contactNo: '9876543210',
+    vehicleNo: 'RJ14PC2278',
+    routeName: 'Bhankrota, Mojika, Hanging Gardens',
+    destination: 'Bhankrota',
+    monthlyFare: 2850,
+    schedule: createStudentSchedule(2850, 7, 'Bhankrota', 'RJ14PC2278')
+  },
+  {
+    studentId: '1245',
+    admNo: '1245',
+    srNo: '1245',
+    name: 'BHAVYA VERMA',
+    className: 'Class II-B',
+    fatherName: 'MANISH VERMA',
+    contactNo: '9829012345',
+    vehicleNo: 'RJ14PC1037',
+    routeName: 'Mangalam Grand City',
+    destination: 'Mangalam Grand City',
+    monthlyFare: 2550,
+    schedule: createStudentSchedule(2550, 7, 'Mangalam Grand City', 'RJ14PC1037')
+  },
+  {
+    studentId: '1310',
+    admNo: '1310',
+    srNo: '1310',
+    name: 'CHETAN MEENA',
+    className: 'Class X-A',
+    fatherName: 'RAMESHWAR MEENA',
+    contactNo: '9414054321',
+    vehicleNo: 'RJ40PA1179',
+    routeName: 'Thikriya, Vatika',
+    destination: 'Thikariya',
+    monthlyFare: 3600,
+    schedule: createStudentSchedule(3600, 7, 'Thikariya', 'RJ40PA1179')
+  },
+  {
+    studentId: '1455',
+    admNo: '1455',
+    srNo: '1455',
+    name: 'KAVYA JANGID',
+    className: 'Class II-A',
+    fatherName: 'BHARAT JANGID',
+    contactNo: '9828884422',
+    vehicleNo: 'RJ20PA9932',
+    routeName: 'Auric City & Shub Nilay',
+    destination: 'Auric City Homes',
+    monthlyFare: 2400,
+    schedule: createStudentSchedule(2400, 7, 'Auric City Homes', 'RJ20PA9932')
+  },
+  {
+    studentId: '1532',
+    admNo: '1532',
+    srNo: '1532',
+    name: 'MANVI RATHORE',
+    className: 'Class III-B',
+    fatherName: 'MAHENDRA RATHORE',
+    contactNo: '9782110022',
+    vehicleNo: 'RJ14PC7878',
+    routeName: 'Manglam Aangan',
+    destination: 'Manglam Aangan',
+    monthlyFare: 2550,
+    schedule: createStudentSchedule(2550, 7, 'Manglam Aangan', 'RJ14PC7878')
+  },
+  {
+    studentId: '1689',
+    admNo: '1689',
+    srNo: '1689',
+    name: 'RIDDHI GURJAR',
+    className: 'Class V-A',
+    fatherName: 'RAJU GURJAR',
+    contactNo: '9982445566',
+    vehicleNo: 'RJ19PB7511',
+    routeName: 'Narsinghpura, Ramchandrapura',
+    destination: 'Narsinghpura',
+    monthlyFare: 2850,
+    schedule: createStudentSchedule(2850, 7, 'Narsinghpura', 'RJ19PB7511')
+  },
+  {
+    studentId: '1740',
+    admNo: '1740',
+    srNo: '1740',
+    name: 'TANMAY SAINI',
+    className: 'Class VIII-B',
+    fatherName: 'NARESH SAINI',
+    contactNo: '9414223344',
+    vehicleNo: 'RJ14PC5938',
+    routeName: 'Aasra, J K Lakshmipat University',
+    destination: 'J K Lakshmipat University',
+    monthlyFare: 2700,
+    schedule: createStudentSchedule(2700, 7, 'J K Lakshmipat University', 'RJ14PC5938')
+  },
+  {
+    studentId: '1812',
+    admNo: '1812',
+    srNo: '1812',
+    name: 'ZOYA KHAN',
+    className: 'Class II-A',
+    fatherName: 'ASLAM KHAN',
+    contactNo: '9602441188',
+    vehicleNo: 'RJ14PE0832',
+    routeName: 'Khatwara',
+    destination: 'Khatwara',
+    monthlyFare: 2550,
+    schedule: createStudentSchedule(2550, 7, 'Khatwara', 'RJ14PE0832')
   }
 ];
 

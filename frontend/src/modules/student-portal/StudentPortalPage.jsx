@@ -1354,38 +1354,51 @@ export function StudentPortalPage({ onNavigate, currentPath }) {
             <div>
               {renderPageHeader('Transport')}
               <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 text-xs max-w-2xl">
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex justify-between items-center">
                   <div>
-                    <span className="text-amber-800 font-bold text-base block">Route #04 &bull; Mahapura - Ajmer Road</span>
-                    <span className="text-slate-600 text-xs">Vehicle: RJ-14-PA-2026 (Tata Starbus)</span>
+                    <span className="text-indigo-900 font-bold text-base block">Route #01 &bull; Kalwara, Ajairajpura</span>
+                    <span className="text-slate-600 text-xs font-mono font-semibold">Vehicle: RJ14PC1019 (Bus - 42 Seats)</span>
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
-                    ● GPS Active
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    ● GPS Active (42 km/h)
                   </span>
                 </div>
-                <div className="space-y-2 border border-slate-200 rounded-xl p-4">
+                <div className="space-y-2.5 border border-slate-200 rounded-xl p-4">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Driver Name:</span>
-                    <strong className="text-slate-800">Ramphal Gurjar</strong>
+                    <strong className="text-slate-900 font-semibold">HANSRAJ JAT</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Driver Mobile:</span>
-                    <strong className="text-slate-800">+91 98290 12345</strong>
+                    <a href="tel:9829012345" className="text-indigo-600 font-bold hover:underline">+91 98290 12345</a>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Assigned Stoppage:</span>
+                    <strong className="text-slate-800">Kalwara Stand (Destination #3)</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Monthly Transport Fare:</span>
+                    <strong className="text-emerald-700 font-bold">₹3,000 / Month</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Morning Pickup:</span>
-                    <strong className="text-slate-800">07:45 AM (Mahapura Bus Stop)</strong>
+                    <strong className="text-slate-800">07:30 AM (Kalwara Stand)</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Afternoon Drop:</span>
-                    <strong className="text-slate-800">02:25 PM (Mahapura Bus Stop)</strong>
+                    <strong className="text-slate-800">01:45 PM (Kalwara Stand)</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">GPS Tracker Device:</span>
+                    <span className="font-mono text-slate-700 font-semibold">GPS-RJ14-101 (AIS-140 Certified)</span>
                   </div>
                 </div>
                 <button
-                  onClick={() => toast.success('Live Bus GPS refreshed: Current speed 34 km/h, reaching Mahapura in 6 mins')}
-                  className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-xs"
+                  onClick={() => toast.success('Live GPS: School Bus RJ14PC1019 near 7R Resort, Kalwara Road. Speed: 42 km/h. ETA to Kalwara: 8 mins.')}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold cursor-pointer transition-colors shadow-xs text-sm"
                 >
-                  Refresh Live Bus GPS
+                  Refresh Live Bus GPS Telemetry
                 </button>
               </div>
             </div>
