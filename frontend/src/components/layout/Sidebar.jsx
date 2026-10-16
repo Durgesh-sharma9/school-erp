@@ -791,7 +791,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     // Auto-scroll active item into view within the sidebar
     setTimeout(() => {
       if (sidebarNavRef.current) {
-        const activeBtn = sidebarNavRef.current.querySelector('.bg-\\[\\#dde4fa\\], .bg-\\[rgba\\(99\\,102\\,241\\,0\\.2\\)\\]');
+        const activeBtn = sidebarNavRef.current.querySelector('[data-sidebar-active="true"]');
         if (activeBtn) {
           activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         } else {
@@ -819,19 +819,22 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         className="fixed inset-0 bg-slate-900/40 z-40 md:hidden transition-opacity"
       />
 
-      {/* 1:1 UAB Exact Left Sidenav (Width 250px, border-r, seamless background) */}
-      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-[250px] bg-slate-50 border-r border-slate-200 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-md md:shadow-none transition-all duration-300">
+      {/* Modern Light ERP Sidenav (Width 256px, clean border, soft light theme) */}
+      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-lg md:shadow-none transition-all duration-300">
         
-        {/* Top Spacer matching UAB navbar height (56px) */}
-        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/60 bg-slate-50 shrink-0 md:hidden">
-          <span className="font-bold text-sm text-slate-800">UAB Navigation</span>
-          <button onClick={onClose} className="p-1 rounded text-slate-500 hover:bg-slate-200">
+        {/* Mobile Header */}
+        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/80 bg-slate-50/70 shrink-0 md:hidden">
+          <span className="font-bold text-sm text-slate-900 tracking-tight">Navigation Menu</span>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Menu Items List - Exactly matching UAB .vex-sidenav-item */}
-        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto pt-2 pb-6 text-sm font-medium custom-scrollbar">
+        {/* Menu Items List */}
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-1 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
@@ -843,8 +846,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             }));
 
             return (
-              <div key={item.id}>
-                {/* Parent Item */}
+              <div key={item.id} className="space-y-0.5">
+                {/* Parent Navigation Item */}
                 <button
                   onClick={() => {
                     if (hasChildren) {
@@ -857,39 +860,35 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
-                  style={{
-                    margin: '0px 12px 4px 12px',
-                    height: '40px',
-                    padding: '8px 12px'
-                  }}
-                  className={`w-[calc(100%-24px)] flex items-center justify-between rounded-lg text-sm transition-all group ${
-                    isOpen || isActive
-                      ? 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold'
-                      : 'text-slate-800 hover:bg-slate-200/60'
+                  data-sidebar-active={(!hasChildren && isActive) ? "true" : undefined}
+                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 text-[13.5px] font-medium transition-all duration-150 group ${
+                    isActive || isOpen
+                      ? 'bg-indigo-50/80 text-indigo-950 font-semibold shadow-2xs border border-indigo-100/70'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/70 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center space-x-3.5">
-                    <Icon className={`w-5 h-5 transition-colors ${
-                      isOpen || isActive ? 'text-[#4338ca]' : 'text-[#4338ca] opacity-80 group-hover:opacity-100'
-                    }`} />
-                    <span className="text-[14px] font-medium tracking-tight text-slate-900">
-                      {item.title}
-                    </span>
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
+                      isActive || isOpen
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-slate-100/90 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="truncate tracking-tight text-[13.5px]">{item.title}</span>
                   </div>
                   {hasChildren && (
-                    <span className="text-slate-500">
-                      {isOpen ? (
-                        <ChevronDown className="w-4 h-4 text-slate-700" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      )}
-                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ${
+                        isOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
+                      }`}
+                    />
                   )}
                 </button>
 
-                {/* Submenu Dropdown List (1:1 UAB Exact style: height 40px, pl-52px, my-1, bg-[#f4f4f5] or active rgba(99,102,241,0.2)) */}
+                {/* Submenu Dropdown Tree */}
                 {hasChildren && isOpen && (
-                  <div className="space-y-1 mb-1">
+                  <div className="ml-5 pl-3 my-1 space-y-0.5 border-l-2 border-slate-200/90">
                     {item.subItems.map((sub) => {
                       const hasSubChildren = sub.children && sub.children.length > 0;
                       if (hasSubChildren) {
@@ -897,29 +896,27 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                         const isSubOpen = openSubDropdowns[subId] ?? true;
                         const isAnyChildActive = sub.children.some(c => c.path === currentPath);
                         return (
-                          <div key={subId} className="space-y-1">
+                          <div key={subId} className="space-y-0.5">
                             {/* Expandable Sub-Item (e.g. Reports) */}
                             <button
                               onClick={() => toggleSubDropdown(subId)}
-                              style={{
-                                margin: '0px 12px 4px 12px',
-                                minHeight: '40px',
-                                paddingLeft: item.id === 'transport' ? '16px' : '52px',
-                                paddingRight: '12px'
-                              }}
-                              className={`w-[calc(100%-24px)] flex items-center justify-between rounded-xl text-[13.5px] transition-colors ${
+                              className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all group ${
                                 isSubOpen || isAnyChildActive
-                                  ? (item.id === 'transport' ? 'bg-[#dde4fa] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
-                                  : (item.id === 'transport' ? 'bg-[#f4f6fa] text-[#030712] hover:bg-slate-200/70 font-medium' : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal')
+                                  ? 'text-indigo-900 bg-indigo-50/60 font-semibold'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                               }`}
                             >
-                              <span className={item.id === 'transport' ? 'flex-1 text-center pl-4' : ''}>{sub.title}</span>
-                              <ChevronDown className={`w-3.5 h-3.5 text-slate-700 transition-transform ${isSubOpen ? 'rotate-0' : '-rotate-90'}`} />
+                              <span className="truncate">{sub.title}</span>
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ${
+                                  isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
+                                }`}
+                              />
                             </button>
 
-                            {/* Nested children (Class List, Subject List, Transport Reports) */}
+                            {/* Nested Level 2 Children (e.g. Transport Reports List) */}
                             {isSubOpen && (
-                              <div className="space-y-1">
+                              <div className="ml-2 pl-2.5 my-0.5 space-y-0.5 border-l border-slate-200/70">
                                 {sub.children.map((child) => {
                                   const isChildActive = currentPath === child.path;
                                   return (
@@ -929,19 +926,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                         if (onNavigate) onNavigate(child.path);
                                         if (window.innerWidth < 768 && onClose) onClose();
                                       }}
-                                      style={{
-                                        margin: '0px 12px 4px 12px',
-                                        minHeight: '38px',
-                                        paddingLeft: item.id === 'transport' ? '12px' : '64px',
-                                        paddingRight: '12px'
-                                      }}
-                                      className={`w-[calc(100%-24px)] flex items-center justify-center text-center rounded-xl text-[13.5px] transition-colors leading-tight ${
+                                      data-sidebar-active={isChildActive ? "true" : undefined}
+                                      className={`w-full flex items-center rounded-lg px-2.5 py-1.5 text-[12.5px] transition-all text-left ${
                                         isChildActive
-                                          ? (item.id === 'transport' ? 'bg-[#e8edf7] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
-                                          : (item.id === 'transport' ? 'text-[#030712] hover:bg-slate-100 font-normal' : 'text-[#030712] hover:bg-slate-200/70 font-normal')
+                                          ? 'bg-indigo-600 text-white font-semibold shadow-2xs'
+                                          : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-100/60 font-medium'
                                       }`}
                                     >
-                                      {child.title}
+                                      <span className={`w-1.5 h-1.5 rounded-full mr-2 shrink-0 ${
+                                        isChildActive ? 'bg-white' : 'bg-slate-300'
+                                      }`} />
+                                      <span className="truncate">{child.title}</span>
                                     </button>
                                   );
                                 })}
@@ -959,21 +954,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          style={{
-                            margin: '0px 12px 4px 12px',
-                            minHeight: '40px',
-                            paddingLeft: item.id === 'transport' ? '12px' : '52px',
-                            paddingRight: '12px'
-                          }}
-                          className={`w-[calc(100%-24px)] flex items-center rounded-xl text-[13.5px] transition-colors leading-snug ${
-                            item.id === 'transport' ? 'justify-center text-center' : 'text-left'
-                          } ${
+                          data-sidebar-active={isSubActive ? "true" : undefined}
+                          className={`w-full flex items-center rounded-lg px-2.5 py-1.5 text-[13px] transition-all text-left group ${
                             isSubActive
-                              ? (item.id === 'transport' ? 'bg-[#dde4fa] text-[#030712] font-semibold' : 'bg-[rgba(99,102,241,0.2)] text-[#030712] font-semibold')
-                              : (item.id === 'transport' ? 'bg-[#f4f6fa] text-[#030712] hover:bg-slate-200/70 font-medium' : 'bg-[#f4f4f5] text-[#030712] hover:bg-slate-200/70 font-normal')
+                              ? 'bg-indigo-600 text-white font-semibold shadow-2xs'
+                              : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-100/60 font-medium'
                           }`}
                         >
-                          {sub.title}
+                          <span className={`w-1.5 h-1.5 rounded-full mr-2.5 shrink-0 transition-colors ${
+                            isSubActive ? 'bg-white' : 'bg-slate-300 group-hover:bg-indigo-500'
+                          }`} />
+                          <span className="truncate">{sub.title}</span>
                         </button>
                       );
                     })}
@@ -984,27 +975,27 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           })}
         </div>
 
-        {/* Student Bottom Profile Card matching UAB Screenshot */}
+        {/* Student Bottom Profile Card */}
         {role === 'STUDENT' && (
           <div 
             onClick={() => onNavigate && onNavigate('/profile')}
-            className="p-3 border-t border-slate-200 bg-white/70 hover:bg-white cursor-pointer transition-colors flex items-center justify-between shrink-0"
+            className="p-3 mx-2 mb-2 rounded-xl border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100/80 cursor-pointer transition-all flex items-center justify-between shrink-0 shadow-2xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative shrink-0">
                 <img
                   src={user?.avatar || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=150'}
                   alt={user?.name || 'Student'}
-                  className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                  className="w-9 h-9 rounded-full object-cover border border-indigo-200 shadow-2xs"
                 />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
               </div>
-              <div className="truncate">
+              <div className="truncate min-w-0">
                 <p className="text-xs font-bold text-slate-800 truncate">{user?.name || 'AADHYA CHOUDHARY'}</p>
-                <p className="text-[10px] text-slate-500 truncate">{user?.className || 'Nursery - PP3+ - A'}</p>
+                <p className="text-[11px] text-slate-500 truncate font-medium">{user?.className || 'Nursery - PP3+ - A'}</p>
               </div>
             </div>
-            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
         )}
       </aside>
