@@ -318,8 +318,7 @@ export const menuCategories = [
     subItems: [
       { title: 'Transport Dashboard', path: '/transport-dashboard' },
       { title: 'Transport Vehicle', path: '/transport-vehicle' },
-      { title: 'Transport Route', path: '/transport-route' },
-      { title: 'Transport Destination', path: '/transport-destination' },
+      { title: 'Transport Route & Destination', path: '/transport-route' },
       { title: 'Transport Assign Routes', path: '/transport-assign-routes' },
       { title: 'Transport Assign Vehicle', path: '/transport-assign-vehicle' },
       { title: 'Edit Transport Fee', path: '/edit-transport-fee' },

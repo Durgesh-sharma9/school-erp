@@ -514,11 +514,20 @@ export const deleteVehicle = (req, res) => {
 
 // --- ROUTES CONTROLLERS ---
 export const getRoutes = (req, res) => {
-  res.status(200).json({ success: true, count: routes.length, data: routes });
+  const enriched = routes.map(r => {
+    const ar = assignedRoutes.find(a => a.routeName === r.routeName);
+    const av = assignedVehicles.find(v => (v.routes || []).includes(r.routeName));
+    return {
+      ...r,
+      destinations: ar ? ar.destinations : [],
+      vehicle: av ? av.vehicleNo : 'RJ14PC1019'
+    };
+  });
+  res.status(200).json({ success: true, count: enriched.length, data: enriched });
 };
 
 export const createRoute = (req, res) => {
-  const { routeName } = req.body;
+  const { routeName, vehicle } = req.body;
   if (!routeName) return res.status(400).json({ success: false, message: 'Route name is required' });
   const newRoute = {
     id: routes.length > 0 ? Math.max(...routes.map(r => r.id)) + 1 : 1,
@@ -526,7 +535,18 @@ export const createRoute = (req, res) => {
     destinationsCount: 0
   };
   routes.push(newRoute);
-  res.status(201).json({ success: true, message: 'Route added', data: newRoute });
+  assignedRoutes.push({
+    id: assignedRoutes.length + 1,
+    routeName,
+    destinations: []
+  });
+  if (vehicle) {
+    const vIdx = assignedVehicles.findIndex(v => v.vehicleNo === vehicle);
+    if (vIdx !== -1) {
+      assignedVehicles[vIdx].routes = [...(assignedVehicles[vIdx].routes || []), routeName];
+    }
+  }
+  res.status(201).json({ success: true, message: 'Route added', data: { ...newRoute, destinations: [], vehicle: vehicle || 'RJ14PC1019' } });
 };
 
 export const updateRoute = (req, res) => {
@@ -545,19 +565,43 @@ export const deleteRoute = (req, res) => {
 
 // --- DESTINATIONS CONTROLLERS ---
 export const getDestinations = (req, res) => {
-  res.status(200).json({ success: true, count: destinations.length, data: destinations });
+  const enriched = destinations.map(d => {
+    const ar = assignedRoutes.find(a => (a.destinations || []).includes(d.destination));
+    return {
+      ...d,
+      routeName: d.routeName || (ar ? ar.routeName : 'General Route')
+    };
+  });
+  res.status(200).json({ success: true, count: enriched.length, data: enriched });
 };
 
 export const createDestination = (req, res) => {
-  const { destination, distance, fare } = req.body;
+  const { destination, distance, fare, routeName } = req.body;
   if (!destination) return res.status(400).json({ success: false, message: 'Destination name is required' });
   const newDest = {
     id: destinations.length > 0 ? Math.max(...destinations.map(d => d.id)) + 1 : 1,
     destination,
     distance: Number(distance) || 0,
-    fare: Number(fare) || 0
+    fare: Number(fare) || 0,
+    routeName: routeName || ''
   };
   destinations.push(newDest);
+
+  if (routeName) {
+    const arIdx = assignedRoutes.findIndex(ar => ar.routeName === routeName);
+    if (arIdx !== -1) {
+      if (!assignedRoutes[arIdx].destinations.includes(destination)) {
+        assignedRoutes[arIdx].destinations.push(destination);
+      }
+    } else {
+      assignedRoutes.push({
+        id: assignedRoutes.length + 1,
+        routeName,
+        destinations: [destination]
+      });
+    }
+  }
+
   res.status(201).json({ success: true, message: 'Destination added', data: newDest });
 };
 

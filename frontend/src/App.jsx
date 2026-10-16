@@ -511,9 +511,9 @@ function AppContent() {
               case '/transport-vehicle':
                 return <TransportVehiclePage onNavigate={handleNavigate} />;
               case '/transport-route':
-                return <TransportRoutePage onNavigate={handleNavigate} />;
+                return <TransportRoutePage onNavigate={handleNavigate} initialTab="routes" />;
               case '/transport-destination':
-                return <TransportDestinationPage onNavigate={handleNavigate} />;
+                return <TransportRoutePage onNavigate={handleNavigate} initialTab="destinations" />;
               case '/transport-assign-routes':
                 return <TransportAssignRoutesPage onNavigate={handleNavigate} />;
               case '/transport-assign-vehicle':
