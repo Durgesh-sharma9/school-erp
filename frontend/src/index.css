@@ -39,10 +39,10 @@ code, pre {
   }
 }
 
-/* Sleek UAB Modern Sidebar Scrollbar (1:1 with reference screenshot) */
+/* Sleek Modern Light Scrollbar - hidden by default, soft on hover */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -50,8 +50,13 @@ code, pre {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: transparent;
   border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.7);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
