@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getAllClasses,
   createClass,
+  updateClass,
   deleteClass,
   getAllSubjectGroups,
   createSubjectGroup,
@@ -21,6 +22,7 @@ const router = express.Router();
 // 1. Classes
 router.get('/classes', getAllClasses);
 router.post('/classes', createClass);
+router.put('/classes/:id', updateClass);
 router.delete('/classes/:id', deleteClass);
 
 // 2. Subject Groups

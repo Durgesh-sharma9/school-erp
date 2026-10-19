@@ -169,6 +169,28 @@ export const createClass = async (req, res, next) => {
   }
 };
 
+export const updateClass = async (req, res, next) => {
+  try {
+    const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
+    const { id } = req.params;
+    const { name, sections, priority, studentCount } = req.body;
+    
+    if (TENANT_CLASSES[schoolId]) {
+      const cls = TENANT_CLASSES[schoolId].find(c => c.id === id);
+      if (cls) {
+        if (name) cls.name = name;
+        if (sections) cls.sections = Array.isArray(sections) ? sections : sections.split(',').map(s => s.trim());
+        if (priority !== undefined) cls.priority = Number(priority);
+        if (studentCount !== undefined) cls.studentCount = Number(studentCount);
+        return res.status(200).json({ success: true, message: 'Class updated successfully', data: cls });
+      }
+    }
+    return res.status(404).json({ success: false, message: 'Class not found' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteClass = async (req, res, next) => {
   try {
     const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
