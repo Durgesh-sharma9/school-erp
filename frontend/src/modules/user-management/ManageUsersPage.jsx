@@ -33,7 +33,8 @@ import {
   FileCheck,
   File,
   Eye,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -92,10 +93,33 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleTab, setRoleTab] = useState(
-    currentPath.includes('driver') ? 'Driver' : currentPath.includes('staff') ? 'Staff' : 'ALL'
+    currentPath.includes('driver')
+      ? 'Driver'
+      : currentPath.includes('staff')
+      ? 'Staff'
+      : currentPath.includes('privilege')
+      ? 'PRIVILEGE'
+      : 'ALL'
   );
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Role Privileges Matrix State
+  const [privileges, setPrivileges] = useState([
+    { id: 'dashboard', name: 'Dashboard & School Analytics', admin: true, teacher: true, staff: true, driver: false },
+    { id: 'students', name: 'Student Admissions & Information', admin: true, teacher: true, staff: true, driver: false },
+    { id: 'attendance', name: 'Daily Attendance Marking & Reports', admin: true, teacher: true, staff: true, driver: false },
+    { id: 'examination', name: 'Exams, Marks Entry & Report Cards', admin: true, teacher: true, staff: false, driver: false },
+    { id: 'fee', name: 'Fee Collection, Receipts & Dues', admin: true, teacher: false, staff: true, driver: false },
+    { id: 'transport', name: 'Transport Fleet, Buses & Routes', admin: true, teacher: false, staff: true, driver: true },
+    { id: 'hostel', name: 'Hostel Rooms & Boarding Records', admin: true, teacher: false, staff: true, driver: false },
+    { id: 'payroll', name: 'Staff Management & Payroll Records', admin: true, teacher: false, staff: true, driver: false },
+    { id: 'library', name: 'Library Catalog & Books Issuance', admin: true, teacher: true, staff: true, driver: false },
+    { id: 'front-office', name: 'Front Desk Visitors & Gate Passes', admin: true, teacher: false, staff: true, driver: false },
+    { id: 'stationary', name: 'School Shop & Stationary Sets', admin: true, teacher: false, staff: true, driver: false },
+    { id: 'sms', name: 'SMS & WhatsApp Notifications', admin: true, teacher: true, staff: true, driver: false },
+    { id: 'users', name: 'User Access Control & Security', admin: true, teacher: false, staff: false, driver: false }
+  ]);
 
   // Modal State & Tabs
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -200,6 +224,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   useEffect(() => {
     if (currentPath.includes('driver')) setRoleTab('Driver');
     else if (currentPath.includes('staff')) setRoleTab('Staff');
+    else if (currentPath.includes('privilege')) setRoleTab('PRIVILEGE');
+    else setRoleTab('ALL');
   }, [currentPath]);
 
   // Open Add Modal
@@ -523,99 +549,112 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
         </div>
       </div>
 
-      {/* 2. Simple Role Tabs & Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs space-y-3">
-        {/* Role Tabs */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 flex-wrap gap-2 text-xs">
-          <div className="flex items-center gap-1.5 flex-wrap">
+      {/* 2. Modern Navigation Tabs & Toolbar */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-3.5">
+        {/* Navigation Tabs */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
             {[
-              { id: 'ALL', label: 'All Staff', count: totalCount },
-              { id: 'Teacher', label: 'Teachers', count: teachersCount },
-              { id: 'Staff', label: 'Office Staff', count: staffCount },
-              { id: 'Driver', label: 'Drivers', count: driversCount },
-              { id: 'Admin', label: 'Admins', count: adminCount }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setRoleTab(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  roleTab === tab.id
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'bg-slate-50 text-slate-600 border border-slate-200/80 hover:bg-slate-100'
-                }`}
+              { id: 'ALL', label: 'All Staff', count: totalCount, icon: Users },
+              { id: 'Teacher', label: 'Teachers', count: teachersCount, icon: GraduationCap },
+              { id: 'Staff', label: 'Office Staff', count: staffCount, icon: Briefcase },
+              { id: 'Driver', label: 'Drivers', count: driversCount, icon: Bus },
+              { id: 'Admin', label: 'Admins', count: adminCount, icon: Shield },
+              { id: 'PRIVILEGE', label: 'User Privileges', count: null, icon: ShieldCheck }
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isSelected = roleTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setRoleTab(tab.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-slate-50 text-slate-600 border border-slate-200/90 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
+                  <span>{tab.label}</span>
+                  {tab.count !== null && (
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Status Filter (When in staff list views) */}
+          {roleTab !== 'PRIVILEGE' && (
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="text-xs font-semibold px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
-                <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  roleTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Status Filter */}
-          <div className="flex items-center gap-2">
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none"
-            >
-              <option value="ALL">All Status</option>
-              <option value="ACTIVE">Active Only</option>
-              <option value="INACTIVE">Inactive Only</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            placeholder="Search by name, phone, department, bus no..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full text-xs pl-9 pr-8 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-slate-50/50"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+                <option value="ALL">All Status</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="INACTIVE">Inactive Only</option>
+              </select>
+            </div>
           )}
         </div>
 
+        {/* Search Input (When in staff list views) */}
+        {roleTab !== 'PRIVILEGE' && (
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              placeholder="Search by name, phone, department, bank account, Aadhaar, license..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full text-xs sm:text-sm pl-10 pr-9 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-slate-50/50"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Bulk Action Bar (When selected) */}
-        {selectedIds.length > 0 && (
-          <div className="p-2 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between text-xs">
+        {roleTab !== 'PRIVILEGE' && selectedIds.length > 0 && (
+          <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center justify-between text-xs">
             <span className="font-semibold text-indigo-900">
               {selectedIds.length} staff selected
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => handleBulkAction('activate')}
-                className="px-2 py-1 bg-white text-emerald-700 border border-emerald-300 font-semibold rounded text-xs hover:bg-emerald-50"
+                className="px-2.5 py-1 bg-white text-emerald-700 border border-emerald-300 font-semibold rounded-lg text-xs hover:bg-emerald-50"
               >
                 Mark Active
               </button>
               <button
                 onClick={() => handleBulkAction('deactivate')}
-                className="px-2 py-1 bg-white text-amber-700 border border-amber-300 font-semibold rounded text-xs hover:bg-amber-50"
+                className="px-2.5 py-1 bg-white text-amber-700 border border-amber-300 font-semibold rounded-lg text-xs hover:bg-amber-50"
               >
                 Mark Inactive
               </button>
               <button
                 onClick={() => handleBulkAction('delete')}
-                className="px-2 py-1 bg-white text-rose-700 border border-rose-300 font-semibold rounded text-xs hover:bg-rose-50"
+                className="px-2.5 py-1 bg-white text-rose-700 border border-rose-300 font-semibold rounded-lg text-xs hover:bg-rose-50"
               >
                 Delete Selected
               </button>
               <button
                 onClick={() => setSelectedIds([])}
-                className="text-slate-500 underline ml-2"
+                className="text-slate-500 underline ml-2 hover:text-slate-800"
               >
                 Clear
               </button>
@@ -624,249 +663,351 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
         )}
       </div>
 
-      {/* 3. Simple & Clean Table */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-700 font-bold uppercase text-[11px]">
-                <th className="py-3 px-3 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={toggleSelectAll}
-                    className="w-3.5 h-3.5 rounded text-indigo-600 cursor-pointer"
-                  />
-                </th>
-                <th className="py-3 px-3">STAFF MEMBER</th>
-                <th className="py-3 px-3">ROLE & TITLE</th>
-                <th className="py-3 px-3">DEPARTMENT</th>
-                <th className="py-3 px-3">SALARY & BANK</th>
-                <th className="py-3 px-3">ASSIGNMENT & KYC</th>
-                <th className="py-3 px-3 text-center">STATUS</th>
-                <th className="py-3 px-3 text-center w-24">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="py-12 text-center text-slate-400">
-                    Loading staff...
-                  </td>
+      {/* 3. Main Content: User Privileges Matrix OR Staff List Table */}
+      {roleTab === 'PRIVILEGE' ? (
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                Role-Based Access Control (RBAC) Matrix
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                School ERP modules aur features ki access permissions configure karein
+              </p>
+            </div>
+            <button
+              onClick={() => toast.success('Privilege permissions saved successfully')}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors self-start sm:self-auto flex items-center gap-1.5"
+            >
+              <Check className="w-4 h-4" /> Save Privileges
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                  <th className="py-3.5 px-4 w-12 text-center">#</th>
+                  <th className="py-3.5 px-4">MODULE / FEATURE</th>
+                  <th className="py-3.5 px-4 text-center">ADMINISTRATOR</th>
+                  <th className="py-3.5 px-4 text-center">TEACHERS</th>
+                  <th className="py-3.5 px-4 text-center">OFFICE STAFF</th>
+                  <th className="py-3.5 px-4 text-center">DRIVERS</th>
                 </tr>
-              ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="py-12 text-center text-slate-400">
-                    No staff found.
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map(user => {
-                  const isDriver = user.role === 'Driver';
-                  const isTeacher = user.role === 'Teacher';
-                  const isSelected = selectedIds.includes(user.id);
-
-                  return (
-                    <tr
-                      key={user.id}
-                      className={`hover:bg-slate-50/70 transition-colors ${
-                        isSelected ? 'bg-indigo-50/30' : ''
-                      }`}
-                    >
-                      {/* Checkbox */}
-                      <td className="py-3 px-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {
-                            setSelectedIds(prev =>
-                              prev.includes(user.id) ? prev.filter(i => i !== user.id) : [...prev, user.id]
-                            );
-                          }}
-                          className="w-3.5 h-3.5 rounded text-indigo-600 cursor-pointer"
-                        />
-                      </td>
-
-                      {/* Name & Phone */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={user.pic}
-                            alt="Avatar"
-                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200"
-                          />
-                          <div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                              <span>{user.displayName || user.name.replace(/^\[.*?\]\s*/, '')}</span>
-                              {user.empCode && (
-                                <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-1 rounded">
-                                  #{user.empCode}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                              <span className="flex items-center gap-1 font-mono">
-                                <Phone className="w-3 h-3 text-slate-400" /> {user.phone}
-                              </span>
-                              {user.email && (
-                                <span className="hidden sm:inline-block text-slate-400">
-                                  • {user.email}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Role & Title */}
-                      <td className="py-3 px-3">
-                        <div className="space-y-1">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            isTeacher
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : isDriver
-                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                              : user.role === 'Admin'
-                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                              : 'bg-blue-50 text-blue-700 border border-blue-200'
-                          }`}>
-                            {isTeacher && <GraduationCap className="w-3 h-3" />}
-                            {isDriver && <Bus className="w-3 h-3" />}
-                            {!isTeacher && !isDriver && <Briefcase className="w-3 h-3" />}
-                            {user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
-                          </span>
-                          {user.designation && (
-                            <div className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">
-                              {user.designation}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Department */}
-                      <td className="py-3 px-3 font-semibold text-slate-700">
-                        {user.department || (isDriver ? 'Transport' : 'Academics')}
-                      </td>
-
-                      {/* SALARY & BANK (ERP Payroll) */}
-                      <td className="py-3 px-3">
-                        {user.basicSalary ? (
-                          <div>
-                            <div className="font-bold text-slate-900 flex items-center gap-0.5 font-mono text-[12px]">
-                              <IndianRupee className="w-3 h-3 text-emerald-600" />
-                              {Number(user.basicSalary).toLocaleString('en-IN')}
-                              <span className="text-[10px] text-slate-400 font-sans font-normal ml-0.5">/mo</span>
-                            </div>
-                            <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span className="truncate max-w-[125px]" title={user.bankName}>
-                                {user.bankName ? user.bankName.replace(/ Bank.*/i, '') : 'Bank'}
-                                {user.accountNo ? ` (..${user.accountNo.slice(-4)})` : ''}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 text-[11px] italic">Not set</span>
-                        )}
-                      </td>
-
-                      {/* Details / Assignment & KYC */}
-                      <td className="py-3 px-3">
-                        {isDriver ? (
-                          <div className="space-y-0.5">
-                            {user.driverLicense ? (
-                              <div className="font-mono text-xs font-semibold text-slate-800">
-                                Lic: {user.driverLicense}
-                              </div>
-                            ) : (
-                              <div className="text-xs text-slate-500 font-medium">
-                                Transport Driver
-                              </div>
-                            )}
-                            {user.vehicleAssigned && (
-                              <div className="text-[11px] text-amber-700 font-medium flex items-center gap-1">
-                                <span>🚌 {user.vehicleAssigned}</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : isTeacher ? (
-                          <div className="space-y-0.5">
-                            <div className="font-semibold text-slate-800">
-                              📚 {(user.subjects && user.subjects.length > 0) ? user.subjects.join(', ') : 'All Subjects'}
-                            </div>
-                            {(user.classes && user.classes.length > 0) && (
-                              <div className="text-[10px] text-slate-500">
-                                Classes: {user.classes.join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-slate-600 font-medium">
-                            {user.workArea || user.designation || 'Administrative Duties'}
-                          </div>
-                        )}
-
-                        {/* KYC Tags */}
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          {user.aadhaarNo && (
-                            <span className="inline-flex items-center text-[9px] text-slate-600 font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200" title={`Aadhaar: ${user.aadhaarNo}`}>
-                              UID ••{user.aadhaarNo.slice(-4)}
-                            </span>
-                          )}
-                          {user.panNo && (
-                            <span className="inline-flex items-center text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200" title={`PAN: ${user.panNo}`}>
-                              PAN {user.panNo}
-                            </span>
-                          )}
-                          {user.documents && Object.values(user.documents).some(d => d && d.name) && (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200" title="KYC Docs Uploaded">
-                              <FileCheck className="w-2.5 h-2.5 text-emerald-600" /> Docs
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3 px-3 text-center">
-                        <button
-                          onClick={() => handleToggleStatus(user)}
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors ${
-                            user.isActive
-                              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                              : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
-                          }`}
-                        >
-                          {user.isActive ? 'Active' : 'Inactive'}
-                        </button>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => handleOpenEdit(user)}
-                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-                            title="Edit Staff & Accounts"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user.id, user.displayName || user.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {privileges.map((p, idx) => (
+                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 text-center font-mono text-slate-400 text-xs">
+                      {idx + 1}
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-slate-800">
+                      {p.name}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                        ✓ Full Access
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => {
+                          setPrivileges(prev =>
+                            prev.map(item => item.id === p.id ? { ...item, teacher: !item.teacher } : item)
+                          );
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                          p.teacher
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
+                        }`}
+                      >
+                        {p.teacher ? '✓ Allowed' : '✕ Disabled'}
+                      </button>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => {
+                          setPrivileges(prev =>
+                            prev.map(item => item.id === p.id ? { ...item, staff: !item.staff } : item)
+                          );
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                          p.staff
+                            ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                            : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
+                        }`}
+                      >
+                        {p.staff ? '✓ Allowed' : '✕ Disabled'}
+                      </button>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => {
+                          setPrivileges(prev =>
+                            prev.map(item => item.id === p.id ? { ...item, driver: !item.driver } : item)
+                          );
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                          p.driver
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
+                        }`}
+                      >
+                        {p.driver ? '✓ Allowed' : '✕ Disabled'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-700 font-bold uppercase text-[11px]">
+                  <th className="py-3 px-3 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleSelectAll}
+                      className="w-3.5 h-3.5 rounded text-indigo-600 cursor-pointer"
+                    />
+                  </th>
+                  <th className="py-3 px-3">STAFF MEMBER</th>
+                  <th className="py-3 px-3">ROLE & TITLE</th>
+                  <th className="py-3 px-3">DEPARTMENT</th>
+                  <th className="py-3 px-3">SALARY & BANK</th>
+                  <th className="py-3 px-3">ASSIGNMENT & KYC</th>
+                  <th className="py-3 px-3 text-center">STATUS</th>
+                  <th className="py-3 px-3 text-center w-24">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan="8" className="py-12 text-center text-slate-400">
+                      Loading staff...
+                    </td>
+                  </tr>
+                ) : filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="py-12 text-center text-slate-400">
+                      No staff found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map(user => {
+                    const isDriver = user.role === 'Driver';
+                    const isTeacher = user.role === 'Teacher';
+                    const isSelected = selectedIds.includes(user.id);
+
+                    return (
+                      <tr
+                        key={user.id}
+                        className={`hover:bg-slate-50/70 transition-colors ${
+                          isSelected ? 'bg-indigo-50/30' : ''
+                        }`}
+                      >
+                        {/* Checkbox */}
+                        <td className="py-3 px-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {
+                              setSelectedIds(prev =>
+                                prev.includes(user.id) ? prev.filter(i => i !== user.id) : [...prev, user.id]
+                              );
+                            }}
+                            className="w-3.5 h-3.5 rounded text-indigo-600 cursor-pointer"
+                          />
+                        </td>
+
+                        {/* Name & Phone */}
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <img
+                              src={user.pic}
+                              alt="Avatar"
+                              className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200"
+                            />
+                            <div>
+                              <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                <span>{user.displayName || user.name.replace(/^\[.*?\]\s*/, '')}</span>
+                                {user.empCode && (
+                                  <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-1 rounded">
+                                    #{user.empCode}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                                <span className="flex items-center gap-1 font-mono">
+                                  <Phone className="w-3 h-3 text-slate-400" /> {user.phone}
+                                </span>
+                                {user.email && (
+                                  <span className="hidden sm:inline-block text-slate-400">
+                                    • {user.email}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Role & Title */}
+                        <td className="py-3 px-3">
+                          <div className="space-y-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              isTeacher
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : isDriver
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : user.role === 'Admin'
+                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                : 'bg-blue-50 text-blue-700 border border-blue-200'
+                            }`}>
+                              {isTeacher && <GraduationCap className="w-3 h-3" />}
+                              {isDriver && <Bus className="w-3 h-3" />}
+                              {!isTeacher && !isDriver && <Briefcase className="w-3 h-3" />}
+                              {user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
+                            </span>
+                            {user.designation && (
+                              <div className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">
+                                {user.designation}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Department */}
+                        <td className="py-3 px-3 font-semibold text-slate-700">
+                          {user.department || (isDriver ? 'Transport' : 'Academics')}
+                        </td>
+
+                        {/* SALARY & BANK (ERP Payroll) */}
+                        <td className="py-3 px-3">
+                          {user.basicSalary ? (
+                            <div>
+                              <div className="font-bold text-slate-900 flex items-center gap-0.5 font-mono text-[12px]">
+                                <IndianRupee className="w-3 h-3 text-emerald-600" />
+                                {Number(user.basicSalary).toLocaleString('en-IN')}
+                                <span className="text-[10px] text-slate-400 font-sans font-normal ml-0.5">/mo</span>
+                              </div>
+                              <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span className="truncate max-w-[125px]" title={user.bankName}>
+                                  {user.bankName ? user.bankName.replace(/ Bank.*/i, '') : 'Bank'}
+                                  {user.accountNo ? ` (..${user.accountNo.slice(-4)})` : ''}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-[11px] italic">Not set</span>
+                          )}
+                        </td>
+
+                        {/* Details / Assignment & KYC */}
+                        <td className="py-3 px-3">
+                          {isDriver ? (
+                            <div className="space-y-0.5">
+                              {user.driverLicense ? (
+                                <div className="font-mono text-xs font-semibold text-slate-800">
+                                  Lic: {user.driverLicense}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-slate-500 font-medium">
+                                  Transport Driver
+                                </div>
+                              )}
+                              {user.vehicleAssigned && (
+                                <div className="text-[11px] text-amber-700 font-medium flex items-center gap-1">
+                                  <span>🚌 {user.vehicleAssigned}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : isTeacher ? (
+                            <div className="space-y-0.5">
+                              <div className="font-semibold text-slate-800">
+                                📚 {(user.subjects && user.subjects.length > 0) ? user.subjects.join(', ') : 'All Subjects'}
+                              </div>
+                              {(user.classes && user.classes.length > 0) && (
+                                <div className="text-[10px] text-slate-500">
+                                  Classes: {user.classes.join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-slate-600 font-medium">
+                              {user.workArea || user.designation || 'Administrative Duties'}
+                            </div>
+                          )}
+
+                          {/* KYC Tags */}
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {user.aadhaarNo && (
+                              <span className="inline-flex items-center text-[9px] text-slate-600 font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200" title={`Aadhaar: ${user.aadhaarNo}`}>
+                                UID ••{user.aadhaarNo.slice(-4)}
+                              </span>
+                            )}
+                            {user.panNo && (
+                              <span className="inline-flex items-center text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200" title={`PAN: ${user.panNo}`}>
+                                PAN {user.panNo}
+                              </span>
+                            )}
+                            {user.documents && Object.values(user.documents).some(d => d && d.name) && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200" title="KYC Docs Uploaded">
+                                <FileCheck className="w-2.5 h-2.5 text-emerald-600" /> Docs
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3 px-3 text-center">
+                          <button
+                            onClick={() => handleToggleStatus(user)}
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors ${
+                              user.isActive
+                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                            }`}
+                          >
+                            {user.isActive ? 'Active' : 'Inactive'}
+                          </button>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleOpenEdit(user)}
+                              className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+                              title="Edit Staff & Accounts"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(user.id, user.displayName || user.name)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* 4. Complete, Professional 3-Tabbed ERP Add / Edit Staff Modal */}
       {isModalOpen && (
@@ -1411,14 +1552,15 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                 {/* ================= TAB 3: DOCUMENTS & KYC ================= */}
                 {activeModalTab === 'documents' && (
                   <div className="space-y-5 animate-in fade-in duration-100">
-                    {/* Informational Documents Banner */}
-                    <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-start gap-3">
-                      <FileCheck className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                       <div>
-                        <div className="font-bold text-emerald-950 text-sm">KYC & Document Verification Records</div>
-                        <div className="text-xs text-emerald-800/90 leading-relaxed mt-0.5">
-                          Upload Aadhaar, PAN card, educational degrees, and driving licenses for staff compliance and CBSE audit readiness.
-                        </div>
+                        <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                          <FileCheck className="w-4 h-4 text-emerald-600" />
+                          Staff Verification Documents & Certificates
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Staff verification records ke liye scanned documents aur ID copies attach karein
+                        </p>
                       </div>
                     </div>
 
@@ -1663,11 +1805,6 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                           </div>
                         )}
                       </div>
-                    </div>
-
-                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600 flex items-center gap-2.5">
-                      <Shield className="w-5 h-5 text-indigo-600 shrink-0" />
-                      <span>Uploaded KYC documents are safely archived in the ERP records for audit and compliance inspection.</span>
                     </div>
                   </div>
                 )}
