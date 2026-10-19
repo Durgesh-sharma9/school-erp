@@ -37,11 +37,11 @@ let usersList = [
     driverLicense: '',
     vehicleAssigned: '',
     pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    division: 'Secondary',
-    modules: ['Fee', 'Transport', 'Front Office'],
-    classes: ['VI - A', 'VII - A', 'VIII - A'],
-    subjects: ['Mathematics'],
-    examNames: ['Term 1 (Half Yearly)'],
+    division: 'Administration',
+    modules: ['Fee', 'Transport', 'Front Office', 'Payroll'],
+    classes: [],
+    subjects: [],
+    examNames: [],
     bulkEditingColumns: ['Fee Category', 'Route Name'],
     isAdd: true,
     isView: true,
@@ -133,11 +133,11 @@ let usersList = [
     driverLicense: '',
     vehicleAssigned: '',
     pic: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop',
-    division: 'Secondary',
+    division: 'Library',
     modules: ['Library', 'Stationary', 'SMS'],
-    classes: ['IX - A', 'X - A'],
-    subjects: ['Computer Science'],
-    examNames: ['Term 1 (Half Yearly)'],
+    classes: [],
+    subjects: [],
+    examNames: [],
     bulkEditingColumns: ['Aadhaar No'],
     isAdd: true,
     isView: true,
@@ -407,6 +407,34 @@ export const deleteUser = (req, res) => {
     success: true,
     message: 'User removed successfully'
   });
+};
+
+export const bulkUserAction = (req, res) => {
+  const { action, userIds } = req.body;
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'No users selected' });
+  }
+
+  if (action === 'activate') {
+    usersList.forEach(u => {
+      if (userIds.includes(u.id)) u.isActive = true;
+    });
+    return res.json({ success: true, message: `${userIds.length} users marked Active` });
+  }
+
+  if (action === 'deactivate') {
+    usersList.forEach(u => {
+      if (userIds.includes(u.id)) u.isActive = false;
+    });
+    return res.json({ success: true, message: `${userIds.length} users marked Inactive` });
+  }
+
+  if (action === 'delete') {
+    usersList = usersList.filter(u => !userIds.includes(u.id));
+    return res.json({ success: true, message: `${userIds.length} users removed` });
+  }
+
+  return res.status(400).json({ success: false, message: 'Invalid bulk action' });
 };
 
 export const getPrivilegeReport = (req, res) => {
