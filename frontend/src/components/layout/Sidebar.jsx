@@ -567,7 +567,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     return {};
   };
 
-  const [openDropdowns, setOpenDropdowns] = useState(() => getInitialActiveDropdown(currentPath));
+  const [openDropdowns, setOpenDropdowns] = useState(() => {
+    const initial = getInitialActiveDropdown(currentPath);
+    menuCategories.forEach(item => {
+      if (item.subItems?.some(sub => sub.path === currentPath || sub.children?.some(c => c.path === currentPath))) {
+        initial[item.id] = true;
+      }
+    });
+    return initial;
+  });
   const [openSubDropdowns, setOpenSubDropdowns] = useState({
     'master-reports': true,
     'transport-reports': true
@@ -576,12 +584,11 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
   const toggleDropdown = (id) => {
     setOpenDropdowns(prev => {
-      const willOpen = !prev[id];
-      if (willOpen) {
-        // Accordion behavior: close other main categories to keep sidebar compact & fixed
-        return { [id]: true };
-      }
-      return {};
+      const isCurrentlyOpen = !!prev[id];
+      return {
+        ...prev,
+        [id]: !isCurrentlyOpen
+      };
     });
   };
 
@@ -842,7 +849,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
-            const isOpen = openDropdowns[item.id] ?? (hasChildren && item.subItems.some(sub => sub.path === currentPath || (sub.children && sub.children.some(c => c.path === currentPath))));
+            const isOpen = Boolean(openDropdowns[item.id]);
             const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => {
               if (sub.path === currentPath) return true;
               if (sub.children && sub.children.some(c => c.path === currentPath)) return true;
@@ -853,19 +860,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
               <div key={item.id} className="space-y-0.5">
                 {/* Parent Navigation Item */}
                 <button
+                  type="button"
                   onClick={() => {
                     if (hasChildren) {
                       toggleDropdown(item.id);
-                      if (item.path && onNavigate) {
-                        onNavigate(item.path);
-                      }
                     } else if (onNavigate) {
                       onNavigate(item.path);
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
                   data-sidebar-active={(!hasChildren && isActive) ? "true" : undefined}
-                  className={`w-full flex items-center justify-between rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors duration-150 group ${
+                  className={`w-full flex items-center justify-between rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors duration-150 outline-none focus:outline-none group ${
                     isActive || isOpen
                       ? 'bg-slate-100/90 text-slate-900 font-semibold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
