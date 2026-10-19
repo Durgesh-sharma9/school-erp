@@ -832,7 +832,7 @@ function AppContent() {
               case '/staff-users':
               case '/driver-users':
               case '/user-privilege':
-                return <ManageUsersPage onNavigate={handleNavigate} />;
+                return <ManageUsersPage onNavigate={handleNavigate} currentPath={currentPath} />;
               case '/user-reports':
                 return <UserReportsPage onNavigate={handleNavigate} />;
               case '/user-privilege-report':

@@ -23,8 +23,8 @@ import toast from 'react-hot-toast';
 
 const ROLES = [
   { id: 'Teacher', label: 'Teacher', icon: GraduationCap, color: 'emerald', defaultDept: 'Academics' },
-  { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts' },
-  { id: 'Driver', label: 'Driver', icon: Bus, color: 'amber', defaultDept: 'Transport' },
+  { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts & Finance' },
+  { id: 'Driver', label: 'Driver', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet' },
   { id: 'Admin', label: 'Admin', icon: Shield, color: 'purple', defaultDept: 'Administration' }
 ];
 
@@ -37,11 +37,13 @@ const COMMON_DEPARTMENTS = [
   'Front Office'
 ];
 
-export function ManageUsersPage({ onNavigate }) {
+export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleTab, setRoleTab] = useState('ALL'); // 'ALL' | 'Teacher' | 'Staff' | 'Driver' | 'Admin'
+  const [roleTab, setRoleTab] = useState(
+    currentPath.includes('driver') ? 'Driver' : currentPath.includes('staff') ? 'Staff' : 'ALL'
+  );
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -79,6 +81,11 @@ export function ManageUsersPage({ onNavigate }) {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (currentPath.includes('driver')) setRoleTab('Driver');
+    else if (currentPath.includes('staff')) setRoleTab('Staff');
+  }, [currentPath]);
 
   // Open Add Modal
   const handleOpenAdd = (presetRole = 'Teacher') => {
@@ -313,7 +320,7 @@ export function ManageUsersPage({ onNavigate }) {
         {/* Action Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => handleOpenAdd('Teacher')}
+            onClick={() => handleOpenAdd(roleTab !== 'ALL' ? roleTab : 'Teacher')}
             className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
           >
             <UserPlus className="w-3.5 h-3.5" /> + Add Staff
@@ -548,12 +555,18 @@ export function ManageUsersPage({ onNavigate }) {
                       <td className="py-3 px-3">
                         {isDriver ? (
                           <div className="space-y-0.5">
-                            <div className="font-semibold text-slate-800">
-                              🚌 {user.vehicleAssigned || 'No Bus Assigned'}
-                            </div>
-                            {user.driverLicense && (
-                              <div className="text-[10px] font-mono text-slate-500">
+                            {user.driverLicense ? (
+                              <div className="font-mono text-xs font-semibold text-slate-800">
                                 Lic: {user.driverLicense}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-slate-500 font-medium">
+                                Transport Staff
+                              </div>
+                            )}
+                            {user.vehicleAssigned && (
+                              <div className="text-[11px] text-amber-700 font-medium flex items-center gap-1">
+                                <span>🚌 {user.vehicleAssigned}</span>
                               </div>
                             )}
                           </div>
@@ -758,33 +771,24 @@ export function ManageUsersPage({ onNavigate }) {
                 </div>
               )}
 
-              {/* If Driver: Bus No & License No */}
+              {/* If Driver: License No only (Bus assignment is in Transport module) */}
               {formData.role === 'Driver' && (
-                <div className="grid grid-cols-2 gap-3 p-3 bg-amber-50/60 border border-amber-200 rounded-xl">
+                <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1.5">
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Assigned Bus / Route
+                      Driving License No. <span className="text-slate-400 font-normal">(Optional)</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Bus 01 (Route 1)"
-                      value={formData.vehicleAssigned}
-                      onChange={e => setFormData({ ...formData, vehicleAssigned: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Driver License No.
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. RJ14-201600104"
+                      placeholder="e.g. DL-1420110012345"
                       value={formData.driverLicense}
                       onChange={e => setFormData({ ...formData, driverLicense: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white font-mono uppercase"
+                      className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white font-mono uppercase focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
+                  <p className="text-[10px] text-amber-800/80">
+                    ℹ️ Bus & Route assignment Transport module se manage kiya jayega.
+                  </p>
                 </div>
               )}
 
