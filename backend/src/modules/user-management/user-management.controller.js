@@ -285,6 +285,8 @@ export const createUser = (req, res) => {
   const {
     staffName,
     name,
+    empCode: inputEmpCode,
+    pic: inputPic,
     mobileNo,
     phone,
     email,
@@ -298,7 +300,8 @@ export const createUser = (req, res) => {
     division = 'Primary',
     modules = [],
     classes = [],
-    subjects = []
+    subjects = [],
+    isActive = true
   } = req.body;
 
   const rawName = staffName || name;
@@ -306,12 +309,18 @@ export const createUser = (req, res) => {
     return res.status(400).json({ success: false, message: 'Staff name is required' });
   }
 
-  const empCode = String(Math.floor(100 + Math.random() * 900));
+  const empCode = inputEmpCode?.trim() ? inputEmpCode.trim().replace(/^#/, '') : String(Math.floor(100 + Math.random() * 900));
   const cleanName = rawName.trim().toUpperCase();
   const phoneNo = mobileNo || phone || '9876543210';
   const userEmail = email || `${rawName.toLowerCase().replace(/\s+/g, '.')}@jdintl.edu`;
   const isDriverStaff = category === 'Transport' || role === 'Driver';
   const isTeachingStaff = category === 'Teaching' || role === 'Teacher';
+
+  const defaultPic = isDriverStaff
+    ? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop'
+    : isTeachingStaff
+    ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'
+    : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop';
 
   const newUser = {
     id: String(Date.now()),
@@ -320,17 +329,13 @@ export const createUser = (req, res) => {
     displayName: rawName.trim(),
     category: category || (isDriverStaff ? 'Transport' : isTeachingStaff ? 'Teaching' : 'Non-Teaching'),
     role: role || (isDriverStaff ? 'Driver' : isTeachingStaff ? 'Teacher' : 'Staff'),
-    designation: designation || (isDriverStaff ? 'Bus Driver' : isTeachingStaff ? 'Subject Teacher' : 'Office Staff'),
-    department: department || (isDriverStaff ? 'Transport' : isTeachingStaff ? 'Academics' : 'Administration'),
+    designation: designation || (isDriverStaff ? 'School Bus Driver' : isTeachingStaff ? 'Subject Teacher' : 'Office Staff'),
+    department: department || (isDriverStaff ? 'Transport & Fleet' : isTeachingStaff ? 'Academics' : 'Administration'),
     phone: phoneNo,
     email: userEmail,
     driverLicense: driverLicense || '',
     vehicleAssigned: vehicleAssigned || '',
-    pic: isDriverStaff
-      ? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop'
-      : isTeachingStaff
-      ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'
-      : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    pic: inputPic?.trim() || defaultPic,
     division: division || 'Primary',
     modules: modules.length > 0 ? modules : (isDriverStaff ? ['Transport'] : isTeachingStaff ? ['Student', 'Attendance', 'Examination'] : ['Fee', 'Front Office']),
     classes: isTeachingStaff ? (classes || []) : [],
@@ -341,7 +346,7 @@ export const createUser = (req, res) => {
     isView: true,
     isModify: !isDriverStaff,
     isDelete: false,
-    isActive: true
+    isActive: Boolean(isActive)
   };
 
   usersList.unshift(newUser);
@@ -362,6 +367,8 @@ export const updateUser = (req, res) => {
   const {
     name,
     displayName,
+    empCode,
+    pic,
     phone,
     email,
     category,
@@ -377,9 +384,15 @@ export const updateUser = (req, res) => {
     isActive
   } = req.body;
 
+  if (empCode !== undefined && empCode.trim()) {
+    user.empCode = empCode.trim().replace(/^#/, '');
+  }
+  if (pic !== undefined && pic.trim()) {
+    user.pic = pic.trim();
+  }
   if (displayName) {
     user.displayName = displayName;
-    user.name = `[${user.empCode}] ${displayName.toUpperCase()}`;
+    user.name = `[${user.empCode || 'STAFF'}] ${displayName.toUpperCase()}`;
   } else if (name) {
     user.name = name;
   }

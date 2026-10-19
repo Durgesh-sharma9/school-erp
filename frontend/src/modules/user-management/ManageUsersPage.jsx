@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Users,
   Search,
@@ -17,15 +17,17 @@ import {
   X,
   CheckCircle2,
   XCircle,
-  Filter
+  Filter,
+  Camera,
+  Upload
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const ROLES = [
-  { id: 'Teacher', label: 'Teacher', icon: GraduationCap, color: 'emerald', defaultDept: 'Academics' },
-  { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts & Finance' },
-  { id: 'Driver', label: 'Driver', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet' },
-  { id: 'Admin', label: 'Admin', icon: Shield, color: 'purple', defaultDept: 'Administration' }
+  { id: 'Teacher', label: 'Teacher', icon: GraduationCap, color: 'emerald', defaultDept: 'Academics', defaultDesignation: 'Subject Teacher' },
+  { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts & Finance', defaultDesignation: 'Office Staff' },
+  { id: 'Driver', label: 'Driver', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet', defaultDesignation: 'School Bus Driver' },
+  { id: 'Admin', label: 'Admin', icon: Shield, color: 'purple', defaultDept: 'Administration', defaultDesignation: 'Principal' }
 ];
 
 const COMMON_DEPARTMENTS = [
@@ -34,8 +36,29 @@ const COMMON_DEPARTMENTS = [
   'Administration',
   'Transport & Fleet',
   'Library',
-  'Front Office'
+  'Front Office',
+  'Sports'
 ];
+
+const DESIGNATION_PRESETS = {
+  Teacher: ['PGT Teacher', 'TGT Teacher', 'PRT Teacher', 'Pre-Primary Teacher', 'Subject Teacher', 'Sports Coach', 'Art Teacher'],
+  Staff: ['Senior Accountant', 'Junior Accountant', 'Chief Librarian', 'Assistant Librarian', 'Receptionist', 'Office Assistant', 'Clerk'],
+  Driver: ['School Bus Driver', 'Van Driver', 'Senior Driver', 'Transport Incharge'],
+  Admin: ['Principal', 'Vice Principal', 'School Administrator', 'Academic Director']
+};
+
+const getRoleDefaultAvatar = (role) => {
+  switch (role) {
+    case 'Driver':
+      return 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop';
+    case 'Teacher':
+      return 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop';
+    case 'Admin':
+      return 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop';
+    default:
+      return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop';
+  }
+};
 
 export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [users, setUsers] = useState([]);
@@ -50,19 +73,37 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
+    empCode: '',
+    pic: '',
     role: 'Teacher',
+    designation: 'Subject Teacher',
     department: 'Academics',
     phone: '',
     email: '',
-    // Teacher specific
+    isActive: true,
     teachingSubject: '',
     assignedClass: '',
-    // Driver specific
     driverLicense: '',
-    vehicleAssigned: ''
+    workArea: ''
   });
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be under 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData(prev => ({ ...prev, pic: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Fetch Users
   const fetchUsers = async () => {
@@ -90,16 +131,21 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Open Add Modal
   const handleOpenAdd = (presetRole = 'Teacher') => {
     setEditingId(null);
+    const matchedRole = ROLES.find(r => r.id === presetRole) || ROLES[0];
     setFormData({
       name: '',
+      empCode: '',
+      pic: '',
       role: presetRole,
-      department: presetRole === 'Teacher' ? 'Academics' : presetRole === 'Driver' ? 'Transport & Fleet' : presetRole === 'Admin' ? 'Administration' : 'Accounts & Finance',
+      designation: matchedRole.defaultDesignation,
+      department: matchedRole.defaultDept,
       phone: '',
       email: '',
+      isActive: true,
       teachingSubject: '',
       assignedClass: '',
       driverLicense: '',
-      vehicleAssigned: ''
+      workArea: ''
     });
     setIsModalOpen(true);
   };
@@ -110,14 +156,18 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     const resolvedRole = user.role === 'Accountant' ? 'Staff' : (user.role || 'Teacher');
     setFormData({
       name: user.displayName || user.name.replace(/^\[.*?\]\s*/, ''),
+      empCode: user.empCode || '',
+      pic: user.pic || '',
       role: resolvedRole,
+      designation: user.designation || '',
       department: user.department || 'Academics',
       phone: user.phone || '',
       email: user.email || '',
+      isActive: user.isActive !== undefined ? user.isActive : true,
       teachingSubject: (user.subjects && user.subjects.length > 0) ? user.subjects.join(', ') : '',
       assignedClass: (user.classes && user.classes.length > 0) ? user.classes.join(', ') : '',
       driverLicense: user.driverLicense || '',
-      vehicleAssigned: user.vehicleAssigned || ''
+      workArea: (user.modules && user.modules.length > 0) ? user.modules.join(', ') : ''
     });
     setIsModalOpen(true);
   };
@@ -138,12 +188,15 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       displayName: formData.name.trim(),
       staffName: formData.name.trim(),
       name: formData.name.trim(),
+      empCode: formData.empCode.trim(),
+      pic: formData.pic.trim() || getRoleDefaultAvatar(formData.role),
       role: formData.role,
+      designation: formData.designation.trim() || (formData.role === 'Driver' ? 'School Bus Driver' : formData.role === 'Teacher' ? 'Subject Teacher' : 'Office Staff'),
       department: formData.department,
       phone: formData.phone.trim(),
       email: formData.email.trim(),
+      isActive: formData.isActive,
       driverLicense: formData.role === 'Driver' ? formData.driverLicense.trim() : '',
-      vehicleAssigned: formData.role === 'Driver' ? formData.vehicleAssigned.trim() : '',
       classes: formData.role === 'Teacher' && formData.assignedClass ? formData.assignedClass.split(',').map(s => s.trim()).filter(Boolean) : [],
       subjects: formData.role === 'Teacher' && formData.teachingSubject ? formData.teachingSubject.split(',').map(s => s.trim()).filter(Boolean) : [],
       modules: formData.role === 'Driver' ? ['Transport'] : formData.role === 'Teacher' ? ['Student', 'Attendance', 'Academics'] : ['Fee', 'Payroll', 'Front Office']
@@ -630,44 +683,109 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
         </div>
       </div>
 
-      {/* 4. Simple, Fast, 1-Page Add / Edit Modal */}
+      {/* 4. Complete, Professional Add / Edit Staff Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
-              <h3 className="font-bold text-sm text-slate-900">
-                {editingId ? 'Edit Staff Member' : 'Add New Staff Member'}
-              </h3>
+            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                  {editingId ? <Edit2 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">
+                    {editingId ? 'Edit Staff Member' : 'Add New Staff Member'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Enter profile details, photo, designation, and assignments
+                  </p>
+                </div>
+              </div>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Simple Form */}
-            <form onSubmit={handleSubmit} className="p-5 space-y-3.5 text-xs">
-              {/* Full Name */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh Kumar"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+              {/* Scrollable Form Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+              {/* Photo & Basic Identity Header Card */}
+              <div className="p-3 bg-slate-50/80 border border-slate-200/90 rounded-xl flex items-center gap-4">
+                {/* Photo Upload Avatar */}
+                <div className="relative shrink-0">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-16 h-16 rounded-full border-2 border-indigo-200 overflow-hidden relative group cursor-pointer bg-white shadow-xs flex items-center justify-center"
+                    title="Click to upload staff photo"
+                  >
+                    <img
+                      src={formData.pic || getRoleDefaultAvatar(formData.role)}
+                      alt="Staff"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="w-4 h-4" />
+                      <span className="text-[9px] font-semibold mt-0.5">Change</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-1 -right-1 p-1 bg-indigo-600 text-white rounded-full shadow-xs hover:bg-indigo-700"
+                    title="Upload Photo"
+                  >
+                    <Camera className="w-3 h-3" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Name & Emp Code */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Full Name <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Pooja Kanwar"
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Emp Code <span className="text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 301"
+                      value={formData.empCode}
+                      onChange={e => setFormData({ ...formData, empCode: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono uppercase bg-white focus:ring-2 focus:ring-indigo-500/20"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Role Selection (Simple 4 Buttons!) */}
+              {/* Role Selection (4 Role Cards) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Role <span className="text-rose-500">*</span>
+                  Role Category <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {ROLES.map(r => {
@@ -680,9 +798,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         onClick={() => setFormData({
                           ...formData,
                           role: r.id,
-                          department: r.defaultDept
+                          department: r.defaultDept,
+                          designation: r.defaultDesignation
                         })}
-                        className={`p-2 rounded-lg border text-center transition-all ${
+                        className={`p-2.5 rounded-xl border text-center transition-all ${
                           isSelected
                             ? 'bg-indigo-600 text-white font-bold border-indigo-600 shadow-xs'
                             : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium'
@@ -696,116 +815,195 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                 </div>
               </div>
 
-              {/* Phone & Email */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Designation & Department (2-col grid) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Designation / Job Title
+                  </label>
+                  <input
+                    type="text"
+                    list="designation-suggestions"
+                    placeholder="e.g. Senior Accountant"
+                    value={formData.designation}
+                    onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                  <datalist id="designation-suggestions">
+                    {(DESIGNATION_PRESETS[formData.role] || []).map(p => (
+                      <option key={p} value={p} />
+                    ))}
+                  </datalist>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Department
+                  </label>
+                  <select
+                    value={formData.department}
+                    onChange={e => setFormData({ ...formData, department: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    {COMMON_DEPARTMENTS.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Phone & Email (2-col grid) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Phone Number <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="e.g. 9829012345"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Email (Optional)
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="e.g. staff@school.edu"
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-              </div>
-
-              {/* Department */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Department
-                </label>
-                <select
-                  value={formData.department}
-                  onChange={e => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
-                >
-                  {COMMON_DEPARTMENTS.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* If Teacher: Subject & Class */}
-              {formData.role === 'Teacher' && (
-                <div className="grid grid-cols-2 gap-3 p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Teaching Subject
-                    </label>
+                  <div className="relative">
+                    <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
                     <input
-                      type="text"
-                      placeholder="e.g. Mathematics"
-                      value={formData.teachingSubject}
-                      onChange={e => setFormData({ ...formData, teachingSubject: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      type="tel"
+                      required
+                      placeholder="e.g. 9829012345"
+                      value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Assigned Class
-                    </label>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
                     <input
-                      type="text"
-                      placeholder="e.g. Class I-A, II-B"
-                      value={formData.assignedClass}
-                      onChange={e => setFormData({ ...formData, assignedClass: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      type="email"
+                      placeholder="e.g. staff@school.edu"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Role-Specific Details */}
+              {/* If Teacher: Subjects & Classes */}
+              {formData.role === 'Teacher' && (
+                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <GraduationCap className="w-4 h-4" /> Academic Assignment
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Teaching Subject(s)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. English, EVS, Mathematics"
+                        value={formData.teachingSubject}
+                        onChange={e => setFormData({ ...formData, teachingSubject: e.target.value })}
+                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Assigned Class(es)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Class I-A, Class II-B"
+                        value={formData.assignedClass}
+                        onChange={e => setFormData({ ...formData, assignedClass: e.target.value })}
+                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* If Driver: License No only (Bus assignment is in Transport module) */}
+              {/* If Driver: License No (Bus assignment handled in Transport module) */}
               {formData.role === 'Driver' && (
-                <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1.5">
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                    <Bus className="w-4 h-4" /> Driver Details
+                  </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Driving License No. <span className="text-slate-400 font-normal">(Optional)</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. DL-1420110012345"
+                      placeholder="e.g. RJ14-201600104"
                       value={formData.driverLicense}
                       onChange={e => setFormData({ ...formData, driverLicense: e.target.value })}
                       className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white font-mono uppercase focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
                   <p className="text-[10px] text-amber-800/80">
-                    ℹ️ Bus & Route assignment Transport module se manage kiya jayega.
+                    ℹ️ Note: Bus & Route assignment Transport module se manage kiya jayega.
                   </p>
                 </div>
               )}
 
-              {/* Submit Buttons */}
-              <div className="pt-2 border-t border-slate-200 flex items-center justify-end gap-2">
+              {/* If Office Staff or Admin: Duty / Work Area */}
+              {(formData.role === 'Staff' || formData.role === 'Admin') && (
+                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
+                  <div className="flex items-center gap-1.5 text-blue-800 font-bold text-xs">
+                    <Briefcase className="w-4 h-4" /> Key Responsibility / Work Area
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="e.g. Fee Counter, Student Records, Library Incharge, Accounts"
+                      value={formData.workArea}
+                      onChange={e => setFormData({ ...formData, workArea: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Account Status Switch */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-slate-800">Account Status</div>
+                  <div className="text-[11px] text-slate-500">
+                    {formData.isActive ? 'Active staff member (authorized to perform operations)' : 'Inactive staff member (disabled)'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+                    formData.isActive
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-rose-100 text-rose-800 border border-rose-300'
+                  }`}
+                >
+                  {formData.isActive ? '✓ Active' : '✕ Inactive'}
+                </button>
+              </div>
+
+              </div>
+
+              {/* Pinned Action Footer */}
+              <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/90 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs transition-colors flex items-center gap-1.5"
                 >
-                  {editingId ? 'Save Changes' : 'Add Staff'}
+                  {editingId ? <Edit2 className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                  {editingId ? 'Save Changes' : 'Add Staff Member'}
                 </button>
               </div>
             </form>
