@@ -4,16 +4,16 @@ import toast from 'react-hot-toast';
 
 export function TransportAssignVehiclePage() {
   const [assignedVehicles, setAssignedVehicles] = useState([
-    { id: 1, type: 'Bus', number: 'RJ14PC1019', capacity: 42, driver: 'HANSRAJ JAT', routes: ['Kalwara, Ajairajpura'] },
-    { id: 2, type: 'Bus', number: 'RJ40PA1179', capacity: 42, driver: 'LALARAM', routes: ['Thikriya, Vatika'] },
-    { id: 3, type: 'Bus', number: 'RJ02PA2762', capacity: 42, driver: 'SHAITAN SINGH', routes: ['Jaisinghpura, Rampura'] },
-    { id: 4, type: 'Bus', number: 'RJ20PA9932', capacity: 50, driver: 'BHARAT JANGID', routes: ['Auric City & Shub Nilay'] },
-    { id: 5, type: 'Bus', number: 'RJ14PC7878', capacity: 42, driver: 'BABU LAL', routes: ['Manglam Aangan'] },
-    { id: 6, type: 'Bus', number: 'RJ14PC1037', capacity: 50, driver: 'PRAKASH CHOUDHARY', routes: ['Mangalam Grand City'] },
-    { id: 7, type: 'Bus', number: 'RJ19PB7511', capacity: 42, driver: 'RAJU IPS', routes: ['Narsinghpura, Ramchandrapura'] },
-    { id: 8, type: 'Bus', number: 'RJ14PC5938', capacity: 45, driver: 'NARESH', routes: ['Aasra, J K Lakshmipat University'] },
-    { id: 9, type: 'Bus', number: 'RJ14PC2278', capacity: 40, driver: 'SHYAM SUNDER', routes: ['Bhankrota, Mojika, Hanging Gardens'] },
-    { id: 10, type: 'Bus', number: 'RJ14PE0832', capacity: 42, driver: 'RAMESH', routes: ['Khatwara'] }
+    { id: 1, type: 'Bus', number: 'RJ14PC1019', capacity: 42, driver: 'HANSRAJ JAT', conductor: 'MANJU DEVI (Nanny)', routes: ['Kalwara, Ajairajpura'] },
+    { id: 2, type: 'Bus', number: 'RJ40PA1179', capacity: 42, driver: 'LALARAM', conductor: 'KAVITA SHARMA (Nanny)', routes: ['Thikriya, Vatika'] },
+    { id: 3, type: 'Bus', number: 'RJ02PA2762', capacity: 42, driver: 'SHAITAN SINGH', conductor: 'SUNITA DEVI (Nanny)', routes: ['Jaisinghpura, Rampura'] },
+    { id: 4, type: 'Bus', number: 'RJ20PA9932', capacity: 50, driver: 'BHARAT JANGID', conductor: 'RAMESH KUMAR (Conductor)', routes: ['Auric City & Shub Nilay'] },
+    { id: 5, type: 'Bus', number: 'RJ14PC7878', capacity: 42, driver: 'BABU LAL', conductor: 'SANTOSH DEVI (Nanny)', routes: ['Manglam Aangan'] },
+    { id: 6, type: 'Bus', number: 'RJ14PC1037', capacity: 50, driver: 'PRAKASH CHOUDHARY', conductor: 'MUKESH MEENA (Conductor)', routes: ['Mangalam Grand City'] },
+    { id: 7, type: 'Bus', number: 'RJ19PB7511', capacity: 42, driver: 'RAJU IPS', conductor: 'GEETA BAI (Nanny)', routes: ['Narsinghpura, Ramchandrapura'] },
+    { id: 8, type: 'Bus', number: 'RJ14PC5938', capacity: 45, driver: 'NARESH', conductor: 'KAMLESH DEVI (Nanny)', routes: ['Aasra, J K Lakshmipat University'] },
+    { id: 9, type: 'Bus', number: 'RJ14PC2278', capacity: 40, driver: 'SHYAM SUNDER', conductor: 'DINESH VERMA (Conductor)', routes: ['Bhankrota, Mojika, Hanging Gardens'] },
+    { id: 10, type: 'Bus', number: 'RJ14PE0832', capacity: 42, driver: 'RAMESH', conductor: 'PREM LATA (Nanny)', routes: ['Khatwara'] }
   ]);
 
   const allRoutesList = [
@@ -49,6 +49,7 @@ export function TransportAssignVehiclePage() {
           number: v.vehicleNo || v.number,
           capacity: v.capacity,
           driver: v.driver,
+          conductor: v.conductor || 'MANJU DEVI (Nanny)',
           routes: v.routes || []
         })));
       }
@@ -97,13 +98,14 @@ export function TransportAssignVehiclePage() {
   const filteredVehicles = assignedVehicles.filter(v =>
     v.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
     v.driver.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (v.conductor && v.conductor.toLowerCase().includes(searchQuery.toLowerCase())) ||
     v.routes.some(r => r.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const exportCSV = () => {
     const csvContent = "data:text/csv;charset=utf-8," +
-      ["S.No.,Type,Number,Capacity,Driver,Assigned Routes"].concat(
-        filteredVehicles.map((v, i) => `${i + 1},"${v.type}","${v.number}",${v.capacity},"${v.driver}","${v.routes.join('; ')}"`)
+      ["S.No.,Type,Number,Capacity,Driver,Attendant (Nanny/Conductor),Assigned Routes"].concat(
+        filteredVehicles.map((v, i) => `${i + 1},"${v.type}","${v.number}",${v.capacity},"${v.driver}","${v.conductor || ''}","${v.routes.join('; ')}"`)
       ).join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
@@ -135,7 +137,7 @@ export function TransportAssignVehiclePage() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search vehicle / driver..."
+              placeholder="Search vehicle / driver / nanny..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 w-52 outline-none"
@@ -169,7 +171,7 @@ export function TransportAssignVehiclePage() {
                 <th className="py-3.5 px-6">TYPE</th>
                 <th className="py-3.5 px-6">NUMBER</th>
                 <th className="py-3.5 px-6">CAPACITY</th>
-                <th className="py-3.5 px-6">DRIVER</th>
+                <th className="py-3.5 px-6">DRIVER & CREW (NANNY / CONDUCTOR)</th>
                 <th className="py-3.5 px-6">ASSIGNED ROUTES</th>
                 <th className="py-3.5 px-6 text-right w-32">ACTION</th>
               </tr>
@@ -185,7 +187,21 @@ export function TransportAssignVehiclePage() {
                   </td>
                   <td className="py-3.5 px-6 font-bold font-mono text-indigo-700">{v.number}</td>
                   <td className="py-3.5 px-6 font-mono font-medium">{v.capacity} Seats</td>
-                  <td className="py-3.5 px-6 font-semibold text-slate-800">{v.driver}</td>
+                  <td className="py-3.5 px-6">
+                    <div className="font-semibold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <span>{v.driver}</span>
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                        Driver
+                      </span>
+                    </div>
+                    {v.conductor && (
+                      <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-1.5 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0" />
+                        <span className="text-slate-800 font-semibold">{v.conductor}</span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3.5 px-6">
                     <div className="flex flex-wrap gap-1.5">
                       {v.routes.map((r, rIdx) => (
@@ -233,7 +249,7 @@ export function TransportAssignVehiclePage() {
                 >
                   {assignedVehicles.map(av => (
                     <option key={av.id} value={av.number}>
-                      {av.number} [{av.type}] [{av.capacity}] - {av.driver}
+                      {av.number} [{av.type}] [{av.capacity}] - Driver: {av.driver} {av.conductor ? `| Crew: ${av.conductor}` : ''}
                     </option>
                   ))}
                 </select>

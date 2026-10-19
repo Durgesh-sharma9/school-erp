@@ -23,7 +23,9 @@ import {
   FileCheck,
   ArrowRight,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  UserCheck,
+  Heart
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -37,6 +39,9 @@ export function TransportVehiclePage() {
       driver: 'SHAITAN SINGH',
       driverPhone: '+91 98290 88211',
       driverLicense: 'RJ14-201500892',
+      conductor: 'SUNITA DEVI',
+      conductorPhone: '+91 98290 11442',
+      conductorType: 'Bus Nanny (Aayah)',
       model: 'Tata Starbus Ultra (42 Seater)',
       fuelType: 'Diesel (BS-VI)',
       assignedRoute: 'Jaisinghpura, Rampura',
@@ -103,6 +108,9 @@ export function TransportVehiclePage() {
       driver: 'HANSRAJ JAT',
       driverPhone: '+91 98291 44521',
       driverLicense: 'RJ14-201600104',
+      conductor: 'MANJU DEVI',
+      conductorPhone: '+91 98290 44211',
+      conductorType: 'Bus Nanny (Aayah)',
       model: 'Ashok Leyland Sunshine (42 Seater)',
       fuelType: 'Diesel (BS-VI)',
       assignedRoute: 'Kalwara, Ajairajpura',
@@ -393,6 +401,9 @@ export function TransportVehiclePage() {
     driver: 'HANSRAJ JAT',
     driverPhone: '',
     driverLicense: '',
+    conductor: 'MANJU DEVI',
+    conductorPhone: '+91 98290 44211',
+    conductorType: 'Bus Nanny (Aayah)',
     capacity: 42,
     pucValidity: '',
     regCertValidity: '',
@@ -439,8 +450,11 @@ export function TransportVehiclePage() {
       vehicleType: 'Bus',
       vehicleNo: '',
       driver: 'HANSRAJ JAT',
-      driverPhone: '',
-      driverLicense: '',
+      driverPhone: '+91 98291 44521',
+      driverLicense: 'RJ14-201600104',
+      conductor: 'MANJU DEVI',
+      conductorPhone: '+91 98290 44211',
+      conductorType: 'Bus Nanny (Aayah)',
       capacity: 42,
       pucValidity: '',
       regCertValidity: '',
@@ -653,14 +667,16 @@ export function TransportVehiclePage() {
   const filteredVehicles = vehicles.filter(v =>
     v.vehicleNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
     v.driver?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.conductor?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.conductorType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     v.vehicleType.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (v.assignedRoute && v.assignedRoute.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const exportCSV = () => {
     const csvContent = "data:text/csv;charset=utf-8," +
-      ["S.No.,Vehicle Type,Vehicle No.,Capacity,Driver,Assigned Route,PUC Validity,Fitness Validity,Insurance Validity,Track No."].concat(
-        filteredVehicles.map((v, i) => `${i + 1},"${v.vehicleType}","${v.vehicleNo}",${v.capacity},"${v.driver || ''}","${v.assignedRoute || ''}","${v.pucValidity || ''}","${v.fitnessValidity || ''}","${v.insuranceValidity || ''}","${v.trackNo || ''}"`)
+      ["S.No.,Vehicle Type,Vehicle No.,Capacity,Driver,Driver Contact,Attendant (Nanny/Conductor),Attendant Role,Attendant Contact,Assigned Route,PUC Validity,Fitness Validity,Insurance Validity,Track No."].concat(
+        filteredVehicles.map((v, i) => `${i + 1},"${v.vehicleType}","${v.vehicleNo}",${v.capacity},"${v.driver || ''}","${v.driverPhone || ''}","${v.conductor || ''}","${v.conductorType || ''}","${v.conductorPhone || ''}","${v.assignedRoute || ''}","${v.pucValidity || ''}","${v.fitnessValidity || ''}","${v.insuranceValidity || ''}","${v.trackNo || ''}"`)
       ).join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
@@ -749,8 +765,8 @@ export function TransportVehiclePage() {
           </div>
         </div>
         <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Active Drivers</div>
-          <div className="text-lg font-bold text-emerald-950 mt-0.5">{vehicles.length} Assigned</div>
+          <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Assigned Crew</div>
+          <div className="text-lg font-bold text-emerald-950 mt-0.5">{vehicles.length} Drivers + {vehicles.filter(v => v.conductor).length} Nannies/Crew</div>
         </div>
         <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
           <div className="text-[11px] font-semibold text-purple-600 uppercase tracking-wider">Docs & Compliance</div>
@@ -768,7 +784,7 @@ export function TransportVehiclePage() {
                 <th className="py-2.5 px-4">VEHICLE TYPE</th>
                 <th className="py-2.5 px-4">VEHICLE NO.</th>
                 <th className="py-2.5 px-4">CAPACITY</th>
-                <th className="py-2.5 px-4">DRIVER</th>
+                <th className="py-2.5 px-4">DRIVER & CREW (NANNY / CONDUCTOR)</th>
                 <th className="py-2.5 px-4">ASSIGNED ROUTE</th>
                 <th className="py-2.5 px-4">DOCUMENTS</th>
                 <th className="py-2.5 px-4 text-right w-36">ACTION</th>
@@ -801,8 +817,36 @@ export function TransportVehiclePage() {
                     <td className="py-2.5 px-4 font-mono font-medium">
                       {v.capacity} Seats
                     </td>
-                    <td className="py-2.5 px-4 font-semibold text-slate-800">
-                      {v.driver || '-'}
+                    <td className="py-2.5 px-4">
+                      {/* Driver Row */}
+                      <div className="font-semibold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                        <span>{v.driver || '-'}</span>
+                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                          Driver
+                        </span>
+                        {v.driverPhone && (
+                          <span className="text-[10px] text-slate-400 font-mono">({v.driverPhone.slice(-10)})</span>
+                        )}
+                      </div>
+                      {/* Nanny / Conductor Row */}
+                      {v.conductor ? (
+                        <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-1.5 flex-wrap font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0" />
+                          <span className="text-slate-800 font-semibold">{v.conductor}</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                            (v.conductorType || '').includes('Conductor')
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200'
+                          }`}>
+                            {v.conductorType || 'Bus Nanny (Aayah)'}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-slate-400 mt-0.5 italic">
+                          No Nanny / Conductor Assigned
+                        </div>
+                      )}
                     </td>
                     <td className="py-2.5 px-4">
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
@@ -949,6 +993,30 @@ export function TransportVehiclePage() {
                   <div className="text-[11px] text-slate-600 mt-0.5 flex items-center gap-1">
                     <span className="font-semibold text-slate-500">License:</span>
                     <span className="font-mono text-slate-700">{viewingVehicle.driverLicense || 'RJ14-201600104'}</span>
+                  </div>
+                </div>
+
+                {/* Nanny / Conductor Attendant Box */}
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mb-1.5">
+                    <Heart className="w-3 h-3 text-pink-600" />
+                    <span>Attendant: {viewingVehicle.conductorType || 'Bus Nanny (Aayah)'}</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <span>{viewingVehicle.conductor || 'Manju Devi'}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Police Verified
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-1">
+                    <span className="font-semibold text-slate-500">Phone:</span>
+                    <a href={`tel:${viewingVehicle.conductorPhone || '9829044211'}`} className="text-indigo-600 font-bold hover:underline font-mono">
+                      {viewingVehicle.conductorPhone || '+91 98290 44211'}
+                    </a>
+                  </div>
+                  <div className="text-[11px] text-slate-600 mt-0.5 flex items-center gap-1">
+                    <span className="font-semibold text-slate-500">Duty Type:</span>
+                    <span className="text-slate-700 font-medium">{viewingVehicle.conductorType || 'Student Safety & Care'}</span>
                   </div>
                 </div>
 
@@ -1315,6 +1383,49 @@ export function TransportVehiclePage() {
                     <option value="SHYAM SUNDER">SHYAM SUNDER</option>
                     <option value="RAMESH">RAMESH</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Attendant Role (Nanny / Conductor)</label>
+                  <select
+                    value={formData.conductorType || 'Bus Nanny (Aayah)'}
+                    onChange={(e) => setFormData({ ...formData, conductorType: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="Bus Nanny (Aayah)">Bus Nanny (Aayah / Lady Attendant)</option>
+                    <option value="Bus Conductor">Bus Conductor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Nanny / Conductor</label>
+                  <select
+                    value={formData.conductor}
+                    onChange={(e) => setFormData({ ...formData, conductor: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="MANJU DEVI">MANJU DEVI (Nanny)</option>
+                    <option value="SUNITA DEVI">SUNITA DEVI (Nanny)</option>
+                    <option value="KAVITA SHARMA">KAVITA SHARMA (Nanny)</option>
+                    <option value="SANTOSH DEVI">SANTOSH DEVI (Nanny)</option>
+                    <option value="GEETA BAI">GEETA BAI (Nanny)</option>
+                    <option value="PREM LATA">PREM LATA (Nanny)</option>
+                    <option value="KAMLESH DEVI">KAMLESH DEVI (Nanny)</option>
+                    <option value="RAMESH KUMAR">RAMESH KUMAR (Conductor)</option>
+                    <option value="MUKESH MEENA">MUKESH MEENA (Conductor)</option>
+                    <option value="DINESH VERMA">DINESH VERMA (Conductor)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Nanny / Conductor Contact No.</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. +91 98290 44211"
+                    value={formData.conductorPhone || ''}
+                    onChange={(e) => setFormData({ ...formData, conductorPhone: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono focus:ring-1 focus:ring-indigo-500 outline-none"
+                  />
                 </div>
 
                 <div>

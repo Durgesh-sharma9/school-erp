@@ -7,27 +7,28 @@ export function TransportVehicleReportPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [records] = useState([
-    { sNo: 1, driverName: 'HANSRAJ JAT', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-30', fitnessDate: '2026-12-15', vehicle: 'RJ14PC1019' },
-    { sNo: 2, driverName: 'LALARAM', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-15', fitnessDate: '2026-12-10', vehicle: 'RJ40PA1179' },
-    { sNo: 3, driverName: 'SHAITAN SINGH', vehCap: 42, vehType: 'Bus', pucDate: '2026-12-31', fitnessDate: '2027-01-20', vehicle: 'RJ02PA2762' },
-    { sNo: 4, driverName: 'BHARAT JANGID', vehCap: 50, vehType: 'Bus', pucDate: '2027-02-10', fitnessDate: '2027-04-15', vehicle: 'RJ20PA9932' },
-    { sNo: 5, driverName: 'BABU LAL', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-20', fitnessDate: '2026-12-28', vehicle: 'RJ14PC7878' },
-    { sNo: 6, driverName: 'PRAKASH CHOUDHARY', vehCap: 50, vehType: 'Bus', pucDate: '2027-01-15', fitnessDate: '2026-12-05', vehicle: 'RJ14PC1037' },
-    { sNo: 7, driverName: 'RAJU IPS', vehCap: 42, vehType: 'Bus', pucDate: '2026-10-30', fitnessDate: '2026-11-30', vehicle: 'RJ19PB7511' },
-    { sNo: 8, driverName: 'NARESH', vehCap: 45, vehType: 'Bus', pucDate: '2026-12-15', fitnessDate: '2027-02-15', vehicle: 'RJ14PC5938' },
-    { sNo: 9, driverName: 'SHYAM SUNDER', vehCap: 40, vehType: 'Bus', pucDate: '2026-10-25', fitnessDate: '2026-11-18', vehicle: 'RJ14PC2278' },
-    { sNo: 10, driverName: 'RAMESH', vehCap: 42, vehType: 'Bus', pucDate: '2026-12-05', fitnessDate: '2027-03-10', vehicle: 'RJ14PE0832' }
+    { sNo: 1, driverName: 'HANSRAJ JAT', conductorName: 'MANJU DEVI (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-30', fitnessDate: '2026-12-15', vehicle: 'RJ14PC1019' },
+    { sNo: 2, driverName: 'LALARAM', conductorName: 'KAVITA SHARMA (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-15', fitnessDate: '2026-12-10', vehicle: 'RJ40PA1179' },
+    { sNo: 3, driverName: 'SHAITAN SINGH', conductorName: 'SUNITA DEVI (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-12-31', fitnessDate: '2027-01-20', vehicle: 'RJ02PA2762' },
+    { sNo: 4, driverName: 'BHARAT JANGID', conductorName: 'RAMESH KUMAR (Conductor)', vehCap: 50, vehType: 'Bus', pucDate: '2027-02-10', fitnessDate: '2027-04-15', vehicle: 'RJ20PA9932' },
+    { sNo: 5, driverName: 'BABU LAL', conductorName: 'SANTOSH DEVI (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-11-20', fitnessDate: '2026-12-28', vehicle: 'RJ14PC7878' },
+    { sNo: 6, driverName: 'PRAKASH CHOUDHARY', conductorName: 'MUKESH MEENA (Conductor)', vehCap: 50, vehType: 'Bus', pucDate: '2027-01-15', fitnessDate: '2026-12-05', vehicle: 'RJ14PC1037' },
+    { sNo: 7, driverName: 'RAJU IPS', conductorName: 'GEETA BAI (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-10-30', fitnessDate: '2026-11-30', vehicle: 'RJ19PB7511' },
+    { sNo: 8, driverName: 'NARESH', conductorName: 'KAMLESH DEVI (Nanny)', vehCap: 45, vehType: 'Bus', pucDate: '2026-12-15', fitnessDate: '2027-02-15', vehicle: 'RJ14PC5938' },
+    { sNo: 9, driverName: 'SHYAM SUNDER', conductorName: 'DINESH VERMA (Conductor)', vehCap: 40, vehType: 'Bus', pucDate: '2026-10-25', fitnessDate: '2026-11-18', vehicle: 'RJ14PC2278' },
+    { sNo: 10, driverName: 'RAMESH', conductorName: 'PREM LATA (Nanny)', vehCap: 42, vehType: 'Bus', pucDate: '2026-12-05', fitnessDate: '2027-03-10', vehicle: 'RJ14PE0832' }
   ]);
 
   const filteredRecords = records.filter(r =>
     r.driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (r.conductorName && r.conductorName.toLowerCase().includes(searchQuery.toLowerCase())) ||
     r.vehicle.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const exportCSV = () => {
     const csvContent = "data:text/csv;charset=utf-8," +
-      ["S.No.,Driver Name,Vehicle Capacity,Vehicle Type,PUC Date,Fitness Date,Vehicle No"].concat(
-        filteredRecords.map(r => `${r.sNo},"${r.driverName}",${r.vehCap},"${r.vehType}","${r.pucDate}","${r.fitnessDate}","${r.vehicle}"`)
+      ["S.No.,Driver Name,Attendant (Nanny/Conductor),Vehicle Capacity,Vehicle Type,PUC Date,Fitness Date,Vehicle No"].concat(
+        filteredRecords.map(r => `${r.sNo},"${r.driverName}","${r.conductorName || ''}",${r.vehCap},"${r.vehType}","${r.pucDate}","${r.fitnessDate}","${r.vehicle}"`)
       ).join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
@@ -115,6 +116,7 @@ export function TransportVehicleReportPage() {
               <tr>
                 <th className="py-3.5 px-6">S.NO.</th>
                 <th className="py-3.5 px-6">DRIVER NAME</th>
+                <th className="py-3.5 px-6">ATTENDANT (NANNY/CONDUCTOR)</th>
                 <th className="py-3.5 px-6">VEH. CAP.</th>
                 <th className="py-3.5 px-6">VEH. TYPE</th>
                 <th className="py-3.5 px-6">PUC DATE</th>
@@ -127,6 +129,12 @@ export function TransportVehicleReportPage() {
                 <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-3.5 px-6 text-slate-400 font-mono">{r.sNo}</td>
                   <td className="py-3.5 px-6 font-bold text-slate-800">{r.driverName}</td>
+                  <td className="py-3.5 px-6 font-semibold text-slate-700">
+                    <span className="inline-flex items-center gap-1 text-slate-800">
+                      <span className="w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0" />
+                      {r.conductorName || 'Attendant Assigned'}
+                    </span>
+                  </td>
                   <td className="py-3.5 px-6 font-mono font-medium">{r.vehCap} Seats</td>
                   <td className="py-3.5 px-6">{r.vehType}</td>
                   <td className="py-3.5 px-6 font-mono">

@@ -43,7 +43,7 @@ import toast from 'react-hot-toast';
 const ROLES = [
   { id: 'Teacher', label: 'Teacher', icon: GraduationCap, color: 'emerald', defaultDept: 'Academics', defaultDesignation: 'Subject Teacher' },
   { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts & Finance', defaultDesignation: 'Office Staff' },
-  { id: 'Driver', label: 'Driver', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet', defaultDesignation: 'School Bus Driver' },
+  { id: 'Driver', label: 'Driver & Transport Crew', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet', defaultDesignation: 'School Bus Driver' },
   { id: 'Admin', label: 'Admin', icon: Shield, color: 'purple', defaultDept: 'Administration', defaultDesignation: 'Principal' }
 ];
 
@@ -73,13 +73,23 @@ const POPULAR_BANKS = [
 const DESIGNATION_PRESETS = {
   Teacher: ['PGT Teacher', 'TGT Teacher', 'PRT Teacher', 'Pre-Primary Teacher', 'Subject Teacher', 'Sports Coach', 'Art Teacher'],
   Staff: ['Senior Accountant', 'Junior Accountant', 'Chief Librarian', 'Assistant Librarian', 'Receptionist', 'Office Assistant', 'Clerk'],
-  Driver: ['School Bus Driver', 'Van Driver', 'Senior Driver', 'Transport Incharge'],
+  Driver: [
+    'School Bus Driver',
+    'Bus Nanny / Female Attendant (Aayah)',
+    'Bus Conductor',
+    'Van Driver',
+    'Senior Driver',
+    'Transport Incharge'
+  ],
   Admin: ['Principal', 'Vice Principal', 'School Administrator', 'Academic Director']
 };
 
-const getRoleDefaultAvatar = (role) => {
+const getRoleDefaultAvatar = (role, designation = '') => {
   switch (role) {
     case 'Driver':
+      if (designation?.toLowerCase().includes('nanny') || designation?.toLowerCase().includes('aayah') || designation?.toLowerCase().includes('female')) {
+        return 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop';
+      }
       return 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop';
     case 'Teacher':
       return 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop';
@@ -647,7 +657,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
               { id: 'ALL', label: 'All Staff', count: totalCount, icon: Users },
               { id: 'Teacher', label: 'Teachers', count: teachersCount, icon: GraduationCap },
               { id: 'Staff', label: 'Office Staff', count: staffCount, icon: Briefcase },
-              { id: 'Driver', label: 'Drivers', count: driversCount, icon: Bus },
+              { id: 'Driver', label: 'Drivers & Transport', count: driversCount, icon: Bus },
               { id: 'Admin', label: 'Admins', count: adminCount, icon: Shield },
               { id: 'PRIVILEGE', label: 'User Privileges', count: null, icon: ShieldCheck }
             ].map(tab => {
@@ -1067,7 +1077,11 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               isTeacher
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : isDriver
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                ? ((user.designation || '').toLowerCase().includes('nanny') || (user.designation || '').toLowerCase().includes('aayah'))
+                                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                  : ((user.designation || '').toLowerCase().includes('conductor'))
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : 'bg-amber-50 text-amber-700 border border-amber-200'
                                 : user.role === 'Admin'
                                 ? 'bg-purple-50 text-purple-700 border border-purple-200'
                                 : 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -1075,7 +1089,13 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               {isTeacher && <GraduationCap className="w-3 h-3" />}
                               {isDriver && <Bus className="w-3 h-3" />}
                               {!isTeacher && !isDriver && <Briefcase className="w-3 h-3" />}
-                              {user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
+                              {isDriver
+                                ? ((user.designation || '').toLowerCase().includes('nanny') || (user.designation || '').toLowerCase().includes('aayah'))
+                                  ? 'Bus Nanny (Aayah)'
+                                  : ((user.designation || '').toLowerCase().includes('conductor'))
+                                  ? 'Bus Conductor'
+                                  : 'Driver'
+                                : user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
                             </span>
                             {user.designation && (
                               <div className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">
@@ -1118,11 +1138,13 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                             <div className="space-y-0.5">
                               {user.driverLicense ? (
                                 <div className="font-mono text-xs font-semibold text-slate-800">
-                                  Lic: {user.driverLicense}
+                                  {((user.designation || '').toLowerCase().includes('nanny') || (user.designation || '').toLowerCase().includes('conductor') || (user.designation || '').toLowerCase().includes('aayah'))
+                                    ? `PV: ${user.driverLicense}`
+                                    : `Lic: ${user.driverLicense}`}
                                 </div>
                               ) : (
                                 <div className="text-xs text-slate-500 font-medium">
-                                  Transport Driver
+                                  {user.designation || 'Transport Crew'}
                                 </div>
                               )}
                               {user.vehicleAssigned && (
@@ -1552,15 +1574,28 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     {formData.role === 'Driver' && (
                       <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
                         <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-                          <Bus className="w-5 h-5 text-amber-700" /> Driver Transport Credentials
+                          <Bus className="w-5 h-5 text-amber-700" />
+                          <span>
+                            {(formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('aayah')
+                              ? 'Bus Nanny (Aayah) Safety & Verification Profile'
+                              : (formData.designation || '').toLowerCase().includes('conductor')
+                              ? 'Bus Conductor Verification Profile'
+                              : 'Driver Transport Credentials & Commercial DL'}
+                          </span>
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
-                            Commercial Driving License No.
+                            {(formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('conductor') || (formData.designation || '').toLowerCase().includes('aayah')
+                              ? 'Police Verification No. / Attendant Security ID'
+                              : 'Commercial Driving License No.'}
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. RJ14-201600104"
+                            placeholder={
+                              (formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('conductor') || (formData.designation || '').toLowerCase().includes('aayah')
+                                ? 'e.g. POL-PV-2026-8812'
+                                : 'e.g. RJ14-201600104'
+                            }
                             value={formData.driverLicense}
                             onChange={e => setFormData({ ...formData, driverLicense: e.target.value })}
                             className="w-full px-3.5 py-2.5 border border-amber-200 rounded-xl text-sm font-mono uppercase bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
@@ -1956,16 +1991,25 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                           </div>
                         </div>
 
-                        {/* 4. Driver License Copy (or Resume for other staff) */}
+                        {/* 4. Driver License Copy (or Police Verification for Nanny/Conductor / Resume for other staff) */}
                         {formData.role === 'Driver' ? (
                           <div className="p-4 border border-amber-200 rounded-2xl bg-amber-50/50 hover:bg-amber-50/80 transition-colors flex flex-col justify-between">
                             <div className="flex items-start justify-between gap-3">
                               <div>
                                 <div className="font-bold text-amber-950 text-sm flex items-center gap-2">
-                                  <Bus className="w-4 h-4 text-amber-700" /> Driving License Scan
+                                  <Bus className="w-4 h-4 text-amber-700" />
+                                  <span>
+                                    {(formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('aayah')
+                                      ? 'Nanny Police Verification Copy'
+                                      : (formData.designation || '').toLowerCase().includes('conductor')
+                                      ? 'Conductor Police Verification Scan'
+                                      : 'Driving License Scan'}
+                                  </span>
                                 </div>
                                 <div className="text-xs text-amber-800/80 mt-1">
-                                  Commercial badge & heavy vehicle scan
+                                  {(formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('conductor') || (formData.designation || '').toLowerCase().includes('aayah')
+                                    ? 'Police verification / background check copy'
+                                    : 'Commercial badge & heavy vehicle scan'}
                                 </div>
                               </div>
                               {formData.documents?.driverLicenseDoc ? (
@@ -1974,14 +2018,20 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                                 </span>
                               ) : (
                                 <span className="text-[11px] bg-amber-200/80 text-amber-900 font-medium px-2 py-0.5 rounded-full shrink-0">
-                                  Driver Mandatory
+                                  {(formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('conductor') || (formData.designation || '').toLowerCase().includes('aayah')
+                                    ? 'Safety Mandatory'
+                                    : 'Driver Mandatory'}
                                 </span>
                               )}
                             </div>
                             <div className="mt-4 flex items-center gap-2 flex-wrap">
                               <label className="cursor-pointer px-3 py-1.5 bg-white border border-amber-200 hover:bg-amber-100/60 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors">
                                 <Upload className="w-3.5 h-3.5 text-amber-700" />
-                                {formData.documents?.driverLicenseDoc ? 'Change License' : 'Upload License'}
+                                {formData.documents?.driverLicenseDoc
+                                  ? 'Change Document'
+                                  : (formData.designation || '').toLowerCase().includes('nanny') || (formData.designation || '').toLowerCase().includes('conductor') || (formData.designation || '').toLowerCase().includes('aayah')
+                                  ? 'Upload Verification'
+                                  : 'Upload License'}
                                 <input
                                   type="file"
                                   accept=".pdf,image/*"

@@ -6,6 +6,11 @@ let vehicles = [
     vehicleNo: 'RJ02PA2762',
     capacity: 42,
     driver: 'SHAITAN SINGH',
+    driverPhone: '+91 98290 88211',
+    driverLicense: 'RJ14-201500892',
+    conductor: 'SUNITA DEVI',
+    conductorPhone: '+91 98290 11442',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-12-31',
     regCertValidity: '2028-05-15',
     fitnessValidity: '2027-01-20',
@@ -20,6 +25,11 @@ let vehicles = [
     vehicleNo: 'RJ14PC1019',
     capacity: 42,
     driver: 'HANSRAJ JAT',
+    driverPhone: '+91 98291 44521',
+    driverLicense: 'RJ14-201600104',
+    conductor: 'MANJU DEVI',
+    conductorPhone: '+91 98290 44211',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-11-30',
     regCertValidity: '2027-08-10',
     fitnessValidity: '2026-12-15',
@@ -34,6 +44,11 @@ let vehicles = [
     vehicleNo: 'RJ14PC1037',
     capacity: 50,
     driver: 'PRAKASH CHOUDHARY',
+    driverPhone: '+91 94140 22319',
+    driverLicense: 'RJ14-201400511',
+    conductor: 'MUKESH MEENA',
+    conductorPhone: '+91 98290 99412',
+    conductorType: 'Bus Conductor',
     pucValidity: '2027-01-15',
     regCertValidity: '2028-02-28',
     fitnessValidity: '2026-12-05',
@@ -48,6 +63,11 @@ let vehicles = [
     vehicleNo: 'RJ14PC2278',
     capacity: 40,
     driver: 'SHYAM SUNDER',
+    driverPhone: '+91 98288 33110',
+    driverLicense: 'RJ14-201700982',
+    conductor: 'DINESH VERMA',
+    conductorPhone: '+91 98290 33901',
+    conductorType: 'Bus Conductor',
     pucValidity: '2026-10-25',
     regCertValidity: '2027-09-30',
     fitnessValidity: '2026-11-18',
@@ -62,6 +82,11 @@ let vehicles = [
     vehicleNo: 'RJ14PC5938',
     capacity: 45,
     driver: 'NARESH',
+    driverPhone: '+91 96024 11209',
+    driverLicense: 'RJ14-201300445',
+    conductor: 'KAMLESH DEVI',
+    conductorPhone: '+91 98290 55890',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-12-15',
     regCertValidity: '2028-01-10',
     fitnessValidity: '2027-02-15',
@@ -76,6 +101,11 @@ let vehicles = [
     vehicleNo: 'RJ14PC7878',
     capacity: 42,
     driver: 'BABU LAL',
+    driverPhone: '+91 98291 77201',
+    driverLicense: 'RJ14-201800621',
+    conductor: 'SANTOSH DEVI',
+    conductorPhone: '+91 98290 77123',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-11-20',
     regCertValidity: '2027-11-25',
     fitnessValidity: '2026-12-28',
@@ -90,6 +120,11 @@ let vehicles = [
     vehicleNo: 'RJ14PE0832',
     capacity: 42,
     driver: 'RAMESH',
+    driverPhone: '+91 94140 88310',
+    driverLicense: 'RJ14-201500293',
+    conductor: 'PREM LATA',
+    conductorPhone: '+91 98290 22345',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-12-05',
     regCertValidity: '2028-04-12',
     fitnessValidity: '2027-03-10',
@@ -104,6 +139,11 @@ let vehicles = [
     vehicleNo: 'RJ19PB7511',
     capacity: 42,
     driver: 'RAJU IPS',
+    driverPhone: '+91 98280 66120',
+    driverLicense: 'RJ19-201600741',
+    conductor: 'GEETA BAI',
+    conductorPhone: '+91 98290 12456',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-10-30',
     regCertValidity: '2027-06-18',
     fitnessValidity: '2026-11-30',
@@ -118,6 +158,11 @@ let vehicles = [
     vehicleNo: 'RJ20PA9932',
     capacity: 50,
     driver: 'BHARAT JANGID',
+    driverPhone: '+91 98288 84422',
+    driverLicense: 'RJ20-201700319',
+    conductor: 'RAMESH KUMAR',
+    conductorPhone: '+91 98290 66541',
+    conductorType: 'Bus Conductor',
     pucValidity: '2027-02-10',
     regCertValidity: '2028-07-20',
     fitnessValidity: '2027-04-15',
@@ -132,6 +177,11 @@ let vehicles = [
     vehicleNo: 'RJ40PA1179',
     capacity: 42,
     driver: 'LALARAM',
+    driverPhone: '+91 94140 55190',
+    driverLicense: 'RJ40-201400823',
+    conductor: 'KAVITA SHARMA',
+    conductorPhone: '+91 98290 88120',
+    conductorType: 'Bus Nanny (Aayah)',
     pucValidity: '2026-11-15',
     regCertValidity: '2027-10-10',
     fitnessValidity: '2026-12-10',
@@ -238,6 +288,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'HANSRAJ JAT',
+    conductor: 'MANJU DEVI (Nanny)',
     routes: ['Kalwara, Ajairajpura']
   },
   {
@@ -246,6 +297,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'LALARAM',
+    conductor: 'KAVITA SHARMA (Nanny)',
     routes: ['Thikriya, Vatika']
   },
   {
@@ -254,6 +306,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'SHAITAN SINGH',
+    conductor: 'SUNITA DEVI (Nanny)',
     routes: ['Jaisinghpura, Rampura']
   },
   {
@@ -262,6 +315,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 50,
     driver: 'BHARAT JANGID',
+    conductor: 'RAMESH KUMAR (Conductor)',
     routes: ['Auric City & Shub Nilay']
   },
   {
@@ -270,6 +324,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'BABU LAL',
+    conductor: 'SANTOSH DEVI (Nanny)',
     routes: ['Manglam Aangan']
   },
   {
@@ -278,6 +333,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 50,
     driver: 'PRAKASH CHOUDHARY',
+    conductor: 'MUKESH MEENA (Conductor)',
     routes: ['Mangalam Grand City']
   },
   {
@@ -286,6 +342,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'RAJU IPS',
+    conductor: 'GEETA BAI (Nanny)',
     routes: ['Narsinghpura, Ramchandrapura']
   },
   {
@@ -294,6 +351,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 45,
     driver: 'NARESH',
+    conductor: 'KAMLESH DEVI (Nanny)',
     routes: ['Aasra, J K Lakshmipat University']
   },
   {
@@ -302,6 +360,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 40,
     driver: 'SHYAM SUNDER',
+    conductor: 'DINESH VERMA (Conductor)',
     routes: ['Bhankrota, Mojika, Hanging Gardens']
   },
   {
@@ -310,6 +369,7 @@ let assignedVehicles = [
     type: 'Bus',
     capacity: 42,
     driver: 'RAMESH',
+    conductor: 'PREM LATA (Nanny)',
     routes: ['Khatwara']
   }
 ];
@@ -486,6 +546,9 @@ export const getVehicles = (req, res) => {
       destinations: dests,
       driverPhone: v.driverPhone || '98290' + Math.floor(10000 + (v.id * 739) % 90000),
       driverLicense: v.driverLicense || `RJ14-${2015 + (v.id % 5)}00${v.id}2`,
+      conductor: v.conductor || 'SUNITA DEVI',
+      conductorPhone: v.conductorPhone || '9829011442',
+      conductorType: v.conductorType || 'Bus Nanny (Aayah)',
       model: v.model || `${v.vehicleType || 'Bus'} - ${v.capacity} Seater`,
       fuelType: v.fuelType || 'Diesel (BS-VI)',
       documents: v.documents || [
@@ -545,7 +608,24 @@ export const getVehicles = (req, res) => {
 };
 
 export const createVehicle = (req, res) => {
-  const { vehicleType, vehicleNo, capacity, driver, pucValidity, regCertValidity, fitnessValidity, insuranceValidity, permitValidity, trackNo, trackApi } = req.body;
+  const {
+    vehicleType,
+    vehicleNo,
+    capacity,
+    driver,
+    driverPhone,
+    driverLicense,
+    conductor,
+    conductorPhone,
+    conductorType,
+    pucValidity,
+    regCertValidity,
+    fitnessValidity,
+    insuranceValidity,
+    permitValidity,
+    trackNo,
+    trackApi
+  } = req.body;
   if (!vehicleNo) {
     return res.status(400).json({ success: false, message: 'Vehicle number is required' });
   }
@@ -555,6 +635,11 @@ export const createVehicle = (req, res) => {
     vehicleNo,
     capacity: Number(capacity) || 40,
     driver: driver || '',
+    driverPhone: driverPhone || '',
+    driverLicense: driverLicense || '',
+    conductor: conductor || '',
+    conductorPhone: conductorPhone || '',
+    conductorType: conductorType || 'Bus Nanny (Aayah)',
     pucValidity: pucValidity || '',
     regCertValidity: regCertValidity || '',
     fitnessValidity: fitnessValidity || '',
@@ -744,22 +829,25 @@ export const getAssignedVehicles = (req, res) => {
 };
 
 export const saveAssignedVehicle = (req, res) => {
-  const { vehicleNo, routes: routeList } = req.body;
+  const { vehicleNo, routes: routeList, driver, conductor } = req.body;
   const idx = assignedVehicles.findIndex(av => av.vehicleNo === vehicleNo);
+  const v = vehicles.find(veh => veh.vehicleNo === vehicleNo);
   if (idx !== -1) {
     assignedVehicles[idx].routes = routeList || [];
+    if (driver) assignedVehicles[idx].driver = driver;
+    if (conductor) assignedVehicles[idx].conductor = conductor;
   } else {
-    const v = vehicles.find(veh => veh.vehicleNo === vehicleNo);
     assignedVehicles.push({
       id: assignedVehicles.length + 1,
       vehicleNo,
       type: v?.vehicleType || 'Bus',
       capacity: v?.capacity || 42,
-      driver: v?.driver || '',
+      driver: driver || v?.driver || '',
+      conductor: conductor || v?.conductor || '',
       routes: routeList || []
     });
   }
-  res.status(200).json({ success: true, message: 'Vehicle routes updated successfully' });
+  res.status(200).json({ success: true, message: 'Vehicle routes and crew assignments updated successfully' });
 };
 
 // --- EDIT STUDENT TRANSPORT FEE ---
