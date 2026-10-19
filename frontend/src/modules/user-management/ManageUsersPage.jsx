@@ -29,7 +29,7 @@ import {
   BookOpen,
   Calendar,
   Settings2,
-  RefreshCw
+  Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -57,12 +57,44 @@ const ALL_VEHICLES = [
   { no: 'RJ14PC2278', name: 'Bus 04 (40 Seater)', route: 'Route 4 (Jagatpura)' }
 ];
 
-const ROLE_OPTIONS = [
-  { value: 'Teacher', label: 'Teacher / Faculty', icon: GraduationCap, color: 'emerald' },
-  { value: 'Staff', label: 'Office / Admin Staff', icon: Briefcase, color: 'blue' },
-  { value: 'Driver', label: 'Driver / Transport Staff', icon: Bus, color: 'amber' },
-  { value: 'Accountant', label: 'Accountant / Cashier', icon: Award, color: 'indigo' },
-  { value: 'Admin', label: 'System Admin / Principal', icon: Shield, color: 'purple' }
+// Unified Staff Categories
+const STAFF_CATEGORIES = [
+  {
+    id: 'Teaching',
+    label: 'Teaching Staff',
+    description: 'Faculty, Subject Teachers, Class Incharges, PRT / TGT / PGT',
+    icon: GraduationCap,
+    badgeColor: 'emerald',
+    defaultRole: 'Teacher',
+    defaultDept: 'Academics'
+  },
+  {
+    id: 'Non-Teaching',
+    label: 'Non-Teaching Staff',
+    description: 'Accounts, Administration, Library, Front Office, Clerical',
+    icon: Briefcase,
+    badgeColor: 'blue',
+    defaultRole: 'Staff',
+    defaultDept: 'Accounts'
+  },
+  {
+    id: 'Transport',
+    label: 'Transport Staff',
+    description: 'School Bus Drivers, Van Drivers, Fleet Conductors',
+    icon: Bus,
+    badgeColor: 'amber',
+    defaultRole: 'Driver',
+    defaultDept: 'Transport'
+  },
+  {
+    id: 'Management',
+    label: 'School Administration',
+    description: 'Principal, Vice Principal, Director, System Admin',
+    icon: Shield,
+    badgeColor: 'purple',
+    defaultRole: 'Admin',
+    defaultDept: 'Administration'
+  }
 ];
 
 export function ManageUsersPage({ onNavigate }) {
@@ -70,7 +102,7 @@ export function ManageUsersPage({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserIds, setSelectedUserIds] = useState([]);
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'TEACHER' | 'STAFF' | 'DRIVER' | 'ADMIN'
+  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'Teaching' | 'Non-Teaching' | 'Transport' | 'Management'
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [departmentFilter, setDepartmentFilter] = useState('ALL');
 
@@ -100,14 +132,16 @@ export function ManageUsersPage({ onNavigate }) {
   // Add / Edit User Form State
   const [formData, setFormData] = useState({
     staffName: '',
+    category: 'Teaching', // 'Teaching' | 'Non-Teaching' | 'Transport' | 'Management'
     role: 'Teacher',
+    designation: 'Subject Teacher',
     department: 'Academics',
     mobileNo: '',
     email: '',
     driverLicense: '',
     vehicleAssigned: '',
     division: 'Primary',
-    modules: ['Student', 'Attendance', 'Academics'],
+    modules: ['Student', 'Attendance', 'Examination'],
     classes: ['I - A', 'I - B'],
     subjects: ['English', 'Mathematics']
   });
@@ -131,19 +165,21 @@ export function ManageUsersPage({ onNavigate }) {
     fetchUsers();
   }, []);
 
-  const handleOpenAddModal = (presetRole = 'Staff') => {
+  const handleOpenAddModal = (presetCategory = 'Teaching') => {
     setFormData({
       staffName: '',
-      role: presetRole,
-      department: presetRole === 'Driver' ? 'Transport' : presetRole === 'Teacher' ? 'Academics' : presetRole === 'Accountant' ? 'Accounts' : 'Administration',
+      category: presetCategory,
+      role: presetCategory === 'Transport' ? 'Driver' : presetCategory === 'Teaching' ? 'Teacher' : presetCategory === 'Management' ? 'Admin' : 'Staff',
+      designation: presetCategory === 'Transport' ? 'School Bus Driver' : presetCategory === 'Teaching' ? 'Subject Teacher' : presetCategory === 'Management' ? 'Principal / Admin' : 'Senior Accountant',
+      department: presetCategory === 'Transport' ? 'Transport' : presetCategory === 'Teaching' ? 'Academics' : presetCategory === 'Management' ? 'Administration' : 'Accounts',
       mobileNo: '',
       email: '',
-      driverLicense: presetRole === 'Driver' ? 'RJ14-' : '',
-      vehicleAssigned: presetRole === 'Driver' ? 'RJ02PA2762 - Route 1 (Kalyanpura)' : '',
-      division: presetRole === 'Driver' ? 'Transport' : 'Primary',
-      modules: presetRole === 'Driver' ? ['Transport'] : presetRole === 'Teacher' ? ['Student', 'Attendance', 'Examination'] : ['Fee', 'Front Office'],
-      classes: presetRole === 'Teacher' ? ['I - A'] : [],
-      subjects: presetRole === 'Teacher' ? ['English'] : []
+      driverLicense: presetCategory === 'Transport' ? 'RJ14-' : '',
+      vehicleAssigned: presetCategory === 'Transport' ? 'RJ02PA2762 - Route 1 (Kalyanpura)' : '',
+      division: presetCategory === 'Transport' ? 'Transport' : 'Primary',
+      modules: presetCategory === 'Transport' ? ['Transport'] : presetCategory === 'Teaching' ? ['Student', 'Attendance', 'Examination'] : ['Fee', 'Front Office', 'Payroll'],
+      classes: presetCategory === 'Teaching' ? ['I - A'] : [],
+      subjects: presetCategory === 'Teaching' ? ['English'] : []
     });
     setEditingUser(null);
     setIsAddUserOpen(true);
@@ -151,9 +187,12 @@ export function ManageUsersPage({ onNavigate }) {
 
   const handleOpenEditModal = (user) => {
     setEditingUser(user);
+    const resolvedCategory = user.category || (user.role === 'Driver' ? 'Transport' : user.role === 'Teacher' ? 'Teaching' : user.role === 'Admin' ? 'Management' : 'Non-Teaching');
     setFormData({
       staffName: user.displayName || user.name.replace(/^\[.*?\]\s*/, ''),
+      category: resolvedCategory,
       role: user.role || 'Staff',
+      designation: user.designation || (resolvedCategory === 'Teaching' ? 'Faculty / Teacher' : resolvedCategory === 'Transport' ? 'Bus Driver' : 'Staff'),
       department: user.department || 'Academics',
       mobileNo: user.phone || '',
       email: user.email || '',
@@ -167,10 +206,70 @@ export function ManageUsersPage({ onNavigate }) {
     setIsAddUserOpen(true);
   };
 
+  const handleCategoryChange = (newCat) => {
+    if (newCat === 'Teaching') {
+      setFormData(prev => ({
+        ...prev,
+        category: 'Teaching',
+        role: 'Teacher',
+        designation: 'Subject Teacher',
+        department: 'Academics',
+        division: 'Primary',
+        modules: ['Student', 'Attendance', 'Examination', 'Academics'],
+        classes: (prev.classes && prev.classes.length > 0) ? prev.classes : ['I - A'],
+        subjects: (prev.subjects && prev.subjects.length > 0) ? prev.subjects : ['English'],
+        driverLicense: '',
+        vehicleAssigned: ''
+      }));
+    } else if (newCat === 'Non-Teaching') {
+      setFormData(prev => ({
+        ...prev,
+        category: 'Non-Teaching',
+        role: 'Staff',
+        designation: 'Senior Accountant',
+        department: 'Accounts',
+        division: 'Administration',
+        modules: ['Fee', 'Payroll', 'Front Office'],
+        classes: [],
+        subjects: [],
+        driverLicense: '',
+        vehicleAssigned: ''
+      }));
+    } else if (newCat === 'Transport') {
+      setFormData(prev => ({
+        ...prev,
+        category: 'Transport',
+        role: 'Driver',
+        designation: 'School Bus Driver',
+        department: 'Transport',
+        division: 'Transport',
+        driverLicense: prev.driverLicense || 'RJ14-',
+        vehicleAssigned: prev.vehicleAssigned || 'RJ02PA2762 - Route 1 (Kalyanpura)',
+        modules: ['Transport'],
+        classes: [],
+        subjects: []
+      }));
+    } else if (newCat === 'Management') {
+      setFormData(prev => ({
+        ...prev,
+        category: 'Management',
+        role: 'Admin',
+        designation: 'Principal / Admin',
+        department: 'Administration',
+        division: 'All',
+        modules: ALL_MODULES,
+        classes: [],
+        subjects: [],
+        driverLicense: '',
+        vehicleAssigned: ''
+      }));
+    }
+  };
+
   const handleSubmitUser = async (e) => {
     e.preventDefault();
     if (!formData.staffName.trim()) {
-      toast.error('Please enter name');
+      toast.error('Please enter staff member name');
       return;
     }
     if (!formData.mobileNo.trim()) {
@@ -185,23 +284,28 @@ export function ManageUsersPage({ onNavigate }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             displayName: formData.staffName,
+            category: formData.category,
             role: formData.role,
+            designation: formData.designation,
             department: formData.department,
             phone: formData.mobileNo,
             email: formData.email,
             driverLicense: formData.driverLicense,
             vehicleAssigned: formData.vehicleAssigned,
-            division: formData.division
+            division: formData.division,
+            classes: formData.classes,
+            subjects: formData.subjects,
+            modules: formData.modules
           })
         });
         const data = await res.json();
         if (data.success) {
-          toast.success('User updated successfully');
+          toast.success('Staff details updated successfully');
           setIsAddUserOpen(false);
           setEditingUser(null);
           fetchUsers();
         } else {
-          toast.error(data.message || 'Failed to update user');
+          toast.error(data.message || 'Failed to update staff');
         }
       } else {
         const res = await fetch('/api/user-management/users', {
@@ -211,11 +315,11 @@ export function ManageUsersPage({ onNavigate }) {
         });
         const data = await res.json();
         if (data.success) {
-          toast.success(data.message || 'User added successfully');
+          toast.success(data.message || 'Staff member added successfully');
           setIsAddUserOpen(false);
           fetchUsers();
         } else {
-          toast.error(data.message || 'Failed to add user');
+          toast.error(data.message || 'Failed to add staff member');
         }
       }
     } catch {
@@ -257,24 +361,24 @@ export function ManageUsersPage({ onNavigate }) {
   };
 
   const handleDeleteUser = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to remove ${name || 'this user'}?`)) return;
+    if (!window.confirm(`Are you sure you want to remove ${name || 'this staff member'}?`)) return;
     try {
       const res = await fetch(`/api/user-management/users/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        toast.success('User removed successfully');
+        toast.success('Staff member removed successfully');
         setSelectedUserIds(prev => prev.filter(i => i !== id));
         fetchUsers();
       }
     } catch {
-      toast.error('Failed to delete user');
+      toast.error('Failed to delete staff member');
     }
   };
 
   // Bulk actions handler
   const handleBulkAction = async (action) => {
     if (selectedUserIds.length === 0) return;
-    if (action === 'delete' && !window.confirm(`Are you sure you want to delete ${selectedUserIds.length} selected users?`)) {
+    if (action === 'delete' && !window.confirm(`Are you sure you want to delete ${selectedUserIds.length} selected staff members?`)) {
       return;
     }
 
@@ -391,11 +495,12 @@ export function ManageUsersPage({ onNavigate }) {
   // Export to CSV
   const handleExportCSV = () => {
     if (users.length === 0) return;
-    const headers = ['Employee Code', 'Full Name', 'Role', 'Department', 'Phone', 'Email', 'Status', 'License / Vehicle', 'Classes / Subjects'];
+    const headers = ['Employee Code', 'Staff Name', 'Category', 'Role / Designation', 'Department', 'Phone', 'Email', 'Status', 'License / Vehicle', 'Classes / Subjects'];
     const rows = filteredUsers.map(u => [
       `"${u.empCode || ''}"`,
       `"${u.displayName || u.name || ''}"`,
-      `"${u.role || ''}"`,
+      `"${u.category || (u.role === 'Teacher' ? 'Teaching' : u.role === 'Driver' ? 'Transport' : 'Non-Teaching')}"`,
+      `"${u.designation || u.role || ''}"`,
       `"${u.department || ''}"`,
       `"${u.phone || ''}"`,
       `"${u.email || ''}"`,
@@ -408,21 +513,32 @@ export function ManageUsersPage({ onNavigate }) {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `School_Users_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `School_Staff_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('Users list exported as CSV');
+    toast.success('Staff directory exported as CSV');
+  };
+
+  // Helper to resolve staff category
+  const getUserCategory = (u) => {
+    if (u.category) return u.category;
+    if (u.role === 'Teacher') return 'Teaching';
+    if (u.role === 'Driver') return 'Transport';
+    if (u.role === 'Admin') return 'Management';
+    return 'Non-Teaching';
   };
 
   // Filtered users logic
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      // Tab filter
-      if (activeTab === 'TEACHER' && u.role !== 'Teacher') return false;
-      if (activeTab === 'STAFF' && u.role !== 'Staff' && u.role !== 'Accountant') return false;
-      if (activeTab === 'DRIVER' && u.role !== 'Driver') return false;
-      if (activeTab === 'ADMIN' && u.role !== 'Admin') return false;
+      const cat = getUserCategory(u);
+
+      // Category Tab filter
+      if (activeTab === 'Teaching' && cat !== 'Teaching') return false;
+      if (activeTab === 'Non-Teaching' && cat !== 'Non-Teaching') return false;
+      if (activeTab === 'Transport' && cat !== 'Transport') return false;
+      if (activeTab === 'Management' && cat !== 'Management') return false;
 
       // Status filter
       if (statusFilter === 'ACTIVE' && !u.isActive) return false;
@@ -438,10 +554,11 @@ export function ManageUsersPage({ onNavigate }) {
         const matchPhone = u.phone && u.phone.includes(q);
         const matchEmail = u.email && u.email.toLowerCase().includes(q);
         const matchRole = u.role && u.role.toLowerCase().includes(q);
+        const matchDesignation = u.designation && u.designation.toLowerCase().includes(q);
         const matchDept = u.department && u.department.toLowerCase().includes(q);
         const matchLicense = u.driverLicense && u.driverLicense.toLowerCase().includes(q);
         const matchVehicle = u.vehicleAssigned && u.vehicleAssigned.toLowerCase().includes(q);
-        if (!matchName && !matchPhone && !matchEmail && !matchRole && !matchDept && !matchLicense && !matchVehicle) {
+        if (!matchName && !matchPhone && !matchEmail && !matchRole && !matchDesignation && !matchDept && !matchLicense && !matchVehicle) {
           return false;
         }
       }
@@ -463,16 +580,17 @@ export function ManageUsersPage({ onNavigate }) {
     }
   };
 
-  // KPI Metrics
+  // KPI Metrics (Accurately categorized under Staff)
   const totalCount = users.length;
-  const teachersCount = users.filter(u => u.role === 'Teacher').length;
-  const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Accountant').length;
-  const driversCount = users.filter(u => u.role === 'Driver').length;
+  const teachingStaffCount = users.filter(u => getUserCategory(u) === 'Teaching').length;
+  const nonTeachingStaffCount = users.filter(u => getUserCategory(u) === 'Non-Teaching').length;
+  const transportStaffCount = users.filter(u => getUserCategory(u) === 'Transport').length;
+  const managementCount = users.filter(u => getUserCategory(u) === 'Management').length;
   const activeCount = users.filter(u => u.isActive).length;
 
   return (
     <div className="p-3 sm:p-5 bg-slate-50 min-h-screen text-slate-800 space-y-3">
-      {/* 1. Sleek Compact Command Card (Header + Actions + KPI Pill Strip) */}
+      {/* 1. Sleek Compact Command Card (Header + Actions + Staff Category Tabs) */}
       <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200/80 space-y-3">
         {/* Row 1: Title & Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -483,10 +601,10 @@ export function ManageUsersPage({ onNavigate }) {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-slate-900 leading-tight">
-                  Users & Campus Staff Directory
+                  Campus Staff & Employee Directory
                 </h1>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                  {totalCount} Total
+                  {totalCount} Total Staff
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
@@ -497,7 +615,7 @@ export function ManageUsersPage({ onNavigate }) {
                   <Home className="w-3 h-3" /> Dashboard
                 </span>
                 <span>/</span>
-                <span className="text-indigo-600 font-semibold">User Management</span>
+                <span className="text-indigo-600 font-semibold">Staff & User Management</span>
               </div>
             </div>
           </div>
@@ -505,13 +623,13 @@ export function ManageUsersPage({ onNavigate }) {
           {/* Action Buttons */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
-              onClick={() => handleOpenAddModal('Staff')}
+              onClick={() => handleOpenAddModal('Teaching')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95"
             >
-              <UserPlus className="w-3.5 h-3.5" /> + Add User / Staff
+              <UserPlus className="w-3.5 h-3.5" /> + Add Staff Member
             </button>
             <button
-              onClick={() => handleOpenAddModal('Driver')}
+              onClick={() => handleOpenAddModal('Transport')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95"
             >
               <Bus className="w-3.5 h-3.5" /> + Add Driver
@@ -532,15 +650,15 @@ export function ManageUsersPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* Row 2: Role Filter Tabs & Live Counts */}
+        {/* Row 2: Unified Staff Categories Filter Bar */}
         <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 flex-wrap gap-2 text-xs">
           <div className="flex items-center gap-1.5 flex-wrap">
             {[
-              { id: 'ALL', label: 'All Users', count: totalCount, icon: Users, color: 'indigo' },
-              { id: 'TEACHER', label: 'Teachers', count: teachersCount, icon: GraduationCap, color: 'emerald' },
-              { id: 'STAFF', label: 'Office & Accounts', count: staffCount, icon: Briefcase, color: 'blue' },
-              { id: 'DRIVER', label: 'Drivers & Fleet', count: driversCount, icon: Bus, color: 'amber' },
-              { id: 'ADMIN', label: 'Admins', count: users.filter(u => u.role === 'Admin').length, icon: Shield, color: 'purple' }
+              { id: 'ALL', label: 'All Staff Members', count: totalCount, icon: Users, color: 'indigo' },
+              { id: 'Teaching', label: 'Teaching Staff', count: teachingStaffCount, icon: GraduationCap, color: 'emerald' },
+              { id: 'Non-Teaching', label: 'Non-Teaching Staff', count: nonTeachingStaffCount, icon: Briefcase, color: 'blue' },
+              { id: 'Transport', label: 'Transport Staff / Drivers', count: transportStaffCount, icon: Bus, color: 'amber' },
+              { id: 'Management', label: 'School Admin', count: managementCount, icon: Shield, color: 'purple' }
             ].map(tab => {
               const IconComp = tab.icon;
               const isActive = activeTab === tab.id;
@@ -604,7 +722,7 @@ export function ManageUsersPage({ onNavigate }) {
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Search by name, phone, email, license, bus no..."
+                placeholder="Search staff by name, designation, phone, bus no..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full text-xs pl-8 pr-7 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50/60"
@@ -637,16 +755,16 @@ export function ManageUsersPage({ onNavigate }) {
               className="text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hidden md:block"
             >
               <option value="ALL">All Departments</option>
-              <option value="Academics">Academics</option>
+              <option value="Academics">Academics (Teaching)</option>
+              <option value="Accounts">Accounts & Finance</option>
               <option value="Administration">Administration</option>
-              <option value="Accounts">Accounts</option>
-              <option value="Transport">Transport</option>
+              <option value="Transport">Transport & Fleet</option>
               <option value="Library">Library</option>
             </select>
           </div>
 
           <div className="text-xs text-slate-500 font-medium">
-            Showing <strong className="text-indigo-600 font-bold">{filteredUsers.length}</strong> of {totalCount} users
+            Showing <strong className="text-indigo-600 font-bold">{filteredUsers.length}</strong> of {totalCount} staff members
           </div>
         </div>
 
@@ -655,7 +773,7 @@ export function ManageUsersPage({ onNavigate }) {
           <div className="p-2 bg-indigo-50/90 border border-indigo-200 rounded-lg flex items-center justify-between flex-wrap gap-2 text-xs animate-in fade-in duration-150">
             <div className="flex items-center gap-2">
               <span className="font-bold text-indigo-900 bg-white px-2 py-0.5 rounded border border-indigo-200">
-                {selectedUserIds.length} Selected
+                {selectedUserIds.length} Staff Selected
               </span>
               <span className="text-indigo-700">Actions:</span>
             </div>
@@ -689,7 +807,7 @@ export function ManageUsersPage({ onNavigate }) {
         )}
       </div>
 
-      {/* 2. Main Directory Table (Clean, Role-Adaptive) */}
+      {/* 2. Main Staff Directory Table */}
       <div className="bg-white rounded-xl shadow-xs border border-slate-200/80 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
@@ -706,10 +824,10 @@ export function ManageUsersPage({ onNavigate }) {
                     title="Select / Deselect All Filtered"
                   />
                 </th>
-                <th className="py-2.5 px-3">USER / EMPLOYEE</th>
-                <th className="py-2.5 px-3">ROLE & DEPT</th>
-                <th className="py-2.5 px-3">ROLE ASSIGNMENTS & DETAILS</th>
-                <th className="py-2.5 px-3 text-center">MODULE ACCESS</th>
+                <th className="py-2.5 px-3">STAFF MEMBER / EMPLOYEE</th>
+                <th className="py-2.5 px-3">STAFF CATEGORY & ROLE</th>
+                <th className="py-2.5 px-3">DUTIES & ASSIGNMENTS</th>
+                <th className="py-2.5 px-3 text-center">ERP MODULES</th>
                 <th className="py-2.5 px-3 text-center">PERMISSIONS</th>
                 <th className="py-2.5 px-2 text-center w-20">STATUS</th>
                 <th className="py-2.5 px-3 text-center w-20">ACTIONS</th>
@@ -720,21 +838,23 @@ export function ManageUsersPage({ onNavigate }) {
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
                     <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-2" />
-                    Loading users directory...
+                    Loading staff directory...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
                     <Users className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                    No users found matching your filters.
+                    No staff members found matching your filters.
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map(user => {
-                  const isDriver = user.role === 'Driver';
-                  const isTeacher = user.role === 'Teacher';
-                  const isStaff = user.role === 'Staff' || user.role === 'Accountant' || user.role === 'Admin';
+                  const cat = getUserCategory(user);
+                  const isTeaching = cat === 'Teaching';
+                  const isTransport = cat === 'Transport';
+                  const isNonTeaching = cat === 'Non-Teaching';
+                  const isManagement = cat === 'Management';
                   const isSelected = selectedUserIds.includes(user.id);
 
                   return (
@@ -758,7 +878,7 @@ export function ManageUsersPage({ onNavigate }) {
                         />
                       </td>
 
-                      {/* USER / EMPLOYEE INFO */}
+                      {/* STAFF MEMBER / EMPLOYEE INFO */}
                       <td className="py-2.5 px-3">
                         <div className="flex items-center gap-2.5">
                           <img
@@ -791,35 +911,36 @@ export function ManageUsersPage({ onNavigate }) {
                         </div>
                       </td>
 
-                      {/* ROLE & DEPT */}
+                      {/* STAFF CATEGORY & ROLE */}
                       <td className="py-2.5 px-3">
                         <div className="space-y-0.5">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            isTeacher
+                            isTeaching
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : isDriver
+                              : isTransport
                               ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                              : user.role === 'Admin'
+                              : isManagement
                               ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                              : user.role === 'Accountant'
-                              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                               : 'bg-blue-50 text-blue-700 border border-blue-200'
                           }`}>
-                            {isDriver && <Bus className="w-3 h-3" />}
-                            {isTeacher && <GraduationCap className="w-3 h-3" />}
-                            {isStaff && <Briefcase className="w-3 h-3" />}
-                            {user.role || 'Staff'}
+                            {isTeaching && <GraduationCap className="w-3 h-3" />}
+                            {isTransport && <Bus className="w-3 h-3" />}
+                            {isNonTeaching && <Briefcase className="w-3 h-3" />}
+                            {isManagement && <Shield className="w-3 h-3" />}
+                            {isTeaching ? 'Teaching Staff' : isTransport ? 'Transport Staff' : isManagement ? 'School Admin' : 'Non-Teaching Staff'}
                           </span>
-                          <div className="text-[11px] text-slate-500 font-medium">
-                            {user.department || (isDriver ? 'Transport' : 'Academics')}
+                          <div className="text-[11px] text-slate-600 font-semibold flex items-center gap-1">
+                            <span>{user.designation || user.role}</span>
+                            <span className="text-slate-400">•</span>
+                            <span className="text-slate-500 font-normal">{user.department}</span>
                           </div>
                         </div>
                       </td>
 
-                      {/* ROLE ASSIGNMENTS & DETAILS (Role-Adaptive) */}
+                      {/* DUTIES & ASSIGNMENTS (Role-Adaptive) */}
                       <td className="py-2.5 px-3">
-                        {isDriver ? (
-                          /* DRIVER DETAILS: License + Vehicle + Route */
+                        {isTransport ? (
+                          /* TRANSPORT STAFF: License + Vehicle + Route */
                           <div className="space-y-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-mono text-[10px] font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
@@ -839,8 +960,8 @@ export function ManageUsersPage({ onNavigate }) {
                               </span>
                             </div>
                           </div>
-                        ) : isTeacher ? (
-                          /* TEACHER DETAILS: Assigned Classes & Subjects */
+                        ) : isTeaching ? (
+                          /* TEACHING STAFF: Assigned Classes & Subjects */
                           <div className="space-y-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {/* Classes Button / Pills */}
@@ -887,7 +1008,7 @@ export function ManageUsersPage({ onNavigate }) {
                             </div>
                           </div>
                         ) : (
-                          /* STAFF / ADMIN DETAILS: Scope & Division */
+                          /* NON-TEACHING / ADMIN STAFF */
                           <div className="space-y-0.5">
                             <div className="text-[11px] font-semibold text-slate-800">
                               {user.department === 'Accounts' ? 'Fee Collection & Finance Management' : user.department === 'Library' ? 'Book Circulation & Catalog' : 'Administrative Operations'}
@@ -899,7 +1020,7 @@ export function ManageUsersPage({ onNavigate }) {
                         )}
                       </td>
 
-                      {/* MODULE ACCESS */}
+                      {/* ERP MODULE ACCESS */}
                       <td className="py-2.5 px-3 text-center">
                         <button
                           onClick={() => openConfigModal(user, 'modules')}
@@ -917,7 +1038,7 @@ export function ManageUsersPage({ onNavigate }) {
 
                       {/* PERMISSIONS (CRUD Toggles) */}
                       <td className="py-2.5 px-3 text-center">
-                        {isDriver ? (
+                        {isTransport ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <Check className="w-3 h-3" /> Driver App Access
                           </span>
@@ -986,14 +1107,14 @@ export function ManageUsersPage({ onNavigate }) {
                           <button
                             onClick={() => handleOpenEditModal(user)}
                             className="p-1.5 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                            title="Edit User Profile"
+                            title="Edit Staff Member"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user.id, user.displayName || user.name)}
                             className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Delete User"
+                            title="Delete Staff Member"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1008,22 +1129,22 @@ export function ManageUsersPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* 3. ADD / EDIT USER MODAL */}
+      {/* 3. RESTRUCTURED LOGICAL ADD / EDIT STAFF MODAL */}
       {isAddUserOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-bold">
-                  {formData.role === 'Driver' ? <Bus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-bold shadow-2xs">
+                  {formData.category === 'Teaching' ? <GraduationCap className="w-5 h-5" /> : formData.category === 'Transport' ? <Bus className="w-5 h-5 text-amber-600" /> : <Briefcase className="w-5 h-5 text-blue-600" />}
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">
-                    {editingUser ? 'Edit User Details' : 'Add New System User'}
+                    {editingUser ? 'Edit Staff Member Details' : 'Add New Staff Member'}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    Faculty, office staff, drivers, and school administrators
+                    School employee registration & access setup
                   </p>
                 </div>
               </div>
@@ -1037,91 +1158,246 @@ export function ManageUsersPage({ onNavigate }) {
 
             {/* Modal Form */}
             <form onSubmit={handleSubmitUser} className="p-5 overflow-y-auto space-y-4 text-xs">
-              {/* Role Selection */}
+              {/* Step 1: Select Staff Category (Teaching vs Non-Teaching vs Transport) */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Select User Role <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                  Staff Category <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {ROLE_OPTIONS.map(opt => {
-                    const IconComp = opt.icon;
-                    const isSelected = formData.role === opt.value;
+                <div className="grid grid-cols-2 gap-2">
+                  {STAFF_CATEGORIES.map(cat => {
+                    const IconComp = cat.icon;
+                    const isSelected = formData.category === cat.id;
                     return (
                       <button
                         type="button"
-                        key={opt.value}
-                        onClick={() => {
-                          setFormData({
-                            ...formData,
-                            role: opt.value,
-                            department: opt.value === 'Driver' ? 'Transport' : opt.value === 'Teacher' ? 'Academics' : opt.value === 'Accountant' ? 'Accounts' : formData.department,
-                            division: opt.value === 'Driver' ? 'Transport' : formData.division
-                          });
-                        }}
-                        className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all ${
+                        key={cat.id}
+                        onClick={() => handleCategoryChange(cat.id)}
+                        className={`p-2.5 rounded-xl border cursor-pointer text-left transition-all flex items-start gap-2.5 ${
                           isSelected
-                            ? 'bg-indigo-50 border-indigo-500 text-indigo-900 font-bold ring-1 ring-indigo-500 shadow-2xs'
+                            ? 'bg-indigo-50/90 border-indigo-500 text-indigo-950 font-bold ring-1 ring-indigo-500 shadow-2xs'
                             : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                       >
-                        <IconComp className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`} />
-                        <span className="truncate text-[11px]">{opt.value}</span>
+                        <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          <IconComp className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold truncate leading-tight">{cat.label}</div>
+                          <div className="text-[10px] text-slate-500 font-normal truncate mt-0.5">{cat.description}</div>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Full Name */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh Kumar / Pooja Kanwar"
-                  value={formData.staffName}
-                  onChange={e => setFormData({ ...formData, staffName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
-              </div>
-
-              {/* Phone & Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Step 2: Basic Contact Info */}
+              <div className="space-y-3 pt-1 border-t border-slate-100">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mobile Number <span className="text-rose-500">*</span>
+                    Staff Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
-                    type="tel"
+                    type="text"
                     required
-                    placeholder="e.g. 9829012345"
-                    value={formData.mobileNo}
-                    onChange={e => setFormData({ ...formData, mobileNo: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="e.g. user@jdintl.edu"
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="e.g. Pooja Kanwar / Bharat Jangid / Shaitan Singh"
+                    value={formData.staffName}
+                    onChange={e => setFormData({ ...formData, staffName: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Mobile Number <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="e.g. 9829012345"
+                      value={formData.mobileNo}
+                      onChange={e => setFormData({ ...formData, mobileNo: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="e.g. staff@jdintl.edu"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Driver Specific Fields */}
-              {formData.role === 'Driver' && (
-                <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-3">
+              {/* Step 3A: If TEACHING STAFF Selected */}
+              {formData.category === 'Teaching' && (
+                <div className="p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-900 text-xs">
+                    <GraduationCap className="w-4 h-4 text-emerald-600" />
+                    <span>Teaching Faculty & Academic Level</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Teacher Designation / Level
+                      </label>
+                      <select
+                        value={formData.designation}
+                        onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      >
+                        <option value="PRT Faculty">PRT (Primary Teacher)</option>
+                        <option value="TGT Faculty">TGT (Trained Graduate Teacher)</option>
+                        <option value="PGT Faculty">PGT (Post Graduate Teacher)</option>
+                        <option value="Pre-Primary Teacher">Pre-Primary / Nursery Teacher</option>
+                        <option value="Subject Teacher">Subject Teacher</option>
+                        <option value="HOD / Academic Head">HOD / Academic Head</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Academic Division
+                      </label>
+                      <select
+                        value={formData.division}
+                        onChange={e => setFormData({ ...formData, division: e.target.value })}
+                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                      >
+                        <option value="Primary">Primary (I - V)</option>
+                        <option value="Middle">Middle (VI - VIII)</option>
+                        <option value="Secondary">Secondary (IX - X)</option>
+                        <option value="Senior Secondary">Senior Secondary (XI - XII)</option>
+                        <option value="Pre-Primary">Pre-Primary (Nursery, LKG, UKG)</option>
+                        <option value="All">All Divisions</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Initial Teaching Classes & Subjects Checkboxes */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                      Assign Teaching Classes ({formData.classes.length} selected)
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-white rounded-lg border border-emerald-200/80">
+                      {ALL_CLASSES.map(cls => {
+                        const isChosen = formData.classes.includes(cls);
+                        return (
+                          <span
+                            key={cls}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                classes: isChosen ? prev.classes.filter(c => c !== cls) : [...prev.classes, cls]
+                              }));
+                            }}
+                            className={`px-2 py-0.5 rounded text-[10px] font-semibold cursor-pointer border select-none transition-colors ${
+                              isChosen
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {cls}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                      Assign Teaching Subjects ({formData.subjects.length} selected)
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-white rounded-lg border border-emerald-200/80">
+                      {ALL_SUBJECTS.map(sub => {
+                        const isChosen = formData.subjects.includes(sub);
+                        return (
+                          <span
+                            key={sub}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                subjects: isChosen ? prev.subjects.filter(s => s !== sub) : [...prev.subjects, sub]
+                              }));
+                            }}
+                            className={`px-2 py-0.5 rounded text-[10px] font-semibold cursor-pointer border select-none transition-colors ${
+                              isChosen
+                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {sub}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3B: If NON-TEACHING STAFF Selected */}
+              {formData.category === 'Non-Teaching' && (
+                <div className="p-3.5 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center gap-1.5 font-bold text-blue-900 text-xs">
+                    <Briefcase className="w-4 h-4 text-blue-600" />
+                    <span>Non-Teaching Department & Designation</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Department
+                      </label>
+                      <select
+                        value={formData.department}
+                        onChange={e => {
+                          const dept = e.target.value;
+                          setFormData({
+                            ...formData,
+                            department: dept,
+                            designation: dept === 'Accounts' ? 'Senior Accountant' : dept === 'Library' ? 'Chief Librarian' : dept === 'Front Office' ? 'Front Desk Executive' : 'Office Assistant'
+                          });
+                        }}
+                        className="w-full px-2.5 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+                      >
+                        <option value="Accounts">Accounts & Finance</option>
+                        <option value="Administration">General Administration</option>
+                        <option value="Library">Library</option>
+                        <option value="Front Office">Front Office & Reception</option>
+                        <option value="Support">Campus Support</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Designation / Role
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.designation}
+                        onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                        placeholder="e.g. Senior Accountant / Cashier"
+                        className="w-full px-2.5 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3C: If TRANSPORT STAFF Selected */}
+              {formData.category === 'Transport' && (
+                <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-3 animate-in fade-in duration-150">
                   <div className="flex items-center gap-1.5 font-bold text-amber-900 text-xs">
-                    <Bus className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Driver Commercial License & Vehicle</span>
+                    <Bus className="w-4 h-4 text-amber-600" />
+                    <span>Driver Commercial License & Vehicle Allocation</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1139,7 +1415,7 @@ export function ManageUsersPage({ onNavigate }) {
                     </div>
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Select Assigned Bus & Route
+                        Assign Fleet Bus & Route
                       </label>
                       <select
                         value={formData.vehicleAssigned}
@@ -1158,40 +1434,24 @@ export function ManageUsersPage({ onNavigate }) {
                 </div>
               )}
 
-              {/* Department & Division */}
-              {formData.role !== 'Driver' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Department
-                    </label>
-                    <select
-                      value={formData.department}
-                      onChange={e => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    >
-                      <option value="Academics">Academics (Teaching)</option>
-                      <option value="Administration">Administration</option>
-                      <option value="Accounts">Accounts & Finance</option>
-                      <option value="Library">Library</option>
-                      <option value="Front Office">Front Office</option>
-                      <option value="Support">Campus Support</option>
-                    </select>
+              {/* Step 3D: If MANAGEMENT / ADMIN Selected */}
+              {formData.category === 'Management' && (
+                <div className="p-3.5 bg-purple-50/70 border border-purple-200 rounded-xl space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center gap-1.5 font-bold text-purple-900 text-xs">
+                    <Shield className="w-4 h-4 text-purple-600" />
+                    <span>School Administration / Principal</span>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Division
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Administrative Title / Designation
                     </label>
-                    <select
-                      value={formData.division}
-                      onChange={e => setFormData({ ...formData, division: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    >
-                      <option value="Primary">Primary</option>
-                      <option value="Secondary">Secondary</option>
-                      <option value="Senior Secondary">Senior Secondary</option>
-                      <option value="All">All Divisions</option>
-                    </select>
+                    <input
+                      type="text"
+                      value={formData.designation}
+                      onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                      placeholder="e.g. Principal / Vice Principal / Administrator"
+                      className="w-full px-2.5 py-1.5 border border-purple-200 rounded-lg text-xs bg-white"
+                    />
                   </div>
                 </div>
               )}
@@ -1209,7 +1469,7 @@ export function ManageUsersPage({ onNavigate }) {
                   type="submit"
                   className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs transition-colors"
                 >
-                  {editingUser ? 'Save Changes' : 'Create User'}
+                  {editingUser ? 'Save Changes' : 'Register Staff Member'}
                 </button>
               </div>
             </form>

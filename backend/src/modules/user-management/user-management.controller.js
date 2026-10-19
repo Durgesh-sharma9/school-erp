@@ -6,7 +6,9 @@ let usersList = [
     empCode: '301',
     name: '[301] POOJA KANWAR',
     displayName: 'Pooja Kanwar',
+    category: 'Teaching',
     role: 'Teacher',
+    designation: 'PRT Faculty',
     department: 'Academics',
     phone: '9876543210',
     email: 'pooja.kanwar@jdintl.edu',
@@ -30,7 +32,9 @@ let usersList = [
     empCode: '501',
     name: '[501] BHARAT JANGID',
     displayName: 'Bharat Jangid',
+    category: 'Non-Teaching',
     role: 'Staff',
+    designation: 'Senior Accountant',
     department: 'Accounts',
     phone: '9829012345',
     email: 'bharat.jangid@jdintl.edu',
@@ -54,7 +58,9 @@ let usersList = [
     empCode: '102',
     name: '[102] PRITI VERMA',
     displayName: 'Priti Verma',
+    category: 'Teaching',
     role: 'Teacher',
+    designation: 'Primary Teacher',
     department: 'Academics',
     phone: '9414056789',
     email: 'priti.verma@jdintl.edu',
@@ -78,7 +84,9 @@ let usersList = [
     empCode: '202',
     name: '[202] SUNITA KUMARI',
     displayName: 'Sunita Kumari',
+    category: 'Teaching',
     role: 'Teacher',
+    designation: 'PGT Faculty',
     department: 'Academics',
     phone: '9828098765',
     email: 'sunita.kumari@jdintl.edu',
@@ -102,7 +110,9 @@ let usersList = [
     empCode: '210',
     name: '[210] NISHA GOYAL',
     displayName: 'Nisha Goyal',
+    category: 'Teaching',
     role: 'Teacher',
+    designation: 'Pre-Primary Teacher',
     department: 'Academics',
     phone: '9988776655',
     email: 'nisha.goyal@jdintl.edu',
@@ -126,7 +136,9 @@ let usersList = [
     empCode: '237',
     name: '[237] PRATIBHA SINGH',
     displayName: 'Pratibha Singh',
+    category: 'Non-Teaching',
     role: 'Staff',
+    designation: 'Chief Librarian',
     department: 'Library',
     phone: '9812345678',
     email: 'pratibha.singh@jdintl.edu',
@@ -150,7 +162,9 @@ let usersList = [
     empCode: '601',
     name: '[601] SHAITAN SINGH',
     displayName: 'Shaitan Singh',
+    category: 'Transport',
     role: 'Driver',
+    designation: 'School Bus Driver',
     department: 'Transport',
     phone: '9829088211',
     email: 'shaitan.singh@jdintl.edu',
@@ -174,7 +188,9 @@ let usersList = [
     empCode: '602',
     name: '[602] HANSRAJ JAT',
     displayName: 'Hansraj Jat',
+    category: 'Transport',
     role: 'Driver',
+    designation: 'School Bus Driver',
     department: 'Transport',
     phone: '9829144521',
     email: 'hansraj.jat@jdintl.edu',
@@ -198,7 +214,9 @@ let usersList = [
     empCode: '603',
     name: '[603] PRAKASH CHOUDHARY',
     displayName: 'Prakash Choudhary',
+    category: 'Transport',
     role: 'Driver',
+    designation: 'School Bus Driver',
     department: 'Transport',
     phone: '9414022319',
     email: 'prakash.choudhary@jdintl.edu',
@@ -222,7 +240,9 @@ let usersList = [
     empCode: '604',
     name: '[604] SHYAM SUNDER',
     displayName: 'Shyam Sunder',
+    category: 'Transport',
     role: 'Driver',
+    designation: 'School Bus Driver',
     department: 'Transport',
     phone: '9828833110',
     email: 'shyam.sunder@jdintl.edu',
@@ -244,8 +264,11 @@ let usersList = [
 ];
 
 export const getUsers = (req, res) => {
-  const { role, department } = req.query;
+  const { role, category, department } = req.query;
   let result = [...usersList];
+  if (category && category !== 'All') {
+    result = result.filter(u => u.category?.toLowerCase() === category.toLowerCase());
+  }
   if (role && role !== 'All') {
     result = result.filter(u => u.role?.toLowerCase() === role.toLowerCase());
   }
@@ -266,7 +289,9 @@ export const createUser = (req, res) => {
     phone,
     email,
     password,
-    role = 'Staff',
+    category = 'Teaching', // 'Teaching' | 'Non-Teaching' | 'Transport' | 'Management'
+    role = 'Teacher',
+    designation = '',
     department = 'Academics',
     driverLicense = '',
     vehicleAssigned = '',
@@ -278,37 +303,43 @@ export const createUser = (req, res) => {
 
   const rawName = staffName || name;
   if (!rawName || !rawName.trim()) {
-    return res.status(400).json({ success: false, message: 'User name is required' });
+    return res.status(400).json({ success: false, message: 'Staff name is required' });
   }
 
   const empCode = String(Math.floor(100 + Math.random() * 900));
   const cleanName = rawName.trim().toUpperCase();
   const phoneNo = mobileNo || phone || '9876543210';
   const userEmail = email || `${rawName.toLowerCase().replace(/\s+/g, '.')}@jdintl.edu`;
+  const isDriverStaff = category === 'Transport' || role === 'Driver';
+  const isTeachingStaff = category === 'Teaching' || role === 'Teacher';
 
   const newUser = {
     id: String(Date.now()),
     empCode,
     name: `[${empCode}] ${cleanName}`,
     displayName: rawName.trim(),
-    role: role || 'Staff',
-    department: department || (role === 'Driver' ? 'Transport' : 'Academics'),
+    category: category || (isDriverStaff ? 'Transport' : isTeachingStaff ? 'Teaching' : 'Non-Teaching'),
+    role: role || (isDriverStaff ? 'Driver' : isTeachingStaff ? 'Teacher' : 'Staff'),
+    designation: designation || (isDriverStaff ? 'Bus Driver' : isTeachingStaff ? 'Subject Teacher' : 'Office Staff'),
+    department: department || (isDriverStaff ? 'Transport' : isTeachingStaff ? 'Academics' : 'Administration'),
     phone: phoneNo,
     email: userEmail,
     driverLicense: driverLicense || '',
     vehicleAssigned: vehicleAssigned || '',
-    pic: role === 'Driver'
+    pic: isDriverStaff
       ? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop'
-      : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+      : isTeachingStaff
+      ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'
+      : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
     division: division || 'Primary',
-    modules: modules.length > 0 ? modules : (role === 'Driver' ? ['Transport'] : ['Student', 'Attendance']),
-    classes: classes || [],
-    subjects: subjects || [],
+    modules: modules.length > 0 ? modules : (isDriverStaff ? ['Transport'] : isTeachingStaff ? ['Student', 'Attendance', 'Examination'] : ['Fee', 'Front Office']),
+    classes: isTeachingStaff ? (classes || []) : [],
+    subjects: isTeachingStaff ? (subjects || []) : [],
     examNames: ['Term 1 (Half Yearly)'],
     bulkEditingColumns: ['Mobile No.'],
-    isAdd: role !== 'Driver',
+    isAdd: !isDriverStaff,
     isView: true,
-    isModify: role !== 'Driver',
+    isModify: !isDriverStaff,
     isDelete: false,
     isActive: true
   };
@@ -316,7 +347,7 @@ export const createUser = (req, res) => {
   usersList.unshift(newUser);
   return res.json({
     success: true,
-    message: `${role} added successfully`,
+    message: `${newUser.displayName} added to ${newUser.category} staff successfully`,
     data: newUser
   });
 };
@@ -333,10 +364,16 @@ export const updateUser = (req, res) => {
     displayName,
     phone,
     email,
+    category,
     role,
+    designation,
     department,
     driverLicense,
     vehicleAssigned,
+    division,
+    classes,
+    subjects,
+    modules,
     isActive
   } = req.body;
 
@@ -348,15 +385,21 @@ export const updateUser = (req, res) => {
   }
   if (phone !== undefined) user.phone = phone;
   if (email !== undefined) user.email = email;
+  if (category !== undefined) user.category = category;
   if (role !== undefined) user.role = role;
+  if (designation !== undefined) user.designation = designation;
   if (department !== undefined) user.department = department;
   if (driverLicense !== undefined) user.driverLicense = driverLicense;
   if (vehicleAssigned !== undefined) user.vehicleAssigned = vehicleAssigned;
+  if (division !== undefined) user.division = division;
+  if (classes !== undefined) user.classes = classes;
+  if (subjects !== undefined) user.subjects = subjects;
+  if (modules !== undefined) user.modules = modules;
   if (isActive !== undefined) user.isActive = isActive;
 
   return res.json({
     success: true,
-    message: 'User details updated successfully',
+    message: 'Staff details updated successfully',
     data: user
   });
 };
