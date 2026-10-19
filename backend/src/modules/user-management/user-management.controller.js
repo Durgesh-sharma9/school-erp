@@ -260,12 +260,101 @@ let usersList = [
     isModify: false,
     isDelete: false,
     isActive: true
+  },
+  {
+    id: '11',
+    empCode: '101',
+    name: '[101] DR. RAJESH SHARMA',
+    displayName: 'Dr. Rajesh Sharma',
+    category: 'Management',
+    role: 'Admin',
+    designation: 'School Principal & Director',
+    department: 'Administration',
+    phone: '9829000101',
+    email: 'principal@jdintl.edu',
+    driverLicense: '',
+    vehicleAssigned: '',
+    pic: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
+    division: 'All',
+    modules: ['Dashboard', 'Student', 'Attendance', 'Examination', 'Fee', 'Transport', 'Payroll', 'Security'],
+    classes: [],
+    subjects: [],
+    examNames: [],
+    bulkEditingColumns: [],
+    isAdd: true,
+    isView: true,
+    isModify: true,
+    isDelete: true,
+    isActive: true,
+    basicSalary: 85000,
+    bankName: 'HDFC Bank',
+    accountNo: '501002391024',
+    ifscCode: 'HDFC0001244',
+    accountHolder: 'Dr. Rajesh Sharma',
+    panNo: 'ABCPR1010A',
+    aadhaarNo: '7891-2345-1010',
+    joiningDate: '2020-04-01',
+    gender: 'Male',
+    qualification: 'Ph.D., M.Ed'
+  },
+  {
+    id: '12',
+    empCode: '102',
+    name: '[102] ANITA GUPTA',
+    displayName: 'Anita Gupta',
+    category: 'Management',
+    role: 'Admin',
+    designation: 'Vice Principal & Academic Head',
+    department: 'Administration',
+    phone: '9829000102',
+    email: 'vp@jdintl.edu',
+    driverLicense: '',
+    vehicleAssigned: '',
+    pic: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
+    division: 'All',
+    modules: ['Dashboard', 'Student', 'Attendance', 'Examination', 'Academics'],
+    classes: [],
+    subjects: [],
+    examNames: [],
+    bulkEditingColumns: [],
+    isAdd: true,
+    isView: true,
+    isModify: true,
+    isDelete: true,
+    isActive: true,
+    basicSalary: 68000,
+    bankName: 'State Bank of India',
+    accountNo: '489210202911',
+    ifscCode: 'SBIN0001024',
+    accountHolder: 'Anita Gupta',
+    panNo: 'ABCPG1020B',
+    aadhaarNo: '7891-2345-1020',
+    joiningDate: '2021-06-15',
+    gender: 'Female',
+    qualification: 'M.Sc., M.Ed'
   }
+];
+
+// Role Privileges Matrix Store
+let rolePrivilegesList = [
+  { id: 'dashboard', name: 'Dashboard & School Analytics', admin: true, teacher: true, staff: true, driver: false },
+  { id: 'students', name: 'Student Admissions & Information', admin: true, teacher: true, staff: true, driver: false },
+  { id: 'attendance', name: 'Daily Attendance Marking & Reports', admin: true, teacher: true, staff: true, driver: false },
+  { id: 'examination', name: 'Exams, Marks Entry & Report Cards', admin: true, teacher: true, staff: false, driver: false },
+  { id: 'fee', name: 'Fee Collection, Receipts & Dues', admin: true, teacher: false, staff: true, driver: false },
+  { id: 'transport', name: 'Transport Fleet, Buses & Routes', admin: true, teacher: false, staff: true, driver: true },
+  { id: 'hostel', name: 'Hostel Rooms & Boarding Records', admin: true, teacher: false, staff: true, driver: false },
+  { id: 'payroll', name: 'Staff Management & Payroll Records', admin: true, teacher: false, staff: true, driver: false },
+  { id: 'library', name: 'Library Catalog & Books Issuance', admin: true, teacher: true, staff: true, driver: false },
+  { id: 'front-office', name: 'Front Desk Visitors & Gate Passes', admin: true, teacher: false, staff: true, driver: false },
+  { id: 'stationary', name: 'School Shop & Stationary Sets', admin: true, teacher: false, staff: true, driver: false },
+  { id: 'sms', name: 'SMS & WhatsApp Notifications', admin: true, teacher: true, staff: true, driver: false },
+  { id: 'users', name: 'User Access Control & Security', admin: true, teacher: false, staff: false, driver: false }
 ];
 
 // Ensure full ERP account and document defaults
 usersList = usersList.map(u => ({
-  basicSalary: u.basicSalary || (u.role === 'Driver' ? 22000 : u.role === 'Teacher' ? 35000 : 42000),
+  basicSalary: u.basicSalary || (u.role === 'Driver' ? 22000 : u.role === 'Teacher' ? 35000 : u.role === 'Admin' ? 75000 : 42000),
   bankName: u.bankName || 'State Bank of India',
   accountNo: u.accountNo || `4892${u.empCode || '101'}0291`,
   ifscCode: u.ifscCode || 'SBIN0001024',
@@ -573,3 +662,23 @@ export const getPrivilegeReport = (req, res) => {
     data: filtered
   });
 };
+
+export const getRolePrivileges = (req, res) => {
+  return res.json({
+    success: true,
+    data: rolePrivilegesList
+  });
+};
+
+export const saveRolePrivileges = (req, res) => {
+  const { privileges } = req.body;
+  if (Array.isArray(privileges) && privileges.length > 0) {
+    rolePrivilegesList = privileges;
+  }
+  return res.json({
+    success: true,
+    message: 'Role-Based Access Control privileges saved successfully',
+    data: rolePrivilegesList
+  });
+};
+

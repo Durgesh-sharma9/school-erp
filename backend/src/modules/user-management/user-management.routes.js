@@ -7,7 +7,9 @@ import {
   toggleUserStatus,
   deleteUser,
   getPrivilegeReport,
-  bulkUserAction
+  bulkUserAction,
+  getRolePrivileges,
+  saveRolePrivileges
 } from './user-management.controller.js';
 
 const router = Router();
@@ -19,6 +21,9 @@ router.put('/users/:id', updateUser);
 router.put('/users/:id/permissions', updatePermissions);
 router.put('/users/:id/status', toggleUserStatus);
 router.delete('/users/:id', deleteUser);
+
+router.get('/privileges', getRolePrivileges);
+router.post('/privileges', saveRolePrivileges);
 
 router.get('/reports/privilege', getPrivilegeReport);
 

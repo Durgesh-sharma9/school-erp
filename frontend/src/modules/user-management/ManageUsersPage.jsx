@@ -34,7 +34,9 @@ import {
   File,
   Eye,
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  Loader2,
+  RotateCcw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -104,22 +106,30 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Role Privileges Matrix State
-  const [privileges, setPrivileges] = useState([
-    { id: 'dashboard', name: 'Dashboard & School Analytics', admin: true, teacher: true, staff: true, driver: false },
-    { id: 'students', name: 'Student Admissions & Information', admin: true, teacher: true, staff: true, driver: false },
-    { id: 'attendance', name: 'Daily Attendance Marking & Reports', admin: true, teacher: true, staff: true, driver: false },
-    { id: 'examination', name: 'Exams, Marks Entry & Report Cards', admin: true, teacher: true, staff: false, driver: false },
-    { id: 'fee', name: 'Fee Collection, Receipts & Dues', admin: true, teacher: false, staff: true, driver: false },
-    { id: 'transport', name: 'Transport Fleet, Buses & Routes', admin: true, teacher: false, staff: true, driver: true },
-    { id: 'hostel', name: 'Hostel Rooms & Boarding Records', admin: true, teacher: false, staff: true, driver: false },
-    { id: 'payroll', name: 'Staff Management & Payroll Records', admin: true, teacher: false, staff: true, driver: false },
-    { id: 'library', name: 'Library Catalog & Books Issuance', admin: true, teacher: true, staff: true, driver: false },
-    { id: 'front-office', name: 'Front Desk Visitors & Gate Passes', admin: true, teacher: false, staff: true, driver: false },
-    { id: 'stationary', name: 'School Shop & Stationary Sets', admin: true, teacher: false, staff: true, driver: false },
-    { id: 'sms', name: 'SMS & WhatsApp Notifications', admin: true, teacher: true, staff: true, driver: false },
-    { id: 'users', name: 'User Access Control & Security', admin: true, teacher: false, staff: false, driver: false }
-  ]);
+  // Role Privileges Matrix State & Persistence
+  const [privileges, setPrivileges] = useState(() => {
+    try {
+      const cached = localStorage.getItem('school_erp_privileges');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return [
+      { id: 'dashboard', name: 'Dashboard & School Analytics', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'students', name: 'Student Admissions & Information', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'attendance', name: 'Daily Attendance Marking & Reports', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'examination', name: 'Exams, Marks Entry & Report Cards', admin: true, teacher: true, staff: false, driver: false },
+      { id: 'fee', name: 'Fee Collection, Receipts & Dues', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'transport', name: 'Transport Fleet, Buses & Routes', admin: true, teacher: false, staff: true, driver: true },
+      { id: 'hostel', name: 'Hostel Rooms & Boarding Records', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'payroll', name: 'Staff Management & Payroll Records', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'library', name: 'Library Catalog & Books Issuance', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'front-office', name: 'Front Desk Visitors & Gate Passes', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'stationary', name: 'School Shop & Stationary Sets', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'sms', name: 'SMS & WhatsApp Notifications', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'users', name: 'User Access Control & Security', admin: true, teacher: false, staff: false, driver: false }
+    ];
+  });
+  const [privilegeSearch, setPrivilegeSearch] = useState('');
+  const [savingPrivileges, setSavingPrivileges] = useState(false);
 
   // Modal State & Tabs
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -166,8 +176,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image size must be under 2MB');
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be under 5MB');
       return;
     }
     const reader = new FileReader();
@@ -179,8 +189,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
 
   const handleDocumentUpload = (docKey, file) => {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be under 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be under 10MB');
       return;
     }
     const reader = new FileReader();
@@ -203,6 +213,17 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     reader.readAsDataURL(file);
   };
 
+  const handleRemoveDocument = (docKey) => {
+    setFormData(prev => ({
+      ...prev,
+      documents: {
+        ...prev.documents,
+        [docKey]: null
+      }
+    }));
+    toast.success('Document removed');
+  };
+
   // Fetch Users
   const fetchUsers = async () => {
     try {
@@ -217,8 +238,76 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     }
   };
 
+  // Fetch Privileges from backend
+  const fetchPrivileges = async () => {
+    try {
+      const res = await fetch('/api/user-management/privileges');
+      const d = await res.json();
+      if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+        setPrivileges(d.data);
+        try { localStorage.setItem('school_erp_privileges', JSON.stringify(d.data)); } catch {}
+      }
+    } catch {}
+  };
+
+  // Save Privileges
+  const handleSavePrivileges = async () => {
+    setSavingPrivileges(true);
+    try {
+      try { localStorage.setItem('school_erp_privileges', JSON.stringify(privileges)); } catch {}
+      const res = await fetch('/api/user-management/privileges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ privileges })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(d.message || 'Privileges saved successfully');
+      } else {
+        toast.success('Privileges saved locally');
+      }
+    } catch {
+      toast.success('Privileges saved in local storage');
+    } finally {
+      setSavingPrivileges(false);
+    }
+  };
+
+  // Bulk Toggle Privileges for a Role
+  const handleToggleAllForRole = (roleKey, value) => {
+    setPrivileges(prev =>
+      prev.map(item => ({
+        ...item,
+        [roleKey]: value
+      }))
+    );
+    toast.success(`All modules ${value ? 'Allowed' : 'Disabled'} for ${roleKey.toUpperCase()}`);
+  };
+
+  // Reset Privileges to Recommended System Defaults
+  const handleResetPrivileges = () => {
+    const defaults = [
+      { id: 'dashboard', name: 'Dashboard & School Analytics', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'students', name: 'Student Admissions & Information', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'attendance', name: 'Daily Attendance Marking & Reports', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'examination', name: 'Exams, Marks Entry & Report Cards', admin: true, teacher: true, staff: false, driver: false },
+      { id: 'fee', name: 'Fee Collection, Receipts & Dues', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'transport', name: 'Transport Fleet, Buses & Routes', admin: true, teacher: false, staff: true, driver: true },
+      { id: 'hostel', name: 'Hostel Rooms & Boarding Records', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'payroll', name: 'Staff Management & Payroll Records', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'library', name: 'Library Catalog & Books Issuance', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'front-office', name: 'Front Desk Visitors & Gate Passes', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'stationary', name: 'School Shop & Stationary Sets', admin: true, teacher: false, staff: true, driver: false },
+      { id: 'sms', name: 'SMS & WhatsApp Notifications', admin: true, teacher: true, staff: true, driver: false },
+      { id: 'users', name: 'User Access Control & Security', admin: true, teacher: false, staff: false, driver: false }
+    ];
+    setPrivileges(defaults);
+    toast.success('Privilege permissions reset to standard defaults');
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchPrivileges();
   }, []);
 
   useEffect(() => {
@@ -479,10 +568,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       // Role Filter
-      if (roleTab === 'Teacher' && u.role !== 'Teacher') return false;
-      if (roleTab === 'Staff' && u.role !== 'Staff' && u.role !== 'Accountant') return false;
-      if (roleTab === 'Driver' && u.role !== 'Driver') return false;
-      if (roleTab === 'Admin' && u.role !== 'Admin') return false;
+      if (roleTab === 'Teacher' && u.role !== 'Teacher' && u.category !== 'Teaching') return false;
+      if (roleTab === 'Staff' && u.role !== 'Staff' && u.role !== 'Accountant' && u.role !== 'Office Staff' && u.category !== 'Non-Teaching') return false;
+      if (roleTab === 'Driver' && u.role !== 'Driver' && u.category !== 'Transport') return false;
+      if (roleTab === 'Admin' && u.role !== 'Admin' && u.category !== 'Management') return false;
 
       // Status Filter
       if (statusFilter === 'ACTIVE' && !u.isActive) return false;
@@ -511,10 +600,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
 
   // Counts
   const totalCount = users.length;
-  const teachersCount = users.filter(u => u.role === 'Teacher').length;
-  const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Accountant').length;
-  const driversCount = users.filter(u => u.role === 'Driver').length;
-  const adminCount = users.filter(u => u.role === 'Admin').length;
+  const teachersCount = users.filter(u => u.role === 'Teacher' || u.category === 'Teaching').length;
+  const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Accountant' || u.role === 'Office Staff' || u.category === 'Non-Teaching').length;
+  const driversCount = users.filter(u => u.role === 'Driver' || u.category === 'Transport').length;
+  const adminCount = users.filter(u => u.role === 'Admin' || u.category === 'Management').length;
 
   return (
     <div className="p-4 sm:p-6 bg-slate-50 min-h-screen text-slate-800 space-y-4 max-w-7xl mx-auto">
@@ -535,7 +624,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
         {/* Action Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => handleOpenAdd(roleTab !== 'ALL' ? roleTab : 'Teacher')}
+            onClick={() => handleOpenAdd(roleTab !== 'ALL' && roleTab !== 'PRIVILEGE' ? roleTab : 'Teacher')}
             className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
           >
             <UserPlus className="w-3.5 h-3.5" /> + Add Staff
@@ -666,22 +755,91 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       {/* 3. Main Content: User Privileges Matrix OR Staff List Table */}
       {roleTab === 'PRIVILEGE' ? (
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
-          <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
               <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-indigo-600" />
                 Role-Based Access Control (RBAC) Matrix
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                School ERP modules aur features ki access permissions configure karein
+                School ERP modules aur features ki access permissions configure aur live save karein
               </p>
             </div>
-            <button
-              onClick={() => toast.success('Privilege permissions saved successfully')}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors self-start sm:self-auto flex items-center gap-1.5"
-            >
-              <Check className="w-4 h-4" /> Save Privileges
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleResetPrivileges}
+                className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs transition-colors flex items-center gap-1"
+                title="Reset permissions to standard defaults"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Defaults
+              </button>
+              <button
+                type="button"
+                disabled={savingPrivileges}
+                onClick={handleSavePrivileges}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                {savingPrivileges ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" /> Save Privileges
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Toolbar for Privileges: Search & Fast Column Toggles */}
+          <div className="p-3 sm:px-5 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search modules (e.g. Student, Fee, Transport)..."
+                value={privilegeSearch}
+                onChange={e => setPrivilegeSearch(e.target.value)}
+                className="w-full text-xs pl-9 pr-8 py-2 border border-slate-200 rounded-xl bg-slate-50/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+              {privilegeSearch && (
+                <button
+                  type="button"
+                  onClick={() => setPrivilegeSearch('')}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Quick Multi-column Toggles */}
+            <div className="flex items-center gap-1.5 text-xs flex-wrap">
+              <span className="text-slate-400 text-[11px] font-semibold mr-1">Quick Sets:</span>
+              <button
+                type="button"
+                onClick={() => handleToggleAllForRole('teacher', true)}
+                className="px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-[11px] font-semibold transition-colors"
+              >
+                + Allow All Teachers
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleAllForRole('staff', true)}
+                className="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-[11px] font-semibold transition-colors"
+              >
+                + Allow All Staff
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleAllForRole('driver', false)}
+                className="px-2.5 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-lg text-[11px] font-semibold transition-colors"
+              >
+                Restrict Drivers
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -690,14 +848,55 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                 <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
                   <th className="py-3.5 px-4 w-12 text-center">#</th>
                   <th className="py-3.5 px-4">MODULE / FEATURE</th>
-                  <th className="py-3.5 px-4 text-center">ADMINISTRATOR</th>
-                  <th className="py-3.5 px-4 text-center">TEACHERS</th>
-                  <th className="py-3.5 px-4 text-center">OFFICE STAFF</th>
-                  <th className="py-3.5 px-4 text-center">DRIVERS</th>
+                  <th className="py-3.5 px-4 text-center">
+                    <div>ADMINISTRATOR</div>
+                    <span className="text-[9px] text-purple-600 font-medium normal-case">full access</span>
+                  </th>
+                  <th className="py-3.5 px-4 text-center">
+                    <div>TEACHERS</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allActive = privileges.every(p => p.teacher);
+                        handleToggleAllForRole('teacher', !allActive);
+                      }}
+                      className="text-[9px] text-indigo-600 hover:underline font-semibold normal-case"
+                    >
+                      toggle all
+                    </button>
+                  </th>
+                  <th className="py-3.5 px-4 text-center">
+                    <div>OFFICE STAFF</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allActive = privileges.every(p => p.staff);
+                        handleToggleAllForRole('staff', !allActive);
+                      }}
+                      className="text-[9px] text-indigo-600 hover:underline font-semibold normal-case"
+                    >
+                      toggle all
+                    </button>
+                  </th>
+                  <th className="py-3.5 px-4 text-center">
+                    <div>DRIVERS</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allActive = privileges.every(p => p.driver);
+                        handleToggleAllForRole('driver', !allActive);
+                      }}
+                      className="text-[9px] text-indigo-600 hover:underline font-semibold normal-case"
+                    >
+                      toggle all
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {privileges.map((p, idx) => (
+                {privileges
+                  .filter(p => !privilegeSearch.trim() || p.name.toLowerCase().includes(privilegeSearch.toLowerCase()))
+                  .map((p, idx) => (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-4 text-center font-mono text-slate-400 text-xs">
                       {idx + 1}
@@ -712,6 +911,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     </td>
                     <td className="py-3 px-4 text-center">
                       <button
+                        type="button"
                         onClick={() => {
                           setPrivileges(prev =>
                             prev.map(item => item.id === p.id ? { ...item, teacher: !item.teacher } : item)
@@ -719,7 +919,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                           p.teacher
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs'
                             : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
                         }`}
                       >
@@ -728,6 +928,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     </td>
                     <td className="py-3 px-4 text-center">
                       <button
+                        type="button"
                         onClick={() => {
                           setPrivileges(prev =>
                             prev.map(item => item.id === p.id ? { ...item, staff: !item.staff } : item)
@@ -735,7 +936,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                           p.staff
-                            ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                            ? 'bg-blue-100 text-blue-800 border border-blue-300 shadow-2xs'
                             : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
                         }`}
                       >
@@ -744,6 +945,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     </td>
                     <td className="py-3 px-4 text-center">
                       <button
+                        type="button"
                         onClick={() => {
                           setPrivileges(prev =>
                             prev.map(item => item.id === p.id ? { ...item, driver: !item.driver } : item)
@@ -751,7 +953,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                           p.driver
-                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs'
                             : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
                         }`}
                       >
@@ -1637,9 +1839,19 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               />
                             </label>
                             {formData.documents?.aadhaar?.name && (
-                              <span className="text-xs text-slate-600 font-mono truncate max-w-[170px]" title={formData.documents.aadhaar.name}>
-                                📄 {formData.documents.aadhaar.name}
-                              </span>
+                              <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                                <span className="text-xs text-slate-700 font-mono truncate max-w-[130px]" title={formData.documents.aadhaar.name}>
+                                  📄 {formData.documents.aadhaar.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDocument('aadhaar')}
+                                  className="p-0.5 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                                  title="Remove attached file"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1677,9 +1889,19 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               />
                             </label>
                             {formData.documents?.pan?.name && (
-                              <span className="text-xs text-slate-600 font-mono truncate max-w-[170px]" title={formData.documents.pan.name}>
-                                📄 {formData.documents.pan.name}
-                              </span>
+                              <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                                <span className="text-xs text-slate-700 font-mono truncate max-w-[130px]" title={formData.documents.pan.name}>
+                                  📄 {formData.documents.pan.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDocument('pan')}
+                                  className="p-0.5 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                                  title="Remove attached file"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1717,9 +1939,19 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               />
                             </label>
                             {formData.documents?.qualificationDoc?.name && (
-                              <span className="text-xs text-slate-600 font-mono truncate max-w-[170px]" title={formData.documents.qualificationDoc.name}>
-                                📄 {formData.documents.qualificationDoc.name}
-                              </span>
+                              <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                                <span className="text-xs text-slate-700 font-mono truncate max-w-[130px]" title={formData.documents.qualificationDoc.name}>
+                                  📄 {formData.documents.qualificationDoc.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDocument('qualificationDoc')}
+                                  className="p-0.5 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                                  title="Remove attached file"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1758,9 +1990,19 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                                 />
                               </label>
                               {formData.documents?.driverLicenseDoc?.name && (
-                                <span className="text-xs text-amber-950 font-mono truncate max-w-[170px]" title={formData.documents.driverLicenseDoc.name}>
-                                  📄 {formData.documents.driverLicenseDoc.name}
-                                </span>
+                                <div className="flex items-center gap-1.5 bg-white border border-amber-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                                  <span className="text-xs text-amber-950 font-mono truncate max-w-[130px]" title={formData.documents.driverLicenseDoc.name}>
+                                    📄 {formData.documents.driverLicenseDoc.name}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveDocument('driverLicenseDoc')}
+                                    className="p-0.5 text-amber-700 hover:text-rose-600 rounded transition-colors"
+                                    title="Remove attached file"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -1797,9 +2039,19 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                                 />
                               </label>
                               {formData.documents?.resumeDoc?.name && (
-                                <span className="text-xs text-slate-600 font-mono truncate max-w-[170px]" title={formData.documents.resumeDoc.name}>
-                                  📄 {formData.documents.resumeDoc.name}
-                                </span>
+                                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                                  <span className="text-xs text-slate-700 font-mono truncate max-w-[130px]" title={formData.documents.resumeDoc.name}>
+                                    📄 {formData.documents.resumeDoc.name}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveDocument('resumeDoc')}
+                                    className="p-0.5 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                                    title="Remove attached file"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </div>

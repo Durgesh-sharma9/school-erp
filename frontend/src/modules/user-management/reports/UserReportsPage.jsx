@@ -17,6 +17,22 @@ export function UserReportsPage({ onNavigate }) {
       icon: ShieldCheck,
       color: 'bg-indigo-50 text-indigo-600',
       badge: 'Access & Permissions'
+    },
+    {
+      title: 'Staff Directory & Remuneration',
+      path: '/users',
+      desc: 'Full directory of teachers, office staff, drivers, and administrators with banking accounts, IFSC, and payroll reference data.',
+      icon: Users,
+      color: 'bg-emerald-50 text-emerald-600',
+      badge: 'Staff Directory'
+    },
+    {
+      title: 'Role-Based Access Control (RBAC)',
+      path: '/user-privilege',
+      desc: 'Live interactive matrix of system module access permissions across Administrators, Teachers, Office Staff, and Transport Drivers.',
+      icon: FileText,
+      color: 'bg-purple-50 text-purple-600',
+      badge: 'RBAC Matrix'
     }
   ];
 
@@ -52,13 +68,13 @@ export function UserReportsPage({ onNavigate }) {
       </div>
 
       {/* Grid of Report Cards */}
-      <div className="max-w-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {reports.map((report, idx) => {
           const Icon = report.icon;
           return (
             <div
               key={idx}
-              onClick={() => onNavigate && onNavigate(report.path.replace(/^\//, ''))}
+              onClick={() => onNavigate && onNavigate(report.path)}
               className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
@@ -79,7 +95,7 @@ export function UserReportsPage({ onNavigate }) {
               </div>
 
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
-                <span>View Full Report</span>
+                <span>View Report / Matrix</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>
