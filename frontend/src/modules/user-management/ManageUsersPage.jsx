@@ -70,6 +70,95 @@ const POPULAR_BANKS = [
   'Central Bank of India'
 ];
 
+const DEFAULT_MASTER_SUBJECTS = [
+  'ENGLISH',
+  'ENGLISH READER',
+  'ENGLISH GRAMMAR',
+  'ENGLISH LANGUAGE & LITERATURE(184)',
+  'ENGLISH CORE(301)',
+  'HINDI',
+  'HINDI COURSE A',
+  'HINDI GRAMMAR',
+  'MATHEMATICS',
+  'MATHEMATICS STANDARD',
+  'MATHEMATICS BASIC',
+  'SCIENCE',
+  'SOCIAL SCIENCE',
+  'EVS',
+  'PHYSICS',
+  'CHEMISTRY',
+  'BIOLOGY',
+  'ACCOUNTANCY',
+  'BUSINESS STUDIES',
+  'ECONOMICS',
+  'HISTORY',
+  'POLITICAL SCIENCE',
+  'GEOGRAPHY',
+  'SOCIOLOGY',
+  'COMPUTER',
+  'Information Technology',
+  'ART EDUCATION',
+  'PHYSICAL EDUCATION',
+  'MORAL SCIENCE',
+  'GENERAL KNOWLEDGE',
+  'THIRD LANGUAGE (Sanskrit)'
+];
+
+const DEFAULT_MASTER_CLASSES = [
+  'Class Nursery - PP3+ - A',
+  'Class Lower Kindergarten - PP4+ - A',
+  'Class Upper Kindergarten - PP5+ - A',
+  'Class I - A',
+  'Class II - A',
+  'Class III - A',
+  'Class IV - A',
+  'Class V - A',
+  'Class VI - A',
+  'Class VII - A',
+  'Class VIII - A',
+  'Class IX - A',
+  'Class X - A',
+  'Class XI- HUMANITIES - A',
+  'Class XII-HUMANITIES - A',
+  'Class XI-MEDICAL - A',
+  'Class XII-MEDICAL - A',
+  'Class XI-NON-MEDICAL - A',
+  'Class XII-NON-MEDICAL - A',
+  'Class XII- COMMERCE - A'
+];
+
+const COMMON_WORK_AREAS = [
+  'Fee Counter & Student Dues',
+  'Admissions & Student Records',
+  'Examination Cell & Marks Entry',
+  'Library Incharge & Catalog',
+  'Front Office & Visitor Management',
+  'Transport Fleet & Route Incharge',
+  'Accounts & Audit Cell',
+  'Hostel Warden & Administration',
+  'Store Keeper & Stationary Shop',
+  'IT & Computer Lab Admin',
+  'Sports & Physical Training Incharge'
+];
+
+const QUALIFICATION_PRESETS = [
+  'M.Sc, B.Ed',
+  'M.A, B.Ed',
+  'B.Sc, B.Ed',
+  'B.A, B.Ed',
+  'B.Ed (Bachelor of Education)',
+  'M.Ed (Master of Education)',
+  'Ph.D / Doctorate',
+  'M.Com / MBA (Finance)',
+  'B.Com / BBA',
+  'B.Tech / M.Tech / MCA (Computer Science)',
+  'Post Graduate (PG)',
+  'Graduate (UG)',
+  '12th (Senior Secondary)',
+  '10th (Secondary)',
+  'Commercial Heavy Transport Driver Certified'
+];
+
 const DESIGNATION_PRESETS = {
   Teacher: ['PGT Teacher', 'TGT Teacher', 'PRT Teacher', 'Pre-Primary Teacher', 'Subject Teacher', 'Sports Coach', 'Art Teacher'],
   Staff: ['Senior Accountant', 'Junior Accountant', 'Chief Librarian', 'Assistant Librarian', 'Receptionist', 'Office Assistant', 'Clerk'],
@@ -315,9 +404,68 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     toast.success('Privilege permissions reset to standard defaults');
   };
 
+  const [masterClasses, setMasterClasses] = useState([]);
+  const [masterSubjects, setMasterSubjects] = useState([]);
+
+  // Computed Master Classes List from backend API or defaults
+  const allMasterClassesList = useMemo(() => {
+    if (masterClasses && masterClasses.length > 0) {
+      const list = [];
+      masterClasses.forEach(cls => {
+        const rawName = cls.name || '';
+        const baseName = rawName.toLowerCase().startsWith('class') || rawName.toLowerCase().includes('kindergarten') || rawName.toLowerCase().includes('nursery')
+          ? rawName
+          : `Class ${rawName}`;
+        if (Array.isArray(cls.sections) && cls.sections.length > 0) {
+          cls.sections.forEach(sec => {
+            list.push(`${baseName} - ${sec}`);
+          });
+        } else {
+          list.push(baseName);
+        }
+      });
+      return Array.from(new Set(list));
+    }
+    return DEFAULT_MASTER_CLASSES;
+  }, [masterClasses]);
+
+  // Computed Master Subjects List (alphabetically sorted unique names)
+  const allMasterSubjectsList = useMemo(() => {
+    if (masterSubjects && masterSubjects.length > 0) {
+      const names = masterSubjects.map(s => s.name || s.shortName).filter(Boolean);
+      return Array.from(new Set(names)).sort();
+    }
+    return DEFAULT_MASTER_SUBJECTS;
+  }, [masterSubjects]);
+
+  // Fetch Master Data for Academic Classes & Subjects
+  const fetchMasterData = async () => {
+    try {
+      const [cRes, sRes] = await Promise.all([
+        fetch('http://localhost:5000/api/academics/classes').catch(() => null),
+        fetch('http://localhost:5000/api/academics/subjects').catch(() => null)
+      ]);
+      if (cRes && cRes.ok) {
+        const cData = await cRes.json();
+        if (cData.success && Array.isArray(cData.data) && cData.data.length > 0) {
+          setMasterClasses(cData.data);
+        }
+      }
+      if (sRes && sRes.ok) {
+        const sData = await sRes.json();
+        if (sData.success && Array.isArray(sData.data) && sData.data.length > 0) {
+          setMasterSubjects(sData.data);
+        }
+      }
+    } catch (e) {
+      console.warn('Master data fetch fallback to defaults', e);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchPrivileges();
+    fetchMasterData();
   }, []);
 
   useEffect(() => {
@@ -1467,31 +1615,31 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Designation / Job Title
+                          Designation / Job Title <span className="text-slate-400 font-normal">(from Master)</span>
                         </label>
-                        <input
-                          type="text"
-                          list="designation-suggestions"
-                          placeholder="e.g. Senior Subject Teacher"
+                        <select
                           value={formData.designation}
                           onChange={e => setFormData({ ...formData, designation: e.target.value })}
-                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                        />
-                        <datalist id="designation-suggestions">
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium cursor-pointer"
+                        >
+                          <option value="" disabled>-- Select Designation from Master --</option>
                           {(DESIGNATION_PRESETS[formData.role] || []).map(p => (
-                            <option key={p} value={p} />
+                            <option key={p} value={p}>{p}</option>
                           ))}
-                        </datalist>
+                          {formData.designation && !(DESIGNATION_PRESETS[formData.role] || []).includes(formData.designation) && (
+                            <option value={formData.designation}>{formData.designation} (Custom)</option>
+                          )}
+                        </select>
                       </div>
 
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Department
+                          Department <span className="text-slate-400 font-normal">(from Master)</span>
                         </label>
                         <select
                           value={formData.department}
                           onChange={e => setFormData({ ...formData, department: e.target.value })}
-                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium cursor-pointer"
                         >
                           {COMMON_DEPARTMENTS.map(d => (
                             <option key={d} value={d}>{d}</option>
@@ -1539,33 +1687,152 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     {/* Role-Specific Assignment Details */}
                     {formData.role === 'Teacher' && (
                       <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2">
-                        <div className="flex items-center gap-1.5 text-emerald-900 font-bold text-xs">
-                          <GraduationCap className="w-4 h-4 text-emerald-700" /> Academic Subject & Class Assignment
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                              Teaching Subject(s)
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. English, EVS, Mathematics"
-                              value={formData.teachingSubject}
-                              onChange={e => setFormData({ ...formData, teachingSubject: e.target.value })}
-                              className="w-full px-3 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                            />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-emerald-900 font-bold text-xs">
+                            <GraduationCap className="w-4 h-4 text-emerald-700" /> Academic Subject & Class Assignment (From Master)
                           </div>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                            Master Dropdowns
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {/* 1. Teaching Subject(s) Master Dropdown */}
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                              Assigned Class(es)
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Class I-A, Class II-B"
-                              value={formData.assignedClass}
-                              onChange={e => setFormData({ ...formData, assignedClass: e.target.value })}
-                              className="w-full px-3 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                            />
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="block text-[11px] font-bold text-slate-700">
+                                Teaching Subject(s)
+                              </label>
+                              {formData.teachingSubject && (
+                                <button
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, teachingSubject: '' })}
+                                  className="text-[10px] text-rose-600 hover:text-rose-700 font-semibold hover:underline"
+                                >
+                                  Clear All
+                                </button>
+                              )}
+                            </div>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) return;
+                                const current = formData.teachingSubject
+                                  ? formData.teachingSubject.split(',').map(s => s.trim()).filter(Boolean)
+                                  : [];
+                                if (!current.includes(val)) {
+                                  setFormData({ ...formData, teachingSubject: [...current, val].join(', ') });
+                                }
+                              }}
+                              className="w-full px-2.5 py-1.5 border border-emerald-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium cursor-pointer"
+                            >
+                              <option value="">+ Select Subject from Master...</option>
+                              {allMasterSubjectsList.map(s => {
+                                const isAdded = (formData.teachingSubject || '').split(',').map(x => x.trim()).includes(s);
+                                return (
+                                  <option key={s} value={s} disabled={isAdded}>
+                                    {isAdded ? `✓ ${s} (Assigned)` : s}
+                                  </option>
+                                );
+                              })}
+                            </select>
+
+                            {/* Selected Subject Badges */}
+                            <div className="flex flex-wrap gap-1 mt-1.5 min-h-[24px]">
+                              {formData.teachingSubject ? (
+                                formData.teachingSubject.split(',').map(s => s.trim()).filter(Boolean).map(sub => (
+                                  <span
+                                    key={sub}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-semibold rounded-md border border-emerald-200"
+                                  >
+                                    {sub}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const current = formData.teachingSubject.split(',').map(x => x.trim()).filter(Boolean);
+                                        setFormData({ ...formData, teachingSubject: current.filter(x => x !== sub).join(', ') });
+                                      }}
+                                      className="p-0.5 hover:text-rose-600 rounded"
+                                      title={`Remove ${sub}`}
+                                    >
+                                      <X className="w-2.5 h-2.5" />
+                                    </button>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-[10px] text-slate-400 italic">Select subject(s) from dropdown</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 2. Assigned Class(es) Master Dropdown */}
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="block text-[11px] font-bold text-slate-700">
+                                Assigned Class(es)
+                              </label>
+                              {formData.assignedClass && (
+                                <button
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, assignedClass: '' })}
+                                  className="text-[10px] text-rose-600 hover:text-rose-700 font-semibold hover:underline"
+                                >
+                                  Clear All
+                                </button>
+                              )}
+                            </div>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) return;
+                                const current = formData.assignedClass
+                                  ? formData.assignedClass.split(',').map(c => c.trim()).filter(Boolean)
+                                  : [];
+                                if (!current.includes(val)) {
+                                  setFormData({ ...formData, assignedClass: [...current, val].join(', ') });
+                                }
+                              }}
+                              className="w-full px-2.5 py-1.5 border border-emerald-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium cursor-pointer"
+                            >
+                              <option value="">+ Select Class from Master...</option>
+                              {allMasterClassesList.map(c => {
+                                const isAdded = (formData.assignedClass || '').split(',').map(x => x.trim()).includes(c);
+                                return (
+                                  <option key={c} value={c} disabled={isAdded}>
+                                    {isAdded ? `✓ ${c} (Assigned)` : c}
+                                  </option>
+                                );
+                              })}
+                            </select>
+
+                            {/* Selected Class Badges */}
+                            <div className="flex flex-wrap gap-1 mt-1.5 min-h-[24px]">
+                              {formData.assignedClass ? (
+                                formData.assignedClass.split(',').map(c => c.trim()).filter(Boolean).map(cls => (
+                                  <span
+                                    key={cls}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-semibold rounded-md border border-emerald-200"
+                                  >
+                                    {cls}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const current = formData.assignedClass.split(',').map(x => x.trim()).filter(Boolean);
+                                        setFormData({ ...formData, assignedClass: current.filter(x => x !== cls).join(', ') });
+                                      }}
+                                      className="p-0.5 hover:text-rose-600 rounded"
+                                      title={`Remove ${cls}`}
+                                    >
+                                      <X className="w-2.5 h-2.5" />
+                                    </button>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-[10px] text-slate-400 italic">Select class(es) from dropdown</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1610,16 +1877,22 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     {(formData.role === 'Staff' || formData.role === 'Admin') && (
                       <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1.5">
                         <div className="flex items-center gap-1.5 text-blue-900 font-bold text-xs">
-                          <Briefcase className="w-4 h-4 text-blue-700" /> Key Responsibility & Work Area
+                          <Briefcase className="w-4 h-4 text-blue-700" /> Key Responsibility & Work Area <span className="text-slate-400 font-normal">(from Master)</span>
                         </div>
                         <div>
-                          <input
-                            type="text"
-                            placeholder="e.g. Fee Counter, Student Records & Admissions, Library Incharge"
+                          <select
                             value={formData.workArea}
                             onChange={e => setFormData({ ...formData, workArea: e.target.value })}
-                            className="w-full px-3 py-1.5 border border-blue-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                          />
+                            className="w-full px-3 py-1.5 border border-blue-200 rounded-lg text-xs bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                          >
+                            <option value="">-- Select Work Area from Master --</option>
+                            {COMMON_WORK_AREAS.map(w => (
+                              <option key={w} value={w}>{w}</option>
+                            ))}
+                            {formData.workArea && !COMMON_WORK_AREAS.includes(formData.workArea) && (
+                              <option value={formData.workArea}>{formData.workArea} (Custom)</option>
+                            )}
+                          </select>
                         </div>
                       </div>
                     )}
@@ -1689,23 +1962,23 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                       {/* Bank Name */}
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Bank Name <span className="text-slate-400 font-normal lowercase">(select or type)</span>
+                          Bank Name <span className="text-slate-400 font-normal lowercase">(from Master)</span>
                         </label>
                         <div className="relative">
-                          <Building2 className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
-                          <input
-                            type="text"
-                            list="popular-banks"
-                            placeholder="e.g. State Bank of India"
+                          <Building2 className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 pointer-events-none" />
+                          <select
                             value={formData.bankName}
                             onChange={e => setFormData({ ...formData, bankName: e.target.value })}
-                            className="w-full pl-8 pr-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                          />
-                          <datalist id="popular-banks">
+                            className="w-full pl-8 pr-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium cursor-pointer"
+                          >
+                            <option value="" disabled>-- Select Bank --</option>
                             {POPULAR_BANKS.map(b => (
-                              <option key={b} value={b} />
+                              <option key={b} value={b}>{b}</option>
                             ))}
-                          </datalist>
+                            {formData.bankName && !POPULAR_BANKS.includes(formData.bankName) && (
+                              <option value={formData.bankName}>{formData.bankName} (Custom)</option>
+                            )}
+                          </select>
                         </div>
                       </div>
 
@@ -1805,17 +2078,23 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Highest Educational Qualification
+                          Highest Educational Qualification <span className="text-slate-400 font-normal">(from Master)</span>
                         </label>
                         <div className="relative">
-                          <Award className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
-                          <input
-                            type="text"
-                            placeholder="e.g. B.Ed, M.Sc Mathematics, MA English"
+                          <Award className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 pointer-events-none" />
+                          <select
                             value={formData.qualification}
                             onChange={e => setFormData({ ...formData, qualification: e.target.value })}
-                            className="w-full pl-8 pr-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                          />
+                            className="w-full pl-8 pr-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium cursor-pointer"
+                          >
+                            <option value="" disabled>-- Select Qualification from Master --</option>
+                            {QUALIFICATION_PRESETS.map(q => (
+                              <option key={q} value={q}>{q}</option>
+                            ))}
+                            {formData.qualification && !QUALIFICATION_PRESETS.includes(formData.qualification) && (
+                              <option value={formData.qualification}>{formData.qualification} (Custom)</option>
+                            )}
+                          </select>
                         </div>
                       </div>
 
