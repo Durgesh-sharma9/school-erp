@@ -168,7 +168,7 @@ const INITIAL_STAFF_LIST = [
   }
 ];
 
-export function StaffListPage({ onNavigate }) {
+export function StaffListPage({ onNavigate, fromModule = 'payroll' }) {
   const [staffList, setStaffList] = useState(INITIAL_STAFF_LIST);
   const [reportType, setReportType] = useState('Standard');
   const [selectedDept, setSelectedDept] = useState('All');
@@ -251,14 +251,29 @@ export function StaffListPage({ onNavigate }) {
               <span>Home</span>
             </button>
             <span>/</span>
-            <button
-              onClick={() => onNavigate && onNavigate('/payroll-reports')}
-              className="hover:text-blue-600 transition-colors"
-            >
-              Payroll Reports
-            </button>
-            <span>/</span>
-            <span className="text-slate-700 font-semibold">Staff List</span>
+            {fromModule === 'users' ? (
+              <>
+                <button
+                  onClick={() => onNavigate && onNavigate('/users')}
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  User Management
+                </button>
+                <span>/</span>
+                <span className="text-slate-700 font-semibold">Staff List Report</span>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => onNavigate && onNavigate('/payroll-reports')}
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  Payroll Reports
+                </button>
+                <span>/</span>
+                <span className="text-slate-700 font-semibold">Staff List</span>
+              </>
+            )}
           </nav>
         </div>
 

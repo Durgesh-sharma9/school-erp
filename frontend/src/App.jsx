@@ -284,9 +284,9 @@ function AppContent() {
     }
     const mainEl = document.getElementById('main-content');
     if (mainEl) {
-      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      mainEl.scrollTop = 0;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   // Route protection and canonical redirects
@@ -609,7 +609,8 @@ function AppContent() {
               case '/payroll-staff-salary':
                 return <StaffSalaryReportPage onNavigate={handleNavigate} />;
               case '/staff-list':
-                return <StaffListPage onNavigate={handleNavigate} />;
+              case '/user-staff-list':
+                return <StaffListPage onNavigate={handleNavigate} fromModule={currentPath.includes('user') ? 'users' : 'payroll'} />;
               case '/staff-attendance-report':
                 return <MonthlyStaffAttendanceReportPage onNavigate={handleNavigate} />;
               case '/staff-attendance-time-report':

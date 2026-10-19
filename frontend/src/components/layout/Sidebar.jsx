@@ -231,7 +231,7 @@ export const menuCategories = [
         title: 'Reports',
         children: [
           { title: 'User Privilege Report', path: '/user-privilege-report' },
-          { title: 'Staff List Report', path: '/staff-list' }
+          { title: 'Staff List Report', path: '/user-staff-list' }
         ]
       }
     ]
@@ -779,7 +779,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       activeKey = 'users';
     }
     const usersReportPaths = [
-      '/user-privilege-report', '/user-reports'
+      '/user-privilege-report', '/user-reports', '/user-staff-list'
     ];
     if (usersReportPaths.includes(currentPath)) {
       activeKey = 'users';
@@ -799,14 +799,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
     }
 
-    // Auto-scroll active item into view within the sidebar
+    // Auto-scroll active item within the sidebar ONLY (never scroll window or main content)
     setTimeout(() => {
-      if (sidebarNavRef.current) {
-        const activeBtn = sidebarNavRef.current.querySelector('[data-sidebar-active="true"]');
+      const navContainer = sidebarNavRef.current;
+      if (navContainer) {
+        const activeBtn = navContainer.querySelector('[data-sidebar-active="true"]');
         if (activeBtn) {
-          activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        } else {
-          sidebarNavRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          const navRect = navContainer.getBoundingClientRect();
+          const btnRect = activeBtn.getBoundingClientRect();
+          if (btnRect.bottom > navRect.bottom || btnRect.top < navRect.top) {
+            navContainer.scrollTop += (btnRect.top - navRect.top) - (navRect.height / 3);
+          }
         }
       }
     }, 50);
