@@ -263,6 +263,25 @@ let usersList = [
   }
 ];
 
+// Ensure full ERP account and document defaults
+usersList = usersList.map(u => ({
+  basicSalary: u.basicSalary || (u.role === 'Driver' ? 22000 : u.role === 'Teacher' ? 35000 : 42000),
+  bankName: u.bankName || 'State Bank of India',
+  accountNo: u.accountNo || `4892${u.empCode || '101'}0291`,
+  ifscCode: u.ifscCode || 'SBIN0001024',
+  accountHolder: u.accountHolder || u.displayName || u.name,
+  panNo: u.panNo || `ABCDE${u.empCode || '101'}F`,
+  aadhaarNo: u.aadhaarNo || `7891-2345-${u.empCode || '101'}0`,
+  joiningDate: u.joiningDate || '2024-07-01',
+  gender: u.gender || (u.role === 'Driver' ? 'Male' : 'Female'),
+  qualification: u.qualification || (u.role === 'Teacher' ? 'M.Sc, B.Ed' : u.role === 'Driver' ? '10th Pass (Commercial DL)' : 'M.Com / MBA'),
+  documents: u.documents || [
+    { name: 'Aadhaar Card', status: 'Verified', fileName: `aadhaar_${u.empCode || 'doc'}.pdf` },
+    { name: 'PAN Card', status: 'Verified', fileName: `pan_${u.empCode || 'doc'}.pdf` }
+  ],
+  ...u
+}));
+
 export const getUsers = (req, res) => {
   const { role, category, department } = req.query;
   let result = [...usersList];
@@ -301,7 +320,19 @@ export const createUser = (req, res) => {
     modules = [],
     classes = [],
     subjects = [],
-    isActive = true
+    isActive = true,
+    // Bank & Accounts & Salary
+    basicSalary = '',
+    bankName = '',
+    accountNo = '',
+    ifscCode = '',
+    accountHolder = '',
+    panNo = '',
+    aadhaarNo = '',
+    joiningDate = '',
+    gender = 'Female',
+    qualification = '',
+    documents = []
   } = req.body;
 
   const rawName = staffName || name;
@@ -321,6 +352,8 @@ export const createUser = (req, res) => {
     : isTeachingStaff
     ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'
     : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop';
+
+  const defaultSalary = isDriverStaff ? 22000 : isTeachingStaff ? 35000 : 40000;
 
   const newUser = {
     id: String(Date.now()),
@@ -346,7 +379,19 @@ export const createUser = (req, res) => {
     isView: true,
     isModify: !isDriverStaff,
     isDelete: false,
-    isActive: Boolean(isActive)
+    isActive: Boolean(isActive),
+    // Salary & Accounts
+    basicSalary: basicSalary !== '' ? Number(basicSalary) : defaultSalary,
+    bankName: bankName || 'State Bank of India',
+    accountNo: accountNo || '',
+    ifscCode: ifscCode || '',
+    accountHolder: accountHolder || rawName.trim(),
+    panNo: panNo ? panNo.toUpperCase() : '',
+    aadhaarNo: aadhaarNo || '',
+    joiningDate: joiningDate || new Date().toISOString().slice(0, 10),
+    gender: gender || (isDriverStaff ? 'Male' : 'Female'),
+    qualification: qualification || (isDriverStaff ? '10th Pass (Commercial DL)' : isTeachingStaff ? 'M.A., B.Ed' : 'Graduate'),
+    documents: documents || []
   };
 
   usersList.unshift(newUser);
@@ -381,7 +426,18 @@ export const updateUser = (req, res) => {
     classes,
     subjects,
     modules,
-    isActive
+    isActive,
+    basicSalary,
+    bankName,
+    accountNo,
+    ifscCode,
+    accountHolder,
+    panNo,
+    aadhaarNo,
+    joiningDate,
+    gender,
+    qualification,
+    documents
   } = req.body;
 
   if (empCode !== undefined && empCode.trim()) {
@@ -409,6 +465,19 @@ export const updateUser = (req, res) => {
   if (subjects !== undefined) user.subjects = subjects;
   if (modules !== undefined) user.modules = modules;
   if (isActive !== undefined) user.isActive = isActive;
+
+  // Accounts & Salary
+  if (basicSalary !== undefined) user.basicSalary = Number(basicSalary);
+  if (bankName !== undefined) user.bankName = bankName;
+  if (accountNo !== undefined) user.accountNo = accountNo;
+  if (ifscCode !== undefined) user.ifscCode = ifscCode;
+  if (accountHolder !== undefined) user.accountHolder = accountHolder;
+  if (panNo !== undefined) user.panNo = panNo.toUpperCase();
+  if (aadhaarNo !== undefined) user.aadhaarNo = aadhaarNo;
+  if (joiningDate !== undefined) user.joiningDate = joiningDate;
+  if (gender !== undefined) user.gender = gender;
+  if (qualification !== undefined) user.qualification = qualification;
+  if (documents !== undefined) user.documents = documents;
 
   return res.json({
     success: true,

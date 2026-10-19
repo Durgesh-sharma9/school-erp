@@ -19,7 +19,21 @@ import {
   XCircle,
   Filter,
   Camera,
-  Upload
+  Upload,
+  CreditCard,
+  FileText,
+  User,
+  Building2,
+  IndianRupee,
+  Calendar,
+  Award,
+  Check,
+  ChevronRight,
+  ChevronLeft,
+  FileCheck,
+  File,
+  Eye,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -38,6 +52,19 @@ const COMMON_DEPARTMENTS = [
   'Library',
   'Front Office',
   'Sports'
+];
+
+const POPULAR_BANKS = [
+  'State Bank of India',
+  'HDFC Bank',
+  'ICICI Bank',
+  'Punjab National Bank',
+  'Bank of Baroda',
+  'Axis Bank',
+  'Canara Bank',
+  'Union Bank of India',
+  'Kotak Mahindra Bank',
+  'Central Bank of India'
 ];
 
 const DESIGNATION_PRESETS = {
@@ -70,9 +97,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Modal State
+  // Modal State & Tabs
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [activeModalTab, setActiveModalTab] = useState('profile'); // 'profile' | 'accounts' | 'documents'
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -85,10 +113,30 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     phone: '',
     email: '',
     isActive: true,
+    gender: 'Female',
+    joiningDate: new Date().toISOString().slice(0, 10),
     teachingSubject: '',
     assignedClass: '',
     driverLicense: '',
-    workArea: ''
+    workArea: '',
+    // Accounts & Salary
+    basicSalary: 35000,
+    bankName: 'State Bank of India',
+    accountNo: '',
+    ifscCode: '',
+    accountHolder: '',
+    panNo: '',
+    uanNo: '',
+    // Documents & KYC
+    aadhaarNo: '',
+    qualification: '',
+    documents: {
+      aadhaar: null,
+      pan: null,
+      qualificationDoc: null,
+      driverLicenseDoc: null,
+      resumeDoc: null
+    }
   });
 
   const handlePhotoUpload = (e) => {
@@ -101,6 +149,32 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     const reader = new FileReader();
     reader.onload = () => {
       setFormData(prev => ({ ...prev, pic: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDocumentUpload = (docKey, file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be under 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData(prev => ({
+        ...prev,
+        documents: {
+          ...prev.documents,
+          [docKey]: {
+            name: file.name,
+            size: (file.size / 1024).toFixed(1) + ' KB',
+            type: file.type,
+            data: reader.result,
+            uploadedAt: 'Attached'
+          }
+        }
+      }));
+      toast.success(`${file.name} attached`);
     };
     reader.readAsDataURL(file);
   };
@@ -131,7 +205,9 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Open Add Modal
   const handleOpenAdd = (presetRole = 'Teacher') => {
     setEditingId(null);
+    setActiveModalTab('profile');
     const matchedRole = ROLES.find(r => r.id === presetRole) || ROLES[0];
+    const defaultSalary = presetRole === 'Driver' ? 22000 : presetRole === 'Teacher' ? 35000 : 40000;
     setFormData({
       name: '',
       empCode: '',
@@ -142,10 +218,28 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       phone: '',
       email: '',
       isActive: true,
+      gender: presetRole === 'Driver' ? 'Male' : 'Female',
+      joiningDate: new Date().toISOString().slice(0, 10),
       teachingSubject: '',
       assignedClass: '',
       driverLicense: '',
-      workArea: ''
+      workArea: '',
+      basicSalary: defaultSalary,
+      bankName: 'State Bank of India',
+      accountNo: '',
+      ifscCode: '',
+      accountHolder: '',
+      panNo: '',
+      uanNo: '',
+      aadhaarNo: '',
+      qualification: presetRole === 'Teacher' ? 'M.Sc, B.Ed' : presetRole === 'Driver' ? '10th Pass (Commercial DL)' : 'Graduate',
+      documents: {
+        aadhaar: null,
+        pan: null,
+        qualificationDoc: null,
+        driverLicenseDoc: null,
+        resumeDoc: null
+      }
     });
     setIsModalOpen(true);
   };
@@ -153,6 +247,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Open Edit Modal
   const handleOpenEdit = (user) => {
     setEditingId(user.id);
+    setActiveModalTab('profile');
     const resolvedRole = user.role === 'Accountant' ? 'Staff' : (user.role || 'Teacher');
     setFormData({
       name: user.displayName || user.name.replace(/^\[.*?\]\s*/, ''),
@@ -164,10 +259,30 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       phone: user.phone || '',
       email: user.email || '',
       isActive: user.isActive !== undefined ? user.isActive : true,
+      gender: user.gender || (resolvedRole === 'Driver' ? 'Male' : 'Female'),
+      joiningDate: user.joiningDate || '2024-07-01',
       teachingSubject: (user.subjects && user.subjects.length > 0) ? user.subjects.join(', ') : '',
       assignedClass: (user.classes && user.classes.length > 0) ? user.classes.join(', ') : '',
       driverLicense: user.driverLicense || '',
-      workArea: (user.modules && user.modules.length > 0) ? user.modules.join(', ') : ''
+      workArea: (user.modules && user.modules.length > 0) ? user.modules.join(', ') : '',
+      basicSalary: user.basicSalary || (resolvedRole === 'Driver' ? 22000 : resolvedRole === 'Teacher' ? 35000 : 42000),
+      bankName: user.bankName || 'State Bank of India',
+      accountNo: user.accountNo || '',
+      ifscCode: user.ifscCode || '',
+      accountHolder: user.accountHolder || (user.displayName || user.name.replace(/^\[.*?\]\s*/, '')),
+      panNo: user.panNo || '',
+      uanNo: user.uanNo || '',
+      aadhaarNo: user.aadhaarNo || '',
+      qualification: user.qualification || '',
+      documents: user.documents && typeof user.documents === 'object' && !Array.isArray(user.documents)
+        ? user.documents
+        : {
+            aadhaar: user.aadhaarNo ? { name: 'Aadhaar_Document.pdf', size: '240 KB', uploadedAt: 'Verified' } : null,
+            pan: user.panNo ? { name: 'PAN_Card.pdf', size: '180 KB', uploadedAt: 'Verified' } : null,
+            qualificationDoc: null,
+            driverLicenseDoc: user.driverLicense ? { name: 'Driving_License.pdf', size: '310 KB', uploadedAt: 'Verified' } : null,
+            resumeDoc: null
+          }
     });
     setIsModalOpen(true);
   };
@@ -196,10 +311,24 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       phone: formData.phone.trim(),
       email: formData.email.trim(),
       isActive: formData.isActive,
+      gender: formData.gender,
+      joiningDate: formData.joiningDate,
       driverLicense: formData.role === 'Driver' ? formData.driverLicense.trim() : '',
       classes: formData.role === 'Teacher' && formData.assignedClass ? formData.assignedClass.split(',').map(s => s.trim()).filter(Boolean) : [],
       subjects: formData.role === 'Teacher' && formData.teachingSubject ? formData.teachingSubject.split(',').map(s => s.trim()).filter(Boolean) : [],
-      modules: formData.role === 'Driver' ? ['Transport'] : formData.role === 'Teacher' ? ['Student', 'Attendance', 'Academics'] : ['Fee', 'Payroll', 'Front Office']
+      modules: formData.role === 'Driver' ? ['Transport'] : formData.role === 'Teacher' ? ['Student', 'Attendance', 'Academics'] : ['Fee', 'Payroll', 'Front Office'],
+      // Accounts & Payroll
+      basicSalary: Number(formData.basicSalary) || 0,
+      bankName: formData.bankName,
+      accountNo: formData.accountNo.trim(),
+      ifscCode: formData.ifscCode.trim().toUpperCase(),
+      accountHolder: formData.accountHolder.trim() || formData.name.trim(),
+      panNo: formData.panNo.trim().toUpperCase(),
+      uanNo: formData.uanNo.trim(),
+      // Documents & KYC
+      aadhaarNo: formData.aadhaarNo.trim(),
+      qualification: formData.qualification.trim(),
+      documents: formData.documents
     };
 
     try {
@@ -292,25 +421,32 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Export CSV
   const handleExportCSV = () => {
     if (users.length === 0) return;
-    const headers = ['Code', 'Name', 'Role', 'Department', 'Phone', 'Email', 'Status', 'Details'];
+    const headers = ['Emp Code', 'Name', 'Role', 'Designation', 'Department', 'Phone', 'Email', 'Basic Salary (INR)', 'Bank Name', 'Account No', 'IFSC Code', 'PAN No', 'Aadhaar No', 'Status', 'Details'];
     const rows = filteredUsers.map(u => [
       `"${u.empCode || ''}"`,
       `"${u.displayName || u.name || ''}"`,
       `"${u.role || ''}"`,
+      `"${u.designation || ''}"`,
       `"${u.department || ''}"`,
       `"${u.phone || ''}"`,
       `"${u.email || ''}"`,
+      `"${u.basicSalary || ''}"`,
+      `"${u.bankName || ''}"`,
+      `"${u.accountNo || ''}"`,
+      `"${u.ifscCode || ''}"`,
+      `"${u.panNo || ''}"`,
+      `"${u.aadhaarNo || ''}"`,
       `"${u.isActive ? 'Active' : 'Inactive'}"`,
-      `"${u.role === 'Driver' ? `${u.driverLicense || ''} - ${u.vehicleAssigned || ''}` : (u.subjects || []).join(' / ')}"`
+      `"${u.role === 'Driver' ? (u.driverLicense ? `Lic: ${u.driverLicense}` : 'Driver') : (u.subjects || []).join(' / ')}"`
     ]);
     const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const link = document.createElement('a');
     link.href = encodeURI(csv);
-    link.download = `Staff_Directory_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `Staff_Directory_Payroll_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('Downloaded CSV');
+    toast.success('Downloaded complete staff payroll CSV');
   };
 
   // Filtered List
@@ -329,7 +465,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       // Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const str = `${u.name || ''} ${u.displayName || ''} ${u.phone || ''} ${u.email || ''} ${u.role || ''} ${u.department || ''} ${u.driverLicense || ''} ${u.vehicleAssigned || ''}`.toLowerCase();
+        const str = `${u.name || ''} ${u.displayName || ''} ${u.empCode || ''} ${u.phone || ''} ${u.email || ''} ${u.role || ''} ${u.designation || ''} ${u.department || ''} ${u.driverLicense || ''} ${u.vehicleAssigned || ''} ${u.bankName || ''} ${u.accountNo || ''} ${u.panNo || ''} ${u.aadhaarNo || ''}`.toLowerCase();
         if (!str.includes(q)) return false;
       }
       return true;
@@ -503,9 +639,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                   />
                 </th>
                 <th className="py-3 px-3">STAFF MEMBER</th>
-                <th className="py-3 px-3">ROLE</th>
+                <th className="py-3 px-3">ROLE & TITLE</th>
                 <th className="py-3 px-3">DEPARTMENT</th>
-                <th className="py-3 px-3">DETAILS / ASSIGNMENT</th>
+                <th className="py-3 px-3">SALARY & BANK</th>
+                <th className="py-3 px-3">ASSIGNMENT & KYC</th>
                 <th className="py-3 px-3 text-center">STATUS</th>
                 <th className="py-3 px-3 text-center w-24">ACTIONS</th>
               </tr>
@@ -513,13 +650,13 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center text-slate-400">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     Loading staff...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center text-slate-400">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     No staff found.
                   </td>
                 </tr>
@@ -581,22 +718,29 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         </div>
                       </td>
 
-                      {/* Role Badge */}
+                      {/* Role & Title */}
                       <td className="py-3 px-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                          isTeacher
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : isDriver
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : user.role === 'Admin'
-                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                            : 'bg-blue-50 text-blue-700 border border-blue-200'
-                        }`}>
-                          {isTeacher && <GraduationCap className="w-3 h-3" />}
-                          {isDriver && <Bus className="w-3 h-3" />}
-                          {!isTeacher && !isDriver && <Briefcase className="w-3 h-3" />}
-                          {user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
-                        </span>
+                        <div className="space-y-1">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            isTeacher
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : isDriver
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : user.role === 'Admin'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : 'bg-blue-50 text-blue-700 border border-blue-200'
+                          }`}>
+                            {isTeacher && <GraduationCap className="w-3 h-3" />}
+                            {isDriver && <Bus className="w-3 h-3" />}
+                            {!isTeacher && !isDriver && <Briefcase className="w-3 h-3" />}
+                            {user.role === 'Accountant' ? 'Office Staff' : (user.role || 'Staff')}
+                          </span>
+                          {user.designation && (
+                            <div className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">
+                              {user.designation}
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       {/* Department */}
@@ -604,7 +748,29 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                         {user.department || (isDriver ? 'Transport' : 'Academics')}
                       </td>
 
-                      {/* Details / Assignment (Simple & Clean!) */}
+                      {/* SALARY & BANK (ERP Payroll) */}
+                      <td className="py-3 px-3">
+                        {user.basicSalary ? (
+                          <div>
+                            <div className="font-bold text-slate-900 flex items-center gap-0.5 font-mono text-[12px]">
+                              <IndianRupee className="w-3 h-3 text-emerald-600" />
+                              {Number(user.basicSalary).toLocaleString('en-IN')}
+                              <span className="text-[10px] text-slate-400 font-sans font-normal ml-0.5">/mo</span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                              <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span className="truncate max-w-[125px]" title={user.bankName}>
+                                {user.bankName ? user.bankName.replace(/ Bank.*/i, '') : 'Bank'}
+                                {user.accountNo ? ` (..${user.accountNo.slice(-4)})` : ''}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[11px] italic">Not set</span>
+                        )}
+                      </td>
+
+                      {/* Details / Assignment & KYC */}
                       <td className="py-3 px-3">
                         {isDriver ? (
                           <div className="space-y-0.5">
@@ -614,7 +780,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                               </div>
                             ) : (
                               <div className="text-xs text-slate-500 font-medium">
-                                Transport Staff
+                                Transport Driver
                               </div>
                             )}
                             {user.vehicleAssigned && (
@@ -636,9 +802,28 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                           </div>
                         ) : (
                           <div className="text-slate-600 font-medium">
-                            {user.designation || 'Administrative Duties'}
+                            {user.workArea || user.designation || 'Administrative Duties'}
                           </div>
                         )}
+
+                        {/* KYC Tags */}
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          {user.aadhaarNo && (
+                            <span className="inline-flex items-center text-[9px] text-slate-600 font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200" title={`Aadhaar: ${user.aadhaarNo}`}>
+                              UID ••{user.aadhaarNo.slice(-4)}
+                            </span>
+                          )}
+                          {user.panNo && (
+                            <span className="inline-flex items-center text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200" title={`PAN: ${user.panNo}`}>
+                              PAN {user.panNo}
+                            </span>
+                          )}
+                          {user.documents && Object.values(user.documents).some(d => d && d.name) && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200" title="KYC Docs Uploaded">
+                              <FileCheck className="w-2.5 h-2.5 text-emerald-600" /> Docs
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Status */}
@@ -661,7 +846,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                           <button
                             onClick={() => handleOpenEdit(user)}
                             className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-                            title="Edit"
+                            title="Edit Staff & Accounts"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
@@ -683,22 +868,22 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
         </div>
       </div>
 
-      {/* 4. Complete, Professional Add / Edit Staff Modal */}
+      {/* 4. Complete, Professional 3-Tabbed ERP Add / Edit Staff Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80 shrink-0">
-              <div className="flex items-center gap-2">
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/90 shrink-0">
+              <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
                   {editingId ? <Edit2 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">
-                    {editingId ? 'Edit Staff Member' : 'Add New Staff Member'}
+                    {editingId ? 'Edit Staff & Payroll Profile' : 'Add New Staff Member'}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    Enter profile details, photo, designation, and assignments
+                    ERP profile, payroll compensation, bank details and KYC document records
                   </p>
                 </div>
               </div>
@@ -711,300 +896,810 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
               </button>
             </div>
 
+            {/* 3 ERP Step Tabs */}
+            <div className="flex items-center border-b border-slate-200 bg-slate-100/60 px-5 pt-2 gap-1.5 shrink-0 overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setActiveModalTab('profile')}
+                className={`px-3.5 py-2 rounded-t-lg font-bold text-xs flex items-center gap-1.5 border-t border-x transition-all shrink-0 ${
+                  activeModalTab === 'profile'
+                    ? 'bg-white text-indigo-600 border-slate-200 border-b-transparent shadow-2xs -mb-px'
+                    : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                1. Profile & Role
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModalTab('accounts')}
+                className={`px-3.5 py-2 rounded-t-lg font-bold text-xs flex items-center gap-1.5 border-t border-x transition-all shrink-0 ${
+                  activeModalTab === 'accounts'
+                    ? 'bg-white text-indigo-600 border-slate-200 border-b-transparent shadow-2xs -mb-px'
+                    : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                2. Bank & Salary (Payroll)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModalTab('documents')}
+                className={`px-3.5 py-2 rounded-t-lg font-bold text-xs flex items-center gap-1.5 border-t border-x transition-all shrink-0 ${
+                  activeModalTab === 'documents'
+                    ? 'bg-white text-indigo-600 border-slate-200 border-b-transparent shadow-2xs -mb-px'
+                    : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                3. Documents & KYC
+              </button>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
               {/* Scrollable Form Body */}
               <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
-              {/* Photo & Basic Identity Header Card */}
-              <div className="p-3 bg-slate-50/80 border border-slate-200/90 rounded-xl flex items-center gap-4">
-                {/* Photo Upload Avatar */}
-                <div className="relative shrink-0">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-16 h-16 rounded-full border-2 border-indigo-200 overflow-hidden relative group cursor-pointer bg-white shadow-xs flex items-center justify-center"
-                    title="Click to upload staff photo"
-                  >
-                    <img
-                      src={formData.pic || getRoleDefaultAvatar(formData.role)}
-                      alt="Staff"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-slate-900/40 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Camera className="w-4 h-4" />
-                      <span className="text-[9px] font-semibold mt-0.5">Change</span>
+                {/* ================= TAB 1: PROFILE & ROLE ================= */}
+                {activeModalTab === 'profile' && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    {/* Photo & Basic Identity Header Card */}
+                    <div className="p-3.5 bg-slate-50/80 border border-slate-200/90 rounded-xl flex items-center gap-4">
+                      {/* Photo Upload Avatar */}
+                      <div className="relative shrink-0">
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-16 h-16 rounded-full border-2 border-indigo-200 overflow-hidden relative group cursor-pointer bg-white shadow-xs flex items-center justify-center"
+                          title="Click to upload staff photo"
+                        >
+                          <img
+                            src={formData.pic || getRoleDefaultAvatar(formData.role)}
+                            alt="Staff"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-slate-900/40 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera className="w-4 h-4" />
+                            <span className="text-[9px] font-semibold mt-0.5">Change</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute -bottom-1 -right-1 p-1 bg-indigo-600 text-white rounded-full shadow-xs hover:bg-indigo-700"
+                          title="Upload Photo"
+                        >
+                          <Camera className="w-3 h-3" />
+                        </button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                      </div>
+
+                      {/* Name & Emp Code */}
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div className="sm:col-span-2">
+                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            Full Name <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Pooja Kanwar"
+                            value={formData.name}
+                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            Emp Code <span className="text-slate-400 font-normal">(Optional)</span>
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 301"
+                            value={formData.empCode}
+                            onChange={e => setFormData({ ...formData, empCode: e.target.value })}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono uppercase bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute -bottom-1 -right-1 p-1 bg-indigo-600 text-white rounded-full shadow-xs hover:bg-indigo-700"
-                    title="Upload Photo"
-                  >
-                    <Camera className="w-3 h-3" />
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </div>
 
-                {/* Name & Emp Code */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Full Name <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Pooja Kanwar"
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    />
-                  </div>
+                    {/* Role Selection (4 Role Cards) */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Role Category <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {ROLES.map(r => {
+                          const isSelected = formData.role === r.id;
+                          const IconComp = r.icon;
+                          return (
+                            <button
+                              type="button"
+                              key={r.id}
+                              onClick={() => setFormData({
+                                ...formData,
+                                role: r.id,
+                                department: r.defaultDept,
+                                designation: r.defaultDesignation,
+                                basicSalary: r.id === 'Driver' ? 22000 : r.id === 'Teacher' ? 35000 : 38000
+                              })}
+                              className={`p-2.5 rounded-xl border text-center transition-all ${
+                                isSelected
+                                  ? 'bg-indigo-600 text-white font-bold border-indigo-600 shadow-xs'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium'
+                              }`}
+                            >
+                              <IconComp className="w-4 h-4 mx-auto mb-1" />
+                              <span className="text-[11px] block">{r.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Emp Code <span className="text-slate-400 font-normal">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 301"
-                      value={formData.empCode}
-                      onChange={e => setFormData({ ...formData, empCode: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono uppercase bg-white focus:ring-2 focus:ring-indigo-500/20"
-                    />
-                  </div>
-                </div>
-              </div>
+                    {/* Designation & Department */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Designation / Job Title
+                        </label>
+                        <input
+                          type="text"
+                          list="designation-suggestions"
+                          placeholder="e.g. Senior Accountant"
+                          value={formData.designation}
+                          onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                        <datalist id="designation-suggestions">
+                          {(DESIGNATION_PRESETS[formData.role] || []).map(p => (
+                            <option key={p} value={p} />
+                          ))}
+                        </datalist>
+                      </div>
 
-              {/* Role Selection (4 Role Cards) */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Role Category <span className="text-rose-500">*</span>
-                </label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {ROLES.map(r => {
-                    const isSelected = formData.role === r.id;
-                    const IconComp = r.icon;
-                    return (
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Department
+                        </label>
+                        <select
+                          value={formData.department}
+                          onChange={e => setFormData({ ...formData, department: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        >
+                          {COMMON_DEPARTMENTS.map(d => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Phone & Email */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Phone Number <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="tel"
+                            required
+                            placeholder="e.g. 9829012345"
+                            value={formData.phone}
+                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="email"
+                            placeholder="e.g. staff@school.edu"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gender & Joining Date */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Gender
+                        </label>
+                        <select
+                          value={formData.gender || 'Female'}
+                          onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        >
+                          <option value="Female">Female</option>
+                          <option value="Male">Male</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Date of Joining
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="date"
+                            value={formData.joiningDate || ''}
+                            onChange={e => setFormData({ ...formData, joiningDate: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Role-Specific Assignment Details */}
+                    {formData.role === 'Teacher' && (
+                      <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2.5">
+                        <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                          <GraduationCap className="w-4 h-4" /> Academic Assignment
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Teaching Subject(s)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. English, EVS, Mathematics"
+                              value={formData.teachingSubject}
+                              onChange={e => setFormData({ ...formData, teachingSubject: e.target.value })}
+                              className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Assigned Class(es)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Class I-A, Class II-B"
+                              value={formData.assignedClass}
+                              onChange={e => setFormData({ ...formData, assignedClass: e.target.value })}
+                              className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formData.role === 'Driver' && (
+                      <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+                        <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                          <Bus className="w-4 h-4" /> Driver Details
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            Driving License No.
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. RJ14-201600104"
+                            value={formData.driverLicense}
+                            onChange={e => setFormData({ ...formData, driverLicense: e.target.value })}
+                            className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white font-mono uppercase focus:ring-2 focus:ring-amber-500/20"
+                          />
+                        </div>
+                        <p className="text-[10px] text-amber-800/80">
+                          ℹ️ Note: Bus allocation & route scheduling Transport module se direct ki jayegi.
+                        </p>
+                      </div>
+                    )}
+
+                    {(formData.role === 'Staff' || formData.role === 'Admin') && (
+                      <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
+                        <div className="flex items-center gap-1.5 text-blue-800 font-bold text-xs">
+                          <Briefcase className="w-4 h-4" /> Key Responsibility / Work Area
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="e.g. Fee Counter, Student Records, Library Incharge, Accounts"
+                            value={formData.workArea}
+                            onChange={e => setFormData({ ...formData, workArea: e.target.value })}
+                            className="w-full px-2.5 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Account Status Switch */}
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-slate-800">Account Status</div>
+                        <div className="text-[11px] text-slate-500">
+                          {formData.isActive ? 'Active staff member (authorized in ERP)' : 'Inactive staff member (disabled)'}
+                        </div>
+                      </div>
                       <button
                         type="button"
-                        key={r.id}
-                        onClick={() => setFormData({
-                          ...formData,
-                          role: r.id,
-                          department: r.defaultDept,
-                          designation: r.defaultDesignation
-                        })}
-                        className={`p-2.5 rounded-xl border text-center transition-all ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white font-bold border-indigo-600 shadow-xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium'
+                        onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+                          formData.isActive
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300'
                         }`}
                       >
-                        <IconComp className="w-4 h-4 mx-auto mb-1" />
-                        <span className="text-[11px] block">{r.label}</span>
+                        {formData.isActive ? '✓ Active' : '✕ Inactive'}
                       </button>
-                    );
-                  })}
-                </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= TAB 2: BANK & SALARY (PAYROLL) ================= */}
+                {activeModalTab === 'accounts' && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    {/* Informational Payroll Banner */}
+                    <div className="p-3 bg-indigo-50/80 border border-indigo-100 rounded-xl flex items-start gap-2.5">
+                      <CreditCard className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-bold text-indigo-900 text-xs">Monthly Payroll & Bank Accounts Disbursal</div>
+                        <div className="text-[11px] text-indigo-700/90 leading-relaxed mt-0.5">
+                          Staff salary processing, bank transfer exports, and TDS tax records are mapped directly to these banking credentials.
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Basic Monthly Salary */}
+                    <div className="p-3.5 bg-slate-50/80 border border-slate-200/90 rounded-xl">
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        Basic Monthly Salary (₹) <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative max-w-sm">
+                        <IndianRupee className="w-4 h-4 text-emerald-600 absolute left-3 top-2.5" />
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          step="500"
+                          placeholder="e.g. 35000"
+                          value={formData.basicSalary}
+                          onChange={e => setFormData({ ...formData, basicSalary: Number(e.target.value) })}
+                          className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm font-bold font-mono text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Gross remuneration per month before provident fund and tax deductions.
+                      </p>
+                    </div>
+
+                    {/* Bank Name & Account Holder */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Bank Name <span className="text-slate-400 font-normal">(Select or Type)</span>
+                        </label>
+                        <div className="relative">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="text"
+                            list="popular-banks"
+                            placeholder="e.g. State Bank of India"
+                            value={formData.bankName}
+                            onChange={e => setFormData({ ...formData, bankName: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                          <datalist id="popular-banks">
+                            {POPULAR_BANKS.map(b => (
+                              <option key={b} value={b} />
+                            ))}
+                          </datalist>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Account Holder Name
+                        </label>
+                        <div className="relative">
+                          <User className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="text"
+                            placeholder={formData.name || 'As per Bank Passbook'}
+                            value={formData.accountHolder}
+                            onChange={e => setFormData({ ...formData, accountHolder: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Account Number & IFSC Code */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Bank Account Number
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 30894102910"
+                          value={formData.accountNo}
+                          onChange={e => setFormData({ ...formData, accountNo: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          IFSC Code
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. SBIN0001234"
+                          value={formData.ifscCode}
+                          onChange={e => setFormData({ ...formData, ifscCode: e.target.value.toUpperCase() })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono uppercase bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                    </div>
+
+                    {/* PAN Card & UAN/PF Number */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          PAN Card Number <span className="text-slate-400 font-normal">(For TDS & Tax)</span>
+                        </label>
+                        <input
+                          type="text"
+                          maxLength="10"
+                          placeholder="e.g. ABCDE1234F"
+                          value={formData.panNo}
+                          onChange={e => setFormData({ ...formData, panNo: e.target.value.toUpperCase() })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono uppercase bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          UAN / EPF Number <span className="text-slate-400 font-normal">(Optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 100928374619"
+                          value={formData.uanNo}
+                          onChange={e => setFormData({ ...formData, uanNo: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Monthly salary slips can be generated automatically in the Accounts module using these values.</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= TAB 3: DOCUMENTS & KYC ================= */}
+                {activeModalTab === 'documents' && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    {/* Informational Documents Banner */}
+                    <div className="p-3 bg-emerald-50/80 border border-emerald-100 rounded-xl flex items-start gap-2.5">
+                      <FileCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-bold text-emerald-900 text-xs">KYC & Document Verification Records</div>
+                        <div className="text-[11px] text-emerald-700/90 leading-relaxed mt-0.5">
+                          Upload Aadhaar, PAN card, educational degrees, and driving licenses for staff compliance and audit readiness.
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Educational Qualification & Degree */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Highest Educational Qualification
+                        </label>
+                        <div className="relative">
+                          <Award className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                          <input
+                            type="text"
+                            placeholder="e.g. B.Ed, M.Sc Mathematics, MA English"
+                            value={formData.qualification}
+                            onChange={e => setFormData({ ...formData, qualification: e.target.value })}
+                            className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Aadhaar Number (12 Digits)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength="14"
+                          placeholder="e.g. 5412 8901 2345"
+                          value={formData.aadhaarNo}
+                          onChange={e => setFormData({ ...formData, aadhaarNo: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Document Upload Grid (4 Cards) */}
+                    <div className="space-y-2.5">
+                      <div className="text-xs font-bold text-slate-800">
+                        Upload Scanned KYC Documents & Certificates
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {/* 1. Aadhaar Card Upload */}
+                        <div className="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex flex-col justify-between">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="font-bold text-slate-800 text-[11px] flex items-center gap-1.5">
+                                <FileText className="w-3.5 h-3.5 text-indigo-600" /> Aadhaar Card Scan
+                              </div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">
+                                PDF, JPG or PNG (Front & Back)
+                              </div>
+                            </div>
+                            {formData.documents?.aadhaar && (
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Check className="w-2.5 h-2.5" /> Attached
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <label className="cursor-pointer px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs">
+                              <Upload className="w-3 h-3 text-slate-500" />
+                              {formData.documents?.aadhaar ? 'Re-upload' : 'Upload File'}
+                              <input
+                                type="file"
+                                accept=".pdf,image/*"
+                                onChange={e => handleDocumentUpload('aadhaar', e.target.files?.[0])}
+                                className="hidden"
+                              />
+                            </label>
+                            {formData.documents?.aadhaar?.name && (
+                              <span className="text-[10px] text-slate-600 truncate max-w-[120px]" title={formData.documents.aadhaar.name}>
+                                {formData.documents.aadhaar.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 2. PAN Card Upload */}
+                        <div className="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex flex-col justify-between">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="font-bold text-slate-800 text-[11px] flex items-center gap-1.5">
+                                <CreditCard className="w-3.5 h-3.5 text-indigo-600" /> PAN Card Copy
+                              </div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">
+                                Required for official TDS records
+                              </div>
+                            </div>
+                            {formData.documents?.pan && (
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Check className="w-2.5 h-2.5" /> Attached
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <label className="cursor-pointer px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs">
+                              <Upload className="w-3 h-3 text-slate-500" />
+                              {formData.documents?.pan ? 'Re-upload' : 'Upload File'}
+                              <input
+                                type="file"
+                                accept=".pdf,image/*"
+                                onChange={e => handleDocumentUpload('pan', e.target.files?.[0])}
+                                className="hidden"
+                              />
+                            </label>
+                            {formData.documents?.pan?.name && (
+                              <span className="text-[10px] text-slate-600 truncate max-w-[120px]" title={formData.documents.pan.name}>
+                                {formData.documents.pan.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 3. Degree / Qualification Certificate */}
+                        <div className="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex flex-col justify-between">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="font-bold text-slate-800 text-[11px] flex items-center gap-1.5">
+                                <Award className="w-3.5 h-3.5 text-emerald-600" /> Degree / Marksheet
+                              </div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">
+                                Highest degree certificate or B.Ed
+                              </div>
+                            </div>
+                            {formData.documents?.qualificationDoc && (
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Check className="w-2.5 h-2.5" /> Attached
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <label className="cursor-pointer px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs">
+                              <Upload className="w-3 h-3 text-slate-500" />
+                              {formData.documents?.qualificationDoc ? 'Re-upload' : 'Upload File'}
+                              <input
+                                type="file"
+                                accept=".pdf,image/*"
+                                onChange={e => handleDocumentUpload('qualificationDoc', e.target.files?.[0])}
+                                className="hidden"
+                              />
+                            </label>
+                            {formData.documents?.qualificationDoc?.name && (
+                              <span className="text-[10px] text-slate-600 truncate max-w-[120px]" title={formData.documents.qualificationDoc.name}>
+                                {formData.documents.qualificationDoc.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 4. Driver License Copy (or Resume for other staff) */}
+                        {formData.role === 'Driver' ? (
+                          <div className="p-3 border border-amber-200 rounded-xl bg-amber-50/40 flex flex-col justify-between">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="font-bold text-amber-900 text-[11px] flex items-center gap-1.5">
+                                  <Bus className="w-3.5 h-3.5 text-amber-700" /> Commercial Driving License
+                                </div>
+                                <div className="text-[10px] text-amber-700/80 mt-0.5">
+                                  Heavy vehicle / commercial badge scan
+                                </div>
+                              </div>
+                              {formData.documents?.driverLicenseDoc && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                  <Check className="w-2.5 h-2.5" /> Attached
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2.5 flex items-center gap-2">
+                              <label className="cursor-pointer px-2.5 py-1 bg-white border border-amber-200 hover:bg-amber-100/50 text-amber-900 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs">
+                                <Upload className="w-3 h-3 text-amber-700" />
+                                {formData.documents?.driverLicenseDoc ? 'Re-upload' : 'Upload License'}
+                                <input
+                                  type="file"
+                                  accept=".pdf,image/*"
+                                  onChange={e => handleDocumentUpload('driverLicenseDoc', e.target.files?.[0])}
+                                  className="hidden"
+                                />
+                              </label>
+                              {formData.documents?.driverLicenseDoc?.name && (
+                                <span className="text-[10px] text-amber-900 truncate max-w-[120px]" title={formData.documents.driverLicenseDoc.name}>
+                                  {formData.documents.driverLicenseDoc.name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex flex-col justify-between">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="font-bold text-slate-800 text-[11px] flex items-center gap-1.5">
+                                  <File className="w-3.5 h-3.5 text-blue-600" /> Staff Resume / Biodata
+                                </div>
+                                <div className="text-[10px] text-slate-500 mt-0.5">
+                                  Experience certificates & CV
+                                </div>
+                              </div>
+                              {formData.documents?.resumeDoc && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                  <Check className="w-2.5 h-2.5" /> Attached
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2.5 flex items-center gap-2">
+                              <label className="cursor-pointer px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs">
+                                <Upload className="w-3 h-3 text-slate-500" />
+                                {formData.documents?.resumeDoc ? 'Re-upload' : 'Upload File'}
+                                <input
+                                  type="file"
+                                  accept=".pdf,image/*"
+                                  onChange={e => handleDocumentUpload('resumeDoc', e.target.files?.[0])}
+                                  className="hidden"
+                                />
+                              </label>
+                              {formData.documents?.resumeDoc?.name && (
+                                <span className="text-[10px] text-slate-600 truncate max-w-[120px]" title={formData.documents.resumeDoc.name}>
+                                  {formData.documents.resumeDoc.name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Uploaded KYC documents are safely archived in the ERP records for audit and compliance inspection.</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Designation & Department (2-col grid) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Pinned Action & Multi-step Navigation Footer */}
+              <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/90 flex items-center justify-between gap-2 shrink-0">
+                {/* Step / Back Button */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Designation / Job Title
-                  </label>
-                  <input
-                    type="text"
-                    list="designation-suggestions"
-                    placeholder="e.g. Senior Accountant"
-                    value={formData.designation}
-                    onChange={e => setFormData({ ...formData, designation: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                  <datalist id="designation-suggestions">
-                    {(DESIGNATION_PRESETS[formData.role] || []).map(p => (
-                      <option key={p} value={p} />
-                    ))}
-                  </datalist>
+                  {activeModalTab === 'accounts' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalTab('profile')}
+                      className="px-3 py-1.5 border border-slate-200 bg-white text-slate-700 rounded-lg font-semibold hover:bg-slate-100 transition-colors flex items-center gap-1"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> Back: Profile
+                    </button>
+                  )}
+                  {activeModalTab === 'documents' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalTab('accounts')}
+                      className="px-3 py-1.5 border border-slate-200 bg-white text-slate-700 rounded-lg font-semibold hover:bg-slate-100 transition-colors flex items-center gap-1"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> Back: Bank Details
+                    </button>
+                  )}
+                  {activeModalTab === 'profile' && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="px-3.5 py-1.5 border border-slate-200 bg-white text-slate-700 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Department
-                  </label>
-                  <select
-                    value={formData.department}
-                    onChange={e => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
+                {/* Next Tab / Save Buttons */}
+                <div className="flex items-center gap-2">
+                  {activeModalTab === 'profile' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalTab('accounts')}
+                      className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-colors flex items-center gap-1"
+                    >
+                      Next: Bank & Salary <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {activeModalTab === 'accounts' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalTab('documents')}
+                      className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-colors flex items-center gap-1"
+                    >
+                      Next: Documents & KYC <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  {/* Primary Save Staff Member (always accessible) */}
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs transition-colors flex items-center gap-1.5"
                   >
-                    {COMMON_DEPARTMENTS.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
+                    {editingId ? <Edit2 className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                    {editingId ? 'Save Changes' : 'Save Staff Member'}
+                  </button>
                 </div>
-              </div>
-
-              {/* Phone & Email (2-col grid) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Phone Number <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-                    <input
-                      type="tel"
-                      required
-                      placeholder="e.g. 9829012345"
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500/20"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Email Address <span className="text-slate-400 font-normal">(Optional)</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-                    <input
-                      type="email"
-                      placeholder="e.g. staff@school.edu"
-                      value={formData.email}
-                      onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-8 pr-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500/20"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Role-Specific Details */}
-              {/* If Teacher: Subjects & Classes */}
-              {formData.role === 'Teacher' && (
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2.5">
-                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
-                    <GraduationCap className="w-4 h-4" /> Academic Assignment
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Teaching Subject(s)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. English, EVS, Mathematics"
-                        value={formData.teachingSubject}
-                        onChange={e => setFormData({ ...formData, teachingSubject: e.target.value })}
-                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Assigned Class(es)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Class I-A, Class II-B"
-                        value={formData.assignedClass}
-                        onChange={e => setFormData({ ...formData, assignedClass: e.target.value })}
-                        className="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg text-xs bg-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* If Driver: License No (Bus assignment handled in Transport module) */}
-              {formData.role === 'Driver' && (
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
-                    <Bus className="w-4 h-4" /> Driver Details
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Driving License No. <span className="text-slate-400 font-normal">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. RJ14-201600104"
-                      value={formData.driverLicense}
-                      onChange={e => setFormData({ ...formData, driverLicense: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-amber-200 rounded-lg text-xs bg-white font-mono uppercase focus:ring-2 focus:ring-amber-500/20"
-                    />
-                  </div>
-                  <p className="text-[10px] text-amber-800/80">
-                    ℹ️ Note: Bus & Route assignment Transport module se manage kiya jayega.
-                  </p>
-                </div>
-              )}
-
-              {/* If Office Staff or Admin: Duty / Work Area */}
-              {(formData.role === 'Staff' || formData.role === 'Admin') && (
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-1.5 text-blue-800 font-bold text-xs">
-                    <Briefcase className="w-4 h-4" /> Key Responsibility / Work Area
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="e.g. Fee Counter, Student Records, Library Incharge, Accounts"
-                      value={formData.workArea}
-                      onChange={e => setFormData({ ...formData, workArea: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Account Status Switch */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-slate-800">Account Status</div>
-                  <div className="text-[11px] text-slate-500">
-                    {formData.isActive ? 'Active staff member (authorized to perform operations)' : 'Inactive staff member (disabled)'}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                    formData.isActive
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                      : 'bg-rose-100 text-rose-800 border border-rose-300'
-                  }`}
-                >
-                  {formData.isActive ? '✓ Active' : '✕ Inactive'}
-                </button>
-              </div>
-
-              </div>
-
-              {/* Pinned Action Footer */}
-              <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/90 flex items-center justify-end gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs transition-colors flex items-center gap-1.5"
-                >
-                  {editingId ? <Edit2 className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-                  {editingId ? 'Save Changes' : 'Add Staff Member'}
-                </button>
               </div>
             </form>
           </div>
