@@ -827,6 +827,10 @@ function AppContent() {
                 return <SmsBirthdayReportPage onNavigate={handleNavigate} />;
 
               // User Management Module
+              case '/users':
+              case '/manage-users':
+              case '/staff-users':
+              case '/driver-users':
               case '/user-privilege':
                 return <ManageUsersPage onNavigate={handleNavigate} />;
               case '/user-reports':

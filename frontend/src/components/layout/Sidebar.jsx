@@ -218,6 +218,25 @@ export const menuCategories = [
     ]
   },
   {
+    id: 'users',
+    title: 'Users',
+    icon: Users,
+    subItems: [
+      { title: 'All Users', path: '/users' },
+      { title: 'Staff & Teachers', path: '/staff-users' },
+      { title: 'Drivers', path: '/driver-users' },
+      { title: 'User Privileges', path: '/user-privilege' },
+      {
+        id: 'users-reports',
+        title: 'Reports',
+        children: [
+          { title: 'User Privilege Report', path: '/user-privilege-report' },
+          { title: 'Staff List Report', path: '/staff-list' }
+        ]
+      }
+    ]
+  },
+  {
     id: 'crm',
     title: 'CRM',
     icon: Contact,
@@ -520,21 +539,6 @@ export const menuCategories = [
     ]
   },
   {
-    id: 'userManagement',
-    title: 'User Management',
-    icon: Settings, // manage_accounts in UAB
-    subItems: [
-      { title: 'Manage Users', path: '/user-privilege' },
-      {
-        id: 'user-management-reports',
-        title: 'Reports',
-        children: [
-          { title: 'User Privilege Report', path: '/user-privilege-report' }
-        ]
-      }
-    ]
-  },
-  {
     id: 'leaveManagement',
     title: 'Leave Management',
     icon: ClipboardList, // receipt_long in UAB
@@ -550,6 +554,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
   const getInitialActiveDropdown = (path) => {
     if (path.includes('transport')) return { transport: true };
     if (path.includes('student') || path.includes('admission')) return { student: true };
+    if (path.includes('user')) return { users: true };
     if (path.includes('fee')) return { fee: true };
     if (path.includes('hostel')) return { hostel: true };
     if (path.includes('exam')) return { examination: true };
@@ -557,7 +562,6 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (path.includes('library')) return { library: true };
     if (path.includes('stationary')) return { stationary: true };
     if (path.includes('sms')) return { sms: true };
-    if (path.includes('user')) return { userManagement: true };
     if (path.includes('leave')) return { leaveManagement: true };
     if (path === '/class-list' || path === '/subject-list' || path.includes('master')) return { master: true };
     return {};
@@ -761,18 +765,18 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       activeKey = 'sms';
       activeSubKey = 'sms-reports';
     }
-    const userManagementPaths = [
-      '/user-privilege'
+    const usersPaths = [
+      '/users', '/manage-users', '/staff-users', '/driver-users', '/user-privilege'
     ];
-    if (userManagementPaths.includes(currentPath)) {
-      activeKey = 'userManagement';
+    if (usersPaths.includes(currentPath)) {
+      activeKey = 'users';
     }
-    const userManagementReportPaths = [
+    const usersReportPaths = [
       '/user-privilege-report', '/user-reports'
     ];
-    if (userManagementReportPaths.includes(currentPath)) {
-      activeKey = 'userManagement';
-      activeSubKey = 'user-management-reports';
+    if (usersReportPaths.includes(currentPath)) {
+      activeKey = 'users';
+      activeSubKey = 'users-reports';
     }
     const leaveManagementPaths = [
       '/all-leave-requests', '/staff-leave-requests', '/apply-leave-request'
