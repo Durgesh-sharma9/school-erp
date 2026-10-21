@@ -47,7 +47,7 @@ const MODULES_INDEX = [
   { id: 'm-transport', title: 'Transport & Fleet Management', path: '/get-transport', category: 'Logistics', icon: Bus, desc: 'Bus route stops, vehicle tracking, and driver directory', keywords: ['transport', 'bus', 'van', 'route', 'pickup', 'driver'] },
   { id: 'm-hostel', title: 'Hostel & Dormitory Allocation', path: '/hostel-rooms', category: 'Logistics', icon: Building, desc: 'Hostel room allocations, warden audits, and mess billing', keywords: ['hostel', 'room', 'bed', 'warden', 'boarding'] },
   { id: 'm-marks', title: 'Exam Marks Entry Grid', path: '/marks-entry', category: 'Examination', icon: Award, desc: 'Periodic tests and term exam marks grading entry', keywords: ['marks', 'exam marks', 'grading', 'test score', 'periodic test'] },
-  { id: 'm-reportcard', title: 'CBSE Holistic Progress Card (HPC)', path: '/report-card', category: 'Examination', icon: FileSpreadsheet, desc: 'Term 1 & 2 printable marksheet and report cards', keywords: ['report card', 'marksheet', 'progress report', 'cbse report card'] },
+  { id: 'm-reportcard', title: 'Marksheet Generator (J D International Template)', path: '/report-card', category: 'Examination', icon: FileSpreadsheet, desc: 'Generate & customize CBSE Holistic Progress Card marksheet with manual marks entry', keywords: ['marksheet', 'report card', 'jd international', 'marksheet generator', 'progress report', 'cbse report card', 'cce'] },
   { id: 'm-payroll', title: 'Staff Payroll & Salary Slips', path: '/payroll', category: 'HR', icon: IndianRupee, desc: 'Monthly salary calculation, allowances, and payslips', keywords: ['payroll', 'salary', 'payslip', 'staff salary'] }
 ];
 
@@ -240,7 +240,7 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
         </div>
 
         {/* Filter Pills Bar (Clean SVG Vector Icons) */}
-        <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {[
             { id: 'ALL', label: 'All Results', icon: Command, count: combinedResults.length },
             { id: 'MODULES', label: 'Modules', icon: Folder, count: matchedModules.length },
@@ -297,7 +297,7 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
                   key={`${item.type}-${item.id || idx}`}
                   onClick={() => handleSelect(item)}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between group ${
+                  className={`search-result-item p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between group ${
                     isSelected
                       ? 'bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 shadow-xs'
                       : 'hover:bg-slate-50/90 dark:hover:bg-slate-800/40 border border-transparent'
@@ -343,7 +343,7 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
                         )}
                         {item.type === 'student' && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800">
-                            Class {item.className}-{item.section} &bull; Roll: #{item.rollNo}
+                            Class {item.className}-{item.section} • Roll: #{item.rollNo}
                           </span>
                         )}
                         {item.type === 'action' && (
@@ -356,8 +356,8 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
                       {/* Subtitle / Description */}
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {item.type === 'module' && item.desc}
-                        {item.type === 'teacher' && `${item.department} &bull; Contact: ${item.phone}`}
-                        {item.type === 'student' && `Adm No: ${item.admNo} &bull; Father: ${item.fatherName} &bull; Phone: ${item.phone}`}
+                        {item.type === 'teacher' && `${item.department} • Contact: ${item.phone}`}
+                        {item.type === 'student' && `Adm No: ${item.admNo} • Father: ${item.fatherName} • Phone: ${item.phone}`}
                         {item.type === 'action' && item.subtitle}
                       </p>
                     </div>
@@ -388,7 +388,7 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
           </div>
           <div className="flex items-center gap-1.5 text-slate-400">
             <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Spotlight &bull; <strong>School ERP Pro</strong></span>
+            <span>Spotlight • <strong>School ERP Pro</strong></span>
           </div>
         </div>
       </div>

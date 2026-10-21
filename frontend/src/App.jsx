@@ -584,6 +584,7 @@ function AppContent() {
                 return <ToppersListReportPage onNavigate={handleNavigate} />;
               case '/consolidated-report':
                 return <ConsolidatedReportPage onNavigate={handleNavigate} />;
+              case '/report-card':
               case '/progress-report-card':
                 return <ProgressReportCardReportPage onNavigate={handleNavigate} />;
               case '/performance-sheet':

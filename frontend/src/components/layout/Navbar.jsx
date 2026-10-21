@@ -113,21 +113,24 @@ export function Navbar({
         </div>
 
         {/* Center: Global Omni-Search Bar (Interactive Spotlight Trigger) */}
-        <div className="flex-1 max-w-xs md:max-w-md mx-1 sm:mx-3 min-w-0">
-          <div
+        <div className="flex-1 max-w-xs sm:max-w-sm md:max-w-md mx-1 sm:mx-3 min-w-[130px] sm:min-w-[180px]">
+          <button
+            type="button"
+            id="global-search-trigger"
             onClick={() => setIsSearchOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer shadow-2xs transition-all group"
+            className="w-full flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer shadow-2xs transition-all group text-left"
+            title="Search modules, teachers, students, actions (Ctrl + K)"
           >
             <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors min-w-0">
               <Search className="w-3.5 h-3.5 shrink-0" />
               <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                Search modules, teachers, students...
+                Search modules, staff, students...
               </span>
             </div>
             <kbd className="hidden sm:inline-flex items-center font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600 whitespace-nowrap shrink-0 shadow-2xs ml-1.5">
               Ctrl + K
             </kbd>
-          </div>
+          </button>
         </div>
 
         {/* Right: Direct Access Icons + Tenant Switcher + Role + Profile */}

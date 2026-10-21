@@ -376,18 +376,6 @@ export function SchoolInfoPage() {
               />
             </div>
 
-            {/* Fax */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Fax</label>
-              <input
-                type="text"
-                name="fax"
-                value={formData.fax}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
             {/* Website */}
             <div>
               <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Website</label>
@@ -396,18 +384,20 @@ export function SchoolInfoPage() {
                 name="website"
                 value={formData.website}
                 onChange={handleInputChange}
+                placeholder="www.school.com"
                 className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Email</label>
+              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Official Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                placeholder="info@school.com"
                 className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -428,100 +418,15 @@ export function SchoolInfoPage() {
               </select>
             </div>
 
-            {/* TC Renew UpTo */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">TC Renew UpTo</label>
-              <input
-                type="date"
-                name="tc_renewed_upto"
-                value={formData.tc_renewed_upto}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Student Min. Age */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Student Min. Age</label>
-              <input
-                type="number"
-                name="students_min_age"
-                value={formData.students_min_age}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* TC Title */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">TC Title</label>
-              <input
-                type="text"
-                name="name_tc_title"
-                value={formData.name_tc_title}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Fee A/c Closing SMS No. */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Fee A/c Closing SMS No.</label>
-              <input
-                type="text"
-                name="fee_ac_closing_sms"
-                value={formData.fee_ac_closing_sms}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Tag Line 1 */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Tag Line 1</label>
+            {/* School Motto / Tagline (Combined) */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Motto / Tagline</label>
               <input
                 type="text"
                 name="school_tag_line_1"
                 value={formData.school_tag_line_1}
                 onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Tag Line 2 */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Tag Line 2</label>
-              <input
-                type="text"
-                name="school_tag_line_2"
-                value={formData.school_tag_line_2}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Fee Reminder From */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Fee Reminder From</label>
-              <select
-                name="fee_remainder_popup_from"
-                value={formData.fee_remainder_popup_from}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              >
-                <option value="Inactive">Inactive</option>
-                <option value="Active">Active</option>
-              </select>
-            </div>
-
-            {/* Fee Remainder Msg */}
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Fee Remainder Msg</label>
-              <input
-                type="text"
-                name="fee_remainder_popup_msg"
-                value={formData.fee_remainder_popup_msg}
-                onChange={handleInputChange}
+                placeholder="e.g. Lead Kindly Light &bull; Empowering Future Leaders"
                 className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
               />
             </div>

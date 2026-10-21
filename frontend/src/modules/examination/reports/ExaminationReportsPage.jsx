@@ -47,11 +47,11 @@ export function ExaminationReportsPage({ onNavigate }) {
     },
     {
       id: 'progress-report-card',
-      title: 'Progress Report Card',
+      title: 'Progress Report Card & Marksheet Generator',
       path: '/progress-report-card',
       icon: Award,
       color: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-      description: 'Official CBSE format Progress Report Card (Marksheet) with Scholastic, Co-scholastic grades, remarks, and signatures.'
+      description: 'Official CBSE J D International School marksheet template with live manual marks entry, auto-grade calculations, and A4 print.'
     },
     {
       id: 'performance-sheet',
