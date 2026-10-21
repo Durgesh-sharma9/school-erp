@@ -245,18 +245,34 @@ import {
   StaffLeaveRequestsPage,
   ApplyLeaveRequestPage
 } from './modules/leave-management';
+import {
+  SchoolExpensePage,
+  DayBookReportPage,
+  IncomeExpenseSummaryPage
+} from './modules/accounts';
+import {
+  ClassTimetablePage,
+  TeacherSubstitutionPage
+} from './modules/timetable';
+import {
+  NoticeBoardPage
+} from './modules/notices';
+import {
+  BiometricSyncPage
+} from './modules/attendance/BiometricSyncPage';
+import TargetedAnnouncementsPage from './modules/announcements/TargetedAnnouncementsPage';
 import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
   const { user, isAuthenticated, role } = useAuth();
 
   const normalizePath = (rawPath) => {
-    if (!rawPath) return '/';
+    if (!rawPath) return '/dashboard';
     let p = String(rawPath).trim();
     try {
       p = decodeURIComponent(p);
     } catch {}
-    if (p === 'dashboard' || p === '/dashboard' || p === '') return '/';
+    if (p === 'dashboard' || p === '/dashboard' || p === '' || p === '/') return '/dashboard';
     if (!p.startsWith('/')) p = '/' + p;
     // Normalize spaces to hyphens and lowercase
     p = p.replace(/\s+/g, '-').toLowerCase();
@@ -291,13 +307,7 @@ function AppContent() {
 
   // Route protection and canonical redirects
   useEffect(() => {
-    if (currentPath === '/') {
-      if (isAuthenticated) {
-        handleNavigate('/dashboard');
-      } else {
-        handleNavigate('/login');
-      }
-    } else if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register') {
+    if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register') {
       handleNavigate('/login');
     }
   }, [currentPath, isAuthenticated]);
@@ -846,6 +856,33 @@ function AppContent() {
                 return <StaffLeaveRequestsPage onNavigate={handleNavigate} />;
               case '/apply-leave-request':
                 return <ApplyLeaveRequestPage onNavigate={handleNavigate} />;
+
+              // Accounts & Expense Management Module
+              case '/school-expenses':
+                return <SchoolExpensePage onNavigate={handleNavigate} />;
+              case '/day-book':
+                return <DayBookReportPage onNavigate={handleNavigate} />;
+              case '/income-expense-summary':
+                return <IncomeExpenseSummaryPage onNavigate={handleNavigate} />;
+
+              // Timetable Pro Module
+              case '/class-timetable':
+                return <ClassTimetablePage onNavigate={handleNavigate} />;
+              case '/teacher-substitution':
+                return <TeacherSubstitutionPage onNavigate={handleNavigate} />;
+
+              // Notice Board & Circulars Module
+              case '/school-notices':
+                return <NoticeBoardPage onNavigate={handleNavigate} />;
+
+              // Targeted Announcements & Broadcast Hub
+              case '/targeted-announcements':
+              case '/announcements':
+                return <TargetedAnnouncementsPage onNavigate={handleNavigate} />;
+
+              // Biometric & RFID Machine Sync
+              case '/biometric-sync':
+                return <BiometricSyncPage onNavigate={handleNavigate} />;
 
               default:
                 return (

@@ -26,7 +26,11 @@ import {
   Crown,
   CalendarDays,
   CalendarCheck,
-  Calendar
+  Calendar,
+  Receipt,
+  Bell,
+  Cpu,
+  Megaphone
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -178,6 +182,15 @@ export const menuCategories = [
     ]
   },
   {
+    id: 'timetable',
+    title: 'Timetable Pro',
+    icon: CalendarDays,
+    subItems: [
+      { title: 'Class Timetable', path: '/class-timetable' },
+      { title: 'Teacher Substitution', path: '/teacher-substitution' }
+    ]
+  },
+  {
     id: 'student',
     title: 'Student',
     icon: User, // person in UAB
@@ -185,6 +198,7 @@ export const menuCategories = [
       { title: 'Registration', path: '/student-registration' },
       { title: 'Assign Roll/Feebook No.', path: '/assign-roll-number' },
       { title: 'Attendance', path: '/student-attendance' },
+      { title: 'Biometric Machine Sync', path: '/biometric-sync' },
       { title: 'Online Classes', path: '/create-online-classes' },
       { title: 'Promotion', path: '/promotion' },
       { title: 'Student Portfolio', path: '/student-portfolio' },
@@ -328,6 +342,16 @@ export const menuCategories = [
           { title: 'Discount Fee Receipt Report', path: '/discount-fee-receipt-report' }
         ]
       }
+    ]
+  },
+  {
+    id: 'accounts',
+    title: 'Accounts & Expense',
+    icon: Receipt,
+    subItems: [
+      { title: 'Expense Vouchers', path: '/school-expenses' },
+      { title: 'Daily Cash Book', path: '/day-book' },
+      { title: 'P&L Surplus Summary', path: '/income-expense-summary' }
     ]
   },
   {
@@ -539,6 +563,18 @@ export const menuCategories = [
     ]
   },
   {
+    id: 'notices',
+    title: 'Notice Board',
+    icon: Bell,
+    path: '/school-notices'
+  },
+  {
+    id: 'announcements',
+    title: 'Announcements Hub',
+    icon: Megaphone,
+    path: '/targeted-announcements'
+  },
+  {
     id: 'leaveManagement',
     title: 'Leave Management',
     icon: ClipboardList, // receipt_long in UAB
@@ -596,204 +632,49 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     setOpenSubDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const { role, user } = useAuth();
+
+  const activeCategories = role === 'STUDENT'
+    ? studentMenuCategories
+    : role === 'STAFF'
+    ? staffMenuCategories
+    : menuCategories;
+
   React.useEffect(() => {
     let activeKey = null;
     let activeSubKey = null;
 
-    if (currentPath === '/class-list' || currentPath === '/subject-list') {
-      activeKey = 'master';
-      activeSubKey = 'master-reports';
-    }
-    const studentReportPaths = [
-      '/students-report', '/donation-collection-report', '/student-upload-data-summary',
-      '/students-promotion-report', '/inactive-student-list', '/student-board-registration',
-      '/student-consolidated-report', '/generate-slips-report', '/attendance-report',
-      '/student-attedance-summary', '/monthly-attendance-report', '/student-wise-subject-list',
-      '/date-sheet-report', '/sibling-report', '/tc-report', '/cancel-tc-report',
-      '/student-call-list', '/subject-wise-student-details'
-    ];
-    if (studentReportPaths.includes(currentPath)) {
-      activeKey = 'student';
-      activeSubKey = 'student-reports';
-    }
-    const certificatePaths = [
-      '/certificate-generater-new', '/transfer-certificate',
-      '/generate-manual-tc', '/add-update-tc-bulk', '/manual-cc-bc'
-    ];
-    if (certificatePaths.includes(currentPath)) {
-      activeKey = 'certificates';
-    }
-    const studyMaterialPaths = [
-      '/study-material', '/homework', '/upload-pre-year-paper', '/study-material-reports'
-    ];
-    if (studyMaterialPaths.includes(currentPath)) {
-      activeKey = 'studyMaterial';
-    }
-    if (currentPath === '/crm' || currentPath.startsWith('/crm/')) {
-      activeKey = 'crm';
-    }
-    const feeReportPaths = [
-      '/fee-reports', '/fee-collection-summary', '/online-collection-summary',
-      '/board-online-collection-summary', '/board-fee-due-list', '/fee-due-list',
-      '/fee-due-list-month-wise', '/fee-concession-summary', '/fee-advance-report',
-      '/fee-structure-report', '/fee-opening-balance-report', '/student-fees-statement',
-      '/fee-book-report', '/cancel-fee-receipt-report', '/discount-fee-receipt-report'
-    ];
-    if (feeReportPaths.includes(currentPath)) {
-      activeKey = 'fee';
-      activeSubKey = 'fee-reports';
-    }
-    const transportPaths = [
-      '/transport', '/transport-dashboard', '/transport-vehicle', '/transport-route', '/transport-destination',
-      '/edit-transport-fee'
-    ];
-    if (transportPaths.includes(currentPath)) {
-      activeKey = 'transport';
-    }
-    const transportReportPaths = [
-      '/transport-summary', '/transport-students', '/transport-due-report',
-      '/transport-vehicle-report', '/transport-reports'
-    ];
-    if (transportReportPaths.includes(currentPath)) {
-      activeKey = 'transport';
-      activeSubKey = 'transport-reports';
-    }
-    const hostelPaths = [
-      '/add-update-hostel', '/add-update-block', '/add-update-floor',
-      '/add-update-room-type', '/add-update-room'
-    ];
-    if (hostelPaths.includes(currentPath)) {
-      activeKey = 'hostel';
-    }
-    const hostelReportPaths = [
-      '/hostel-report', '/hostel-students-report', '/hostel-due-report', '/hostel-reports'
-    ];
-    if (hostelReportPaths.includes(currentPath)) {
-      activeKey = 'hostel';
-      activeSubKey = 'hostel-reports';
-    }
-    const examPaths = [
-      '/exam-terms', '/exam-names', '/group-master', '/grade-master',
-      '/link-student-with-subject', '/marks-entry', '/student-wise-marks-entry',
-      '/prc-comment', '/marks-entry-locking'
-    ];
-    if (examPaths.includes(currentPath)) {
-      activeKey = 'examination';
-    }
-    const examReportPaths = [
-      '/blank-exam-format', '/student-signature-sheet', '/toppers-list',
-      '/consolidated-report', '/progress-report-card', '/performance-sheet',
-      '/report-card-remark-report', '/examination-reports'
-    ];
-    if (examReportPaths.includes(currentPath)) {
-      activeKey = 'examination';
-      activeSubKey = 'examination-reports';
-    }
-    const payrollPaths = [
-      '/payroll-branch', '/payroll-department', '/payroll-designation',
-      '/payroll-allowances', '/payroll-leave-setup', '/shift-master',
-      '/payroll-registration', '/staff-attendance', '/generate-staff-salary',
-      '/payroll-advance-payment', '/staff-id-card-generator'
-    ];
-    if (payrollPaths.includes(currentPath)) {
-      activeKey = 'payroll';
-    }
-    const payrollReportPaths = [
-      '/payroll-staff-salary', '/staff-list', '/staff-attendance-report',
-      '/staff-attendance-time-report', '/payroll-reports'
-    ];
-    if (payrollReportPaths.includes(currentPath)) {
-      activeKey = 'payroll';
-      activeSubKey = 'payroll-reports';
-    }
-    const frontOfficePaths = [
-      '/app-users', '/reminder', '/gate-pass', '/visitor-enquiry',
-      '/pre-admission', '/calendar-planning', '/student-app-popup',
-      '/staff-gate-pass', '/payroll-visit-staff-meeting', '/get-complaint',
-      '/manual-complaint'
-    ];
-    if (frontOfficePaths.includes(currentPath)) {
-      activeKey = 'frontOffice';
-    }
-    const frontOfficeReportPaths = [
-      '/manual-complaint-reports', '/class-wise-notification-count-report',
-      '/visitor-enquiry-report', '/pre-admission-report',
-      '/payroll-visit-staff-meeting-report', '/gate-pass-report',
-      '/calendar-planning-report', '/reminder-report', '/complaint-report',
-      '/staff-gate-pass-report', '/front-office-reports'
-    ];
-    if (frontOfficeReportPaths.includes(currentPath)) {
-      activeKey = 'frontOffice';
-      activeSubKey = 'front-office-reports';
-    }
-    const libraryPaths = [
-      '/library-master', '/add-books', '/issue-book', '/return-book',
-      '/purchase-book', '/damaged-book', '/library-supplier-master'
-    ];
-    if (libraryPaths.includes(currentPath)) {
-      activeKey = 'library';
-    }
-    const libraryReportPaths = [
-      '/get-books-report', '/get-issued-books-report', '/get-pending-books-report',
-      '/get-books-stock-report', '/get-purchase-books-report', '/get-damaged-books-report',
-      '/library-reports'
-    ];
-    if (libraryReportPaths.includes(currentPath)) {
-      activeKey = 'library';
-      activeSubKey = 'library-reports';
-    }
-    const stationaryPaths = [
-      '/shop-info', '/supplier-master', '/category-master', '/items-master',
-      '/set-master', '/issue-items', '/due-payment', '/purchase-items'
-    ];
-    if (stationaryPaths.includes(currentPath)) {
-      activeKey = 'stationary';
-    }
-    const stationaryReportPaths = [
-      '/category-items-report', '/set-master-report', '/issue-sets-report',
-      '/supplier-report', '/purchase-items-report', '/stock-report',
-      '/low-stock-report', '/stationary-reports'
-    ];
-    if (stationaryReportPaths.includes(currentPath)) {
-      activeKey = 'stationary';
-      activeSubKey = 'stationary-reports';
-    }
-    const smsPaths = [
-      '/student-sms', '/staff-sms', '/birthday-sms', '/individual-sms',
-      '/visitor-sms', '/create-whatsapp-templates'
-    ];
-    if (smsPaths.includes(currentPath)) {
-      activeKey = 'sms';
-    }
-    const smsReportPaths = [
-      '/sms-status-report', '/birthday-report', '/sms-reports'
-    ];
-    if (smsReportPaths.includes(currentPath)) {
-      activeKey = 'sms';
-      activeSubKey = 'sms-reports';
-    }
-    const usersPaths = [
-      '/users', '/manage-users', '/staff-users', '/driver-users', '/user-privilege'
-    ];
-    if (usersPaths.includes(currentPath)) {
-      activeKey = 'users';
-    }
-    const usersReportPaths = [
-      '/user-privilege-report', '/user-reports', '/user-staff-list'
-    ];
-    if (usersReportPaths.includes(currentPath)) {
-      activeKey = 'users';
-      activeSubKey = 'users-reports';
-    }
-    const leaveManagementPaths = [
-      '/all-leave-requests', '/staff-leave-requests', '/apply-leave-request'
-    ];
-    if (leaveManagementPaths.includes(currentPath)) {
-      activeKey = 'leaveManagement';
+    const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
+
+    // Dynamically search activeCategories for currentPath to expand parent and sub-reports
+    for (const item of activeCategories) {
+      if (item.path && item.path === normCurrent) {
+        activeKey = item.id;
+        break;
+      }
+      if (item.subItems && item.subItems.length > 0) {
+        for (const sub of item.subItems) {
+          if (sub.path === normCurrent) {
+            activeKey = item.id;
+            break;
+          }
+          if (sub.children && sub.children.length > 0) {
+            for (const child of sub.children) {
+              if (child.path === normCurrent) {
+                activeKey = item.id;
+                activeSubKey = sub.id || `${item.id}-${sub.title}`;
+                break;
+              }
+            }
+          }
+          if (activeKey) break;
+        }
+      }
+      if (activeKey) break;
     }
 
     if (activeKey) {
-      setOpenDropdowns({ [activeKey]: true });
+      setOpenDropdowns(prev => ({ ...prev, [activeKey]: true }));
     }
     if (activeSubKey) {
       setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
@@ -813,15 +694,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         }
       }
     }, 50);
-  }, [currentPath]);
-
-  const { role, user } = useAuth();
-
-  const activeCategories = role === 'STUDENT'
-    ? studentMenuCategories
-    : role === 'STAFF'
-    ? staffMenuCategories
-    : menuCategories;
+  }, [currentPath, activeCategories]);
 
   if (!isOpen) return null;
 
@@ -853,9 +726,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
             const isOpen = Boolean(openDropdowns[item.id]);
-            const isActive = currentPath === item.path || (hasChildren && item.subItems.some(sub => {
-              if (sub.path === currentPath) return true;
-              if (sub.children && sub.children.some(c => c.path === currentPath)) return true;
+            const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
+            const isActive = normCurrent === item.path || (hasChildren && item.subItems.some(sub => {
+              if (sub.path === normCurrent) return true;
+              if (sub.children && sub.children.some(c => c.path === normCurrent)) return true;
               return false;
             }));
 
@@ -902,7 +776,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (hasSubChildren) {
                         const subId = sub.id || `${item.id}-${sub.title}`;
                         const isSubOpen = openSubDropdowns[subId] ?? true;
-                        const isAnyChildActive = sub.children.some(c => c.path === currentPath);
+                        const isAnyChildActive = sub.children.some(c => c.path === normCurrent);
                         return (
                           <div key={subId} className="space-y-0.5">
                             {/* Expandable Sub-Item (e.g. Reports) */}
@@ -926,7 +800,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             {isSubOpen && (
                               <div className="ml-2 pl-2 my-0.5 space-y-0.5 border-l border-slate-200">
                                 {sub.children.map((child) => {
-                                  const isChildActive = currentPath === child.path;
+                                  const isChildActive = normCurrent === child.path;
                                   return (
                                     <button
                                       key={child.path}
@@ -951,7 +825,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                         );
                       }
 
-                      const isSubActive = currentPath === sub.path;
+                      const isSubActive = normCurrent === sub.path;
                       return (
                         <button
                           key={sub.path}

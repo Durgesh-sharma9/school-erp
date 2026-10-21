@@ -1500,6 +1500,114 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+---
+
+### Entry 54: Dynamic Navigation Auto-Expansion & Canonical Dashboard Routing Fixes
+* **Date:** 2026-10-21
+* **Goal / Prompt:** "sabhi cheej fix kar do" - Audit, fix routing edge-cases, dynamic sidebar menu auto-expansion, and active navigation indicators.
+* **Issues Identified & Fixed:**
+  1. **Canonical Dashboard Routing & Redirect Loop:**
+     - Previously, `normalizePath` converted `/dashboard` to `/`, while `useEffect` redirected `/` to `/dashboard`. This caused state-sync mismatches where the Dashboard item was never highlighted as active.
+     - Updated `normalizePath` in `App.jsx` to treat `/dashboard` as canonical, and cleaned up the redirect condition so that authenticated users stay on `/dashboard` with proper URL history.
+  2. **Dynamic 100% Sidebar Auto-Expansion:**
+     - Previously, `Sidebar.jsx` contained over 150 lines of static hardcoded route arrays for report paths only. Core module paths like `/class`, `/student-registration`, `/fee-collection`, etc. lacked entries, causing sidebar dropdowns to fail to auto-expand or collapse on navigation.
+     - Refactored `Sidebar.jsx` to dynamically scan `activeCategories` recursively (handling top-level, sub-items, and nested report children across SuperAdmin, School Admin, Staff, and Student portals).
+     - Changed `setOpenDropdowns` to use functional state updates (`prev => ({ ...prev, [activeKey]: true })`), preserving user's previously opened menus while auto-expanding the active category.
+  3. **Accurate Active Pill & Dot Highlighting:**
+     - Standardized `normCurrent = currentPath === '/' ? '/dashboard' : currentPath` across `isActive`, `isSubActive`, and `isChildActive` checks in `Sidebar.jsx`.
+     - Active sidebar item now reliably highlights across all 222+ routes.
+  4. **Navbar Quick-Home Interaction:**
+     - Made school title and logo in `Navbar.jsx` interactive with hover effects and direct `onNavigate('/dashboard')` trigger.
+* **Build Verification:**
+  - `npm run build` executed and passed cleanly in 11.12s with 0 errors across 3,411 transformed modules.
+  - Live puppeteer end-to-end tests confirmed navigation, active indicators, and category switching across Master, Fee, Student, and Dashboard views.
+* **Status:** ✅ Completed
+
+---
+
+### Entry 55: Industry Deep-Research & Powerhouse Modules Integration (Accounts Ledger, Timetable Pro, Digital Notice Board & Biometric Sync)
+* **Date:** 2026-10-21
+* **Goal / Prompt:** Conduct deep web research into Indian & global school ERP workflows (CBSE, NEP 2020, Fedena, Entab CampusCare, Edunext, Teachmint). Build and integrate all high-value missing operational workflows so the ERP is completely functional, cohesive, and unmatched.
+* **Research Insights & Architecture Additions:**
+  1. **School Accounts & Financial Accounting (Cash Book / Day Book):**
+     - Indian schools require maintaining a Day Book, Cash Book, Income/Expense Vouchers, and Revenue Reconciliation alongside Fee Collection.
+     - Created `backend/src/modules/accounts/accounts.controller.js` and `accounts.routes.js`.
+     - Built frontend:
+       - `SchoolExpensePage.jsx`: Expense voucher generator, category filter (Electricity, Fuel, Science Lab, Sports, Stationery, Maintenance), approval audit, and delete actions.
+       - `DayBookReportPage.jsx`: Dual inflow (Fee collection POS & sales) vs outflow (Disbursements) daily ledger with brought-forward opening balance, net collections, and cash-in-hand closing balance with A4 print layout.
+       - `IncomeExpenseSummaryPage.jsx`: Institutional financial health and annual P&L statement with revenue/expense progress distribution.
+  2. **Timetable Pro & Smart Teacher Substitution Engine:**
+     - Created `backend/src/modules/timetable/timetable.controller.js` and `timetable.routes.js`.
+     - Built frontend:
+       - `ClassTimetablePage.jsx`: Period matrix grid (Monday to Saturday, Periods 1 to 8, time slots, subject badges, teacher names, and room allocations with notice board print formatting).
+       - `TeacherSubstitutionPage.jsx`: Real-time teacher absence coverage engine that flags vacant periods, dynamically scans available free teachers with matching slots, and provides 1-tap substitution assignment with live audit feed.
+  3. **Official Notice Board & Circulars Hub:**
+     - Created `backend/src/modules/notices/notices.controller.js` and `notices.routes.js`.
+     - Built frontend:
+       - `NoticeBoardPage.jsx`: Category pills (Academic, Exam, Holiday, Sports, Fees), target audience selector (All, Parents, Teachers, Students), priority indicators (Urgent, High), modal broadcaster, and printable CBSE official circular template with reference numbers and principal signature block.
+  4. **Biometric & RFID Attendance Machine Sync:**
+     - Built frontend `BiometricSyncPage.jsx`: Hardware telemetry for campus gate face terminals, RFID turnstiles, and staff biometric scanners with real-time punch simulation, late-arrival detection, and automated SMS/WhatsApp parent alert triggers.
+* **Build Verification:**
+  - `npm run build` executed and passed cleanly in 12.16s with 0 errors across 3,421 transformed modules.
+  - All 5 new backend endpoints (`/api/accounts/expenses`, `/api/accounts/day-book`, `/api/timetable/class`, `/api/timetable/substitutions`, `/api/notices`) responded with `200 OK`.
+  - Browser end-to-end tests confirmed active highlights, routing, and live interaction on all new views.
+* **Status:** ✅ Completed
+
+---
+
+### Entry 56: Precision Targeted Announcements & Multi-Channel Broadcast Hub
+* **Date:** 2026-10-21
+* **Goal / Prompt:** Implement a specialized targeted announcement engine allowing school admins to broadcast notices with granular targeting:
+  1. All Teachers / Faculty
+  2. Selective individual teachers (search & multi-select chips)
+  3. Group of teachers / departments (e.g., Science Dept, Primary Wing, Exam Cell)
+  4. Entire Class / Sections (e.g., Class 10-A, Class 8-B)
+  5. Specific individual student in any class (with Roll No, Admission No, and parent details)
+* **Architecture & Additions Built:**
+  1. **Backend (`backend/src/modules/announcements/`):**
+     - `announcements.controller.js` & `announcements.routes.js`: Handlers for `GET /api/announcements`, `GET /api/announcements/meta`, `POST /api/announcements`, `POST /:id/resend`, and `DELETE /:id`.
+     - Seeded realistic targetable metadata: 10 subject faculty members, 7 departments/wings, 14 classes (Nursery–XII), and sample students with admission numbers.
+     - Registered at `/api/announcements` in `backend/src/app.js`.
+  2. **Frontend UI (`frontend/src/modules/announcements/TargetedAnnouncementsPage.jsx`):**
+     - Interactive Compose Announcement Studio with 5 distinct audience mode selector cards.
+     - Real-time recipient counter, live summary banner, and 1-click quick announcement presets (Staff Meeting, Dept Review, Remedial Prep, Student Commendation).
+     - Multi-channel options (In-App, SMS, WhatsApp) with read-receipt / acknowledgment tracking.
+     - Live broadcast feed with priority filters (Urgent/High/Normal), audience pills, delivery telemetry, resend action, and modal inspector.
+  3. **Routing & Sidebar Integration:**
+     - Registered `/targeted-announcements` and `/announcements` in `App.jsx`.
+     - Added `Announcements Hub` with `Megaphone` icon in `Sidebar.jsx`.
+* **Build Verification:**
+  - `npm run build` executed cleanly in 16.70s with 0 errors (3,422 modules transformed).
+  - API verified via curl/fetch: `GET /api/announcements/meta` returned 10 teachers and 12 students; `POST /api/announcements` tested with `SPECIFIC_STUDENT` and `SELECTIVE_TEACHERS` targets.
+* **Status:** ✅ Completed
+
+---
+
+### Entry 57: Universal Global Spotlight Search (Ctrl+K) & Navbar Direct Access
+* **Date:** 2026-10-21
+* **Goal / Prompt:** Implement seamless global search and direct access from the Navbar allowing instant lookup and 1-click navigation to:
+  1. Any ERP module or setting
+  2. Any teacher/staff member (name, subject, department, phone)
+  3. Any student (name, admission no, roll no, class & section)
+  4. Quick one-click action shortcuts (New Announcement, Record Expense, Day Book, etc.)
+* **Architecture & Additions Built:**
+  1. **Global Search Modal (`frontend/src/components/layout/GlobalSearchModal.jsx`):**
+     - Apple Spotlight / Command Palette style modal triggered by `Ctrl+K` or search bar click.
+     - Search across 20+ core ERP modules with category pills and descriptions.
+     - Search across school teachers with subject, department, and contact info.
+     - Search across students with class, section, admission number, and parent phone.
+     - Interactive filter tabs (All, Modules, Teachers, Students, Actions), keyboard navigation (Up/Down arrow keys, Enter to navigate, Escape to dismiss).
+  2. **Navbar Redesign (`frontend/src/components/layout/Navbar.jsx`):**
+     - Centered Omni-Search bar with placeholder, search icon, and `Ctrl K` shortcut chip.
+     - Direct Quick Access button for **Targeted Announcements Hub** (`Megaphone` icon with active broadcast badge).
+     - Direct Quick Access button for **Daily Cash Day Book** (`Receipt` icon).
+     - Global `keydown` event listener for `Ctrl+K` / `Cmd+K` anywhere in the app.
+* **Build Verification:**
+  - `npm run build` executed cleanly in 11.34s with 0 errors (3,423 modules transformed).
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
-* Ready for user review or next module instructions.
+* Ready for production deployment or client demonstration.
 

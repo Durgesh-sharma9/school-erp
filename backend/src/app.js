@@ -52,6 +52,10 @@ import stationaryRoutes from './modules/stationary/stationary.routes.js';
 import smsRoutes from './modules/sms/sms.routes.js';
 import userManagementRoutes from './modules/user-management/user-management.routes.js';
 import leaveManagementRoutes from './modules/leave-management/leave-management.routes.js';
+import accountsRoutes from './modules/accounts/accounts.routes.js';
+import timetableRoutes from './modules/timetable/timetable.routes.js';
+import noticesRoutes from './modules/notices/notices.routes.js';
+import announcementsRoutes from './modules/announcements/announcements.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -73,6 +77,10 @@ app.use('/api/stationary', stationaryRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/user-management', userManagementRoutes);
 app.use('/api/leave-management', leaveManagementRoutes);
+app.use('/api/accounts', accountsRoutes);
+app.use('/api/timetable', timetableRoutes);
+app.use('/api/notices', noticesRoutes);
+app.use('/api/announcements', announcementsRoutes);
 
 
 // Global Error Handler

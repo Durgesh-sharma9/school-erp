@@ -1,0 +1,1 @@
+export { NoticeBoardPage } from './NoticeBoardPage';
