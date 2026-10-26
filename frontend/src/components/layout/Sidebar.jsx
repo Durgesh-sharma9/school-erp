@@ -35,6 +35,29 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { STUDENT_REPORT_PATHS } from '../../modules/students/reports/studentReportsCatalog';
 
+// Color Map Matching Test Master Pro
+const ITEM_COLORS = {
+  'superadmin-analytics': { iconColor: 'text-blue-600', boxBg: 'bg-blue-50 group-hover:bg-blue-100' },
+  'dashboard': { iconColor: 'text-sky-600', boxBg: 'bg-sky-50 group-hover:bg-sky-100' },
+  'classes': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
+  'school': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' },
+  'master': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
+  'timetable-pro': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'student': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
+  'users': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' },
+  'examination': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
+  'fee': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'transport': { iconColor: 'text-orange-600', boxBg: 'bg-orange-50 group-hover:bg-orange-100' },
+  'hostel': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
+  'payroll': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
+  'library': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'stationary': { iconColor: 'text-fuchsia-600', boxBg: 'bg-fuchsia-50 group-hover:bg-fuchsia-100' },
+  'sms': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'notices': { iconColor: 'text-rose-600', boxBg: 'bg-rose-50 group-hover:bg-rose-100' },
+  'announcements': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
+  'leaveManagement': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' }
+};
+
 export const studentMenuCategories = [
   {
     id: 'std-dashboard',
@@ -682,22 +705,39 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         className="fixed inset-0 bg-slate-900/40 z-40 md:hidden transition-opacity"
       />
 
-      {/* Modern Light ERP Sidenav (Width 272px, clean border, soft light theme) */}
-      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-[272px] bg-white border-r border-slate-200/90 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-lg md:shadow-none transition-all duration-300">
+      {/* 1:1 Test Master Pro Sidenav */}
+      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 md:w-64 bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
         
-        {/* Mobile Header */}
-        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/80 bg-slate-50/70 shrink-0 md:hidden">
-          <span className="font-bold text-sm text-slate-900 tracking-tight">Navigation Menu</span>
+        {/* Top Header matching Test Master Pro */}
+        <div className="relative flex h-16 items-center justify-between border-b border-slate-100 pl-5 pr-3 shrink-0 bg-white">
+          <div className="flex items-center gap-1.5 select-none cursor-pointer" onClick={() => onNavigate && onNavigate('/dashboard')}>
+            <span className="font-extrabold text-sm md:text-base tracking-tight text-slate-900">
+              TEST MASTER
+            </span>
+            <span className="text-[11px] font-bold text-teal-600 tracking-wider">
+              PRO
+            </span>
+          </div>
+
+          <button
+            onClick={() => {}}
+            className="hidden md:flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/80 rounded-lg h-7 w-7 transition-colors cursor-pointer border border-slate-200/70 shadow-2xs"
+            title="Collapse sidebar"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 transition-colors"
+            className="md:hidden text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg h-7 w-7 flex items-center justify-center transition-colors cursor-pointer"
+            title="Close navigation"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Menu Items List */}
-        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-2.5 py-3 space-y-0.5 text-sm font-medium custom-scrollbar">
+        {/* Menu Items List matching Test Master Pro styling */}
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-1 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
@@ -710,8 +750,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
               return false;
             }));
 
+            const colorConfig = ITEM_COLORS[item.id] || { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' };
+
             return (
-              <div key={item.id} className="space-y-0.5">
+              <div key={item.id} className="flex flex-col space-y-0.5">
                 {/* Parent Navigation Item */}
                 <button
                   type="button"
@@ -723,31 +765,46 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
-                  data-sidebar-active={(!hasChildren && isActive) ? "true" : undefined}
-                  className={`w-full flex items-center justify-between rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors duration-150 outline-none focus:outline-none group ${
-                    isActive || isOpen
-                      ? 'bg-slate-100/90 text-slate-900 font-semibold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold transition-all duration-200 group overflow-hidden whitespace-nowrap w-full text-left cursor-pointer ${
+                    isActive && !hasChildren
+                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : isOpen || isActive
+                      ? 'bg-slate-50 text-slate-900 border border-slate-100 shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-50/90 hover:text-indigo-600'
                   }`}
                 >
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                      isActive || isOpen ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'
+                  {/* Icon Box with distinct soft background */}
+                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
+                    isActive && !hasChildren
+                      ? 'bg-white/20 text-white shadow-inner'
+                      : isOpen || isActive
+                      ? 'bg-white shadow-2xs text-indigo-600'
+                      : colorConfig.boxBg
+                  }`}>
+                    <Icon className={`h-[15px] w-[15px] transition-transform duration-200 group-hover:scale-110 ${
+                      isActive && !hasChildren ? 'text-white' : (isOpen || isActive ? 'text-indigo-600' : colorConfig.iconColor)
                     }`} />
-                    <span className="truncate tracking-tight">{item.title}</span>
                   </div>
+
+                  <span className="flex-1 truncate tracking-tight font-medium text-[13px]">
+                    {item.title}
+                  </span>
+
                   {hasChildren && (
                     <ChevronDown
-                      className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ${
-                        isOpen ? 'rotate-0 text-slate-700' : '-rotate-90'
-                      }`}
+                      className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-0 text-slate-700' : '-rotate-90 text-slate-400 group-hover:text-slate-600'
+                      } ${isActive && !hasChildren ? 'text-white' : ''}`}
                     />
                   )}
                 </button>
 
-                {/* Submenu Dropdown Tree */}
+                {/* Submenu Dropdown Tree with Connecting Guide Line */}
                 {hasChildren && isOpen && (
-                  <div className="ml-4 pl-2.5 my-0.5 space-y-0.5 border-l border-slate-200">
+                  <div className="relative flex flex-col space-y-0.5 mt-0.5 pb-0.5">
+                    {/* Vertical Connecting Line exactly like Test Master Pro */}
+                    <div className="absolute left-[1.125rem] top-1.5 bottom-2.5 w-px bg-slate-200" />
+
                     {item.subItems.map((sub) => {
                       const hasSubChildren = sub.children && sub.children.length > 0;
                       if (hasSubChildren) {
@@ -759,12 +816,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             {/* Expandable Sub-Item (e.g. Reports) */}
                             <button
                               onClick={() => toggleSubDropdown(subId)}
-                              className={`w-full flex items-center justify-between rounded-md px-2.5 py-1.5 text-[12.5px] font-medium transition-colors group ${
+                              className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2 text-[12.5px] font-medium transition-all duration-200 group w-full text-left cursor-pointer ${
                                 isSubOpen || isAnyChildActive
                                   ? 'text-indigo-900 bg-indigo-50/50 font-semibold'
-                                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                  : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
                               }`}
                             >
+                              <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${
+                                isAnyChildActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
+                              }`} />
                               <span className="truncate">{sub.title}</span>
                               <ChevronDown
                                 className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${
@@ -773,9 +833,9 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                               />
                             </button>
 
-                            {/* Nested Level 2 Children (e.g. Transport Reports List) */}
+                            {/* Nested Level 2 Children */}
                             {isSubOpen && (
-                              <div className="ml-2 pl-2 my-0.5 space-y-0.5 border-l border-slate-200">
+                              <div className="relative flex flex-col space-y-0.5 pl-3">
                                 {sub.children.map((child) => {
                                   const isChildActive = normCurrent === child.path;
                                   return (
@@ -785,11 +845,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                         if (onNavigate) onNavigate(child.path);
                                         if (window.innerWidth < 768 && onClose) onClose();
                                       }}
-                                      data-sidebar-active={isChildActive ? "true" : undefined}
-                                      className={`w-full flex items-center rounded-md px-2 py-1.5 text-[12px] transition-all text-left ${
+                                      className={`relative flex items-center rounded-lg py-1 pl-[2rem] pr-2 text-[12px] transition-all text-left cursor-pointer ${
                                         isChildActive
-                                          ? 'text-indigo-700 bg-indigo-50 font-semibold border-l-2 border-indigo-600 rounded-l-none pl-2'
-                                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                                          ? 'text-indigo-700 bg-indigo-50/70 font-semibold shadow-2xs'
+                                          : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-medium'
                                       }`}
                                     >
                                       <span className="truncate">{child.title}</span>
@@ -810,17 +869,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          data-sidebar-active={isSubActive ? "true" : undefined}
-                          className={`w-full flex items-center justify-between rounded-md px-2.5 py-1.5 text-[12.5px] transition-all text-left ${
+                          className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2.5 text-[12.5px] font-medium transition-all duration-200 group text-left cursor-pointer ${
                             isSubActive
-                              ? 'text-indigo-700 bg-indigo-50/90 font-semibold border border-indigo-100 shadow-2xs'
-                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                              ? 'text-indigo-700 bg-indigo-50/80 font-semibold shadow-2xs'
+                              : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
                           }`}
                         >
+                          {/* Dot exactly on guide line */}
+                          <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${
+                            isSubActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
+                          }`} />
                           <span className="truncate">{sub.title}</span>
-                          {isSubActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
-                          )}
                         </button>
                       );
                     })}
@@ -831,29 +890,22 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           })}
         </div>
 
-        {/* Student Bottom Profile Card */}
-        {role === 'STUDENT' && (
-          <div 
-            onClick={() => onNavigate && onNavigate('/profile')}
-            className="p-3 mx-2 mb-2 rounded-xl border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100/80 cursor-pointer transition-all flex items-center justify-between shrink-0 shadow-2xs"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="relative shrink-0">
-                <img
-                  src={user?.avatar || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=150'}
-                  alt={user?.name || 'Student'}
-                  className="w-9 h-9 rounded-full object-cover border border-indigo-200 shadow-2xs"
-                />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
-              </div>
-              <div className="truncate min-w-0">
-                <p className="text-xs font-bold text-slate-800 truncate">{user?.name || 'AADHYA CHOUDHARY'}</p>
-                <p className="text-[11px] text-slate-500 truncate font-medium">{user?.className || 'Nursery - PP3+ - A'}</p>
-              </div>
+        {/* User Card at Bottom matching Test Master Pro */}
+        <div className="border-t border-slate-100 bg-slate-50/50 p-3.5 transition-all shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs shadow-sm">
+              TS
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-bold text-slate-800 leading-tight">
+                {user?.name || 'Test School Admin'}
+              </p>
+              <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+                (school_admin)
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </aside>
     </>
   );
