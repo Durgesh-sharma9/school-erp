@@ -587,7 +587,6 @@ export function StudentRegistrationPage({ onNavigate }) {
     { id: 'transport', label: 'Transport' },
     { id: 'hostel', label: 'Hostel Allocation' },
     { id: 'documents', label: 'Documents' },
-    { id: 'objection', label: 'Objection' },
     { id: 'sports', label: 'Sports' }
   ];
 
@@ -1584,32 +1583,6 @@ export function StudentRegistrationPage({ onNavigate }) {
                 />
                 <span>M Marksheet</span>
               </label>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 6: Objection */}
-        {activeTab === 'objection' && (
-          <div className="py-2 max-w-2xl">
-            <OutlineSelect
-              label="Objection Status"
-              name="objection_status"
-              value={formData.objection_status}
-              onChange={handleInputChange}
-              options={['No Objection', 'Fees Pending', 'Document Deficient', 'Administrative Hold']}
-            />
-            <div className="relative mb-3 mt-4">
-              <label className="absolute -top-2 left-2.5 px-1 text-[11px] font-medium text-gray-500 bg-white z-10">
-                Objection Remark / Notes
-              </label>
-              <textarea
-                name="objection_remark"
-                value={formData.objection_remark}
-                onChange={handleInputChange}
-                rows={4}
-                placeholder="Enter objection or administrative flag details here..."
-                className="w-full px-3 py-2 text-xs md:text-sm text-gray-800 bg-white border border-gray-300 rounded focus:border-indigo-600 focus:outline-none transition-colors"
-              />
             </div>
           </div>
         )}
