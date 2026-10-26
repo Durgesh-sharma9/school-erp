@@ -271,7 +271,6 @@ export function StudentRegistrationPage({ onNavigate }) {
   const [accordions, setAccordions] = useState({
     contact: false,
     other: false,
-    education: false,
     previous: false,
     bank: false
   });
@@ -909,207 +908,87 @@ export function StudentRegistrationPage({ onNavigate }) {
               </label>
             </div>
 
-            {/* 5 Collapsible Accordions matching Live UAB */}
-            <div className="mt-4">
-              {/* Accordion 1: Contact Details */}
+            {/* Streamlined & Essential Student Accordions */}
+            <div className="mt-4 space-y-2">
+              {/* Accordion 1: Address & Contact Details */}
               <Accordion
-                title="CONTACT DETAILS"
+                title="RESIDENTIAL & CONTACT DETAILS"
                 isOpen={accordions.contact}
                 onToggle={() => toggleAccordion('contact')}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4">
                   <OutlineInput
-                    label="Present Address"
+                    label="Current Residential Address"
                     name="present_address"
                     value={formData.present_address}
                     onChange={handleInputChange}
+                    placeholder="House No., Building, Street / Locality"
+                    className="sm:col-span-2"
                   />
                   <OutlineInput
-                    label="City/Village2"
-                    name="village2"
-                    value={formData.village2}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Postal Code"
-                    name="present_postal_code"
-                    value={formData.present_postal_code}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Country"
-                    name="present_country"
-                    value={formData.present_country}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Permanent Address"
-                    name="permanent_address"
-                    value={formData.permanent_address}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="City/Village"
+                    label="City / Town / Village"
                     name="village"
                     value={formData.village}
                     onChange={handleInputChange}
+                    placeholder="e.g. Jaipur"
                   />
                   <OutlineInput
-                    label="Postal Code"
-                    name="permanent_postal_code"
-                    value={formData.permanent_postal_code}
+                    label="Pincode / Postal Code"
+                    name="present_postal_code"
+                    value={formData.present_postal_code}
                     onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Post Office"
-                    name="post_office"
-                    value={formData.post_office}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Police station"
-                    name="police_station"
-                    value={formData.police_station}
-                    onChange={handleInputChange}
+                    placeholder="e.g. 302026"
                   />
                   <OutlineInput
                     label="District"
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
+                    placeholder="e.g. Jaipur"
                   />
                   <OutlineInput
-                    label="Taluka/Tehsil"
-                    name="taluka"
-                    value={formData.taluka}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Birth Place"
+                    label="State"
                     name="birth_place"
                     value={formData.birth_place}
                     onChange={handleInputChange}
+                    placeholder="e.g. Rajasthan"
                   />
                   <OutlineInput
                     label="Country"
-                    name="permanent_country"
-                    value={formData.permanent_country}
+                    name="present_country"
+                    value={formData.present_country || 'India'}
                     onChange={handleInputChange}
                   />
                   <OutlineInput
-                    label="Contact Person Phone"
+                    label="Emergency Contact Phone"
                     name="contact_phone_no"
                     value={formData.contact_phone_no}
                     onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Contact Person Email"
-                    name="contact_person_email"
-                    value={formData.contact_person_email}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Contact Person Address"
-                    name="contact_person_address"
-                    value={formData.contact_person_address}
-                    onChange={handleInputChange}
+                    placeholder="Alternative Phone No."
                   />
                 </div>
               </Accordion>
 
-              {/* Accordion 2: Other Details */}
+              {/* Accordion 2: KYC & Identity Details */}
               <Accordion
-                title="OTHER DETAILS"
+                title="KYC, IDENTITY & CATEGORY DETAILS"
                 isOpen={accordions.other}
                 onToggle={() => toggleAccordion('other')}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4">
-                  <OutlineSelect
-                    label="Nationality"
-                    name="nationality"
-                    value={formData.nationality}
-                    onChange={handleInputChange}
-                    options={['Indian', 'American', 'British', 'Other']}
-                  />
-                  <OutlineSelect
-                    label="Religion"
-                    name="religion"
-                    value={formData.religion}
-                    onChange={handleInputChange}
-                    options={['Hindu', 'Muslim', 'Sikh', 'Christian', 'Jain', 'Other']}
-                  />
-                  <OutlineSelect
-                    label="Category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    options={['General', 'OBC', 'SC', 'ST']}
-                  />
                   <OutlineInput
-                    label="Cast"
-                    name="cast"
-                    value={formData.cast}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Aadhaar No."
+                    label="Student Aadhaar Card No."
                     name="aadhaar"
                     value={formData.aadhaar}
                     onChange={handleInputChange}
+                    placeholder="12-digit Aadhaar Number"
                   />
                   <OutlineInput
-                    label="Email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Prev. School"
-                    name="prev_school_name"
-                    value={formData.prev_school_name}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Refrence By"
-                    name="refrence_by"
-                    value={formData.refrence_by}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="APAAR ID"
+                    label="APAAR ID / PEN (National ID)"
                     name="apaar_id"
                     value={formData.apaar_id}
                     onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Passport No"
-                    name="passport_no"
-                    value={formData.passport_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="NIC"
-                    name="nic_id"
-                    value={formData.nic_id}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="BPL Card / RICE Card"
-                    name="bpl_number"
-                    value={formData.bpl_number}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Saral ID"
-                    name="saral_id"
-                    value={formData.saral_id}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Family ID"
-                    name="family_id"
-                    value={formData.family_id}
-                    onChange={handleInputChange}
+                    placeholder="Govt. Automated Permanent Academic Account"
                   />
                   <OutlineSelect
                     label="Blood Group"
@@ -1118,180 +997,46 @@ export function StudentRegistrationPage({ onNavigate }) {
                     onChange={handleInputChange}
                     options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
                   />
-                  <OutlineInput
-                    label="Height"
-                    name="student_height"
-                    value={formData.student_height}
+                  <OutlineSelect
+                    label="Social Category"
+                    name="category"
+                    value={formData.category}
                     onChange={handleInputChange}
+                    options={['General', 'OBC', 'SC', 'ST', 'EWS', 'Other']}
                   />
                   <OutlineInput
-                    label="Weight (kg)"
-                    name="student_weight"
-                    value={formData.student_weight}
+                    label="Sub-Caste (Optional)"
+                    name="cast"
+                    value={formData.cast}
                     onChange={handleInputChange}
+                    placeholder="e.g. Rajput, Brahmin, etc."
                   />
-                  <OutlineInput
-                    label="Admitted Class"
-                    name="admitted_class"
-                    value={formData.admitted_class}
+                  <OutlineSelect
+                    label="Religion"
+                    name="religion"
+                    value={formData.religion}
                     onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Student Samagra Id"
-                    name="student_samagra_id"
-                    value={formData.student_samagra_id}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Sats No"
-                    name="sats_no"
-                    value={formData.sats_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="General No"
-                    name="general_no"
-                    value={formData.general_no}
-                    onChange={handleInputChange}
+                    options={['Hindu', 'Muslim', 'Sikh', 'Christian', 'Jain', 'Buddhism', 'Other']}
                   />
                   <OutlineInput
                     label="Mother Tongue"
                     name="mother_tongue"
-                    value={formData.mother_tongue}
+                    value={formData.mother_tongue || 'Hindi'}
                     onChange={handleInputChange}
                   />
-                  <OutlineInput
-                    label="Donation Amount"
-                    name="donation_amount"
-                    value={formData.donation_amount}
+                  <OutlineSelect
+                    label="Nationality"
+                    name="nationality"
+                    value={formData.nationality || 'Indian'}
                     onChange={handleInputChange}
+                    options={['Indian', 'NRI', 'Other']}
                   />
                 </div>
               </Accordion>
 
-              {/* Accordion 3: Education Details */}
+              {/* Accordion 3: Previous School & TC Details */}
               <Accordion
-                title="EDUCATION DETAILS"
-                isOpen={accordions.education}
-                onToggle={() => toggleAccordion('education')}
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4">
-                  <OutlineInput
-                    label="10th Board Roll no"
-                    name="tenth_board_roll_no"
-                    value={formData.tenth_board_roll_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="10th Passing Year"
-                    name="tenth_passing_year"
-                    value={formData.tenth_passing_year}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="10th Board Name"
-                    name="reg_board_name"
-                    value={formData.reg_board_name}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="10 th Marks"
-                    name="tenth_marks"
-                    value={formData.tenth_marks}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="10th Percentage"
-                    name="tenth_percentage"
-                    value={formData.tenth_percentage}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineSelect
-                    label="10th Result"
-                    name="tenth_result"
-                    value={formData.tenth_result}
-                    onChange={handleInputChange}
-                    options={['Pass', 'Fail', 'Compartment']}
-                  />
-                  <OutlineInput
-                    label="12 th Roll No"
-                    name="twelfth_board_roll_no"
-                    value={formData.twelfth_board_roll_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="12 th Board Name"
-                    name="twelfth_board_name"
-                    value={formData.twelfth_board_name}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="12th Marks"
-                    name="twelfth_marks"
-                    value={formData.twelfth_marks}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="12 th Pass. Yr"
-                    name="twelfth_passing_year"
-                    value={formData.twelfth_passing_year}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="12 th Percentage"
-                    name="twelfth_percentage"
-                    value={formData.twelfth_percentage}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineSelect
-                    label="12th Result"
-                    name="twelth_result"
-                    value={formData.twelth_result}
-                    onChange={handleInputChange}
-                    options={['Pass', 'Fail', 'Compartment']}
-                  />
-                  <OutlineInput
-                    label="Graduation Roll No"
-                    name="graduation_roll_no"
-                    value={formData.graduation_roll_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Graduation Marks"
-                    name="graduation_marks"
-                    value={formData.graduation_marks}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Graduation Pass. Yr"
-                    name="graduation_passing_year"
-                    value={formData.graduation_passing_year}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Graduation University"
-                    name="graduation_university_name"
-                    value={formData.graduation_university_name}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Graduation Percentage"
-                    name="graduation_percentage"
-                    value={formData.graduation_percentage}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Board Registration No."
-                    name="board_registration_no"
-                    value={formData.board_registration_no}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </Accordion>
-
-              {/* Accordion 4: Previous Details */}
-              <Accordion
-                title="PREVIOUS DETAILS"
+                title="PREVIOUS SCHOOL & TRANSFER CERTIFICATE (TC)"
                 isOpen={accordions.previous}
                 onToggle={() => toggleAccordion('previous')}
               >
@@ -1301,67 +1046,57 @@ export function StudentRegistrationPage({ onNavigate }) {
                     name="previous_school"
                     value={formData.previous_school}
                     onChange={handleInputChange}
+                    placeholder="Name of last attended school"
+                    className="sm:col-span-2"
                   />
                   <OutlineInput
-                    label="Previous Class Name"
+                    label="Previous Class Passed"
                     name="previous_class"
                     value={formData.previous_class}
                     onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous Passout Year"
-                    name="previous_year"
-                    value={formData.previous_year}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous registration No."
-                    name="previous_regi_no"
-                    value={formData.previous_regi_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous Roll No."
-                    name="previous_roll_no"
-                    value={formData.previous_roll_no}
-                    onChange={handleInputChange}
+                    placeholder="e.g. Class IV"
                   />
                   <OutlineInput
                     label="Previous Board"
                     name="previous_board"
                     value={formData.previous_board}
                     onChange={handleInputChange}
+                    placeholder="e.g. CBSE / State Board / ICSE"
                   />
                   <OutlineInput
-                    label="Previous Subjects"
-                    name="previous_subjects"
-                    value={formData.previous_subjects}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous Result"
-                    name="previous_result"
-                    value={formData.previous_result}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous Marks"
-                    name="previous_marks"
-                    value={formData.previous_marks}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Previous Percentage"
+                    label="Marks (% / Grade)"
                     name="previous_percentage"
                     value={formData.previous_percentage}
                     onChange={handleInputChange}
+                    placeholder="e.g. 88% or A Grade"
+                  />
+                  <OutlineSelect
+                    label="Transfer Certificate (TC) Available?"
+                    name="has_tc"
+                    value={formData.has_tc || 'No'}
+                    onChange={handleInputChange}
+                    options={['Yes - Submitted', 'No - Due / Pending', 'Not Applicable (Fresher)']}
+                  />
+                  <OutlineInput
+                    label="TC Serial Number"
+                    name="tc_no"
+                    value={formData.tc_no}
+                    onChange={handleInputChange}
+                    placeholder="TC No. on certificate"
+                  />
+                  <OutlineInput
+                    label="Previous Passout Year"
+                    name="previous_year"
+                    value={formData.previous_year}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 2025-2026"
                   />
                 </div>
               </Accordion>
 
-              {/* Accordion 5: Bank Details */}
+              {/* Accordion 4: Bank Details (Optional for Scholarships/Refunds) */}
               <Accordion
-                title="BANK DETAILS"
+                title="BANK ACCOUNT DETAILS (OPTIONAL)"
                 isOpen={accordions.bank}
                 onToggle={() => toggleAccordion('bank')}
               >
@@ -1371,24 +1106,28 @@ export function StudentRegistrationPage({ onNavigate }) {
                     name="bank_name"
                     value={formData.bank_name}
                     onChange={handleInputChange}
+                    placeholder="e.g. State Bank of India"
                   />
                   <OutlineInput
-                    label="Account No"
+                    label="Bank Account Number"
                     name="stu_account_no"
                     value={formData.stu_account_no}
                     onChange={handleInputChange}
+                    placeholder="e.g. 30894102910"
                   />
                   <OutlineInput
                     label="Account Holder Name"
                     name="account_holder_name"
                     value={formData.account_holder_name}
                     onChange={handleInputChange}
+                    placeholder="Student / Parent Account Name"
                   />
                   <OutlineInput
                     label="IFSC Code"
                     name="ifc_code"
                     value={formData.ifc_code}
                     onChange={handleInputChange}
+                    placeholder="e.g. SBIN0001234"
                   />
                 </div>
               </Accordion>
