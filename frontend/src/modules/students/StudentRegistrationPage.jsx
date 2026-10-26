@@ -195,7 +195,7 @@ function StudentAvatar({
   );
 }
 
-// Landscape Mountain Document Card matching Live UAB
+// Document Upload Card with auto-uploaded status badge
 function DocumentCard({
   title,
   previewUrl,
@@ -204,21 +204,29 @@ function DocumentCard({
   const fileRef = React.useRef(null);
 
   return (
-    <div className="flex flex-col rounded border border-gray-200 bg-white overflow-hidden shadow-2xs hover:shadow-sm transition-all">
-      <div className="w-full h-32 bg-sky-100 relative flex items-center justify-center overflow-hidden">
+    <div className="flex flex-col rounded-xl border border-gray-200/80 bg-white overflow-hidden shadow-xs hover:shadow-md transition-all">
+      <div className="w-full h-32 bg-slate-50 relative flex items-center justify-center overflow-hidden border-b border-gray-100">
         {previewUrl ? (
           <img src={previewUrl} alt={title} className="w-full h-full object-cover" />
         ) : (
-          <svg className="w-full h-full" viewBox="0 0 200 120" preserveAspectRatio="none">
-            {/* Sky Background */}
-            <rect width="200" height="120" fill="#bae6fd" />
-            {/* Sun */}
-            <circle cx="50" cy="35" r="18" fill="#facc15" />
-            {/* Mountains */}
-            <polygon points="10,120 70,45 130,120" fill="#10b981" />
-            <polygon points="80,120 145,30 210,120" fill="#059669" />
-          </svg>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-sky-50/50 to-indigo-50/30 p-3 text-center">
+            <FileText className="w-8 h-8 text-indigo-300 mb-1" />
+            <span className="text-[11px] font-medium text-gray-400">No file attached</span>
+          </div>
         )}
+
+        {/* Auto Uploaded Status Badge */}
+        <div className="absolute top-2 right-2">
+          {previewUrl ? (
+            <span className="inline-flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-xs">
+              <Check className="w-3 h-3" /> Attached
+            </span>
+          ) : (
+            <span className="inline-flex items-center bg-gray-400/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
+              Optional
+            </span>
+          )}
+        </div>
       </div>
 
       <input
@@ -229,24 +237,29 @@ function DocumentCard({
         className="hidden"
       />
 
-      <div className="flex items-center text-white bg-red-500 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex-1 bg-red-500 hover:bg-red-600 transition-colors p-1.5 flex items-center justify-center gap-1.5 text-xs font-semibold truncate px-2"
-          title={title}
-        >
-          <CloudUpload className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">{title}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="bg-gray-800 hover:bg-gray-900 transition-colors px-2 py-1.5 flex items-center justify-center text-xs shrink-0"
-          title="Camera Upload"
-        >
-          <Camera className="w-3.5 h-3.5" />
-        </button>
+      <div className="p-3 bg-white flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-gray-800 truncate" title={title}>
+          {title}
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors px-2.5 py-1 flex items-center gap-1 text-xs font-medium rounded cursor-pointer shadow-xs"
+            title={`Upload ${title}`}
+          >
+            <CloudUpload className="w-3.5 h-3.5" />
+            <span>Upload</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="bg-slate-700 hover:bg-slate-800 text-white transition-colors p-1 flex items-center justify-center text-xs rounded cursor-pointer shadow-xs"
+            title="Camera capture"
+          >
+            <Camera className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1432,30 +1445,20 @@ export function StudentRegistrationPage({ onNavigate }) {
           </div>
         )}
 
-        {/* Tab 5: Documents matching Live UAB */}
+        {/* Tab 5: Documents - Clean & Streamlined */}
         {activeTab === 'documents' && (
-          <div className="py-2">
-            {/* 11 Document Cards in 4-Column Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="py-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500">
+                Upload student certificates and identity proofs. Upload status updates automatically.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               <DocumentCard
-                title="Front Aadhar Card"
+                title="Student Aadhaar Card"
                 previewUrl={formData.doc_front_aadhar}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_front_aadhar')}
-              />
-              <DocumentCard
-                title="Back Aadhar Card"
-                previewUrl={formData.doc_back_aadhar}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_back_aadhar')}
-              />
-              <DocumentCard
-                title="CC"
-                previewUrl={formData.doc_cc}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_cc')}
-              />
-              <DocumentCard
-                title="TC"
-                previewUrl={formData.doc_tc}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_tc')}
               />
               <DocumentCard
                 title="Birth Certificate"
@@ -1463,106 +1466,25 @@ export function StudentRegistrationPage({ onNavigate }) {
                 onFileSelect={(e) => handleFileUpload(e, 'doc_birth_cert')}
               />
               <DocumentCard
-                title="Father's Front Aadhar"
+                title="Transfer Certificate (TC)"
+                previewUrl={formData.doc_tc}
+                onFileSelect={(e) => handleFileUpload(e, 'doc_tc')}
+              />
+              <DocumentCard
+                title="Character Certificate (CC)"
+                previewUrl={formData.doc_cc}
+                onFileSelect={(e) => handleFileUpload(e, 'doc_cc')}
+              />
+              <DocumentCard
+                title="Parent ID Proof / Aadhaar"
                 previewUrl={formData.doc_f_front_aadhar}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_f_front_aadhar')}
               />
               <DocumentCard
-                title="Father's Back Aadhar"
-                previewUrl={formData.doc_f_back_aadhar}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_f_back_aadhar')}
-              />
-              <DocumentCard
-                title="Mother's Front Aadhar"
-                previewUrl={formData.doc_m_front_aadhar}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_m_front_aadhar')}
-              />
-              <DocumentCard
-                title="Mother's Back Aadhar"
-                previewUrl={formData.doc_m_back_aadhar}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_m_back_aadhar')}
-              />
-              <DocumentCard
-                title="Registration Form"
-                previewUrl={formData.doc_reg_form}
-                onFileSelect={(e) => handleFileUpload(e, 'doc_reg_form')}
-              />
-              <DocumentCard
-                title="Other Document"
+                title="Previous School Marksheet"
                 previewUrl={formData.doc_other}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_other')}
               />
-            </div>
-
-            {/* 8 Document Verification Checkboxes matching Live UAB */}
-            <div className="flex items-center flex-wrap gap-x-6 gap-y-2 text-xs md:text-sm text-gray-700 font-medium pt-2 border-t border-gray-100">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_std_aadhar"
-                  checked={formData.ver_std_aadhar}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>Std Aadhar</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_cc"
-                  checked={formData.ver_cc}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>CC</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_tc"
-                  checked={formData.ver_tc}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>TC</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_bc"
-                  checked={formData.ver_bc}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>BC</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_f_aadhar"
-                  checked={formData.ver_f_aadhar}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>F Aadhar</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_m_aadhar"
-                  checked={formData.ver_m_aadhar}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>M Aadhar</span>
-              </label>
-
-
             </div>
           </div>
         )}
