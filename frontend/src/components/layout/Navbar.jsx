@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { GlobalSearchModal } from './GlobalSearchModal';
+import { AnnouncementModal } from '../announcements/AnnouncementModal';
 import toast from 'react-hot-toast';
 
 export function Navbar({
@@ -25,6 +26,7 @@ export function Navbar({
 }) {
   const { user, role, schoolId, schoolName, switchRole, switchSchool, AVAILABLE_SCHOOLS, logout } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
 
   // Global Ctrl + K / Cmd + K keyboard shortcut
   useEffect(() => {
@@ -194,7 +196,7 @@ export function Navbar({
 
           {/* Megaphone Announcement Button (Purple/Violet Gradient) */}
           <button
-            onClick={() => onNavigate && onNavigate('/targeted-announcements')}
+            onClick={() => setIsAnnouncementModalOpen(true)}
             className="w-9 h-9 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-xs transition-all cursor-pointer shrink-0"
             title="Broadcast Announcements"
           >
@@ -229,6 +231,13 @@ export function Navbar({
           </button>
         </div>
       </header>
+
+      {/* Test Master Pro Style Announcement & Poll Modal */}
+      <AnnouncementModal
+        isOpen={isAnnouncementModalOpen}
+        onClose={() => setIsAnnouncementModalOpen(false)}
+        onSuccess={() => onNavigate && onNavigate('/targeted-announcements')}
+      />
 
       {/* Global Spotlight Search Modal */}
       <GlobalSearchModal

@@ -339,3 +339,422 @@ export const deleteAnnouncement = asyncHandler(async (req, res) => {
     new ApiResponse(200, { id }, 'Announcement deleted successfully')
   );
 });
+
+// ==========================================
+// INTERACTIVE POLLS STORE & CONTROLLERS
+// ==========================================
+
+const TENANT_POLLS = {
+  'sch_jd_intl': [
+    {
+      id: 'poll_001',
+      title: 'Annual Winter Carnival & Sports Day - Preferred Time Schedule',
+      description: 'Dear Parents & Faculty, please vote for the preferred time slot for the upcoming Winter Sports & Carnival 2026 celebration.',
+      audience: 'parents',
+      audienceScope: 'all',
+      selectedClassIds: ['All Classes'],
+      pollType: 'single',
+      options: [
+        { id: 'opt_1', text: 'Morning Slot (08:30 AM - 12:30 PM)', votes: 74 },
+        { id: 'opt_2', text: 'Afternoon / Evening Slot (02:30 PM - 06:30 PM)', votes: 132 },
+        { id: 'opt_3', text: 'Weekend Sunday Special (09:00 AM - 02:00 PM)', votes: 45 }
+      ],
+      totalVotes: 251,
+      allowEdit: false,
+      expiryDate: '2026-11-20T23:59:59.000Z',
+      status: 'Active',
+      createdAt: '2026-10-22T10:00:00.000Z',
+      votedUsers: ['user_admin_1']
+    },
+    {
+      id: 'poll_002',
+      title: 'Senior Secondary Saturday Skill Workshop - Subject Preference',
+      description: 'Vote for the vocational / tech skill track you want prioritized for Saturday zero-period practical masterclasses.',
+      audience: 'teachers',
+      audienceScope: 'all',
+      selectedClassIds: ['XI - SCI', 'XII - SCI'],
+      pollType: 'multiple',
+      options: [
+        { id: 'opt_201', text: 'AI & Python Robotics Automation', votes: 19 },
+        { id: 'opt_202', text: 'Financial Literacy & Stock Market Fundamentals', votes: 14 },
+        { id: 'opt_203', text: 'Public Speaking, MUN & Debating Excellence', votes: 16 }
+      ],
+      totalVotes: 49,
+      allowEdit: true,
+      expiryDate: '2026-11-30T23:59:59.000Z',
+      status: 'Active',
+      createdAt: '2026-10-24T14:30:00.000Z',
+      votedUsers: []
+    }
+  ]
+};
+
+// GET /api/announcements/polls
+export const getPolls = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const list = TENANT_POLLS[schoolId] || [];
+
+  // Recalculate percentages
+  const pollsWithPercentages = list.map(poll => {
+    const total = poll.options.reduce((sum, o) => sum + (o.votes || 0), 0);
+    const optionsWithPercent = poll.options.map(opt => ({
+      ...opt,
+      percentage: total > 0 ? Math.round(((opt.votes || 0) / total) * 100) : 0
+    }));
+    return {
+      ...poll,
+      totalVotes: total,
+      options: optionsWithPercent
+    };
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, { polls: pollsWithPercentages }, 'Polls retrieved successfully')
+  );
+});
+
+// POST /api/announcements/polls
+export const createPoll = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { title, description, audience, audienceScope, selectedClassIds, pollType, options, expiryDate, allowEdit } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json(new ApiResponse(400, null, 'Title and description are required'));
+  }
+
+  const rawOpts = Array.isArray(options) ? options : [];
+  if (rawOpts.length < 2) {
+    return res.status(400).json(new ApiResponse(400, null, 'At least 2 options are required'));
+  }
+
+  const formattedOptions = rawOpts.map((opt, idx) => ({
+    id: `opt_${Date.now()}_${idx}`,
+    text: typeof opt === 'string' ? opt.trim() : (opt.text || '').trim(),
+    votes: 0
+  })).filter(o => o.text);
+
+  const newPoll = {
+    id: `poll_${Date.now()}`,
+    title,
+    description,
+    audience: audience || 'parents',
+    audienceScope: audienceScope || 'all',
+    selectedClassIds: selectedClassIds || [],
+    pollType: pollType || 'single',
+    options: formattedOptions,
+    totalVotes: 0,
+    allowEdit: Boolean(allowEdit),
+    expiryDate: expiryDate || null,
+    status: 'Active',
+    createdAt: new Date().toISOString(),
+    votedUsers: []
+  };
+
+  if (!TENANT_POLLS[schoolId]) {
+    TENANT_POLLS[schoolId] = [];
+  }
+  TENANT_POLLS[schoolId].unshift(newPoll);
+
+  return res.status(201).json(
+    new ApiResponse(201, newPoll, 'Poll published successfully')
+  );
+});
+
+// POST /api/announcements/polls/:id/vote
+export const castVote = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+  const { optionIds, userId } = req.body;
+
+  const list = TENANT_POLLS[schoolId] || [];
+  const poll = list.find(p => p.id === id);
+
+  if (!poll) {
+    return res.status(404).json(new ApiResponse(404, null, 'Poll not found'));
+  }
+
+  if (poll.status !== 'Active') {
+    return res.status(400).json(new ApiResponse(400, null, 'This poll is no longer active'));
+  }
+
+  const targetOptionIds = Array.isArray(optionIds) ? optionIds : [optionIds];
+  let voteAdded = false;
+
+  poll.options.forEach(opt => {
+    if (targetOptionIds.includes(opt.id)) {
+      opt.votes = (opt.votes || 0) + 1;
+      voteAdded = true;
+    }
+  });
+
+  if (voteAdded) {
+    poll.totalVotes = poll.options.reduce((sum, o) => sum + (o.votes || 0), 0);
+    if (userId) {
+      if (!poll.votedUsers) poll.votedUsers = [];
+      poll.votedUsers.push(userId);
+    }
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, poll, 'Vote recorded successfully')
+  );
+});
+
+// POST /api/announcements/polls/:id/status
+export const togglePollStatus = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const list = TENANT_POLLS[schoolId] || [];
+  const poll = list.find(p => p.id === id);
+
+  if (!poll) {
+    return res.status(404).json(new ApiResponse(404, null, 'Poll not found'));
+  }
+
+  poll.status = status || (poll.status === 'Active' ? 'Closed' : 'Active');
+
+  return res.status(200).json(
+    new ApiResponse(200, poll, `Poll status changed to ${poll.status}`)
+  );
+});
+
+// DELETE /api/announcements/polls/:id
+export const deletePoll = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+
+  if (TENANT_POLLS[schoolId]) {
+    TENANT_POLLS[schoolId] = TENANT_POLLS[schoolId].filter(p => p.id !== id);
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, { id }, 'Poll deleted successfully')
+  );
+});
+
+
+// ==========================================
+// COMPLAINTS & FEEDBACK STORE & CONTROLLERS
+// ==========================================
+
+const TENANT_FEEDBACK = {
+  'sch_jd_intl': [
+    {
+      id: 'TKT-2026-081',
+      senderName: 'Sunita Verma (Mother of Ananya - II-A)',
+      senderRole: 'Parent',
+      senderContact: '7891008092',
+      category: 'Transport',
+      subject: 'Bus Route No. 4 Arrival Delay in Morning',
+      description: 'Bus No. 4 was delayed by 25 minutes at Bhankrota circle this morning. Requesting school management to ensure timely pickup during winter timings.',
+      priority: 'High',
+      status: 'In Progress',
+      createdAt: '2026-10-25T08:30:00.000Z',
+      updatedAt: '2026-10-25T11:15:00.000Z',
+      conversation: [
+        {
+          id: 'msg_1',
+          sender: 'Sunita Verma',
+          senderRole: 'Parent',
+          text: 'Bus No. 4 was delayed by 25 minutes at Bhankrota circle this morning. Requesting school management to ensure timely pickup during winter timings.',
+          timestamp: '2026-10-25T08:30:00.000Z'
+        },
+        {
+          id: 'msg_2',
+          sender: 'Transport Coordinator (Admin Office)',
+          senderRole: 'School Staff',
+          text: 'Dear Parent, thank you for bringing this to our attention. Route 4 driver experienced tyre puncture near the expressway. A spare bus was deployed. Driver has been instructed to keep buffer time.',
+          timestamp: '2026-10-25T11:15:00.000Z'
+        }
+      ]
+    },
+    {
+      id: 'TKT-2026-082',
+      senderName: 'Rajesh Sharma (Father of Aarav - I-A)',
+      senderRole: 'Parent',
+      senderContact: '7891008092',
+      category: 'Academic',
+      subject: 'Request for Extra Mathematics Worksheets',
+      description: 'Aarav is finding 2-digit carry-over addition a bit challenging. Could the class teacher please share extra practice worksheets?',
+      priority: 'Medium',
+      status: 'Resolved',
+      createdAt: '2026-10-23T15:20:00.000Z',
+      updatedAt: '2026-10-24T09:40:00.000Z',
+      conversation: [
+        {
+          id: 'msg_101',
+          sender: 'Rajesh Sharma',
+          senderRole: 'Parent',
+          text: 'Aarav is finding 2-digit carry-over addition a bit challenging. Could the class teacher please share extra practice worksheets?',
+          timestamp: '2026-10-23T15:20:00.000Z'
+        },
+        {
+          id: 'msg_102',
+          sender: 'Mrs. Kavita (Primary Math Faculty)',
+          senderRole: 'Teacher',
+          text: 'Dear Mr. Sharma, I have uploaded a curated 15-page visual addition worksheet in Aarav\'s study material portal and handed a hardcopy in class today.',
+          timestamp: '2026-10-24T09:40:00.000Z'
+        }
+      ]
+    },
+    {
+      id: 'TKT-2026-083',
+      senderName: 'Vikram Choudhary (PGT Mathematics)',
+      senderRole: 'Teacher',
+      senderContact: '7891008092',
+      category: 'Infrastructure',
+      subject: 'Projector HDMI port loose in Room 204',
+      description: 'The projector in Class 10-B (Room 204) frequently flickers during digital blackboard presentations due to a loose HDMI connection.',
+      priority: 'Low',
+      status: 'Open',
+      createdAt: '2026-10-26T09:10:00.000Z',
+      updatedAt: '2026-10-26T09:10:00.000Z',
+      conversation: [
+        {
+          id: 'msg_201',
+          sender: 'Vikram Choudhary',
+          senderRole: 'Teacher',
+          text: 'The projector in Class 10-B (Room 204) frequently flickers during digital blackboard presentations due to a loose HDMI connection.',
+          timestamp: '2026-10-26T09:10:00.000Z'
+        }
+      ]
+    }
+  ]
+};
+
+// GET /api/announcements/feedback
+export const getFeedbackTickets = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { status, category, search } = req.query;
+  let list = TENANT_FEEDBACK[schoolId] || [];
+
+  if (status && status !== 'ALL') {
+    list = list.filter(t => t.status.toLowerCase() === status.toLowerCase());
+  }
+  if (category && category !== 'ALL') {
+    list = list.filter(t => t.category.toLowerCase() === category.toLowerCase());
+  }
+  if (search) {
+    const q = search.toLowerCase();
+    list = list.filter(t => 
+      t.subject.toLowerCase().includes(q) || 
+      t.senderName.toLowerCase().includes(q) || 
+      t.id.toLowerCase().includes(q)
+    );
+  }
+
+  const counts = {
+    all: (TENANT_FEEDBACK[schoolId] || []).length,
+    open: (TENANT_FEEDBACK[schoolId] || []).filter(t => t.status === 'Open').length,
+    inProgress: (TENANT_FEEDBACK[schoolId] || []).filter(t => t.status === 'In Progress').length,
+    resolved: (TENANT_FEEDBACK[schoolId] || []).filter(t => t.status === 'Resolved').length
+  };
+
+  return res.status(200).json(
+    new ApiResponse(200, { tickets: list, counts }, 'Feedback tickets retrieved successfully')
+  );
+});
+
+// POST /api/announcements/feedback
+export const createFeedbackTicket = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { senderName, senderRole, senderContact, category, subject, description, priority } = req.body;
+
+  if (!subject || !description) {
+    return res.status(400).json(new ApiResponse(400, null, 'Subject and description are required'));
+  }
+
+  const newTicket = {
+    id: `TKT-2026-${String(Math.floor(100 + Math.random() * 900))}`,
+    senderName: senderName || 'Parent / Student',
+    senderRole: senderRole || 'Parent',
+    senderContact: senderContact || '7891008092',
+    category: category || 'General',
+    subject,
+    description,
+    priority: priority || 'Medium',
+    status: 'Open',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    conversation: [
+      {
+        id: `msg_${Date.now()}`,
+        sender: senderName || 'Parent / Student',
+        senderRole: senderRole || 'Parent',
+        text: description,
+        timestamp: new Date().toISOString()
+      }
+    ]
+  };
+
+  if (!TENANT_FEEDBACK[schoolId]) {
+    TENANT_FEEDBACK[schoolId] = [];
+  }
+  TENANT_FEEDBACK[schoolId].unshift(newTicket);
+
+  return res.status(201).json(
+    new ApiResponse(201, newTicket, 'Complaint ticket registered successfully')
+  );
+});
+
+// POST /api/announcements/feedback/:id/reply
+export const replyFeedbackTicket = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+  const { replyText, senderName, senderRole, changeStatus } = req.body;
+
+  if (!replyText || !replyText.trim()) {
+    return res.status(400).json(new ApiResponse(400, null, 'Reply message cannot be empty'));
+  }
+
+  const list = TENANT_FEEDBACK[schoolId] || [];
+  const ticket = list.find(t => t.id === id);
+
+  if (!ticket) {
+    return res.status(404).json(new ApiResponse(404, null, 'Ticket not found'));
+  }
+
+  const newMsg = {
+    id: `msg_${Date.now()}`,
+    sender: senderName || 'School Admin',
+    senderRole: senderRole || 'Staff',
+    text: replyText.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  ticket.conversation.push(newMsg);
+  ticket.updatedAt = new Date().toISOString();
+
+  if (changeStatus) {
+    ticket.status = changeStatus;
+  } else if (ticket.status === 'Open') {
+    ticket.status = 'In Progress';
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, ticket, 'Reply sent successfully')
+  );
+});
+
+// PATCH /api/announcements/feedback/:id/status
+export const updateFeedbackStatus = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const list = TENANT_FEEDBACK[schoolId] || [];
+  const ticket = list.find(t => t.id === id);
+
+  if (!ticket) {
+    return res.status(404).json(new ApiResponse(404, null, 'Ticket not found'));
+  }
+
+  ticket.status = status;
+  ticket.updatedAt = new Date().toISOString();
+
+  return res.status(200).json(
+    new ApiResponse(200, ticket, `Ticket status updated to ${status}`)
+  );
+});

@@ -1,1289 +1,1042 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import {
   Megaphone,
+  BarChart3,
+  MessageSquare,
   Users,
-  UserCheck,
-  GraduationCap,
-  Layers,
-  Send,
   CheckCircle2,
-  AlertTriangle,
   Clock,
   Search,
   Filter,
   Trash2,
   RefreshCw,
   FileText,
-  Smartphone,
-  MessageSquare,
-  Eye,
-  Paperclip,
-  ChevronRight,
+  Send,
   Plus,
   X,
-  Radio,
   Sparkles,
-  Phone,
+  AlertCircle,
+  Eye,
+  CheckSquare,
+  Square,
   ShieldAlert,
-  Info
+  ArrowRight,
+  MessageCircle,
+  Phone,
+  User,
+  Vote,
+  Calendar,
+  Lock,
+  Unlock,
+  Radio
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AnnouncementModal } from '../../components/announcements/AnnouncementModal';
 
-const API_BASE = '/api/announcements';
+export default function TargetedAnnouncementsPage({ onNavigate }) {
+  // Main Module Tab: 'announcements' | 'polls' | 'feedback'
+  const [currentModuleTab, setCurrentModuleTab] = useState('announcements');
 
-export default function TargetedAnnouncementsPage() {
+  // Modal open states
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+  const [announcementModalTab, setAnnouncementModalTab] = useState('announcement');
+
+  // ==========================================
+  // 1. ANNOUNCEMENTS STATE & LOGIC
+  // ==========================================
   const [announcements, setAnnouncements] = useState([]);
-  const [counts, setCounts] = useState({ all: 0, teachers: 0, classes: 0, students: 0, urgent: 0 });
-  const [loading, setLoading] = useState(true);
-  const [metadata, setMetadata] = useState({ teachers: [], teacherGroups: [], classes: [], students: [] });
-
-  // Filter state
-  const [activeTab, setActiveTab] = useState('ALL');
-  const [priorityFilter, setPriorityFilter] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Modals state
-  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [annCounts, setAnnCounts] = useState({ all: 0, teachers: 0, classes: 0, urgent: 0 });
+  const [annLoading, setAnnLoading] = useState(true);
+  const [annSearch, setAnnSearch] = useState('');
+  const [annPriorityFilter, setAnnPriorityFilter] = useState('ALL');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
-  // Form State for new Announcement
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    targetType: 'ALL_TEACHERS', // 'ALL_TEACHERS' | 'SELECTIVE_TEACHERS' | 'TEACHER_GROUP' | 'ENTIRE_CLASS' | 'SPECIFIC_STUDENT'
-    priority: 'Normal',
-    category: 'Academic',
-    channels: { inApp: true, sms: false, whatsapp: false, push: true },
-    ackRequired: false,
-    attachmentUrl: '',
-    sender: 'Principal Office',
-    // Target specific details
-    selectiveTeacherIds: [],
-    selectedGroupId: 'grp_science',
-    selectedClass: 'X',
-    selectedSection: 'A',
-    selectedStudentId: ''
-  });
-
-  // Fetch Announcements & Targeting Metadata
-  const fetchData = async () => {
+  const fetchAnnouncements = async () => {
     try {
-      setLoading(true);
-      const [annRes, metaRes] = await Promise.all([
-        fetch(`${API_BASE}?targetType=${activeTab}&priority=${priorityFilter}&search=${encodeURIComponent(searchQuery)}`),
-        fetch(`${API_BASE}/meta`)
-      ]);
-
-      const annData = await annRes.json();
-      const metaData = await metaRes.json();
-
-      if (annData.success) {
-        setAnnouncements(annData.data.announcements || []);
-        if (annData.data.counts) setCounts(annData.data.counts);
+      setAnnLoading(true);
+      const res = await fetch(`/api/announcements?priority=${annPriorityFilter}&search=${encodeURIComponent(annSearch)}`);
+      const d = await res.json();
+      if (d.success) {
+        setAnnouncements(d.data.announcements || []);
+        if (d.data.counts) setAnnCounts(d.data.counts);
       }
-      if (metaData.success) {
-        setMetadata(metaData.data || { teachers: [], teacherGroups: [], classes: [], students: [] });
-      }
-    } catch (err) {
-      console.error('Failed to load announcements:', err);
-      toast.error('Failed to load announcements data');
+    } catch {
+      toast.error('Failed to load announcements');
     } finally {
-      setLoading(false);
+      setAnnLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab, priorityFilter]);
-
-  // Handle Search submit
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchData();
+  const handleResendAnnouncement = async (id) => {
+    try {
+      const res = await fetch(`/api/announcements/${id}/resend`, { method: 'POST' });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Announcement re-sent to all channels! 🚀');
+        fetchAnnouncements();
+      }
+    } catch {
+      toast.error('Failed to resend');
+    }
   };
 
-  // Toggle selective teacher selection
-  const handleToggleTeacher = (tId) => {
-    setFormData(prev => {
-      const exists = prev.selectiveTeacherIds.includes(tId);
-      const updated = exists
-        ? prev.selectiveTeacherIds.filter(id => id !== tId)
-        : [...prev.selectiveTeacherIds, tId];
-      return { ...prev, selectiveTeacherIds: updated };
+  const handleDeleteAnnouncement = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this broadcast?')) return;
+    try {
+      const res = await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Announcement removed');
+        fetchAnnouncements();
+      }
+    } catch {
+      toast.error('Failed to delete');
+    }
+  };
+
+  // ==========================================
+  // 2. INTERACTIVE POLLS STATE & LOGIC
+  // ==========================================
+  const [polls, setPolls] = useState([]);
+  const [pollsLoading, setPollsLoading] = useState(true);
+  const [pollFilter, setPollFilter] = useState('ALL'); // 'ALL' | 'Active' | 'Closed'
+  const [userSelectedVote, setUserSelectedVote] = useState({}); // { [pollId]: ['opt_1'] }
+
+  const fetchPolls = async () => {
+    try {
+      setPollsLoading(true);
+      const res = await fetch('/api/announcements/polls/list');
+      const d = await res.json();
+      if (d.success) {
+        setPolls(d.data.polls || []);
+      }
+    } catch {
+      toast.error('Failed to load polls');
+    } finally {
+      setPollsLoading(false);
+    }
+  };
+
+  const handleOptionSelect = (pollId, optId, isMultiple) => {
+    setUserSelectedVote(prev => {
+      const current = prev[pollId] || [];
+      if (isMultiple) {
+        const next = current.includes(optId)
+          ? current.filter(id => id !== optId)
+          : [...current, optId];
+        return { ...prev, [pollId]: next };
+      } else {
+        return { ...prev, [pollId]: [optId] };
+      }
     });
   };
 
-  // Quick preset template application
-  const applyPresetTemplate = (type) => {
-    if (type === 'staff_meeting') {
-      setFormData(prev => ({
-        ...prev,
-        title: 'Emergency Academic Faculty Briefing - CBSE Board Guidelines',
-        content: 'All faculty members are requested to attend a 20-minute briefing today at 02:45 PM in the Staff Conference Room. Key agenda: Internal assessment upload timeline and revision class rosters.',
-        category: 'Staff Notice',
-        priority: 'High',
-        targetType: 'ALL_TEACHERS'
-      }));
-    } else if (type === 'remedial_class') {
-      setFormData(prev => ({
-        ...prev,
-        title: 'Important: Extra Remedial Support Classes for Board Preparation',
-        content: 'Dear Students, extra remedial sessions for Science and Mathematics will commence from this Saturday from 08:30 AM to 11:30 AM. Attendance is mandatory for all students.',
-        category: 'Academic',
-        priority: 'Normal',
-        targetType: 'ENTIRE_CLASS'
-      }));
-    } else if (type === 'student_praise') {
-      setFormData(prev => ({
-        ...prev,
-        title: 'Commendation & Official Selection Notice for Inter-School Tournament',
-        content: 'Dear Student & Parents, hearty congratulations on your selection to represent the school at the upcoming Inter-School Championship. Please collect your official event kit and consent form from the sports desk.',
-        category: 'Academic',
-        priority: 'Urgent',
-        targetType: 'SPECIFIC_STUDENT'
-      }));
-    } else if (type === 'dept_review') {
-      setFormData(prev => ({
-        ...prev,
-        title: 'Department Practical Syllabus & Lab Inventory Audit',
-        content: 'All members of this department are instructed to finalize their Term 1 practical experiment record books and submit laboratory equipment requisition by 3:00 PM tomorrow.',
-        category: 'Staff Notice',
-        priority: 'Normal',
-        targetType: 'TEACHER_GROUP'
-      }));
-    }
-    toast.success('Quick template loaded!');
-  };
-
-  // Submit new Announcement
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title.trim() || !formData.content.trim()) {
-      toast.error('Please enter announcement title and content');
+  const handleCastVote = async (pollId) => {
+    const selected = userSelectedVote[pollId];
+    if (!selected || selected.length === 0) {
+      toast.error('Please choose at least one option to vote');
       return;
     }
 
-    // Build targetDetails based on targetType
-    let targetDetails = {};
-    if (formData.targetType === 'ALL_TEACHERS') {
-      targetDetails = { allStaff: true };
-    } else if (formData.targetType === 'SELECTIVE_TEACHERS') {
-      if (formData.selectiveTeacherIds.length === 0) {
-        toast.error('Please select at least one teacher');
-        return;
-      }
-      const selectedTeachers = metadata.teachers.filter(t => formData.selectiveTeacherIds.includes(t.id));
-      targetDetails = {
-        teacherIds: formData.selectiveTeacherIds,
-        teachers: selectedTeachers
-      };
-    } else if (formData.targetType === 'TEACHER_GROUP') {
-      const grp = metadata.teacherGroups.find(g => g.id === formData.selectedGroupId);
-      targetDetails = {
-        groupId: formData.selectedGroupId,
-        groupName: grp ? grp.name : 'Faculty Wing'
-      };
-    } else if (formData.targetType === 'ENTIRE_CLASS') {
-      targetDetails = {
-        className: formData.selectedClass,
-        section: formData.selectedSection,
-        studentCount: formData.selectedSection === 'ALL' ? 85 : 42
-      };
-    } else if (formData.targetType === 'SPECIFIC_STUDENT') {
-      const student = metadata.students.find(s => s.id === formData.selectedStudentId);
-      if (!student) {
-        toast.error('Please select a student');
-        return;
-      }
-      targetDetails = {
-        studentId: student.id,
-        studentName: student.name,
-        admNo: student.admNo,
-        rollNo: student.rollNo,
-        className: student.className,
-        section: student.section,
-        parentName: student.fatherName,
-        phone: student.phone
-      };
-    }
-
     try {
-      setSubmitting(true);
-      const res = await fetch(API_BASE, {
+      const res = await fetch(`/api/announcements/polls/${pollId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ optionIds: selected, userId: 'user_admin' })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Your vote has been counted! 🗳️');
+        fetchPolls();
+      } else {
+        toast.error(d.message || 'Failed to submit vote');
+      }
+    } catch {
+      toast.error('Failed to submit vote');
+    }
+  };
+
+  const handleTogglePollStatus = async (pollId, currentStatus) => {
+    const nextStatus = currentStatus === 'Active' ? 'Closed' : 'Active';
+    try {
+      const res = await fetch(`/api/announcements/polls/${pollId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Poll marked as ${nextStatus}`);
+        fetchPolls();
+      }
+    } catch {
+      toast.error('Failed to update poll status');
+    }
+  };
+
+  const handleDeletePoll = async (pollId) => {
+    if (!window.confirm('Delete this poll and its voting telemetry?')) return;
+    try {
+      const res = await fetch(`/api/announcements/polls/${pollId}`, { method: 'DELETE' });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Poll deleted');
+        fetchPolls();
+      }
+    } catch {
+      toast.error('Failed to delete poll');
+    }
+  };
+
+  // ==========================================
+  // 3. COMPLAINTS & FEEDBACK STATE & LOGIC
+  // ==========================================
+  const [feedbackTickets, setFeedbackTickets] = useState([]);
+  const [feedbackCounts, setFeedbackCounts] = useState({ all: 0, open: 0, inProgress: 0, resolved: 0 });
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [feedbackFilter, setFeedbackFilter] = useState('ALL'); // 'ALL' | 'Open' | 'In Progress' | 'Resolved'
+  const [feedbackCategory, setFeedbackCategory] = useState('ALL');
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+
+  // Conversation Modal state
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replying, setReplying] = useState(false);
+
+  // New Ticket Modal state
+  const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
+  const [newTicketForm, setNewTicketForm] = useState({
+    senderName: '',
+    senderRole: 'Parent',
+    senderContact: '7891008092',
+    category: 'Academic',
+    subject: '',
+    description: '',
+    priority: 'Medium'
+  });
+
+  const fetchFeedback = async () => {
+    try {
+      setFeedbackLoading(true);
+      const res = await fetch(`/api/announcements/feedback/list?status=${feedbackFilter}&category=${feedbackCategory}&search=${encodeURIComponent(feedbackSearch)}`);
+      const d = await res.json();
+      if (d.success) {
+        setFeedbackTickets(d.data.tickets || []);
+        if (d.data.counts) setFeedbackCounts(d.data.counts);
+      }
+    } catch {
+      toast.error('Failed to load complaints');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const handleSendReply = async (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || !selectedTicket) return;
+
+    setReplying(true);
+    try {
+      const res = await fetch(`/api/announcements/feedback/${selectedTicket.id}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.title,
-          content: formData.content,
-          targetType: formData.targetType,
-          targetDetails,
-          priority: formData.priority,
-          category: formData.category,
-          channels: formData.channels,
-          ackRequired: formData.ackRequired,
-          attachmentUrl: formData.attachmentUrl,
-          sender: formData.sender
+          replyText: replyText.trim(),
+          senderName: 'Principal Office / School Admin',
+          senderRole: 'Admin'
         })
       });
-
-      const data = await res.json();
-      if (data.success) {
-        toast.success('Announcement broadcasted successfully!');
-        setShowComposeModal(false);
-        // Reset form
-        setFormData({
-          title: '',
-          content: '',
-          targetType: 'ALL_TEACHERS',
-          priority: 'Normal',
-          category: 'Academic',
-          channels: { inApp: true, sms: false, whatsapp: false, push: true },
-          ackRequired: false,
-          attachmentUrl: '',
-          sender: 'Principal Office',
-          selectiveTeacherIds: [],
-          selectedGroupId: 'grp_science',
-          selectedClass: 'X',
-          selectedSection: 'A',
-          selectedStudentId: ''
-        });
-        fetchData();
-      } else {
-        toast.error(data.message || 'Failed to broadcast announcement');
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Reply dispatched to parent/student! 💬');
+        setReplyText('');
+        setSelectedTicket(d.data);
+        fetchFeedback();
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('Error broadcasting announcement');
+    } catch {
+      toast.error('Failed to send reply');
     } finally {
-      setSubmitting(false);
+      setReplying(false);
     }
   };
 
-  // Resend Announcement
-  const handleResend = async (id, title) => {
+  const handleUpdateTicketStatus = async (ticketId, newStatus) => {
     try {
-      const res = await fetch(`${API_BASE}/${id}/resend`, { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        toast.success(`Broadcast re-triggered for: "${title.slice(0, 30)}..."`);
-        fetchData();
+      const res = await fetch(`/api/announcements/feedback/${ticketId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Ticket marked as ${newStatus}`);
+        if (selectedTicket && selectedTicket.id === ticketId) {
+          setSelectedTicket(d.data);
+        }
+        fetchFeedback();
       }
-    } catch (err) {
-      toast.error('Failed to resend announcement');
+    } catch {
+      toast.error('Failed to update status');
     }
   };
 
-  // Delete Announcement
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this broadcast?')) return;
+  const handleCreateTicketSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTicketForm.subject.trim() || !newTicketForm.description.trim()) {
+      toast.error('Please enter subject and description');
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        toast.success('Announcement deleted');
-        fetchData();
+      const res = await fetch('/api/announcements/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTicketForm)
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Complaint ticket registered successfully! 📋');
+        setIsNewTicketOpen(false);
+        setNewTicketForm({
+          senderName: '',
+          senderRole: 'Parent',
+          senderContact: '7891008092',
+          category: 'Academic',
+          subject: '',
+          description: '',
+          priority: 'Medium'
+        });
+        fetchFeedback();
       }
-    } catch (err) {
-      toast.error('Failed to delete announcement');
+    } catch {
+      toast.error('Failed to create ticket');
     }
   };
 
-  // Helper icon by target type
-  const getTargetIcon = (type) => {
-    switch (type) {
-      case 'ALL_TEACHERS':
-        return <UserCheck className="w-4 h-4 text-emerald-600" />;
-      case 'SELECTIVE_TEACHERS':
-        return <Users className="w-4 h-4 text-blue-600" />;
-      case 'TEACHER_GROUP':
-        return <Layers className="w-4 h-4 text-purple-600" />;
-      case 'ENTIRE_CLASS':
-        return <GraduationCap className="w-4 h-4 text-indigo-600" />;
-      case 'SPECIFIC_STUDENT':
-        return <UserCheck className="w-4 h-4 text-amber-600" />;
-      default:
-        return <Megaphone className="w-4 h-4 text-slate-600" />;
-    }
-  };
-
-  // Filter students based on selected class in Compose modal
-  const filteredStudents = metadata.students.filter(s =>
-    (!formData.selectedClass || s.className === formData.selectedClass)
-  );
+  // Initial Data Fetch
+  useEffect(() => {
+    if (currentModuleTab === 'announcements') fetchAnnouncements();
+    else if (currentModuleTab === 'polls') fetchPolls();
+    else if (currentModuleTab === 'feedback') fetchFeedback();
+  }, [currentModuleTab, annPriorityFilter, feedbackFilter, feedbackCategory]);
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-7xl mx-auto">
-      {/* Breadcrumb Navigation */}
-      <div className="flex items-center space-x-2 text-xs text-slate-500">
-        <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">Targeted Announcements</span>
-        <span>&bull;</span>
-        <Megaphone className="w-3.5 h-3.5 text-indigo-500" />
-        <span className="text-slate-400">&bull; Communications Hub</span>
-      </div>
-
-      {/* Modern Executive Page Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-start sm:items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
-            <Megaphone className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Targeted Announcements Hub
-              </h1>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Broadcast
-              </span>
+    <div className="p-3 sm:p-5 bg-slate-50 min-h-screen text-slate-800 space-y-4">
+      
+      {/* Top Header Card matching Test Master Pro styling */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
+              <Megaphone className="w-5 h-5" />
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Directly communicate with All Teachers, Selective Staff, Faculty Departments, Entire Classes, or Specific Students.
-            </p>
+            <div>
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                Communication & Announcement Hub
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wider">
+                  Test Master Suite
+                </span>
+              </h1>
+              <p className="text-xs text-slate-500">
+                Broadcast announcements, run community polls, and resolve complaints & grievances.
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => {
+              setAnnouncementModalTab('announcement');
+              setIsAnnouncementModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Megaphone className="w-3.5 h-3.5" />
+            Broadcast Notice
+          </button>
+
+          <button
+            onClick={() => {
+              setAnnouncementModalTab('poll');
+              setIsAnnouncementModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold shadow-2xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Create Poll
+          </button>
+        </div>
+      </div>
+
+      {/* 3 Main Unified Tabs Matching Test Master Pro */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
         <button
-          onClick={() => setShowComposeModal(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all active:scale-95 shrink-0"
+          onClick={() => setCurrentModuleTab('announcements')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            currentModuleTab === 'announcements'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
         >
-          <Plus className="w-4 h-4" />
-          <span>Compose Announcement</span>
+          <Megaphone className="w-4 h-4" />
+          <span>Announcements</span>
+          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+            currentModuleTab === 'announcements' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
+          }`}>
+            {announcements.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setCurrentModuleTab('polls')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            currentModuleTab === 'polls'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          <span>Interactive Polls</span>
+          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+            currentModuleTab === 'polls' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
+          }`}>
+            {polls.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setCurrentModuleTab('feedback')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            currentModuleTab === 'feedback'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>Complaints & Feedback</span>
+          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+            currentModuleTab === 'feedback' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
+          }`}>
+            {feedbackCounts.open > 0 ? `${feedbackCounts.open} Open` : feedbackTickets.length}
+          </span>
         </button>
       </div>
 
-      {/* KPI Stats Cards - 5 Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
-        {/* Card 1: Total Sent */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-all hover:shadow-md">
-          <div className="bg-blue-50/70 dark:bg-blue-950/40 border-b border-blue-100 dark:border-blue-900/40 py-1.5 px-3.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-blue-900 dark:text-blue-300">Total Sent</span>
-            <Megaphone className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div className="p-3.5">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white leading-none">{counts.all}</p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Active broadcast logs</p>
-          </div>
-        </div>
+      {/* ========================================================= */}
+      {/* TAB 1: ANNOUNCEMENTS CONTENT */}
+      {/* ========================================================= */}
+      {currentModuleTab === 'announcements' && (
+        <div className="space-y-4">
+          {/* Filter Bar */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs font-bold text-slate-500">Priority:</span>
+              <div className="flex items-center gap-1">
+                {['ALL', 'Normal', 'High', 'Urgent'].map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setAnnPriorityFilter(p)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                      annPriorityFilter === p
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Card 2: Faculty Notices */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-all hover:shadow-md">
-          <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-900/40 py-1.5 px-3.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-indigo-900 dark:text-indigo-300">Faculty Notices</span>
-            <Users className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div className="p-3.5">
-            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 leading-none">{counts.teachers}</p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Teachers & wings</p>
-          </div>
-        </div>
-
-        {/* Card 3: Class Broadcasts */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-all hover:shadow-md">
-          <div className="bg-purple-50/70 dark:bg-purple-950/40 border-b border-purple-100 dark:border-purple-900/40 py-1.5 px-3.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-purple-900 dark:text-purple-300">Class Broadcasts</span>
-            <GraduationCap className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div className="p-3.5">
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 leading-none">{counts.classes}</p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Grades & sections</p>
-          </div>
-        </div>
-
-        {/* Card 4: Student Notices */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-all hover:shadow-md">
-          <div className="bg-amber-50/70 dark:bg-amber-950/40 border-b border-amber-100 dark:border-amber-900/40 py-1.5 px-3.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-900 dark:text-amber-300">Student Notices</span>
-            <UserCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="p-3.5">
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 leading-none">{counts.students}</p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Targeted individual</p>
-          </div>
-        </div>
-
-        {/* Card 5: Urgent Priority */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden col-span-2 md:col-span-1 transition-all hover:shadow-md">
-          <div className="bg-rose-50/70 dark:bg-rose-950/40 border-b border-rose-100 dark:border-rose-900/40 py-1.5 px-3.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-900 dark:text-rose-300">Urgent Priority</span>
-            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-          </div>
-          <div className="p-3.5">
-            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 leading-none">{counts.urgent}</p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Immediate action</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar with Lucide Icons */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 shadow-xs space-y-3">
-        <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3">
-          {/* Target Tabs (Clean SVG Icons instead of raw emojis) */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl">
-            {[
-              { id: 'ALL', label: 'All Targets', icon: Radio },
-              { id: 'ALL_TEACHERS', label: 'All Teachers', icon: Users },
-              { id: 'SELECTIVE_TEACHERS', label: 'Selective Staff', icon: UserCheck },
-              { id: 'TEACHER_GROUP', label: 'Teacher Groups', icon: Layers },
-              { id: 'ENTIRE_CLASS', label: 'Entire Class', icon: GraduationCap },
-              { id: 'SPECIFIC_STUDENT', label: 'Specific Student', icon: UserCheck }
-            ].map(tab => {
-              const IconComp = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200 dark:border-slate-700'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search Box */}
-          <form onSubmit={handleSearch} className="flex gap-2 min-w-[260px] sm:min-w-[320px]">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search announcement, student, teacher..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition"
+                placeholder="Search announcements..."
+                value={annSearch}
+                onChange={e => setAnnSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && fetchAnnouncements()}
+                className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
-            <button
-              type="submit"
-              className="px-3.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition shrink-0"
-            >
-              Filter
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Announcements Feed List */}
-      <div className="space-y-3">
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-indigo-500 mb-2" />
-            <p className="text-sm">Fetching targeted announcements...</p>
           </div>
-        ) : announcements.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-12 text-center">
-            <Megaphone className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">No Announcements Found</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
-              No broadcast announcements match the current filter. Click "Compose Announcement" above to send one.
-            </p>
-          </div>
-        ) : (
-          announcements.map((ann) => {
-            const isUrgent = ann.priority === 'Urgent';
-            const isHigh = ann.priority === 'High';
-            const borderAccent = isUrgent 
-              ? 'border-l-4 border-l-rose-500' 
-              : isHigh 
-              ? 'border-l-4 border-l-amber-500' 
-              : 'border-l-4 border-l-indigo-500';
 
-            return (
+          {/* Announcements Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {announcements.map(ann => (
               <div
                 key={ann.id}
-                className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 ${borderAccent} p-4 sm:p-5 shadow-xs hover:shadow-md transition-all group`}
+                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
               >
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
-                  {/* Header & Badges */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Priority Badge */}
-                    <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
-                        isUrgent
-                          ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/40'
-                          : isHigh
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40'
-                          : 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/40'
-                      }`}
-                    >
-                      {isUrgent && <AlertTriangle className="w-3 h-3" />}
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      ann.priority === 'Urgent'
+                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                        : ann.priority === 'High'
+                        ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                        : 'bg-blue-50 text-blue-700 border border-blue-200'
+                    }`}>
                       {ann.priority} Priority
                     </span>
-
-                    {/* Target Audience Pill */}
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      {getTargetIcon(ann.targetType)}
-                      <span className="font-semibold">{ann.targetSummary}</span>
-                    </span>
-
-                    {/* Category Pill */}
-                    <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700">
-                      {ann.category}
-                    </span>
-
-                    {/* Acknowledgment required badge */}
-                    {ann.ackRequired && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200">
-                        Sign-off Required
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Delivery Date */}
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>
-                      {new Date(ann.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} at{' '}
-                      {new Date(ann.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {new Date(ann.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                </div>
 
-                {/* Title & Content */}
-                <div className="mt-3">
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-1.5 hover:text-indigo-600 transition-colors">
                     {ann.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-3">
                     {ann.content}
                   </p>
                 </div>
 
-                {/* Footer: Channels, Stats, and Action Buttons */}
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  {/* Delivery Channels */}
-                  <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500">
-                    <span className="font-medium text-slate-400">Channels:</span>
-                    <div className="flex items-center gap-1.5">
-                      {ann.channels?.inApp && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-[10px] font-medium text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900">
-                          <Smartphone className="w-3 h-3 text-indigo-500" /> App
-                        </span>
-                      )}
-                      {ann.channels?.sms && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-[10px] font-medium text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900">
-                          <MessageSquare className="w-3 h-3 text-blue-500" /> SMS
-                        </span>
-                      )}
-                      {ann.channels?.whatsapp && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[10px] font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900">
-                          <Phone className="w-3 h-3 text-emerald-500" /> WhatsApp
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="text-slate-300 dark:text-slate-700">|</span>
-                    <span className="text-slate-600 dark:text-slate-400 text-xs">
-                      Delivered: <strong className="text-emerald-600 dark:text-emerald-400">{ann.stats?.delivered || 0}/{ann.stats?.targeted || 0}</strong>
-                    </span>
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="text-[11px] font-semibold text-slate-500">
+                    Target: <strong className="text-slate-700">{ann.targetSummary || 'Faculty & Students'}</strong>
                   </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <div className="flex items-center gap-1">
                     <button
-                      onClick={() => {
-                        setSelectedAnnouncement(ann);
-                        setShowDetailModal(true);
-                      }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                      onClick={() => handleResendAnnouncement(ann.id)}
+                      title="Resend broadcast"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition"
                     >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>View Details</span>
+                      <RefreshCw className="w-3.5 h-3.5" />
                     </button>
-
                     <button
-                      onClick={() => handleResend(ann.id, ann.title)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition"
-                      title="Resend to audience"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      <span>Resend</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(ann.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition"
-                      title="Delete announcement"
+                      onClick={() => handleDeleteAnnouncement(ann.id)}
+                      title="Delete broadcast"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               </div>
-            );
-          })
-        )}
-      </div>
+            ))}
+          </div>
 
-      {/* ========================================================================= */}
-      {/* COMPOSE ANNOUNCEMENT MODAL (Mounted to document.body via Portal) */}
-      {/* ========================================================================= */}
-      {showComposeModal && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-150">
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
-            {/* ENTERPRISE MODAL HEADER */}
-            <div className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-200/60 dark:border-indigo-800/60 shadow-2xs">
-                  <Megaphone className="w-5 h-5" />
+          {announcements.length === 0 && !annLoading && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+              <Megaphone className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+              <p className="text-xs font-semibold">No announcements found matching criteria</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 2: INTERACTIVE POLLS CONTENT */}
+      {/* ========================================================= */}
+      {currentModuleTab === 'polls' && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500">Status:</span>
+              <div className="flex items-center gap-1">
+                {['ALL', 'Active', 'Closed'].map(st => (
+                  <button
+                    key={st}
+                    onClick={() => setPollFilter(st)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                      pollFilter === st
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setAnnouncementModalTab('poll');
+                setIsAnnouncementModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> New Poll
+            </button>
+          </div>
+
+          {/* Polls Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {polls
+              .filter(p => pollFilter === 'ALL' || p.status === pollFilter)
+              .map(poll => {
+                const isSingle = poll.pollType === 'single';
+                const selectedOpts = userSelectedVote[poll.id] || [];
+                return (
+                  <div
+                    key={poll.id}
+                    className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Poll Header Badges */}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            poll.status === 'Active'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                          }`}>
+                            {poll.status}
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase">
+                            Audience: {poll.audience}
+                          </span>
+                        </div>
+
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                          {poll.totalVotes || 0} Total Votes
+                        </span>
+                      </div>
+
+                      <h3 className="font-bold text-slate-900 text-sm leading-snug mb-1">
+                        {poll.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                        {poll.description}
+                      </p>
+
+                      {/* Options with Live Voting & Bar Charts */}
+                      <div className="space-y-2.5 mb-4">
+                        {poll.options.map(opt => {
+                          const isSelected = selectedOpts.includes(opt.id);
+                          return (
+                            <div
+                              key={opt.id}
+                              onClick={() => poll.status === 'Active' && handleOptionSelect(poll.id, opt.id, !isSingle)}
+                              className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+                                isSelected
+                                  ? 'border-indigo-600 bg-indigo-50/40 shadow-xs'
+                                  : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                              }`}
+                            >
+                              {/* Background Percentage Progress Fill */}
+                              <div
+                                className="absolute left-0 top-0 bottom-0 bg-indigo-100/60 transition-all duration-500 pointer-events-none"
+                                style={{ width: `${opt.percentage || 0}%` }}
+                              />
+
+                              <div className="relative z-10 flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className={`w-4 h-4 rounded-${isSingle ? 'full' : 'md'} border flex items-center justify-center shrink-0 ${
+                                    isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white'
+                                  }`}>
+                                    {isSelected && <div className={`w-1.5 h-1.5 rounded-${isSingle ? 'full' : 'xs'} bg-white`} />}
+                                  </div>
+                                  <span className="text-xs font-semibold text-slate-800 truncate">
+                                    {opt.text}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-[11px] font-bold text-slate-700">
+                                    {opt.votes || 0} votes
+                                  </span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-600 text-white shadow-2xs">
+                                    {opt.percentage || 0}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Bottom Actions */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      {poll.status === 'Active' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleCastVote(poll.id)}
+                          className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Vote className="w-3.5 h-3.5" /> Submit Vote
+                        </button>
+                      ) : (
+                        <span className="text-xs font-semibold text-slate-400 italic">Voting Closed</span>
+                      )}
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePollStatus(poll.id, poll.status)}
+                          title={poll.status === 'Active' ? 'Close poll' : 'Reopen poll'}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          {poll.status === 'Active' ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePoll(poll.id)}
+                          title="Delete poll"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {polls.length === 0 && !pollsLoading && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+              <BarChart3 className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+              <p className="text-xs font-semibold">No interactive polls published yet</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 3: COMPLAINTS & GRIEVANCE FEEDBACK */}
+      {/* ========================================================= */}
+      {currentModuleTab === 'feedback' && (
+        <div className="space-y-4">
+          
+          {/* Summary Metric Counters */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs">
+              <span className="text-[11px] font-bold text-slate-400 uppercase">Total Tickets</span>
+              <p className="text-xl font-extrabold text-slate-800 mt-0.5">{feedbackCounts.all}</p>
+            </div>
+            <div className="bg-white rounded-xl p-3 border border-rose-200/80 bg-rose-50/20 shadow-2xs">
+              <span className="text-[11px] font-bold text-rose-600 uppercase">Open / Pending</span>
+              <p className="text-xl font-extrabold text-rose-700 mt-0.5">{feedbackCounts.open}</p>
+            </div>
+            <div className="bg-white rounded-xl p-3 border border-amber-200/80 bg-amber-50/20 shadow-2xs">
+              <span className="text-[11px] font-bold text-amber-600 uppercase">In Progress</span>
+              <p className="text-xl font-extrabold text-amber-700 mt-0.5">{feedbackCounts.inProgress}</p>
+            </div>
+            <div className="bg-white rounded-xl p-3 border border-emerald-200/80 bg-emerald-50/20 shadow-2xs">
+              <span className="text-[11px] font-bold text-emerald-600 uppercase">Resolved</span>
+              <p className="text-xl font-extrabold text-emerald-700 mt-0.5">{feedbackCounts.resolved}</p>
+            </div>
+          </div>
+
+          {/* Controls Bar */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+              {['ALL', 'Open', 'In Progress', 'Resolved'].map(st => (
+                <button
+                  key={st}
+                  onClick={() => setFeedbackFilter(st)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
+                    feedbackFilter === st
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-60">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search complaints..."
+                  value={feedbackSearch}
+                  onChange={e => setFeedbackSearch(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchFeedback()}
+                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+
+              <button
+                onClick={() => setIsNewTicketOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Log Ticket
+              </button>
+            </div>
+          </div>
+
+          {/* Feedback Tickets List */}
+          <div className="space-y-3">
+            {feedbackTickets.map(ticket => (
+              <div
+                key={ticket.id}
+                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                      {ticket.id}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                      ticket.status === 'Resolved'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : ticket.status === 'In Progress'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}>
+                      {ticket.status}
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                      {ticket.category}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      {new Date(ticket.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-slate-900 text-sm mb-1 leading-snug">
+                    {ticket.subject}
+                  </h3>
+                  <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed">
+                    {ticket.description}
+                  </p>
+
+                  <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-slate-400" />
+                      <strong>{ticket.senderName}</strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-slate-400" />
+                      {ticket.senderContact}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">Compose Targeted Announcement</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Send precision circulars & alerts to teachers, departments, classes, or students</p>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setSelectedTicket(ticket)}
+                    className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    Conversation ({ticket.conversation?.length || 1})
+                  </button>
+
+                  <select
+                    value={ticket.status}
+                    onChange={e => handleUpdateTicketStatus(ticket.id, e.target.value)}
+                    className="text-xs font-semibold px-2 py-1.5 border border-slate-200 rounded-xl bg-white focus:outline-none"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                  </select>
                 </div>
               </div>
+            ))}
+          </div>
+
+          {feedbackTickets.length === 0 && !feedbackLoading && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+              <MessageSquare className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+              <p className="text-xs font-semibold">No complaints or feedback found</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 2-WAY CONVERSATION CHAT MODAL (COMPLAINTS) */}
+      {/* ========================================================= */}
+      {selectedTicket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+            
+            {/* Modal Header */}
+            <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3 shrink-0">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                    {selectedTicket.id}
+                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                    selectedTicket.status === 'Resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {selectedTicket.status}
+                  </span>
+                </div>
+                <h3 className="font-bold text-slate-900 text-sm mt-1">{selectedTicket.subject}</h3>
+                <p className="text-[11px] text-slate-500">From: {selectedTicket.senderName} ({selectedTicket.senderContact})</p>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowComposeModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                onClick={() => setSelectedTicket(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* SCROLLABLE FORM BODY */}
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
-              <div className="overflow-y-auto flex-1 p-5 sm:p-6 space-y-5">
-                {/* STEP 1: TARGET AUDIENCE PICKER */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Step 1: Choose Target Audience Type
-                    </label>
-                    <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                      5 Targeting Modes Available
+            {/* Conversation Messages Thread */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/30">
+              {selectedTicket.conversation?.map((msg, i) => {
+                const isAdmin = msg.senderRole === 'Admin' || msg.senderRole === 'School Staff';
+                return (
+                  <div
+                    key={msg.id || i}
+                    className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}
+                  >
+                    <span className="text-[10px] font-bold text-slate-400 mb-0.5">
+                      {msg.sender} ({msg.senderRole}) • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                  </div>
-
-                  {/* 5-Card Grid for Audience Modes */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                    {/* Mode 1: All Teachers */}
-                    <div
-                      onClick={() => setFormData(prev => ({ ...prev, targetType: 'ALL_TEACHERS' }))}
-                      className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                        formData.targetType === 'ALL_TEACHERS'
-                          ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
-                          <UserCheck className="w-3.5 h-3.5" />
-                        </div>
-                        {formData.targetType === 'ALL_TEACHERS' && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">All Teachers</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Whole faculty</p>
-                      </div>
-                    </div>
-
-                    {/* Mode 2: Selective Teachers */}
-                    <div
-                      onClick={() => setFormData(prev => ({ ...prev, targetType: 'SELECTIVE_TEACHERS' }))}
-                      className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                        formData.targetType === 'SELECTIVE_TEACHERS'
-                          ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
-                          <Users className="w-3.5 h-3.5" />
-                        </div>
-                        {formData.targetType === 'SELECTIVE_TEACHERS' && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Selective Staff</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Pick teachers</p>
-                      </div>
-                    </div>
-
-                    {/* Mode 3: Teacher Groups */}
-                    <div
-                      onClick={() => setFormData(prev => ({ ...prev, targetType: 'TEACHER_GROUP' }))}
-                      className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                        formData.targetType === 'TEACHER_GROUP'
-                          ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-600 flex items-center justify-center">
-                          <Layers className="w-3.5 h-3.5" />
-                        </div>
-                        {formData.targetType === 'TEACHER_GROUP' && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Faculty Group</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Dept / Wing</p>
-                      </div>
-                    </div>
-
-                    {/* Mode 4: Entire Class */}
-                    <div
-                      onClick={() => setFormData(prev => ({ ...prev, targetType: 'ENTIRE_CLASS' }))}
-                      className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                        formData.targetType === 'ENTIRE_CLASS'
-                          ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center">
-                          <GraduationCap className="w-3.5 h-3.5" />
-                        </div>
-                        {formData.targetType === 'ENTIRE_CLASS' && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Entire Class</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Grade & Sec</p>
-                      </div>
-                    </div>
-
-                    {/* Mode 5: Specific Student */}
-                    <div
-                      onClick={() => setFormData(prev => ({ ...prev, targetType: 'SPECIFIC_STUDENT' }))}
-                      className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between col-span-2 sm:col-span-1 ${
-                        formData.targetType === 'SPECIFIC_STUDENT'
-                          ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600 flex items-center justify-center">
-                          <UserCheck className="w-3.5 h-3.5" />
-                        </div>
-                        {formData.targetType === 'SPECIFIC_STUDENT' && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Single Student</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Roll / Adm No</p>
-                      </div>
+                    <div className={`p-3 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
+                      isAdmin
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-tr-none shadow-sm'
+                        : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-2xs'
+                    }`}>
+                      {msg.text}
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  {/* DYNAMIC RECIPIENT PICKERS ACCORDING TO TARGET TYPE */}
-                  <div className="bg-slate-50 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700/70">
-                    {/* If SELECTIVE_TEACHERS */}
-                    {formData.targetType === 'SELECTIVE_TEACHERS' && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Select Teachers ({formData.selectiveTeacherIds.length} Selected):
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setFormData(p => ({ ...p, selectiveTeacherIds: metadata.teachers.map(t => t.id) }))}
-                              className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
-                            >
-                              Select All
-                            </button>
-                            <span className="text-slate-300 dark:text-slate-600">|</span>
-                            <button
-                              type="button"
-                              onClick={() => setFormData(p => ({ ...p, selectiveTeacherIds: [] }))}
-                              className="text-[11px] font-medium text-slate-500 hover:underline"
-                            >
-                              Clear
-                            </button>
-                          </div>
-                        </div>
+            {/* Fast Reply Box */}
+            <form onSubmit={handleSendReply} className="p-3 border-t border-slate-200 bg-white flex items-center gap-2 shrink-0">
+              <input
+                type="text"
+                placeholder="Type response to parent/student..."
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+              />
+              <button
+                type="submit"
+                disabled={replying || !replyText.trim()}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Send className="w-3.5 h-3.5" />
+                {replying ? 'Sending...' : 'Reply'}
+              </button>
+            </form>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                          {metadata.teachers.map((teacher) => {
-                            const isSelected = formData.selectiveTeacherIds.includes(teacher.id);
-                            return (
-                              <div
-                                key={teacher.id}
-                                onClick={() => handleToggleTeacher(teacher.id)}
-                                className={`p-2 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition ${
-                                  isSelected
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 font-medium'
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
-                                }`}
-                              >
-                                <div>
-                                  <p className="font-semibold">{teacher.name}</p>
-                                  <p className="text-[10px] text-slate-400">{teacher.subject}</p>
-                                </div>
-                                {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+          </div>
+        </div>
+      )}
 
-                    {/* If TEACHER_GROUP */}
-                    {formData.targetType === 'TEACHER_GROUP' && (
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
-                          Select Department / Faculty Wing:
-                        </label>
-                        <select
-                          value={formData.selectedGroupId}
-                          onChange={(e) => setFormData(p => ({ ...p, selectedGroupId: e.target.value }))}
-                          className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                        >
-                          {metadata.teacherGroups.map(grp => (
-                            <option key={grp.id} value={grp.id}>
-                              {grp.name} ({grp.memberCount} Members) — {grp.description}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+      {/* ========================================================= */}
+      {/* NEW TICKET REGISTRATION MODAL */}
+      {/* ========================================================= */}
+      {isNewTicketOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-sm">Register New Grievance / Complaint</h3>
+              <button onClick={() => setIsNewTicketOpen(false)} className="text-slate-400 hover:text-rose-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-                    {/* If ENTIRE_CLASS */}
-                    {formData.targetType === 'ENTIRE_CLASS' && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                            Select Class:
-                          </label>
-                          <select
-                            value={formData.selectedClass}
-                            onChange={(e) => setFormData(p => ({ ...p, selectedClass: e.target.value }))}
-                            className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                          >
-                            {metadata.classes.map(c => (
-                              <option key={c.name} value={c.name}>Class {c.name}</option>
-                            ))}
-                          </select>
-                        </div>
+            <form onSubmit={handleCreateTicketSubmit} className="p-4 space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Complainant / Parent Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar (Father of Rohan - II-B)"
+                  value={newTicketForm.senderName}
+                  onChange={e => setNewTicketForm({ ...newTicketForm, senderName: e.target.value })}
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl outline-none"
+                />
+              </div>
 
-                        <div>
-                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                            Select Section:
-                          </label>
-                          <select
-                            value={formData.selectedSection}
-                            onChange={(e) => setFormData(p => ({ ...p, selectedSection: e.target.value }))}
-                            className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                          >
-                            <option value="A">Section A</option>
-                            <option value="B">Section B</option>
-                            <option value="C">Section C</option>
-                            <option value="ALL">All Sections (Entire Grade)</option>
-                          </select>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* If SPECIFIC_STUDENT */}
-                    {formData.targetType === 'SPECIFIC_STUDENT' && (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                              Filter Class:
-                            </label>
-                            <select
-                              value={formData.selectedClass}
-                              onChange={(e) => setFormData(p => ({ ...p, selectedClass: e.target.value, selectedStudentId: '' }))}
-                              className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white"
-                            >
-                              <option value="">All Classes</option>
-                              {metadata.classes.map(c => (
-                                <option key={c.name} value={c.name}>Class {c.name}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                              Choose Specific Student:
-                            </label>
-                            <select
-                              value={formData.selectedStudentId}
-                              onChange={(e) => setFormData(p => ({ ...p, selectedStudentId: e.target.value }))}
-                              className="w-full text-xs p-2 rounded-lg border border-indigo-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium"
-                            >
-                              <option value="">-- Choose Student --</option>
-                              {filteredStudents.map(s => (
-                                <option key={s.id} value={s.id}>
-                                  {s.name} (Adm: {s.admNo}, Roll: {s.rollNo}, Class {s.className}-{s.section})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        {formData.selectedStudentId && (
-                          <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-xs flex items-center justify-between text-emerald-800 dark:text-emerald-300">
-                            <div>
-                              <strong>Targeted Recipient:</strong>{' '}
-                              {metadata.students.find(s => s.id === formData.selectedStudentId)?.name}
-                              <span className="text-[11px] block text-emerald-600 dark:text-emerald-400">
-                                Father: {metadata.students.find(s => s.id === formData.selectedStudentId)?.fatherName} | Mobile: {metadata.students.find(s => s.id === formData.selectedStudentId)?.phone}
-                              </span>
-                            </div>
-                            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* If ALL_TEACHERS */}
-                    {formData.targetType === 'ALL_TEACHERS' && (
-                      <div className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2">
-                        <Info className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>
-                          This will dispatch to all <strong>{metadata.teachers.length} registered teachers</strong> and coordinators in the school.
-                        </span>
-                      </div>
-                    )}
-                  </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                  <select
+                    value={newTicketForm.category}
+                    onChange={e => setNewTicketForm({ ...newTicketForm, category: e.target.value })}
+                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                  >
+                    <option value="Academic">Academic</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Fees">Fees & Accounts</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Discipline">Discipline</option>
+                    <option value="General">General</option>
+                  </select>
                 </div>
 
-                {/* STEP 2: QUICK TEMPLATE BUTTONS */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Quick Announcement Presets:</span>
-                    <span className="text-[10px] text-slate-400">1-click autofill</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => applyPresetTemplate('staff_meeting')}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/40 hover:bg-indigo-100 transition"
-                    >
-                      📝 Staff Meeting
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyPresetTemplate('dept_review')}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40 hover:bg-purple-100 transition"
-                    >
-                      🔬 Dept Lab Review
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyPresetTemplate('remedial_class')}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 hover:bg-blue-100 transition"
-                    >
-                      📐 Class Remedial Prep
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyPresetTemplate('student_praise')}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40 hover:bg-amber-100 transition"
-                    >
-                      🏆 Student Commendation
-                    </button>
-                  </div>
-                </div>
-
-                {/* STEP 3: CONTENT & DETAILS */}
-                <div className="space-y-3">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Step 2: Announcement Details & Message
-                  </label>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="md:col-span-2">
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                        Announcement Title / Subject *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Urgent Faculty Briefing regarding Term 1 Assessments"
-                        value={formData.title}
-                        onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
-                        className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                        Priority Level
-                      </label>
-                      <select
-                        value={formData.priority}
-                        onChange={(e) => setFormData(p => ({ ...p, priority: e.target.value }))}
-                        className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
-                      >
-                        <option value="Normal">Normal</option>
-                        <option value="High">High</option>
-                        <option value="Urgent">Urgent (Immediate Alert)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                        Category
-                      </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))}
-                        className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                      >
-                        <option value="Academic">Academic</option>
-                        <option value="Staff Notice">Staff Notice / Faculty Circular</option>
-                        <option value="Discipline">Discipline & Conduct</option>
-                        <option value="Examination">Examination & Pre-Board</option>
-                        <option value="Fee / Accounts">Fee & Accounts Clearance</option>
-                        <option value="Sports & Co-curricular">Sports & Co-curricular</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                        Attachment PDF / Document Name (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Schedule_Notice_Oct2026.pdf"
-                        value={formData.attachmentUrl}
-                        onChange={(e) => setFormData(p => ({ ...p, attachmentUrl: e.target.value }))}
-                        className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                      Announcement Body / Full Message *
-                    </label>
-                    <textarea
-                      rows={3}
-                      required
-                      placeholder="Enter comprehensive instructions, dates, timings, and expectations..."
-                      value={formData.content}
-                      onChange={(e) => setFormData(p => ({ ...p, content: e.target.value }))}
-                      className="w-full text-xs p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <div className="text-right text-[10px] text-slate-400 mt-0.5">
-                      {formData.content.length} characters
-                    </div>
-                  </div>
-
-                  {/* STEP 4: CHANNELS & SETTINGS */}
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-                      Step 3: Delivery Channels & Tracking
-                    </span>
-
-                    <div className="flex flex-wrap gap-4 text-xs">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.channels.inApp}
-                          disabled
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="font-medium text-slate-700 dark:text-slate-300">Mobile & Web In-App (Active)</span>
-                      </label>
-
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.channels.sms}
-                          onChange={(e) => setFormData(p => ({ ...p, channels: { ...p.channels, sms: e.target.checked } }))}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-slate-700 dark:text-slate-300">Dispatch SMS</span>
-                      </label>
-
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.channels.whatsapp}
-                          onChange={(e) => setFormData(p => ({ ...p, channels: { ...p.channels, whatsapp: e.target.checked } }))}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-slate-700 dark:text-slate-300">WhatsApp Alert</span>
-                      </label>
-
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.ackRequired}
-                          onChange={(e) => setFormData(p => ({ ...p, ackRequired: e.target.checked }))}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium text-indigo-600 dark:text-indigo-400">
-                          Require Read Sign-Off
-                        </span>
-                      </label>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Priority</label>
+                  <select
+                    value={newTicketForm.priority}
+                    onChange={e => setNewTicketForm({ ...newTicketForm, priority: e.target.value })}
+                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                  </select>
                 </div>
               </div>
 
-              {/* STICKY MODAL FOOTER */}
-              <div className="px-5 sm:px-6 py-3.5 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 shadow-inner">
-                <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Target: <strong>{formData.targetType.replace('_', ' ')}</strong></span>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Subject *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Delayed textbook delivery"
+                  value={newTicketForm.subject}
+                  onChange={e => setNewTicketForm({ ...newTicketForm, subject: e.target.value })}
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl outline-none"
+                />
+              </div>
 
-                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowComposeModal(false)}
-                    className="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 rounded-lg transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md transition disabled:opacity-50"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{submitting ? 'Broadcasting...' : 'Send Broadcast Now'}</span>
-                  </button>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Description / Details *</label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Detailed description of issue..."
+                  value={newTicketForm.description}
+                  onChange={e => setNewTicketForm({ ...newTicketForm, description: e.target.value })}
+                  className="w-full text-xs p-2.5 border border-slate-300 rounded-xl outline-none resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsNewTicketOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg"
+                >
+                  Register Ticket
+                </button>
               </div>
             </form>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* DETAILS / RECIPIENT INSPECTOR MODAL (Mounted to document.body via Portal) */}
-      {/* ========================================================================= */}
-      {showDetailModal && selectedAnnouncement && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-150">
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 flex justify-between items-center border-b border-slate-200 dark:border-slate-700 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <Megaphone className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Announcement Details & Telemetry</h3>
-              </div>
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Universal Announcement & Poll Modal */}
+      <AnnouncementModal
+        isOpen={isAnnouncementModalOpen}
+        onClose={() => setIsAnnouncementModalOpen(false)}
+        initialTab={announcementModalTab}
+        onSuccess={() => {
+          if (currentModuleTab === 'announcements') fetchAnnouncements();
+          else if (currentModuleTab === 'polls') fetchPolls();
+        }}
+      />
 
-            <div className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
-              <div>
-                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                  {selectedAnnouncement.category} • {selectedAnnouncement.priority} Priority
-                </span>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                  {selectedAnnouncement.title}
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Broadcasted by: {selectedAnnouncement.sender} on {new Date(selectedAnnouncement.createdAt).toLocaleString('en-IN')}
-                </p>
-              </div>
-
-              {/* Target Details Card */}
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    {getTargetIcon(selectedAnnouncement.targetType)}
-                    {selectedAnnouncement.targetSummary}
-                  </span>
-                  <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
-                    Status: {selectedAnnouncement.status || 'Delivered'}
-                  </span>
-                </div>
-
-                {/* Extended Details */}
-                {selectedAnnouncement.targetType === 'SELECTIVE_TEACHERS' && selectedAnnouncement.targetDetails?.teachers && (
-                  <div className="text-xs text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-                    <p className="font-semibold text-slate-500 mb-1">Targeted Staff List:</p>
-                    <ul className="list-disc list-inside space-y-0.5">
-                      {selectedAnnouncement.targetDetails.teachers.map((t, idx) => (
-                        <li key={idx}>{t.name} ({t.subject})</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {selectedAnnouncement.targetType === 'SPECIFIC_STUDENT' && (
-                  <div className="text-xs text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1">
-                    <p><strong>Student Name:</strong> {selectedAnnouncement.targetDetails?.studentName}</p>
-                    <p><strong>Admission No:</strong> {selectedAnnouncement.targetDetails?.admNo} | <strong>Roll No:</strong> {selectedAnnouncement.targetDetails?.rollNo}</p>
-                    <p><strong>Class:</strong> {selectedAnnouncement.targetDetails?.className} - {selectedAnnouncement.targetDetails?.section}</p>
-                    <p><strong>Parent Contact:</strong> {selectedAnnouncement.targetDetails?.parentName} ({selectedAnnouncement.targetDetails?.phone})</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Message Content */}
-              <div>
-                <label className="text-xs font-semibold text-slate-500 block mb-1">Message Content:</label>
-                <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
-                  {selectedAnnouncement.content}
-                </div>
-              </div>
-
-              {/* Attachment */}
-              {selectedAnnouncement.attachmentUrl && (
-                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-xs text-indigo-700 dark:text-indigo-300">
-                  <Paperclip className="w-4 h-4" />
-                  <span>Attachment: <strong>{selectedAnnouncement.attachmentUrl}</strong></span>
-                </div>
-              )}
-
-              {/* Delivery Stats Bar */}
-              <div className="grid grid-cols-3 gap-3 text-center pt-2">
-                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  <span className="text-[10px] text-slate-400 block">Total Targeted</span>
-                  <span className="text-base font-bold text-slate-800 dark:text-white">
-                    {selectedAnnouncement.stats?.targeted || 1}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  <span className="text-[10px] text-slate-400 block">Delivered</span>
-                  <span className="text-base font-bold text-emerald-600">
-                    {selectedAnnouncement.stats?.delivered || 1}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  <span className="text-[10px] text-slate-400 block">Read / Ack</span>
-                  <span className="text-base font-bold text-indigo-600">
-                    {selectedAnnouncement.stats?.read || 0}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-700 flex justify-end shrink-0">
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="px-4 py-1.5 text-xs font-medium rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-white transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
     </div>
   );
 }

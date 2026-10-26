@@ -97,6 +97,7 @@ import { SubjectLinkPage } from './modules/master/SubjectLinkPage';
 import { StreamMasterPage } from './modules/master/StreamMasterPage';
 import { ClassListPage } from './modules/master/ClassListPage';
 import { SubjectListPage } from './modules/master/SubjectListPage';
+import { MasterReportsPage } from './modules/master/MasterReportsPage';
 import {
   StudentListPage,
   DonationReportPage,
@@ -451,6 +452,8 @@ function AppContent() {
                 return <ClassListPage onNavigate={handleNavigate} />;
               case '/subject-list':
                 return <SubjectListPage onNavigate={handleNavigate} />;
+              case '/master-reports':
+                return <MasterReportsPage onNavigate={handleNavigate} />;
               case '/student-registration':
                 return <StudentRegistrationPage onNavigate={handleNavigate} />;
               case '/assign-roll-number':

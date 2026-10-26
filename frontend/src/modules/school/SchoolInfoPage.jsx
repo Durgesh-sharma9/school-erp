@@ -747,7 +747,7 @@ export function SchoolInfoPage() {
                       )}
                     </div>
                     <p className="text-[11px] text-slate-600 mt-0.5">
-                      School campus me rehkar button dabayein taaki exact latitude & longitude automatically bhar jayein.
+                      Click this button while on the school campus to automatically detect and populate the exact latitude and longitude coordinates.
                     </p>
                   </div>
                 </div>
@@ -885,9 +885,9 @@ export function SchoolInfoPage() {
               <div className="p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
                 <span className="text-sm">💡</span>
                 <div>
-                  <strong className="text-slate-800">Range Attendance (Geo-Fencing) Kaise Kaam Karta Hai?</strong>
+                  <strong className="text-slate-800">How Does Range Attendance (Geo-Fencing) Work?</strong>
                   <p className="mt-0.5 text-slate-500">
-                    Jab staff members ya teachers mobile app se attendance lagayenge, system automatically unki device GPS check karega. Yadi wo school campus ke is radius (e.g. {formData.attend_range || 100} meters) ke andar honge tabhi attendance lag payegi.
+                    When staff members or teachers mark their attendance via the mobile app, the system verifies their device GPS coordinates in real time. Attendance will only be marked if they are physically within this permitted radius (e.g. {formData.attend_range || 100} meters) of the school campus center.
                   </p>
                 </div>
               </div>
