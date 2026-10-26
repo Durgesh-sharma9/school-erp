@@ -1,6 +1,6 @@
 // Complete 1:1 In-Memory & Database-backed Store for Academics / Master Module
 
-let classesStore = [
+export let classesStore = [
   { id: '1', name: 'Nursery - PP3+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 1, studentCount: 26, classTeacher: 'Mrs. Suman Meena', roomNo: 'KG-01' },
   { id: '2', name: 'Lower Kindergarten - PP4+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 2, studentCount: 49, classTeacher: 'Mrs. Aarti Sen', roomNo: 'KG-02' },
   { id: '3', name: 'Upper Kindergarten - PP5+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 3, studentCount: 71, classTeacher: 'Mrs. Rekha Sharma', roomNo: 'KG-03' },
@@ -24,7 +24,7 @@ let classesStore = [
   { id: '21', name: 'Class XII - Commerce', wing: 'Senior Secondary', stream: 'COMMERCE', sections: ['A'], priority: 21, studentCount: 29, classTeacher: 'Mr. Hemant Soni', roomNo: '308' }
 ];
 
-let subjectGroupsStore = [
+export let subjectGroupsStore = [
   // 1. Scholastic (Core Academic Subjects - Graded by Marks & Grades)
   { id: '1', name: 'MATHEMATICS', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Core math curriculum for standard grades' },
   { id: '2', name: 'SCIENCE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'General Science, Physics, Chemistry, Biology' },
@@ -61,7 +61,7 @@ let subjectGroupsStore = [
   { id: '27', name: 'CREATIVITY SKILLS', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Original thinking & project presentations' }
 ];
 
-let subjectsStore = [
+export let subjectsStore = [
   { id: '1', name: 'ART EDUCATION', shortName: 'Art Education', group: 'ART EDUCATION', code: '' },
   { id: '2', name: 'GENERAL STUDIES', shortName: 'General Studies', group: 'CLASS XI & XII', code: '503' },
   { id: '3', name: 'HEALTH & PHY. EDUCATION', shortName: 'Health & Phy. Education', group: 'CLASS XI & XII', code: '' },
@@ -112,13 +112,13 @@ let subjectsStore = [
   { id: '48', name: 'WORK EDUCATION', shortName: 'Work Edu.', group: 'WORK EDUCATION', code: '' }
 ];
 
-let streamsStore = [
+export let streamsStore = [
   { id: '1', stream: 'SCIENCE' },
   { id: '2', stream: 'COMMERCE' },
   { id: '3', stream: 'HUMANITIES' }
 ];
 
-let subjectLinksStore = classesStore.map((c) => ({
+export let subjectLinksStore = classesStore.map((c) => ({
   className: c.name,
   linkedSubjectsCount: 10,
   linkedSubjectNames: ['HINDI', 'ENGLISH', 'MATHEMATICS', 'SCIENCE', 'SOCIAL SCIENCE', 'EVS', 'GENERAL KNOWLEDGE', 'MORAL SCIENCE', 'COMPUTER', 'ART EDUCATION']

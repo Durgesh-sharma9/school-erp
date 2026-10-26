@@ -34,6 +34,12 @@ model School {
   feeReceipts     FeeReceipt[]
   exams           Exam[]
   users           User[]
+  timetables      Timetable[]
+  rooms           Room[]
+  dailyReports    DailyReport[]
+  lessonPlans     LessonPlan[]
+  homeworks       TimetableHomework[]
+  replacementAssignments ReplacementAssignment[]
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -285,4 +291,231 @@ model User {
   createdAt       DateTime          @default(now())
 
   @@unique([schoolId, username])
+}
+
+
+// =================================================================
+// 8. Timetable Pro Suite Modules
+// =================================================================
+
+model Timetable {
+  id             String          @id @default(uuid())
+  schoolId       String
+  school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name           String
+  status         String          @default("DRAFT") // DRAFT, PUBLISHED
+  baseStartTime  String          @default("08:00")
+  periodDuration Int             @default(45)
+  workingDays    Json?           @default("[1,2,3,4,5,6]")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  slots          TimetableSlot[]
+  periods        Period[]
+
+  @@index([schoolId])
+}
+
+model Period {
+  id             String          @id @default(uuid())
+  schoolId       String
+  timetableId    String?
+  timetable      Timetable?      @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  periodNumber   Int
+  startTime      String
+  endTime        String
+  isBreak        Boolean         @default(false)
+  label          String?
+
+  slots          TimetableSlot[]
+  replacements   ReplacementAssignment[]
+
+  @@index([schoolId])
+  @@index([timetableId])
+}
+
+model Room {
+  id             String          @id @default(uuid())
+  schoolId       String
+  school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  roomNumber     String
+  floor          String?
+  block          String?
+  capacity       Int?            @default(40)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  slots          TimetableSlot[]
+
+  @@index([schoolId])
+}
+
+model TimetableSlot {
+  id          String                 @id @default(uuid())
+  timetableId String
+  timetable   Timetable              @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  schoolId    String
+  dayOfWeek   Int                    // 1=Mon, 2=Tue, ..., 6=Sat
+  periodId    String
+  period      Period                 @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  classId     String
+  subjectId   String
+  teacherId   String
+  roomId      String?
+  room        Room?                  @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  replacements ReplacementAssignment[]
+  lessonPlans  LessonPlan[]
+
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@unique([timetableId, dayOfWeek, periodId, classId])
+  @@index([timetableId])
+  @@index([schoolId])
+}
+
+model TeacherAttendanceRecord {
+  id        String                 @id @default(uuid())
+  schoolId  String
+  teacherId String
+  date      String                 // YYYY-MM-DD
+  status    String                 @default("PRESENT") // PRESENT, ABSENT, FIRST_HALF, SECOND_HALF
+  reason    String?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@unique([schoolId, teacherId, date])
+  @@index([schoolId, date])
+}
+
+model ReplacementAssignment {
+  id                   String      @id @default(uuid())
+  schoolId             String
+  school               School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  date                 String      // YYYY-MM-DD
+  periodId             String
+  period               Period      @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  classId              String
+  originalTeacherId    String
+  replacementTeacherId String
+  reason               String      @default("Casual Leave")
+  status               String      @default("Assigned") // Pending, Assigned, Completed, Cancelled
+  slotId               String?
+  slot                 TimetableSlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  @@index([schoolId, date])
+}
+
+model DailyReport {
+  id          String             @id @default(uuid())
+  schoolId    String
+  school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherId   String
+  reportDate  String             // YYYY-MM-DD
+  status      String             @default("DRAFT") // DRAFT, SUBMITTED
+  submittedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  entries     DailyReportEntry[]
+
+  @@unique([schoolId, teacherId, reportDate])
+  @@index([schoolId, reportDate])
+}
+
+model DailyReportEntry {
+  id                  String       @id @default(uuid())
+  reportId            String
+  report              DailyReport  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  classId             String
+  subjectId           String
+  description         String
+  isCompleted         Boolean      @default(false)
+  isProxy             Boolean      @default(false)
+  entryType           String       @default("LESSON") // LESSON, ACTIVITY
+  activityCategory    String?
+  activityDescription String?
+  learningOutcome     String?
+  createdAt           DateTime     @default(now())
+
+  @@index([reportId])
+}
+
+model TimetableHomework {
+  id          String             @id @default(uuid())
+  schoolId    String
+  school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherId   String
+  classId     String
+  title       String
+  description String
+  status      String             @default("SENT_TO_ADMIN") // DRAFT, SENT_TO_ADMIN
+  dueDate     String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([schoolId, classId])
+}
+
+model LessonPlan {
+  id                String              @id @default(uuid())
+  schoolId          String
+  school            School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherId         String
+  slotId            String?
+  slot              TimetableSlot?      @relation(fields: [slotId], references: [id], onDelete: SetNull)
+  classId           String
+  subjectId         String
+  periodId          String?
+  planDate          String              // YYYY-MM-DD
+  lessonTitle       String
+  topic             String?
+  chapter           String?
+  subtopic          String?
+  teachingAids      String?
+  activities        String?
+  homework          String?
+  assessmentMethod  String?
+  learningOutcomes  String?
+  notes             String?
+  estimatedDuration Int?                @default(45)
+  status            String              @default("PLANNED") // DRAFT, PLANNED, COMPLETED, SKIPPED, CANCELLED
+
+  attachments       LessonAttachment[]
+  comments          LessonPlanComment[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([schoolId, planDate])
+  @@index([schoolId, teacherId])
+}
+
+model LessonAttachment {
+  id           String             @id @default(uuid())
+  lessonPlanId String
+  lessonPlan   LessonPlan         @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  mimeType     String?
+  createdAt    DateTime           @default(now())
+
+  @@index([lessonPlanId])
+}
+
+model LessonPlanComment {
+  id           String             @id @default(uuid())
+  lessonPlanId String
+  lessonPlan   LessonPlan         @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  userId       String
+  authorName   String?            @default("Admin")
+  content      String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([lessonPlanId])
 }
