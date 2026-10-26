@@ -1,141 +1,123 @@
 import React, { useState } from 'react';
-import { Bus, Users, AlertCircle, ShieldCheck, Download, Printer, Search, ArrowRight } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Bus, Users, AlertCircle, ShieldCheck, Search, ArrowRight } from 'lucide-react';
+
+export const ALL_TRANSPORT_REPORTS = [
+  {
+    id: 'transport-summary',
+    title: 'Transport Summary Report',
+    path: '/transport-summary',
+    badge: '10 Vehicles',
+    icon: Bus,
+    description: 'Vehicle, seating capacity, operational route, driver assignments, and destination fare matrix.'
+  },
+  {
+    id: 'transport-students',
+    title: 'Transport Students Report',
+    path: '/transport-students',
+    badge: '428 Students',
+    icon: Users,
+    description: 'Enrolled transport student roster with pickup point, route allocation, and emergency parent contacts.'
+  },
+  {
+    id: 'transport-due-report',
+    title: 'Transport Due Report',
+    path: '/transport-due-report',
+    badge: 'Bus Fee Dues',
+    icon: AlertCircle,
+    description: 'Month-wise bus fee dues, collection register, pending fee notifications, and printable bus passes.'
+  },
+  {
+    id: 'transport-vehicle-report',
+    title: 'Transport Vehicle Report',
+    path: '/transport-vehicle-report',
+    badge: 'Fleet Fitness',
+    icon: ShieldCheck,
+    description: 'Fleet fitness, PUC validity, vehicle insurance, driver licensing, and RTO statutory compliance audit.'
+  }
+];
 
 export function TransportReportsPage({ onNavigate }) {
-  const [activeTab, setActiveTab] = useState('summary');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const reportCards = [
-    {
-      id: 'summary',
-      title: 'Transport Summary',
-      path: '/transport-summary',
-      icon: Bus,
-      color: 'indigo',
-      count: '10 Vehicles',
-      desc: 'Vehicle, capacity, operational route, and destination fare matrix'
-    },
-    {
-      id: 'students',
-      title: 'Transport Students',
-      path: '/transport-students',
-      icon: Users,
-      color: 'emerald',
-      count: '428 Students',
-      desc: 'Enrolled transport student roster with route allocation & SMS alerts'
-    },
-    {
-      id: 'due',
-      title: 'Transport Due Report',
-      path: '/transport-due-report',
-      icon: AlertCircle,
-      color: 'rose',
-      count: '₹92,800 Due',
-      desc: 'Month-wise bus fee dues, collection register, and printable bus passes'
-    },
-    {
-      id: 'vehicle',
-      title: 'Transport Vehicle Report',
-      path: '/transport-vehicle-report',
-      icon: ShieldCheck,
-      color: 'purple',
-      count: '100% Compliant',
-      desc: 'Fleet fitness, PUC validity, driver licensing, and RTO compliance audit'
-    }
-  ];
+  const filteredReports = ALL_TRANSPORT_REPORTS.filter(report => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      report.title.toLowerCase().includes(q) ||
+      report.description.toLowerCase().includes(q) ||
+      report.badge.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* 1:1 Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-        <div>
-          <div className="flex items-center space-x-2 text-xs text-slate-400 mb-1">
-            <span>Transport</span>
-            <span>&gt;</span>
-            <span className="text-indigo-600 font-medium">Reports Hub</span>
+    <div className="min-h-screen bg-slate-50/60 p-3 md:p-5 flex flex-col space-y-3.5">
+      {/* Compact Controls Bar: Title and Search */}
+      <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <Bus className="w-3.5 h-3.5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Bus className="w-6 h-6 text-indigo-600" />
-            Transport Master Reports Hub
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Unified School Fleet Management, Student Route Rosters, Dues & Compliance Register
-          </p>
+          <div>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">
+              Transport Reports Directory
+            </h1>
+            <p className="text-[11px] text-slate-400">
+              Showing {filteredReports.length} of {ALL_TRANSPORT_REPORTS.length} transport reports
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
-            <Printer className="w-4 h-4" /> Print
-          </button>
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search transport reports..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+          />
         </div>
       </div>
 
-      {/* 4 Report Shortcut Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {reportCards.map((card) => {
-          const Icon = card.icon;
+      {/* Grid of Compact Report Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredReports.map(report => {
+          const Icon = report.icon;
           return (
             <div
-              key={card.id}
-              onClick={() => onNavigate ? onNavigate(card.path) : null}
-              className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+              key={report.id}
+              onClick={() => onNavigate && onNavigate(report.path)}
+              className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Icon className="w-5 h-5" />
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                    {card.count}
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-md transition-colors truncate max-w-[120px]">
+                    {report.badge}
                   </span>
                 </div>
-                <h3 className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  {card.title}
+
+                <h3 className="font-bold text-slate-900 text-[13px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
+                  {report.title}
                 </h3>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                  {card.desc}
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                  {report.description}
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
-                <span>Open Report</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-indigo-600">
+                <span className="group-hover:underline">Open Report</span>
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Quick Summary Fleet Overview */}
-      <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-sm text-slate-900">Fleet Operations & Compliance At A Glance</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Session 2026-2027 live transport status</p>
-          </div>
-        </div>
-
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="text-xs font-semibold text-slate-500 uppercase">Total Active Fleet</div>
-            <div className="text-2xl font-extrabold text-slate-900 mt-1">10 Buses</div>
-            <p className="text-[11px] text-slate-500 mt-1">Serving 82 destinations across Jaipur</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
-            <div className="text-xs font-semibold text-emerald-600 uppercase">Passenger Capacity</div>
-            <div className="text-2xl font-extrabold text-emerald-900 mt-1">437 Seats</div>
-            <p className="text-[11px] text-emerald-700 mt-1">98% utilization across 10 routes</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
-            <div className="text-xs font-semibold text-indigo-600 uppercase">GPS & Safety Track</div>
-            <div className="text-2xl font-extrabold text-indigo-900 mt-1">100% Online</div>
-            <p className="text-[11px] text-indigo-700 mt-1">Real-time telematics enabled</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
+
+export default TransportReportsPage;

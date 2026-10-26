@@ -1,134 +1,141 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
-  FileText,
+  Layers,
   Clock,
   Package,
   Building,
   AlertTriangle,
-  ArrowRight,
-  Home,
-  Layers,
-  Printer,
-  FileDown
+  Search,
+  ArrowRight
 } from 'lucide-react';
 
+export const ALL_LIBRARY_REPORTS = [
+  {
+    id: 'get-books-report',
+    title: 'Books Summary Report',
+    path: '/get-books-report',
+    badge: 'Catalog Overview',
+    icon: BookOpen,
+    description: 'Complete overview of registered library book titles, author details, categorized quantities, and financial valuation.'
+  },
+  {
+    id: 'get-issued-books-report',
+    title: 'Issued Books Report',
+    path: '/get-issued-books-report',
+    badge: 'Circulation Audit',
+    icon: Layers,
+    description: 'Detailed log of all currently lent books with borrower information, class, issue date, and expected return schedules.'
+  },
+  {
+    id: 'get-pending-books-report',
+    title: 'Pending Books Report',
+    path: '/get-pending-books-report',
+    badge: 'Overdue & Fines',
+    icon: Clock,
+    description: 'Monitor books overdue past their due dates, accrued fine tracking @ ₹5/day, and trigger reminder SMS to students/parents.'
+  },
+  {
+    id: 'get-books-stock-report',
+    title: 'Books Stock Report',
+    path: '/get-books-stock-report',
+    badge: 'Inventory Audit',
+    icon: Package,
+    description: 'Physical inventory audit tracking opening quantities, purchases, issues, damaged copies, and shelf availability.'
+  },
+  {
+    id: 'get-purchase-books-report',
+    title: 'Purchased Books Report',
+    path: '/get-purchase-books-report',
+    badge: 'Procurement Log',
+    icon: Building,
+    description: 'Supplier-wise procurement history, invoice numbers, bill dates, GST breakdown, and acquisition expenditure.'
+  },
+  {
+    id: 'get-damaged-books-report',
+    title: 'Damaged Books Report',
+    path: '/get-damaged-books-report',
+    badge: 'Write-off Losses',
+    icon: AlertTriangle,
+    description: 'Decommissioned, torn, water-damaged, or written-off books register with depreciation loss valuations.'
+  }
+];
+
 export function LibraryReportsPage({ onNavigate }) {
-  const reports = [
-    {
-      title: 'Books Summary',
-      path: '/get-books-report',
-      desc: 'Complete overview of all registered library book titles, author details, categorized quantities, and financial valuation.',
-      icon: BookOpen,
-      color: 'bg-indigo-50 text-indigo-600',
-      badge: 'Catalog Overview'
-    },
-    {
-      title: 'Issued Books Report',
-      path: '/get-issued-books-report',
-      desc: 'Detailed log of all currently lent books with borrower information, class, issue date, and expected return schedules.',
-      icon: Layers,
-      color: 'bg-blue-50 text-blue-600',
-      badge: 'Circulation Audit'
-    },
-    {
-      title: 'Pending Books Report',
-      path: '/get-pending-books-report',
-      desc: 'Monitor books overdue past their due dates, accrued fine tracking @ ₹5/day, and trigger reminder SMS to students/parents.',
-      icon: Clock,
-      color: 'bg-rose-50 text-rose-600',
-      badge: 'Overdue & Fines'
-    },
-    {
-      title: 'Books Stock Report',
-      path: '/get-books-stock-report',
-      desc: 'Physical inventory audit tracking opening quantities, purchases, issues, damaged copies, and shelf availability.',
-      icon: Package,
-      color: 'bg-emerald-50 text-emerald-600',
-      badge: 'Inventory Audit'
-    },
-    {
-      title: 'Purchased Books Report',
-      path: '/get-purchase-books-report',
-      desc: 'Supplier-wise procurement history, invoice numbers, bill dates, GST breakdown, and acquisition expenditure.',
-      icon: Building,
-      color: 'bg-purple-50 text-purple-600',
-      badge: 'Procurement Log'
-    },
-    {
-      title: 'Damaged Books Report',
-      path: '/get-damaged-books-report',
-      desc: 'Decommissioned, torn, water-damaged, or written-off books register with depreciation loss valuations.',
-      icon: AlertTriangle,
-      color: 'bg-amber-50 text-amber-600',
-      badge: 'Write-off Losses'
-    }
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredReports = ALL_LIBRARY_REPORTS.filter(report => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      report.title.toLowerCase().includes(q) ||
+      report.description.toLowerCase().includes(q) ||
+      report.badge.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800">
-      {/* Breadcrumb Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="min-h-screen bg-slate-50/60 p-3 md:p-5 flex flex-col space-y-3.5">
+      {/* Compact Controls Bar: Title and Search */}
+      <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onNavigate?.('/dashboard')}
-            className="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1 text-sm font-medium"
-          >
-            <Home className="w-4 h-4" />
-            Home
-          </button>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-500 text-sm font-medium">Library</span>
-          <span className="text-slate-400">/</span>
-          <span className="text-indigo-600 text-sm font-semibold">Library Reports Hub</span>
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <BookOpen className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">
+              Library Reports Hub
+            </h1>
+            <p className="text-[11px] text-slate-400">
+              Showing {filteredReports.length} of {ALL_LIBRARY_REPORTS.length} library reports
+            </p>
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search library reports..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+          />
         </div>
       </div>
 
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-700 rounded-2xl p-6 md:p-8 text-white mb-8 shadow-sm">
-        <div className="max-w-2xl">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md mb-3">
-            Library Intelligence & Inventory Reports
-          </span>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Library Reports & Analytical Audits
-          </h2>
-          <p className="text-indigo-100 text-xs md:text-sm mt-2 leading-relaxed">
-            Access 1:1 UAB-aligned circulation logs, stock balance verification, overdue tracking, procurement summaries, and loss logs.
-          </p>
-        </div>
-      </div>
-
-      {/* Grid of Report Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {reports.map((rep, idx) => {
-          const Icon = rep.icon;
+      {/* Grid of Compact Report Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredReports.map(report => {
+          const Icon = report.icon;
           return (
             <div
-              key={idx}
-              onClick={() => onNavigate?.(rep.path)}
-              className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-indigo-300 group flex flex-col justify-between"
+              key={report.id}
+              onClick={() => onNavigate && onNavigate(report.path)}
+              className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${rep.color}`}>
-                    <Icon className="w-5 h-5" />
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                    {rep.badge}
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-md transition-colors truncate max-w-[120px]">
+                    {report.badge}
                   </span>
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors">
-                  {rep.title}
+
+                <h3 className="font-bold text-slate-900 text-[13px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
+                  {report.title}
                 </h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  {rep.desc}
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                  {report.description}
                 </p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600 group-hover:text-indigo-700">
-                <span>View Full Report</span>
-                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-indigo-600">
+                <span className="group-hover:underline">Open Report</span>
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           );
@@ -137,4 +144,5 @@ export function LibraryReportsPage({ onNavigate }) {
     </div>
   );
 }
+
 export default LibraryReportsPage;

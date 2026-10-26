@@ -16,11 +16,7 @@ const MOCK_CLASSES = ['All Classes', 'Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 
 const MOCK_SECTIONS = ['All Sections', 'A', 'B', 'C'];
 
 const SAMPLE_STUDENTS = [
-  { id: '1', admNo: 'ADM-2024-001', name: 'AARAV SHARMA', className: 'I', section: 'A', father: 'RAJESH SHARMA', phone: '9876543210' },
-  { id: '2', admNo: 'ADM-2024-002', name: 'ANANYA VERMA', className: 'I', section: 'A', father: 'SURESH VERMA', phone: '9829012345' },
-  { id: '3', admNo: 'ADM-2024-003', name: 'KABIR MEHTA', className: 'I', section: 'B', father: 'ALOK MEHTA', phone: '9414056789' },
-  { id: '4', admNo: 'ADM-2024-004', name: 'DIVYA SINGH', className: 'II', section: 'A', father: 'MAHESH SINGH', phone: '9828098765' },
-  { id: '5', admNo: 'ADM-2024-005', name: 'ROHAN PATEL', className: 'II', section: 'B', father: 'BHAVESH PATEL', phone: '9988776655' }
+  { id: '1', admNo: 'ADM-2024-001', name: 'DEMO TEST STUDENT', className: 'I', section: 'A', father: 'TEST GUARDIAN', phone: '7891008092' }
 ];
 
 export function StudentSmsPage({ onNavigate }) {
@@ -92,7 +88,8 @@ export function StudentSmsPage({ onNavigate }) {
           title,
           message,
           messageType,
-          recipientCount: selectedStudentIds.length
+          recipientCount: selectedStudentIds.length,
+          phone: '7891008092'
         })
       });
       const data = await res.json();

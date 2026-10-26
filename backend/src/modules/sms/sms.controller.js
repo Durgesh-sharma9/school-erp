@@ -62,7 +62,7 @@ let smsLogs = [
   {
     id: '1',
     msgId: 'MSG-2026-901',
-    mobileNo: '9876543210',
+    mobileNo: '7891008092',
     type: 'WhatsApp',
     message: 'Dear AARAV SHARMA, this is a gentle reminder that your school fee of ₹2500 is pending.',
     status: 'Success',
@@ -73,7 +73,7 @@ let smsLogs = [
   {
     id: '2',
     msgId: 'MSG-2026-902',
-    mobileNo: '9829012345',
+    mobileNo: '9999900001',
     type: 'Text',
     message: 'Staff Meeting scheduled today at 3:30 PM in the Principal Conference Hall.',
     status: 'Success',
@@ -84,7 +84,7 @@ let smsLogs = [
   {
     id: '3',
     msgId: 'MSG-2026-903',
-    mobileNo: '9414056789',
+    mobileNo: '9999900002',
     type: 'WhatsApp',
     message: 'Happy Birthday KABIR MEHTA! Wishing you joy, health, and bright success ahead.',
     status: 'Success',
@@ -95,7 +95,7 @@ let smsLogs = [
   {
     id: '4',
     msgId: 'MSG-2026-904',
-    mobileNo: '9828098765',
+    mobileNo: '9999900003',
     type: 'Text',
     message: 'School holiday declared on 14th April on account of Ambedkar Jayanti.',
     status: 'Success',
@@ -106,7 +106,7 @@ let smsLogs = [
   {
     id: '5',
     msgId: 'MSG-2026-905',
-    mobileNo: '9812345678',
+    mobileNo: '9999900005',
     type: 'WhatsApp',
     message: 'Thank you for visiting J D International School. We hope to see you soon.',
     status: 'Failed',
@@ -125,7 +125,7 @@ const mockBirthdays = [
     className: 'I - A',
     fatherName: 'RAJESH SHARMA',
     motherName: 'PRIYA SHARMA',
-    contactNo: '9876543210',
+    contactNo: '7891008092',
     dob: '2019-10-15',
     type: 'Student',
     month: 'October'
@@ -138,7 +138,7 @@ const mockBirthdays = [
     className: 'II - A',
     fatherName: 'SURESH VERMA',
     motherName: 'SUNITA VERMA',
-    contactNo: '9829012345',
+    contactNo: '9999900001',
     dob: '2018-10-15',
     type: 'Student',
     month: 'October'
@@ -151,7 +151,7 @@ const mockBirthdays = [
     className: 'TGT - Mathematics',
     fatherName: 'RAMESHWAR CHOUDHARY',
     motherName: 'KAMLA DEVI',
-    contactNo: '9414056789',
+    contactNo: '9999900002',
     dob: '1988-10-15',
     type: 'Staff',
     month: 'October'
@@ -164,7 +164,7 @@ const mockBirthdays = [
     className: 'V - B',
     fatherName: 'ALOK MEHTA',
     motherName: 'MEENA MEHTA',
-    contactNo: '9828098765',
+    contactNo: '9999900003',
     dob: '2015-10-16',
     type: 'Student',
     month: 'October'
@@ -177,7 +177,7 @@ const mockBirthdays = [
     className: 'IX - A',
     fatherName: 'MAHESH SINGH',
     motherName: 'REKHA SINGH',
-    contactNo: '9988776655',
+    contactNo: '9999900004',
     dob: '2011-10-18',
     type: 'Student',
     month: 'October'
@@ -239,12 +239,13 @@ export const deleteTemplate = (req, res) => {
 };
 
 export const sendStudentSms = (req, res) => {
-  const { classes, sections, title, message, messageType, recipientCount } = req.body;
-  const count = recipientCount || 45;
+  const { classes, sections, title, message, messageType, recipientCount, phone } = req.body;
+  const count = recipientCount || 1;
+  const targetPhone = phone || '7891008092';
   const newLog = {
     id: String(smsLogs.length + 1),
     msgId: `MSG-2026-${String(900 + smsLogs.length + 1)}`,
-    mobileNo: 'Multiple Students',
+    mobileNo: targetPhone,
     type: messageType || 'Text',
     message: message || title || 'Student Notification',
     status: 'Success',
@@ -260,7 +261,7 @@ export const sendStudentSms = (req, res) => {
   }
   return res.json({
     success: true,
-    message: `Message sent to ${count} students successfully`,
+    message: `Message sent to ${count} student(s) successfully (${targetPhone})`,
     data: newLog
   });
 };

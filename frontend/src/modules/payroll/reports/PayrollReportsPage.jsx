@@ -1,199 +1,130 @@
 import React, { useState } from 'react';
 import {
-  FileText,
   IndianRupee,
   Users,
   Calendar,
   Clock,
-  ArrowRight,
-  Home,
-  FileCheck,
-  CheckCircle2,
-  TrendingUp,
-  BarChart2,
-  Printer,
-  FileDown
+  Search,
+  ArrowRight
 } from 'lucide-react';
-import { StaffSalaryReportPage } from './StaffSalaryReportPage';
-import { StaffListPage } from './StaffListPage';
-import { MonthlyStaffAttendanceReportPage } from './MonthlyStaffAttendanceReportPage';
-import { StaffAttendanceTimeReportPage } from './StaffAttendanceTimeReportPage';
+
+export const ALL_PAYROLL_REPORTS = [
+  {
+    id: 'salary',
+    path: '/payroll-staff-salary',
+    title: 'Staff Salary Report',
+    description: 'Comprehensive payroll disbursement breakdown, basic pay, allowances, deductions & net payable per staff member.',
+    icon: IndianRupee,
+    badge: 'Disbursements'
+  },
+  {
+    id: 'staff-list',
+    path: '/staff-list',
+    title: 'Staff Master Directory',
+    description: 'Complete roster of all teaching & non-teaching staff, designations, departments, contact and banking details.',
+    icon: Users,
+    badge: 'Staff Directory'
+  },
+  {
+    id: 'monthly-attendance',
+    path: '/staff-attendance-report',
+    title: 'Monthly Staff Attendance Matrix',
+    description: 'Day-by-day 1-to-31 attendance register with P/A/L/HD badges, total working days & payable day calculations.',
+    icon: Calendar,
+    badge: 'Monthly Matrix'
+  },
+  {
+    id: 'time-attendance',
+    path: '/staff-attendance-time-report',
+    title: 'Staff Punch & Time Report',
+    description: 'In/out biometric punch timestamps, total working hours, late arrivals tracking, and overtime calculation.',
+    icon: Clock,
+    badge: 'Biometric Times'
+  }
+];
 
 export function PayrollReportsPage({ onNavigate }) {
-  const [activeTab, setActiveTab] = useState('hub');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const reportCards = [
-    {
-      id: 'salary',
-      path: 'payroll-staff-salary',
-      title: 'Staff Salary Report',
-      description: 'Comprehensive payroll disbursement breakdown, basic pay, allowances, deductions & net payable per staff member.',
-      icon: IndianRupee,
-      color: 'blue',
-      metrics: '₹2,65,310 total disbursed this month'
-    },
-    {
-      id: 'staff-list',
-      path: 'staff-list',
-      title: 'Staff Master Directory',
-      description: 'Complete roster of all teaching & non-teaching staff, designations, departments, contact and banking details.',
-      icon: Users,
-      color: 'emerald',
-      metrics: '7 Registered staff members'
-    },
-    {
-      id: 'monthly-attendance',
-      path: 'staff-attendance-report',
-      title: 'Monthly Staff Attendance Matrix',
-      description: 'Day-by-day 1-to-31 attendance register with P/A/L/HD badges, total working days & payable day calculations.',
-      icon: Calendar,
-      color: 'purple',
-      metrics: '94.8% average attendance rate'
-    },
-    {
-      id: 'time-attendance',
-      path: 'staff-attendance-time-report',
-      title: 'Staff Punch & Time Report',
-      description: 'In/out biometric punch timestamps, total working hours, late arrivals tracking, and overtime calculation.',
-      icon: Clock,
-      color: 'amber',
-      metrics: 'Today: 6 Present, 1 Late'
-    }
-  ];
-
-  if (activeTab === 'salary') {
-    return <StaffSalaryReportPage onNavigate={onNavigate} />;
-  }
-  if (activeTab === 'staff-list') {
-    return <StaffListPage onNavigate={onNavigate} />;
-  }
-  if (activeTab === 'monthly-attendance') {
-    return <MonthlyStaffAttendanceReportPage onNavigate={onNavigate} />;
-  }
-  if (activeTab === 'time-attendance') {
-    return <StaffAttendanceTimeReportPage onNavigate={onNavigate} />;
-  }
+  const filteredReports = ALL_PAYROLL_REPORTS.filter(report => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      report.title.toLowerCase().includes(q) ||
+      report.description.toLowerCase().includes(q) ||
+      report.badge.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* 1:1 Secondary Top Header Toolbar */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-20">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-lg font-bold text-slate-800 pr-3 border-r border-slate-300">
-            Payroll & Staff Reports Hub
-          </h1>
-          <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
-            <button
-              onClick={() => onNavigate && onNavigate('/')}
-              className="hover:text-blue-600 flex items-center gap-1 transition-colors"
-            >
-              <Home size={13} />
-              <span>Home</span>
-            </button>
-            <span>/</span>
-            <button
-              onClick={() => onNavigate && onNavigate('/payroll-registration')}
-              className="hover:text-blue-600 transition-colors"
-            >
-              Payroll
-            </button>
-            <span>/</span>
-            <span className="text-slate-700 font-semibold">Reports</span>
-          </nav>
+    <div className="min-h-screen bg-slate-50/60 p-3 md:p-5 flex flex-col space-y-3.5">
+      {/* Compact Controls Bar: Title and Search */}
+      <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <IndianRupee className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">
+              Payroll Reports Directory
+            </h1>
+            <p className="text-[11px] text-slate-400">
+              Showing {filteredReports.length} of {ALL_PAYROLL_REPORTS.length} payroll reports
+            </p>
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search payroll reports..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+          />
         </div>
       </div>
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
-        {/* Quick KPI Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Users size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500">Total Registered Staff</div>
-              <div className="text-xl font-bold text-slate-800">7 Members</div>
-              <div className="text-[11px] text-emerald-600 font-semibold mt-0.5">6 Active · 1 Inactive</div>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <IndianRupee size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500">Last Disbursed Payroll</div>
-              <div className="text-xl font-bold text-slate-800">₹2,65,310</div>
-              <div className="text-[11px] text-blue-600 font-semibold mt-0.5">September 2026</div>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <CheckCircle2 size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500">Average Attendance</div>
-              <div className="text-xl font-bold text-slate-800">94.8%</div>
-              <div className="text-[11px] text-purple-600 font-semibold mt-0.5">Current Academic Term</div>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Clock size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500">Punctuality Score</div>
-              <div className="text-xl font-bold text-slate-800">91.2%</div>
-              <div className="text-[11px] text-amber-600 font-semibold mt-0.5">Morning Shifts</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4 Dedicated Report Access Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {reportCards.map(card => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.id}
-                className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-blue-50 text-slate-700 group-hover:text-blue-600 flex items-center justify-center transition-colors">
-                      <Icon size={24} />
-                    </div>
-                    <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
-                      {card.metrics}
-                    </span>
+      {/* Grid of Compact Report Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredReports.map(report => {
+          const Icon = report.icon;
+          return (
+            <div
+              key={report.id}
+              onClick={() => onNavigate && onNavigate(report.path)}
+              className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-6">
-                    {card.description}
-                  </p>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-md transition-colors truncate max-w-[120px]">
+                    {report.badge}
+                  </span>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <button
-                    onClick={() => onNavigate ? onNavigate(card.path) : setActiveTab(card.id)}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 group-hover:text-blue-700 transition-colors"
-                  >
-                    <span>Open Dedicated Report</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button
-                    onClick={() => setActiveTab(card.id)}
-                    className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
-                  >
-                    Quick View
-                  </button>
-                </div>
+                <h3 className="font-bold text-slate-900 text-[13px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
+                  {report.title}
+                </h3>
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                  {report.description}
+                </p>
               </div>
-            );
-          })}
-        </div>
+
+              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-indigo-600">
+                <span className="group-hover:underline">Open Report</span>
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+export default PayrollReportsPage;

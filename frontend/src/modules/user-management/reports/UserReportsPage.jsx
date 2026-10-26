@@ -1,102 +1,114 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck,
   FileText,
-  Home,
-  Printer,
+  Search,
   ArrowRight,
   Users
 } from 'lucide-react';
 
+export const ALL_USER_REPORTS = [
+  {
+    id: 'user-privilege-report',
+    title: 'User Privilege Report',
+    path: '/user-privilege-report',
+    badge: 'Permissions Audit',
+    icon: ShieldCheck,
+    description: 'Comprehensive audit log of user accounts, role allocations, assigned modules, classes, subjects, exam rights, and CRUD privileges.'
+  },
+  {
+    id: 'user-staff-list',
+    title: 'Staff List Report',
+    path: '/user-staff-list',
+    badge: 'Staff Directory',
+    icon: Users,
+    description: 'Full directory of teachers, office staff, drivers, and administrators with banking accounts, IFSC, and contact information.'
+  },
+  {
+    id: 'user-privilege-matrix',
+    title: 'Role-Based Access Control (RBAC)',
+    path: '/user-privilege',
+    badge: 'RBAC Matrix',
+    icon: FileText,
+    description: 'Interactive permission matrix configuring module access across Administrators, Teachers, Office Staff, and Drivers.'
+  }
+];
+
 export function UserReportsPage({ onNavigate }) {
-  const reports = [
-    {
-      title: 'User Privilege Report',
-      path: '/user-privilege-report',
-      desc: 'Comprehensive audit log of system user access, division allocations, assigned modules, classes, subjects, exam rights, and CRUD privileges.',
-      icon: ShieldCheck,
-      color: 'bg-indigo-50 text-indigo-600',
-      badge: 'Access & Permissions'
-    },
-    {
-      title: 'Staff Directory & Remuneration',
-      path: '/users',
-      desc: 'Full directory of teachers, office staff, drivers, and administrators with banking accounts, IFSC, and payroll reference data.',
-      icon: Users,
-      color: 'bg-emerald-50 text-emerald-600',
-      badge: 'Staff Directory'
-    },
-    {
-      title: 'Role-Based Access Control (RBAC)',
-      path: '/user-privilege',
-      desc: 'Live interactive matrix of system module access permissions across Administrators, Teachers, Office Staff, and Transport Drivers.',
-      icon: FileText,
-      color: 'bg-purple-50 text-purple-600',
-      badge: 'RBAC Matrix'
-    }
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredReports = ALL_USER_REPORTS.filter(report => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      report.title.toLowerCase().includes(q) ||
+      report.description.toLowerCase().includes(q) ||
+      report.badge.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="p-4 bg-slate-50 min-h-screen text-slate-800">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-indigo-600" />
-            User Management Reports
-          </h1>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-            <span
-              className="flex items-center gap-1 hover:text-indigo-600 cursor-pointer"
-              onClick={() => onNavigate && onNavigate('/')}
-            >
-              <Home className="w-3.5 h-3.5" /> Home
-            </span>
-            <span>/</span>
-            <span className="text-indigo-600 font-semibold">User Reports</span>
+    <div className="min-h-screen bg-slate-50/60 p-3 md:p-5 flex flex-col space-y-3.5">
+      {/* Compact Controls Bar: Title and Search */}
+      <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <ShieldCheck className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">
+              User Management Reports Directory
+            </h1>
+            <p className="text-[11px] text-slate-400">
+              Showing {filteredReports.length} of {ALL_USER_REPORTS.length} reports
+            </p>
           </div>
         </div>
 
-        <div className="mt-3 md:mt-0 flex items-center gap-2">
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded text-xs font-semibold shadow-sm transition-all"
-          >
-            <Printer className="w-4 h-4" /> Print Overview
-          </button>
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search user reports..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+          />
         </div>
       </div>
 
-      {/* Grid of Report Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {reports.map((report, idx) => {
+      {/* Grid of Compact Report Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredReports.map(report => {
           const Icon = report.icon;
           return (
             <div
-              key={idx}
+              key={report.id}
               onClick={() => onNavigate && onNavigate(report.path)}
-              className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${report.color}`}>
-                    <Icon className="w-6 h-6" />
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 uppercase">
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-md transition-colors truncate max-w-[120px]">
                     {report.badge}
                   </span>
                 </div>
-                <h2 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-2">
+
+                <h3 className="font-bold text-slate-900 text-[13px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
                   {report.title}
-                </h2>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {report.desc}
+                </h3>
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                  {report.description}
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
-                <span>View Report / Matrix</span>
-                <ArrowRight className="w-4 h-4" />
+              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-indigo-600">
+                <span className="group-hover:underline">Open Report</span>
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           );
@@ -105,4 +117,5 @@ export function UserReportsPage({ onNavigate }) {
     </div>
   );
 }
+
 export default UserReportsPage;

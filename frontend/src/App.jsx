@@ -836,6 +836,7 @@ function AppContent() {
 
               // SMS Module Action Pages
               case '/student-sms':
+              case '/student_sms':
                 return <StudentSmsPage onNavigate={handleNavigate} />;
               case '/staff-sms':
                 return <StaffSmsPage onNavigate={handleNavigate} />;

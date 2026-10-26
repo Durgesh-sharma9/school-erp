@@ -13,11 +13,11 @@ import {
 import toast from 'react-hot-toast';
 
 const SAMPLE_VISITORS = [
-  { id: '1', name: 'MUKESH AGRAWAL', enquiryDate: '2026-04-10', contactNo: '9876543210', purpose: 'Class XI Admission Inquiry' },
-  { id: '2', name: 'SUNIL JAIN', enquiryDate: '2026-04-11', contactNo: '9829012345', purpose: 'Fee Structure Information' },
-  { id: '3', name: 'NEERAJ SHARMA', enquiryDate: '2026-04-12', contactNo: '9414056789', purpose: 'Hostel Facility Visit' },
-  { id: '4', name: 'PRIYANKA VERMA', enquiryDate: '2026-04-13', contactNo: '9828098765', purpose: 'Pre-Primary Admission' },
-  { id: '5', name: 'DEEPAK MEENA', enquiryDate: '2026-04-14', contactNo: '9988776655', purpose: 'Transport Route Inquiry' }
+  { id: '1', name: 'MUKESH AGRAWAL', enquiryDate: '2026-04-10', contactNo: '9999900001', purpose: 'Class XI Admission Inquiry' },
+  { id: '2', name: 'SUNIL JAIN', enquiryDate: '2026-04-11', contactNo: '9999900002', purpose: 'Fee Structure Information' },
+  { id: '3', name: 'NEERAJ SHARMA', enquiryDate: '2026-04-12', contactNo: '9999900003', purpose: 'Hostel Facility Visit' },
+  { id: '4', name: 'PRIYANKA VERMA', enquiryDate: '2026-04-13', contactNo: '9999900004', purpose: 'Pre-Primary Admission' },
+  { id: '5', name: 'DEEPAK MEENA', enquiryDate: '2026-04-14', contactNo: '9999900005', purpose: 'Transport Route Inquiry' }
 ];
 
 export function VisitorSmsPage({ onNavigate }) {

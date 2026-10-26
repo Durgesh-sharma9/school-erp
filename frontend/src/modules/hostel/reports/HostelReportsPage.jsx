@@ -1,116 +1,115 @@
-import React from 'react';
-import { Building, Bed, Users, AlertCircle, ArrowRight, Printer } from 'lucide-react';
+import React, { useState } from 'react';
+import { Building, Bed, Users, AlertCircle, Search, ArrowRight } from 'lucide-react';
+
+export const ALL_HOSTEL_REPORTS = [
+  {
+    id: 'rooms',
+    title: 'Hostel Room Report',
+    path: '/hostel-report',
+    badge: '6 Rooms',
+    icon: Bed,
+    description: 'Room inventory, floor/block mapping, bed capacity, occupancy rates, and vacancy analysis.'
+  },
+  {
+    id: 'boarders',
+    title: 'Hostel Students Report',
+    path: '/hostel-students-report',
+    badge: 'Resident Roster',
+    icon: Users,
+    description: 'Current student resident roster with allocated room, bed numbers, and emergency guardian contacts.'
+  },
+  {
+    id: 'due',
+    title: 'Hostel Fee Due Report',
+    path: '/hostel-due-report',
+    badge: 'Mess & Fee Dues',
+    icon: AlertCircle,
+    description: 'Outstanding accommodation and mess fee balances filtered by hostel building and individual student.'
+  }
+];
 
 export function HostelReportsPage({ onNavigate }) {
-  const reportCards = [
-    {
-      id: 'rooms',
-      title: 'Hostel Room Report',
-      path: '/hostel-report',
-      icon: Bed,
-      count: '6 Rooms',
-      desc: 'Room inventory, floor/block mapping, bed occupancy, and vacancy analysis'
-    },
-    {
-      id: 'boarders',
-      title: 'Hostel Students Report',
-      path: '/hostel-students-report',
-      icon: Users,
-      count: '4 Boarders',
-      desc: 'Current student resident roster with bed numbers and guardian contacts'
-    },
-    {
-      id: 'due',
-      title: 'Hostel Fee Due Report',
-      path: '/hostel-due-report',
-      icon: AlertCircle,
-      count: '₹75,000 Due',
-      desc: 'Outstanding accommodation and mess fee balances by hostel & student'
-    }
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredReports = ALL_HOSTEL_REPORTS.filter(report => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      report.title.toLowerCase().includes(q) ||
+      report.description.toLowerCase().includes(q) ||
+      report.badge.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* 1:1 Breadcrumbs & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-        <div>
-          <div className="flex items-center space-x-2 text-xs text-slate-400 mb-1">
-            <span>Hostel</span>
-            <span>&gt;</span>
-            <span className="text-indigo-600 font-medium">Reports Hub</span>
+    <div className="min-h-screen bg-slate-50/60 p-3 md:p-5 flex flex-col space-y-3.5">
+      {/* Compact Controls Bar: Title and Search */}
+      <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <Building className="w-3.5 h-3.5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Building className="w-6 h-6 text-indigo-600" />
-            Hostel Master Reports Hub
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Residential Facilities, Room Allocations, Occupancy Rates & Financial Summaries
-          </p>
+          <div>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">
+              Hostel Reports Directory
+            </h1>
+            <p className="text-[11px] text-slate-400">
+              Showing {filteredReports.length} of {ALL_HOSTEL_REPORTS.length} hostel reports
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
-            <Printer className="w-4 h-4" /> Print
-          </button>
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search hostel reports..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+          />
         </div>
       </div>
 
-      {/* 3 Report Shortcut Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {reportCards.map((card) => {
-          const Icon = card.icon;
+      {/* Grid of Compact Report Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredReports.map(report => {
+          const Icon = report.icon;
           return (
             <div
-              key={card.id}
-              onClick={() => onNavigate ? onNavigate(card.path) : null}
-              className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+              key={report.id}
+              onClick={() => onNavigate && onNavigate(report.path)}
+              className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Icon className="w-6 h-6" />
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                    {card.count}
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-md transition-colors truncate max-w-[120px]">
+                    {report.badge}
                   </span>
                 </div>
-                <h3 className="font-bold text-base text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  {card.title}
+
+                <h3 className="font-bold text-slate-900 text-[13px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
+                  {report.title}
                 </h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  {card.desc}
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                  {report.description}
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
-                <span>View Full Report</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-indigo-600">
+                <span className="group-hover:underline">Open Report</span>
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-          <div className="text-xs font-semibold text-slate-500 uppercase">Total Residential Capacity</div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-1">300 Beds</div>
-          <p className="text-xs text-slate-500 mt-1">Across 3 Hostels (Boys & Girls Wings)</p>
-        </div>
-
-        <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
-          <div className="text-xs font-semibold text-emerald-600 uppercase">Current Boarders</div>
-          <div className="text-2xl font-extrabold text-emerald-900 mt-1">4 Enrolled</div>
-          <p className="text-xs text-emerald-700 mt-1">Active residential students</p>
-        </div>
-
-        <div className="bg-rose-50/50 p-5 rounded-2xl border border-rose-100">
-          <div className="text-xs font-semibold text-rose-600 uppercase">Outstanding Hostel Fee</div>
-          <div className="text-2xl font-extrabold text-rose-900 mt-1">₹75,000</div>
-          <p className="text-xs text-rose-700 mt-1">Pending term fee collections</p>
-        </div>
-      </div>
     </div>
   );
 }
+
+export default HostelReportsPage;

@@ -196,14 +196,7 @@ export const menuCategories = [
       { title: 'Subject Master', path: '/subject' },
       { title: 'Subject Link', path: '/subject-link' },
       { title: 'Stream Master', path: '/add-update-stream' },
-      {
-        id: 'master-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Class List', path: '/class-list' },
-          { title: 'Subject List', path: '/subject-list' }
-        ]
-      }
+      { title: 'Reports', path: '/master-reports' }
     ]
   },
   {
@@ -241,14 +234,7 @@ export const menuCategories = [
       { title: 'Staff & Teachers', path: '/staff-users' },
       { title: 'Drivers', path: '/driver-users' },
       { title: 'User Privileges', path: '/user-privilege' },
-      {
-        id: 'users-reports',
-        title: 'Reports',
-        children: [
-          { title: 'User Privilege Report', path: '/user-privilege-report' },
-          { title: 'Staff List Report', path: '/user-staff-list' }
-        ]
-      }
+      { title: 'Reports', path: '/user-reports' }
     ]
   },
   {
@@ -323,25 +309,7 @@ export const menuCategories = [
       { title: 'Sibling Fee Entry', path: '/sibling-fee-collection' },
       { title: 'Cancel Fee', path: '/fee-refund' },
       { title: 'Board Fee Manual Entry', path: '/board-fee-manual-collection' },
-      {
-        id: 'fee-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Fee Collection Summary', path: '/fee-collection-summary' },
-          { title: 'Online Collection Summary', path: '/online-collection-summary' },
-          { title: 'Board Collection Summary', path: '/board-online-collection-summary' },
-          { title: 'Board Fee Due List', path: '/board-fee-due-list' },
-          { title: 'Fee Due List', path: '/fee-due-list-month-wise' },
-          { title: 'Fee Concession Summary', path: '/fee-concession-summary' },
-          { title: 'Advance Report', path: '/fee-advance-report' },
-          { title: 'Fee Structure Report', path: '/fee-structure-report' },
-          { title: 'Fee Opening Balance Report', path: '/fee-opening-balance-report' },
-          { title: 'Student Fees Statement', path: '/student-fees-statement' },
-          { title: 'Fee Book Report', path: '/fee-book-report' },
-          { title: 'Cancel Fee Receipt Report', path: '/cancel-fee-receipt-report' },
-          { title: 'Discount Fee Receipt Report', path: '/discount-fee-receipt-report' }
-        ]
-      }
+      { title: 'Reports', path: '/fee-reports' }
     ]
   },
   {
@@ -363,16 +331,7 @@ export const menuCategories = [
       { title: 'Transport Vehicle', path: '/transport-vehicle' },
       { title: 'Transport Route & Destination', path: '/transport-route' },
       { title: 'Edit Transport Fee', path: '/edit-transport-fee' },
-      {
-        id: 'transport-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Transport Summary', path: '/transport-summary' },
-          { title: 'Transport Students', path: '/transport-students' },
-          { title: 'Transport Due Report', path: '/transport-due-report' },
-          { title: 'Transport Vehicle Report', path: '/transport-vehicle-report' }
-        ]
-      }
+      { title: 'Reports', path: '/transport-reports' }
     ]
   },
   {
@@ -385,15 +344,7 @@ export const menuCategories = [
       { title: 'Hostel Floor', path: '/add-update-floor' },
       { title: 'Room Type', path: '/add-update-room-type' },
       { title: 'Room Master', path: '/add-update-room' },
-      {
-        id: 'hostel-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Hostel Room List', path: '/hostel-report' },
-          { title: 'Hostel Students Report', path: '/hostel-students-report' },
-          { title: 'Hostel Due Report', path: '/hostel-due-report' }
-        ]
-      }
+      { title: 'Reports', path: '/hostel-reports' }
     ]
   },
   {
@@ -410,19 +361,7 @@ export const menuCategories = [
       { title: 'Student Wise Marks Entry', path: '/student-wise-marks-entry' },
       { title: 'PRC Comment', path: '/prc-comment' },
       { title: 'Lock Marks Entry', path: '/marks-entry-locking' },
-      {
-        id: 'examination-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Blank Exam Format', path: '/blank-exam-format' },
-          { title: 'Student Signature Sheet', path: '/student-signature-sheet' },
-          { title: 'Toppers List', path: '/toppers-list' },
-          { title: 'Consolidated Report', path: '/consolidated-report' },
-          { title: 'Progress Report Card', path: '/progress-report-card' },
-          { title: 'Performance Sheet', path: '/performance-sheet' },
-          { title: 'Report Card Remarks', path: '/report-card-remark-report' }
-        ]
-      }
+      { title: 'Reports', path: '/examination-reports' }
     ]
   },
   {
@@ -441,16 +380,7 @@ export const menuCategories = [
       { title: 'Generate Salary', path: '/generate-staff-salary' },
       { title: 'Advance Salary', path: '/payroll-advance-payment' },
       { title: 'Staff ID Card', path: '/staff-id-card-generator' },
-      {
-        id: 'payroll-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Staff Salary', path: '/payroll-staff-salary' },
-          { title: 'Staff List', path: '/staff-list' },
-          { title: 'Staff Attendance Report', path: '/staff-attendance-report' },
-          { title: 'Staff Attendance Time Report', path: '/staff-attendance-time-report' }
-        ]
-      }
+      { title: 'Reports', path: '/payroll-reports' }
     ]
   },
   {
@@ -469,22 +399,7 @@ export const menuCategories = [
       { title: 'Visit Staff Meeting', path: '/payroll-visit-staff-meeting' },
       { title: 'Student Complaint', path: '/get-complaint' },
       { title: 'Staff Complaint', path: '/manual-complaint' },
-      {
-        id: 'front-office-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Staff Complaint Report', path: '/manual-complaint-reports' },
-          { title: 'Notification Count Report', path: '/class-wise-notification-count-report' },
-          { title: 'Visitor Report', path: '/visitor-enquiry-report' },
-          { title: 'Pre Admission Report', path: '/pre-admission-report' },
-          { title: 'Visit Staff Meeting Report', path: '/payroll-visit-staff-meeting-report' },
-          { title: 'Gate Pass Report', path: '/gate-pass-report' },
-          { title: 'Calendar Planning Report', path: '/calendar-planning-report' },
-          { title: 'Reminder Report', path: '/reminder-report' },
-          { title: 'Student Complaint Report', path: '/complaint-report' },
-          { title: 'Staff Gate Pass Report', path: '/staff-gate-pass-report' }
-        ]
-      }
+      { title: 'Reports', path: '/front-office-reports' }
     ]
   },
   {
@@ -499,18 +414,7 @@ export const menuCategories = [
       { title: 'Purchase Books', path: '/purchase-book' },
       { title: 'Damaged Books', path: '/damaged-book' },
       { title: 'Library Supplier Master', path: '/library-supplier-master' },
-      {
-        id: 'library-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Books Summary', path: '/get-books-report' },
-          { title: 'Issued Books Report', path: '/get-issued-books-report' },
-          { title: 'Pending Books Report', path: '/get-pending-books-report' },
-          { title: 'Books Stock Report', path: '/get-books-stock-report' },
-          { title: 'Purchased Books Report', path: '/get-purchase-books-report' },
-          { title: 'Damaged Books Report', path: '/get-damaged-books-report' }
-        ]
-      }
+      { title: 'Reports', path: '/library-reports' }
     ]
   },
   {
@@ -526,19 +430,7 @@ export const menuCategories = [
       { title: 'Issue Items', path: '/issue-items' },
       { title: 'Due Payment', path: '/due-payment' },
       { title: 'Purchase Items', path: '/purchase-items' },
-      {
-        id: 'stationary-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Category Items Report', path: '/category-items-report' },
-          { title: 'Set Master Report', path: '/set-master-report' },
-          { title: 'Issue Sets Report', path: '/issue-sets-report' },
-          { title: 'Supplier Report', path: '/supplier-report' },
-          { title: 'Purchase Items Report', path: '/purchase-items-report' },
-          { title: 'Stock Report', path: '/stock-report' },
-          { title: 'Low Stock Report', path: '/low-stock-report' }
-        ]
-      }
+      { title: 'Reports', path: '/stationary-reports' }
     ]
   },
   {
@@ -552,14 +444,7 @@ export const menuCategories = [
       { title: 'Individual SMS', path: '/individual-sms' },
       { title: 'Visitor SMS', path: '/visitor-sms' },
       { title: 'Create Whatsapp Templates', path: '/create-whatsapp-templates' },
-      {
-        id: 'sms-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Message Report', path: '/sms-status-report' },
-          { title: 'Birthday Report', path: '/birthday-report' }
-        ]
-      }
+      { title: 'Reports', path: '/sms-reports' }
     ]
   },
   {
@@ -593,10 +478,11 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (path.includes('user')) return { users: true };
     if (path.includes('fee')) return { fee: true };
     if (path.includes('hostel')) return { hostel: true };
-    if (path.includes('exam')) return { examination: true };
-    if (path.includes('payroll')) return { payroll: true };
-    if (path.includes('library')) return { library: true };
-    if (path.includes('stationary')) return { stationary: true };
+    if (path.includes('exam') || path.includes('marks') || path.includes('grade') || path.includes('toppers') || path.includes('prc') || path.includes('performance') || path.includes('consolidated')) return { examination: true };
+    if (path.includes('payroll') || path.includes('staff-salary') || path.includes('staff-attendance') || path.includes('staff-list')) return { payroll: true };
+    if (path.includes('front') || path.includes('complaint') || path.includes('visitor') || path.includes('gate-pass') || path.includes('reminder') || path.includes('notification-count')) return { frontOffice: true };
+    if (path.includes('library') || path.includes('book')) return { library: true };
+    if (path.includes('stationary') || path.includes('stock') || path.includes('purchase-item') || path.includes('issue-set')) return { stationary: true };
     if (path.includes('sms')) return { sms: true };
     if (path.includes('leave')) return { leaveManagement: true };
     if (path === '/class-list' || path === '/subject-list' || path.includes('master')) return { master: true };
@@ -612,10 +498,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     });
     return initial;
   });
-  const [openSubDropdowns, setOpenSubDropdowns] = useState({
-    'master-reports': true,
-    'transport-reports': true
-  });
+  const [openSubDropdowns, setOpenSubDropdowns] = useState({});
   const sidebarNavRef = React.useRef(null);
 
   const toggleDropdown = (id) => {

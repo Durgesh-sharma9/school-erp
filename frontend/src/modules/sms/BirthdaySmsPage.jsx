@@ -13,11 +13,11 @@ import {
 import toast from 'react-hot-toast';
 
 const MOCK_BIRTHDAYS = [
-  { id: '1', srNo: '101', name: 'AARAV SHARMA', className: 'I - A', fatherName: 'RAJESH SHARMA', phone: '9876543210', category: 'Student', dob: '15 Oct' },
-  { id: '2', srNo: '102', name: 'ANANYA VERMA', className: 'II - A', fatherName: 'SURESH VERMA', phone: '9829012345', category: 'Student', dob: '15 Oct' },
-  { id: '3', srNo: 'EMP-12', name: 'VIKRAM CHOUDHARY', className: 'Mathematics', fatherName: 'RAMESHWAR CHOUDHARY', phone: '9414056789', category: 'Staff', dob: '15 Oct' },
-  { id: '4', srNo: 'F-101', name: 'RAJESH SHARMA', className: 'I - A', fatherName: 'HARI SHARMA', phone: '9876543210', category: 'Father', dob: '15 Oct' },
-  { id: '5', srNo: 'M-102', name: 'SUNITA VERMA', className: 'II - A', fatherName: 'RAM LAL', phone: '9829012345', category: 'Mother', dob: '15 Oct' }
+  { id: '1', srNo: '101', name: 'AARAV SHARMA', className: 'I - A', fatherName: 'RAJESH SHARMA', phone: '7891008092', category: 'Student', dob: '15 Oct' },
+  { id: '2', srNo: '102', name: 'ANANYA VERMA', className: 'II - A', fatherName: 'SURESH VERMA', phone: '9999900001', category: 'Student', dob: '15 Oct' },
+  { id: '3', srNo: 'EMP-12', name: 'VIKRAM CHOUDHARY', className: 'Mathematics', fatherName: 'RAMESHWAR CHOUDHARY', phone: '9999900002', category: 'Staff', dob: '15 Oct' },
+  { id: '4', srNo: 'F-101', name: 'RAJESH SHARMA', className: 'I - A', fatherName: 'HARI SHARMA', phone: '7891008092', category: 'Father', dob: '15 Oct' },
+  { id: '5', srNo: 'M-102', name: 'SUNITA VERMA', className: 'II - A', fatherName: 'RAM LAL', phone: '9999900001', category: 'Mother', dob: '15 Oct' }
 ];
 
 export function BirthdaySmsPage({ onNavigate }) {

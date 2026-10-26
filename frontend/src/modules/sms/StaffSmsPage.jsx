@@ -16,11 +16,11 @@ const MOCK_DEPTS = ['All Departments', 'Teaching', 'Administration', 'Accounts',
 const MOCK_DESIGS = ['All Designations', 'Principal', 'Vice Principal', 'PGT', 'TGT', 'PRT', 'Accountant', 'Librarian', 'Office Assistant'];
 
 const SAMPLE_STAFF = [
-  { id: '1', empCode: 'EMP-001', name: 'RAJESH SHARMA', department: 'Administration', designation: 'Principal', phone: '9876543210' },
-  { id: '2', empCode: 'EMP-002', name: 'SUNITA VERMA', department: 'Teaching', designation: 'PGT English', phone: '9829012345' },
-  { id: '3', empCode: 'EMP-003', name: 'VIKRAM CHOUDHARY', department: 'Teaching', designation: 'TGT Mathematics', phone: '9414056789' },
-  { id: '4', empCode: 'EMP-004', name: 'ANIL GUPTA', department: 'Accounts', designation: 'Accountant', phone: '9828098765' },
-  { id: '5', empCode: 'EMP-005', name: 'SURESH JOSHI', department: 'Library', designation: 'Librarian', phone: '9988776655' }
+  { id: '1', empCode: 'EMP-001', name: 'RAJESH SHARMA', department: 'Administration', designation: 'Principal', phone: '9999900001' },
+  { id: '2', empCode: 'EMP-002', name: 'SUNITA VERMA', department: 'Teaching', designation: 'PGT English', phone: '9999900002' },
+  { id: '3', empCode: 'EMP-003', name: 'VIKRAM CHOUDHARY', department: 'Teaching', designation: 'TGT Mathematics', phone: '9999900003' },
+  { id: '4', empCode: 'EMP-004', name: 'ANIL GUPTA', department: 'Accounts', designation: 'Accountant', phone: '9999900004' },
+  { id: '5', empCode: 'EMP-005', name: 'SURESH JOSHI', department: 'Library', designation: 'Librarian', phone: '9999900005' }
 ];
 
 export function StaffSmsPage({ onNavigate }) {
