@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { PageHeader } from '../../components/erp/PagePrimitives';
 import {
   QrCode,
   Trash2,
@@ -18,7 +19,10 @@ import {
   GraduationCap,
   UserCheck,
   Search,
-  Users
+  Users,
+  ShieldCheck,
+  Building2,
+  Sparkles
 } from 'lucide-react';
 
 const STORAGE_KEY = 'school_whatsapp_session';
@@ -103,9 +107,8 @@ export function WhatsappQrPage() {
         const list = Array.isArray(d) ? d : (d.data || []);
         setStudentsList(list);
         if (list.length > 0) {
-          // Pre-select first student as demo
           const s = list[0];
-          const phone = s.smsWhatsappNo || s.fatherMobile || s.motherMobile || '';
+          const phone = '7891008092';
           setTestPhone(phone);
           setSelectedContact({
             type: 'student',
@@ -130,7 +133,6 @@ export function WhatsappQrPage() {
       .catch(() => {});
   }, []);
 
-  // Helper to re-generate message based on template + contact
   const applyTemplateToContact = (templateId, contact = selectedContact) => {
     setSelectedTemplateId(templateId);
     if (!contact) {
@@ -158,7 +160,6 @@ export function WhatsappQrPage() {
     }
   };
 
-  // Test logs
   const [testLogs, setTestLogs] = useState(() => {
     try {
       const saved = localStorage.getItem(LOGS_STORAGE_KEY);
@@ -176,7 +177,6 @@ export function WhatsappQrPage() {
     ];
   });
 
-  // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }, [session]);
@@ -185,7 +185,6 @@ export function WhatsappQrPage() {
     localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(testLogs));
   }, [testLogs]);
 
-  // Fetch live backend status
   const fetchStatus = async () => {
     try {
       const res = await fetch('http://localhost:5000/api/whatsapp/status');
@@ -204,99 +203,100 @@ export function WhatsappQrPage() {
     return null;
   };
 
-  // Poll status periodically (every 3 seconds)
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  // Poll for real Baileys QR code when modal is open
   useEffect(() => {
     if (!qrModalOpen) return;
 
     let isMounted = true;
     setIsQrLoading(true);
 
-    fetch('http://localhost:5000/api/whatsapp/start-session', { method: 'POST' })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.qr && isMounted) {
-          setLiveQr(d.qr);
-          setIsQrLoading(false);
-        }
-      })
-      .catch(() => {});
-
-    const interval = setInterval(async () => {
+    const checkQr = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/whatsapp/status');
+        const res = await fetch('http://localhost:5000/api/whatsapp/qr');
         const data = await res.json();
-        if (data.success && isMounted) {
+
+        if (isMounted && data.success) {
+          if (data.active && data.session?.loggedIn) {
+            setSession(data.session);
+            setQrModalOpen(false);
+            toast.success(`WhatsApp successfully connected to ${data.session.phone}!`, {
+              icon: '🎉',
+              duration: 4000,
+            });
+            return;
+          }
+
           if (data.qr) {
             setLiveQr(data.qr);
             setIsQrLoading(false);
           }
-          if (data.active && data.session?.loggedIn) {
-            setSession(data.session);
-            setQrModalOpen(false);
-            toast.success(`WhatsApp Linked with ${data.session.phone}!`, {
-              icon: '🟢',
-              duration: 5000,
-            });
-            clearInterval(interval);
-          }
         }
-      } catch {}
-    }, 2000);
+      } catch {
+        if (isMounted) setIsQrLoading(false);
+      }
+    };
+
+    checkQr();
+    const qrInterval = setInterval(checkQr, 2000);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      clearInterval(qrInterval);
     };
   }, [qrModalOpen]);
 
-  // Disconnect Handler
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      await fetch('http://localhost:5000/api/whatsapp/logout', { method: 'POST' });
-    } catch {}
+      const res = await fetch('http://localhost:5000/api/whatsapp/logout', {
+        method: 'POST',
+      });
+      const data = await res.json();
 
-    setSession({
-      loggedIn: false,
-      phone: '',
-      accountName: '',
-      instanceId: '',
-      accessToken: '',
-      status: 'Disconnected',
-      connectedAt: null,
-    });
-    setLiveQr(null);
-    setShowConfirmDisconnect(false);
-    setIsDisconnecting(false);
-    toast.success('WhatsApp device disconnected successfully.', {
-      icon: '🔌'
-    });
+      if (data.success) {
+        const clearedSession = {
+          loggedIn: false,
+          phone: '',
+          accountName: '',
+          instanceId: '',
+          accessToken: '',
+          status: 'Disconnected',
+          connectedAt: null,
+        };
+        setSession(clearedSession);
+        setShowConfirmDisconnect(false);
+        setLiveQr(null);
+        toast.success('WhatsApp session disconnected successfully!');
+      } else {
+        toast.error('Failed to disconnect WhatsApp session');
+      }
+    } catch {
+      toast.error('Error contacting backend server.');
+    } finally {
+      setIsDisconnecting(false);
+    }
   };
 
-  // Send Test Message
   const handleSendTestMessage = async (e) => {
     e.preventDefault();
 
     if (!testPhone.trim()) {
-      toast.error('Please enter recipient mobile number');
+      toast.error('Please enter a recipient 10-digit mobile number.');
       return;
     }
 
     if (!testMessageText.trim()) {
-      toast.error('Message body cannot be empty');
+      toast.error('Message text cannot be empty.');
       return;
     }
 
     setIsSending(true);
 
-    // Refresh live status first in case frontend state was stale
     let currentSession = session;
     if (!currentSession.loggedIn || currentSession.status !== 'Connected') {
       const fresh = await fetchStatus();
@@ -351,14 +351,34 @@ export function WhatsappQrPage() {
   };
 
   return (
-    <div className="bg-[#f3f4f6] min-h-screen p-3 md:p-4 space-y-4 font-sans text-slate-800">
+    <div className="space-y-3 max-w-6xl mx-auto pt-0 pb-12 px-2 sm:px-4 text-slate-800">
+      {/* 1:1 Test Master Pro Page Header */}
+      <PageHeader
+        title="WhatsApp Gateway & Cloud Integration"
+        description="Link school official WhatsApp device via Baileys QR for automated attendance, fee receipts, and marksheet delivery."
+      >
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+          isActive
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-slate-100 text-slate-600 border-slate-200'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
+          <span>{isActive ? 'Live Connected' : 'Device Disconnected'}</span>
+        </span>
+      </PageHeader>
+
       <div className="space-y-4">
         {/* Device Status Card */}
-        <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
-          <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Connected WhatsApp Instance
-            </span>
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
+          <div className="px-4 sm:px-5 py-3 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white border-b border-emerald-100 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                📱
+              </div>
+              <span className="text-xs font-bold text-slate-900 tracking-tight uppercase">
+                Connected WhatsApp Instance
+              </span>
+            </div>
             {isActive && (
               <span className="text-[11px] text-slate-500 font-medium">
                 Last synced: Just now
@@ -370,12 +390,12 @@ export function WhatsappQrPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse table-fixed min-w-[700px]">
                 <thead>
-                  <tr className="bg-[#f8fafc] text-slate-600 font-bold text-[12px] border-b border-slate-200">
-                    <th className="py-3 px-5 text-center w-[22%] font-semibold">Phone Number</th>
-                    <th className="py-3 px-5 text-center w-[20%] font-semibold">Instance ID</th>
-                    <th className="py-3 px-5 text-center w-[25%] font-semibold">Access Token</th>
-                    <th className="py-3 px-5 text-center w-[18%] font-semibold">Status</th>
-                    <th className="py-3 px-5 text-center w-[15%] font-semibold">Action</th>
+                  <tr className="bg-slate-50/90 text-slate-600 font-bold text-[11px] border-b border-slate-200 uppercase tracking-wider">
+                    <th className="py-2.5 px-5 text-center w-[22%]">Phone Number</th>
+                    <th className="py-2.5 px-5 text-center w-[20%]">Instance ID</th>
+                    <th className="py-2.5 px-5 text-center w-[25%]">Access Token</th>
+                    <th className="py-2.5 px-5 text-center w-[18%]">Status</th>
+                    <th className="py-2.5 px-5 text-center w-[15%]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="text-xs text-slate-700">
@@ -417,7 +437,7 @@ export function WhatsappQrPage() {
 
                     {/* Status */}
                     <td className="py-3 px-5">
-                      <div className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full inline-flex items-center space-x-1.5 font-semibold text-xs">
+                      <div className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full inline-flex items-center space-x-1.5 font-bold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Connected</span>
                       </div>
@@ -440,17 +460,17 @@ export function WhatsappQrPage() {
             </div>
           ) : (
             <div className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-                <Smartphone className="w-7 h-7 text-slate-400" />
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
+                <Smartphone className="w-7 h-7 text-indigo-600" />
               </div>
               <h3 className="font-bold text-sm text-slate-800">No WhatsApp Device Connected</h3>
-              <p className="text-xs text-slate-500 max-w-md">
+              <p className="text-xs text-slate-500 max-w-md leading-relaxed">
                 Link your school smartphone to enable automated attendance notifications, fee receipts, and marksheet PDF delivery to parents.
               </p>
               <button
                 type="button"
                 onClick={() => setQrModalOpen(true)}
-                className="mt-2 px-5 py-2 rounded-xl bg-[#5058e5] hover:bg-[#434ac9] text-white font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                className="mt-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
               >
                 <QrCode className="w-4 h-4" />
                 <span>Scan QR Code to Connect</span>
@@ -460,18 +480,18 @@ export function WhatsappQrPage() {
         </div>
 
         {/* Live Test Messenger Sandbox */}
-        <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-5 md:p-6 space-y-4">
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 p-4 sm:p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                 <Send className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-xs text-slate-800">Test Live WhatsApp Delivery</h3>
+                <h3 className="font-bold text-xs text-slate-900 tracking-tight">Test Live WhatsApp Delivery</h3>
                 <p className="text-[11px] text-slate-500">Verify real-time delivery from linked school number</p>
               </div>
             </div>
-            <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border ${
+            <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold border ${
               isActive
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 : 'bg-slate-100 text-slate-500 border-slate-200'
@@ -483,7 +503,7 @@ export function WhatsappQrPage() {
           <form onSubmit={handleSendTestMessage} className="space-y-4">
             {/* Preset Templates */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                 Choose Template:
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -492,9 +512,9 @@ export function WhatsappQrPage() {
                     key={tpl.id}
                     type="button"
                     onClick={() => applyTemplateToContact(tpl.id)}
-                    className={`text-left p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${
+                    className={`text-left p-2.5 rounded-xl border text-xs transition-all cursor-pointer ${
                       selectedTemplateId === tpl.id
-                        ? 'border-indigo-600 bg-indigo-50/70 font-semibold text-indigo-900 shadow-2xs'
+                        ? 'border-indigo-600 bg-indigo-50/70 font-bold text-indigo-950 shadow-2xs'
                         : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50/50'
                     }`}
                   >
@@ -507,7 +527,7 @@ export function WhatsappQrPage() {
 
             {/* Target Audience Switcher */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                 Select Recipient:
               </label>
               <div className="flex gap-2">
@@ -528,7 +548,7 @@ export function WhatsappQrPage() {
                         setSearchContactQuery('');
                         setIsDropdownOpen(false);
                       }}
-                      className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                         active
                           ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 shadow-2xs'
                           : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-slate-50/50'
@@ -545,8 +565,8 @@ export function WhatsappQrPage() {
             {/* Contact Search or Manual Input */}
             {recipientType === 'student' && (
               <div className="relative">
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  Search & Fetch Student / Parent Contact:
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Search &amp; Fetch Student / Parent Contact:
                 </label>
                 <div className="relative">
                   <input
@@ -558,7 +578,7 @@ export function WhatsappQrPage() {
                       setIsDropdownOpen(true);
                     }}
                     placeholder="Search by student name, father name, class (e.g. Aaditya, Choudhary, Class I)..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 bg-slate-50/50 focus:bg-white"
                   />
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   {selectedContact && (
@@ -611,7 +631,7 @@ export function WhatsappQrPage() {
                       .slice(0, 10)
                       .map((s) => {
                         const sName = `${s.firstName || ''} ${s.lastName || ''}`.trim();
-                        const phone = s.smsWhatsappNo || s.fatherMobile || s.motherMobile || '';
+                        const phone = '7891008092';
                         return (
                           <div
                             key={s.id || s._id}
@@ -656,8 +676,8 @@ export function WhatsappQrPage() {
 
             {recipientType === 'staff' && (
               <div className="relative">
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  Search & Fetch Teacher / Staff Contact:
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Search &amp; Fetch Teacher / Staff Contact:
                 </label>
                 <div className="relative">
                   <input
@@ -669,7 +689,7 @@ export function WhatsappQrPage() {
                       setIsDropdownOpen(true);
                     }}
                     placeholder="Search by teacher name, designation, department (e.g. Pooja, Faculty, Academics)..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 bg-slate-50/50 focus:bg-white"
                   />
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   {selectedContact && (
@@ -719,7 +739,7 @@ export function WhatsappQrPage() {
                       .slice(0, 10)
                       .map((st) => {
                         const sName = st.displayName || st.name || 'Staff Member';
-                        const phone = st.phone || '';
+                        const phone = '7891008092';
                         return (
                           <div
                             key={st.id || st._id}
@@ -764,7 +784,7 @@ export function WhatsappQrPage() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               {/* Recipient Phone (Editable) */}
               <div className="md:col-span-5">
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
                   Recipient Mobile Number:
                 </label>
                 <div className="relative">
@@ -772,8 +792,8 @@ export function WhatsappQrPage() {
                     type="text"
                     value={testPhone}
                     onChange={(e) => setTestPhone(e.target.value)}
-                    placeholder="98290 12345"
-                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-mono"
+                    placeholder="7891008092"
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 font-mono bg-slate-50/50 focus:bg-white font-bold"
                   />
                   <span className="absolute right-3 top-2 text-[10px] text-slate-400 font-medium">
                     10-digit mobile
@@ -783,14 +803,14 @@ export function WhatsappQrPage() {
 
               {/* Message Body */}
               <div className="md:col-span-7">
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
                   Message Content:
                 </label>
                 <textarea
                   rows={3}
                   value={testMessageText}
                   onChange={(e) => setTestMessageText(e.target.value)}
-                  className="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800 leading-relaxed"
+                  className="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 leading-relaxed bg-slate-50/50 focus:bg-white"
                 />
               </div>
             </div>
@@ -802,7 +822,7 @@ export function WhatsappQrPage() {
                 disabled={isSending || !isActive}
                 className={`px-6 py-2.5 rounded-lg text-xs font-bold text-white shadow-xs flex items-center gap-1.5 transition-all ${
                   isActive
-                    ? 'bg-[#5058e5] hover:bg-[#434ac9] cursor-pointer active:scale-95'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer active:scale-95'
                     : 'bg-slate-300 cursor-not-allowed'
                 }`}
               >
@@ -895,7 +915,6 @@ export function WhatsappQrPage() {
       {qrModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
-            {/* Close Button */}
             <button
               onClick={() => setQrModalOpen(false)}
               className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
@@ -903,7 +922,6 @@ export function WhatsappQrPage() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Title Header */}
             <div>
               <div className="w-10 h-10 rounded-full bg-[#25d366]/10 text-[#25d366] flex items-center justify-center mx-auto mb-2">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
@@ -916,7 +934,6 @@ export function WhatsappQrPage() {
               </p>
             </div>
 
-            {/* 3 Steps */}
             <div className="bg-slate-50 rounded-xl p-3 text-left text-xs text-slate-600 space-y-1.5 border border-slate-100">
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
@@ -932,7 +949,6 @@ export function WhatsappQrPage() {
               </div>
             </div>
 
-            {/* QR Box */}
             <div className="relative w-52 h-52 mx-auto bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-center shadow-inner">
               {liveQr ? (
                 <img
@@ -949,7 +965,6 @@ export function WhatsappQrPage() {
               )}
             </div>
 
-            {/* Live Indicator */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Waiting for WhatsApp scan...</span>
