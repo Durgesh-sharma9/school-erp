@@ -212,10 +212,7 @@ function PeriodCell({ cell }) {
         <User className="w-2.5 h-2.5 text-slate-400 shrink-0" />
         {cell.teacher}
       </div>
-      <div className="text-[9.5px] text-slate-400 font-mono truncate flex items-center gap-1">
-        <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-        {cell.room}
-      </div>
+      
     </div>
   );
 }

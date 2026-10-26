@@ -204,8 +204,12 @@ export const menuCategories = [
     title: 'Timetable Pro',
     icon: CalendarDays,
     subItems: [
-      { title: 'Class Timetable', path: '/class-timetable' },
-      { title: 'Teacher Substitution', path: '/teacher-substitution' }
+      { title: 'Dashboard', path: '/timetable-dashboard' },
+      { title: 'Time Tables', path: '/timetables' },
+      { title: 'Daily Desk', path: '/daily-desk' },
+      { title: 'Lesson Planning', path: '/lesson-planning' },
+      { title: 'Reports', path: '/timetable-reports' },
+      { title: 'Homework', path: '/timetable-homework' }
     ]
   },
   {

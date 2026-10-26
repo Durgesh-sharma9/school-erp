@@ -24,7 +24,9 @@ import {
   Zap,
   LayoutGrid,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Clock,
+  FileText
 } from 'lucide-react';
 
 // Comprehensive search index of ERP modules
@@ -34,6 +36,12 @@ const MODULES_INDEX = [
   { id: 'm-expenses', title: 'School Expenses & Vouchers', path: '/school-expenses', category: 'Accounts', icon: Receipt, desc: 'Record expense vouchers, vendor bills, and maintenance heads', keywords: ['expense', 'voucher', 'spending', 'cost', 'bill', 'vendor', 'diesel'] },
   { id: 'm-daybook', title: 'Daily Cash Day Book Ledger', path: '/day-book', category: 'Accounts', icon: Receipt, desc: 'Daily fee inflow vs expense outflow cash-in-hand reconciliation', keywords: ['day book', 'cash book', 'reconciliation', 'cash in hand', 'closing balance', 'ledger'] },
   { id: 'm-summary', title: 'Income & Expense Annual Summary', path: '/income-expense-summary', category: 'Accounts', icon: IndianRupee, desc: 'Financial health, operating surplus and P&L charts', keywords: ['p&l', 'profit', 'loss', 'balance sheet', 'audit', 'summary'] },
+  { id: 'm-tt-dashboard', title: 'Timetable Pro Dashboard', path: '/timetable-dashboard', category: 'Timetable Pro', icon: CalendarDays, desc: 'Real-time timetable operations, faculty workload, and daily replacement metrics', keywords: ['timetable dashboard', 'workload', 'analytics', 'timetable stats'] },
+  { id: 'm-tt-timetables', title: 'Time Tables & Weekly Routines', path: '/timetables', category: 'Timetable Pro', icon: CalendarDays, desc: 'Master weekly timetable schedules, period duration and conflict-free builder', keywords: ['timetables', 'routine', 'master timetable', 'schedule builder', 'auto generate'] },
+  { id: 'm-tt-dailydesk', title: 'Daily Desk Operational Matrix', path: '/daily-desk', category: 'Timetable Pro', icon: Clock, desc: 'Live daily operations matrix, absent teacher coverage and 1-tap substitute assignment', keywords: ['daily desk', 'substitutions', 'proxy', 'absent faculty', 'period replacement'] },
+  { id: 'm-tt-lessonplanning', title: 'Lesson Planning & Pedagogy', path: '/lesson-planning', category: 'Timetable Pro', icon: BookOpen, desc: 'Standardized chapter lesson plans, learning outcomes, teaching aids and principal review', keywords: ['lesson planning', 'lesson plan', 'curriculum', 'pedagogy', 'chapter plan'] },
+  { id: 'm-tt-reports', title: 'Daily Faculty Teaching Reports', path: '/timetable-reports', category: 'Timetable Pro', icon: FileText, desc: 'Teacher daily activity logs, topics completed, proxy coverage records and learning outcome evidence', keywords: ['timetable reports', 'daily report', 'teacher log', 'activity report'] },
+  { id: 'm-tt-homework', title: 'Homework Central & Study Tasks', path: '/timetable-homework', category: 'Timetable Pro', icon: GraduationCap, desc: 'Class-wise homework assignments, teacher task tracking and submission due dates', keywords: ['timetable homework', 'homework', 'assignments', 'self study', 'due date'] },
   { id: 'm-timetable', title: 'Class Timetable Routine Pro', path: '/class-timetable', category: 'Academics', icon: CalendarDays, desc: 'Mon to Sat 8-period weekly schedule matrix with print view', keywords: ['timetable', 'routine', 'period', 'schedule', 'class timetable'] },
   { id: 'm-substitution', title: 'Smart Teacher Substitution', path: '/teacher-substitution', category: 'Academics', icon: Users, desc: 'Absent teacher detector and 1-tap substitute teacher assigner', keywords: ['substitution', 'proxy', 'absent teacher', 'leave replacement', 'free teacher'] },
   { id: 'm-biometric', title: 'Biometric & RFID Machine Sync', path: '/biometric-sync', category: 'Attendance', icon: Cpu, desc: 'Campus gate facial recognition, turnstile, and punch telemetry', keywords: ['biometric', 'rfid', 'punch', 'machine', 'face recognition', 'turnstile', 'late arrival'] },

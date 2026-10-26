@@ -254,7 +254,14 @@ import {
 } from './modules/accounts';
 import {
   ClassTimetablePage,
-  TeacherSubstitutionPage
+  TeacherSubstitutionPage,
+  TimetableDashboardPage,
+  TimetablesManagerPage,
+  TimetableEditorPage,
+  DailyDeskPage,
+  LessonPlanningPage,
+  TimetableReportsPage,
+  TimetableHomeworkPage
 } from './modules/timetable';
 import {
   NoticeBoardPage
@@ -282,14 +289,20 @@ function AppContent() {
     return p;
   };
 
+  const getCleanRoute = (rawPath) => {
+    if (!rawPath) return '/dashboard';
+    const clean = String(rawPath).split('?')[0].split('#')[0];
+    return normalizePath(clean);
+  };
+
   const [currentPath, setCurrentPath] = useState(() => {
-    return normalizePath(window.location.pathname);
+    return normalizePath(window.location.pathname + window.location.search);
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(normalizePath(window.location.pathname));
+      setCurrentPath(normalizePath(window.location.pathname + window.location.search));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -298,7 +311,7 @@ function AppContent() {
   const handleNavigate = (path) => {
     const normalized = normalizePath(path);
     setCurrentPath(normalized);
-    if (window.location.pathname !== normalized) {
+    if (window.location.pathname + window.location.search !== normalized) {
       window.history.pushState({}, '', normalized);
     }
     const mainEl = document.getElementById('main-content');
@@ -379,7 +392,7 @@ function AppContent() {
         <main id="main-content" className="flex-1 overflow-y-auto custom-scrollbar">
           <ErrorBoundary onNavigate={handleNavigate}>
           {(() => {
-            switch (normalizePath(currentPath)) {
+            switch (getCleanRoute(currentPath)) {
               case '/':
               case '/dashboard':
                 return renderDashboardByRole();
@@ -888,7 +901,28 @@ function AppContent() {
               case '/income-expense-summary':
                 return <IncomeExpenseSummaryPage onNavigate={handleNavigate} />;
 
-              // Timetable Pro Module
+              // Timetable Pro Suite Modules
+              case '/timetable-dashboard':
+              case '/timetable-pro/dashboard':
+                return <TimetableDashboardPage onNavigate={handleNavigate} />;
+              case '/timetables':
+              case '/timetable-pro/timetables':
+                return <TimetablesManagerPage onNavigate={handleNavigate} />;
+              case '/timetable-edit':
+              case '/timetable-builder':
+                return <TimetableEditorPage onNavigate={handleNavigate} currentPath={currentPath} />;
+              case '/daily-desk':
+              case '/timetable-pro/daily-desk':
+                return <DailyDeskPage onNavigate={handleNavigate} />;
+              case '/lesson-planning':
+              case '/timetable-pro/lesson-planning':
+                return <LessonPlanningPage onNavigate={handleNavigate} />;
+              case '/timetable-reports':
+              case '/timetable-pro/reports':
+                return <TimetableReportsPage onNavigate={handleNavigate} />;
+              case '/timetable-homework':
+              case '/timetable-pro/homework':
+                return <TimetableHomeworkPage onNavigate={handleNavigate} />;
               case '/class-timetable':
                 return <ClassTimetablePage onNavigate={handleNavigate} />;
               case '/teacher-substitution':
