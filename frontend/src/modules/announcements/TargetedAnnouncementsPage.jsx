@@ -480,7 +480,7 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto pb-32">
       {/* Header matching Test Master Pro */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
@@ -589,11 +589,11 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
           ) : (
             <>
               {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto p-4">
-                <table className="w-full text-left text-[12px] table-fixed border-separate border-spacing-y-3">
+              <div className="hidden lg:block overflow-x-auto p-4 custom-scrollbar">
+                <table className="w-full text-left text-[12px] min-w-[850px] border-separate border-spacing-y-3">
                   <colgroup>
-                    <col style={{ width: '12%' }} />
-                    <col style={{ width: '22%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '24%' }} />
                     <col style={{ width: '32%' }} />
                     <col style={{ width: '14%' }} />
                     <col style={{ width: '10%' }} />
@@ -653,10 +653,12 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
                           <td className={`px-4 py-3 border-t border-b border-slate-200/60 ${unread ? 'font-semibold text-slate-800' : 'font-medium text-slate-600'}`}>
                             <div className="line-clamp-2" title={n.content}>{n.content}</div>
                           </td>
-                          <td className="px-4 py-3 border-t border-b border-slate-200/60 font-semibold text-slate-700 capitalize whitespace-nowrap">
-                            {n.sender || 'System Admin'}
+                          <td className="px-4 py-3 border-t border-b border-slate-200/60 font-semibold text-slate-700">
+                            <div className="line-clamp-2 text-xs leading-snug" title={n.sender || 'System Admin'}>
+                              {n.sender || 'System Admin'}
+                            </div>
                           </td>
-                          <td className="px-4 py-3 border-t border-b border-slate-200/60 font-medium text-slate-500 whitespace-nowrap">
+                          <td className="px-4 py-3 border-t border-b border-slate-200/60 font-medium text-slate-500 whitespace-nowrap text-xs">
                             {formatDate(n.createdAt)}
                           </td>
                           <td className="px-4 py-3 rounded-r-xl border border-slate-200/60 text-center">
