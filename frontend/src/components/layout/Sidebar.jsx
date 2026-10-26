@@ -682,15 +682,29 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         className="fixed inset-0 bg-slate-900/40 z-40 md:hidden transition-opacity"
       />
 
-      {/* Modern Light ERP Sidenav (Width 272px, clean border, soft light theme) */}
-      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-[272px] bg-white border-r border-slate-200/90 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-lg md:shadow-none transition-all duration-300">
+      {/* Modern Light ERP Sidenav matching C:\\fro_test */}
+      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-72 bg-white border-r border-slate-200/90 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
         
-        {/* Mobile Header */}
-        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200/80 bg-slate-50/70 shrink-0 md:hidden">
-          <span className="font-bold text-sm text-slate-900 tracking-tight">Navigation Menu</span>
+        {/* Top Branding Header matching C:\\fro_test (Height h-16 to align seamlessly with Navbar) */}
+        <div className="h-16 px-4 border-b border-slate-200/90 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div className="truncate min-w-0">
+              <h2 className="font-bold text-sm text-slate-900 leading-tight truncate">
+                School ERP
+              </h2>
+              <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1 leading-none mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                WebNCode Platform
+              </span>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 transition-colors"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors md:hidden cursor-pointer"
+            title="Close Menu"
           >
             <X className="w-4 h-4" />
           </button>
@@ -724,15 +738,21 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                     }
                   }}
                   data-sidebar-active={(!hasChildren && isActive) ? "true" : undefined}
-                  className={`w-full flex items-center justify-between rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors duration-150 outline-none focus:outline-none group ${
-                    isActive || isOpen
-                      ? 'bg-slate-100/90 text-slate-900 font-semibold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  className={`w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-xs md:text-[13px] font-medium transition-all duration-150 outline-none focus:outline-none group cursor-pointer ${
+                    isActive && !hasChildren
+                      ? 'bg-indigo-600 text-white font-semibold shadow-xs'
+                      : isOpen || isActive
+                      ? 'bg-slate-100 text-slate-900 font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                   }`}
                 >
                   <div className="flex items-center space-x-2.5 min-w-0">
                     <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                      isActive || isOpen ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'
+                      isActive && !hasChildren
+                        ? 'text-white'
+                        : isOpen || isActive
+                        ? 'text-indigo-600'
+                        : 'text-slate-400 group-hover:text-slate-600'
                     }`} />
                     <span className="truncate tracking-tight">{item.title}</span>
                   </div>
@@ -747,7 +767,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
                 {/* Submenu Dropdown Tree */}
                 {hasChildren && isOpen && (
-                  <div className="ml-4 pl-2.5 my-0.5 space-y-0.5 border-l border-slate-200">
+                  <div className="ml-4 pl-3 my-1 space-y-1 border-l-2 border-indigo-100">
                     {item.subItems.map((sub) => {
                       const hasSubChildren = sub.children && sub.children.length > 0;
                       if (hasSubChildren) {
@@ -811,10 +831,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
                           data-sidebar-active={isSubActive ? "true" : undefined}
-                          className={`w-full flex items-center justify-between rounded-md px-2.5 py-1.5 text-[12.5px] transition-all text-left ${
+                          className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12.5px] transition-all text-left cursor-pointer ${
                             isSubActive
-                              ? 'text-indigo-700 bg-indigo-50/90 font-semibold border border-indigo-100 shadow-2xs'
-                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                              ? 'text-indigo-700 bg-indigo-50 font-semibold border border-indigo-200/60 shadow-2xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                           }`}
                         >
                           <span className="truncate">{sub.title}</span>
