@@ -12,6 +12,11 @@ export function DateSheetReportPage({ onNavigate }) {
 
   const rows = MOCK_DATE_SHEET_ROWS;
 
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Loaded date sheet for ${selectedClass} (${exam})`);
+  };
+
   const handleExport = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +

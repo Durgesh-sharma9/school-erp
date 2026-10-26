@@ -13,6 +13,11 @@ export function DayWiseAttendanceSummaryPage({ onNavigate }) {
   const totalPresent = rows.reduce((a, b) => a + b.present, 0);
   const totalAbsent = rows.reduce((a, b) => a + b.absent, 0);
 
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Showing attendance summary for ${rows.length} classes`);
+  };
+
   const handleExport = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +

@@ -11,17 +11,17 @@ export function StudentWiseSubjectListPage({ onNavigate }) {
 
   const filtered = MOCK_STUDENTS.filter(s => {
     const matchesClass = selectedClass === 'All' || s.className === selectedClass;
-
-  const handleSearch = (e) => {
-    if (e) e.preventDefault();
-    toast.success(`Filtered ${filtered.length} record(s)`);
-  };
     const matchesDiv = division === 'All' || s.section === division;
     const matchesQuery = !searchQuery ||
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.admNo.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesClass && matchesDiv && matchesQuery;
   });
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
 
   const handleExport = () => {
     const csvContent =

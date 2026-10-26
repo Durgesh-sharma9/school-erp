@@ -11,6 +11,11 @@ export function MonthlyAttendanceReportPage({ onNavigate }) {
   // Days 1 to 10 mock calendar
   const days = Array.from({ length: 15 }, (_, i) => i + 1);
 
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Loaded monthly register for ${month}`);
+  };
+
   const handleExport = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +

@@ -14,11 +14,6 @@ export function AttendanceReportPage({ onNavigate }) {
 
   const filtered = MOCK_STUDENTS.filter(s => {
     const minDays = parseInt(days) || 1;
-
-  const handleSearch = (e) => {
-    if (e) e.preventDefault();
-    toast.success(`Filtered ${filtered.length} record(s)`);
-  };
     const matchesDays = type === 'Absent' ? s.absentDays >= minDays : s.presentDays >= minDays;
     const matchesQuery = !searchQuery ||
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -26,6 +21,11 @@ export function AttendanceReportPage({ onNavigate }) {
       s.fatherName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesDays && matchesQuery;
   });
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
 
   const handleExport = () => {
     const csvContent =

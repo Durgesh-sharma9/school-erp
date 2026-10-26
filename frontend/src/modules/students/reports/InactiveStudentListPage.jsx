@@ -14,17 +14,17 @@ export function InactiveStudentListPage({ onNavigate }) {
 
   const filtered = inactiveStudents.filter(r => {
     const matchesClass = selectedClass === 'All' || r.className === selectedClass;
-
-  const handleSearch = (e) => {
-    if (e) e.preventDefault();
-    toast.success(`Filtered ${filtered.length} record(s)`);
-  };
     const matchesQuery = !searchQuery ||
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.admNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.fatherName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesClass && matchesQuery;
   });
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Filtered ${filtered.length} record(s)`);
+  };
 
   const handleExport = () => {
     const csvContent =

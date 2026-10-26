@@ -25,6 +25,11 @@ export function StudentConsolidatedReportPage({ onNavigate }) {
   const totalSt = consolidatedRows.reduce((a, b) => a + b.st, 0);
   const grandTotal = consolidatedRows.reduce((a, b) => a + b.total, 0);
 
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    toast.success(`Showing ${consolidatedRows.length} classes consolidated data`);
+  };
+
   const handleExport = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +
