@@ -1562,27 +1562,7 @@ export function StudentRegistrationPage({ onNavigate }) {
                 <span>M Aadhar</span>
               </label>
 
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_f_marksheet"
-                  checked={formData.ver_f_marksheet}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>F Marksheet</span>
-              </label>
 
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  name="ver_m_marksheet"
-                  checked={formData.ver_m_marksheet}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-                />
-                <span>M Marksheet</span>
-              </label>
             </div>
           </div>
         )}
