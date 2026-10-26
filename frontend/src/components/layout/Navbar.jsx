@@ -11,7 +11,8 @@ import {
   Receipt,
   CalendarDays,
   Sparkles,
-  Command
+  Command,
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { GlobalSearchModal } from './GlobalSearchModal';

@@ -20,6 +20,7 @@ import {
   Settings,
   ClipboardList,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Contact,
   X,
