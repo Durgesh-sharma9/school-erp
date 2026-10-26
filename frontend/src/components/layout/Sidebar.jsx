@@ -888,22 +888,45 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           })}
         </div>
 
-        {/* User Card at Bottom matching Test Master Pro */}
-        <div className="border-t border-slate-100 bg-slate-50/50 p-3.5 transition-all shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs shadow-sm">
-              TS
+        {/* Student Profile or User Card at Bottom matching Test Master Pro */}
+        {role === 'STUDENT' ? (
+          <div 
+            onClick={() => onNavigate && onNavigate('/profile')}
+            className="p-3 mx-2 mb-2 rounded-xl border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100/80 cursor-pointer transition-all flex items-center justify-between shrink-0 shadow-2xs"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="relative shrink-0">
+                <img
+                  src={user?.avatar || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=150'}
+                  alt={user?.name || 'Student'}
+                  className="w-9 h-9 rounded-full object-cover border border-indigo-200 shadow-2xs"
+                />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+              </div>
+              <div className="truncate min-w-0">
+                <p className="text-xs font-bold text-slate-800 truncate">{user?.name || 'AADHYA CHOUDHARY'}</p>
+                <p className="text-[11px] text-slate-500 truncate font-medium">{user?.className || 'Nursery - PP3+ - A'}</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-xs font-bold text-slate-800 leading-tight">
-                {user?.name || 'Test School Admin'}
-              </p>
-              <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-                (school_admin)
-              </p>
+            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+          </div>
+        ) : (
+          <div className="border-t border-slate-100 bg-slate-50/50 p-3.5 transition-all shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs shadow-sm">
+                {(user?.name || (role === 'SUPER_ADMIN' ? 'SA' : 'Admin')).slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-xs font-bold text-slate-800 leading-tight">
+                  {user?.name || (role === 'SUPER_ADMIN' ? 'SuperAdmin HQ' : 'School Admin')}
+                </p>
+                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+                  ({role ? role.toLowerCase() : 'school_admin'})
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </aside>
     </>
   );
