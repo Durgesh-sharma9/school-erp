@@ -11,8 +11,15 @@ import {
   MapPin,
   ShieldCheck,
   Building2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Navigation,
+  Crosshair,
+  ExternalLink,
+  Loader2,
+  Check,
+  AlertTriangle
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export function SchoolInfoPage() {
   const { schoolId, schoolName } = useAuth();
@@ -21,6 +28,69 @@ export function SchoolInfoPage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationStatus, setLocationStatus] = useState(null); // { type: 'success' | 'error' | 'loading', message: string, accuracy?: number }
+
+  const handleFetchCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser.');
+      setLocationStatus({
+        type: 'error',
+        message: 'Geolocation is not supported by your browser.'
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationStatus({
+      type: 'loading',
+      message: 'Accessing device GPS sensors to fetch live coordinates...'
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude.toFixed(7);
+        const lng = position.coords.longitude.toFixed(7);
+        const accuracy = Math.round(position.coords.accuracy);
+
+        setFormData(prev => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+          attend_range: (!prev.attend_range || prev.attend_range === '0') ? '100' : prev.attend_range
+        }));
+
+        setIsLocating(false);
+        setLocationStatus({
+          type: 'success',
+          message: `GPS location detected: ${lat}, ${lng} (Accuracy: ±${accuracy}m)`,
+          accuracy
+        });
+        toast.success(`GPS Location fetched: ${lat}, ${lng} (±${accuracy}m)`);
+      },
+      (error) => {
+        setIsLocating(false);
+        let errorMsg = 'Failed to fetch GPS location.';
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMsg = 'Location permission denied. Please allow location access in your browser address bar.';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMsg = 'Location information unavailable. Please turn on device GPS / Wi-Fi.';
+        } else if (error.code === error.TIMEOUT) {
+          errorMsg = 'Location request timed out. Please try again.';
+        }
+        setLocationStatus({
+          type: 'error',
+          message: errorMsg
+        });
+        toast.error(errorMsg);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0
+      }
+    );
+  };
 
   const initialProfile = tenantStore.getSchoolProfile(schoolId);
   const [formData, setFormData] = useState({
@@ -55,9 +125,9 @@ export function SchoolInfoPage() {
     app_win_url: '',
     app_andr_url: '',
     app_ios_url: '',
-    latitude: '1.0000000',
-    longitude: '1.0000000',
-    attend_range: '0',
+    latitude: initialProfile.latitude || '1.0000000',
+    longitude: initialProfile.longitude || '1.0000000',
+    attend_range: initialProfile.attend_range || '100',
     paytm_merchant_id: '',
     paytm_merchant_key: '',
     study_material_url: '',
@@ -178,7 +248,10 @@ export function SchoolInfoPage() {
         place: formData.place,
         pinCode: formData.postal_code,
         receiptNotes: formData.fee_receipt_notes,
-        logoUrl: formData.logoUrl
+        logoUrl: formData.logoUrl,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        attend_range: formData.attend_range
       };
 
       // 1. Persist strictly in active tenant store
@@ -617,51 +690,206 @@ export function SchoolInfoPage() {
           )}
         </div>
 
-        {/* Card 4: Collapsible Accordion 3 - RANGE ATTENDANCE (Geo-Fencing) */}
+        {/* Card 4: Collapsible Accordion 3 - RANGE ATTENDANCE (Geo-Fencing) with Auto-Fetch */}
         <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
-          <button
-            type="button"
+          <div
             onClick={() => setExpandedSection(prev => prev === 'range' ? '' : 'range')}
-            className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors"
+            className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer select-none"
           >
             <span className="flex items-center space-x-2">
               <MapPin className="w-4 h-4 text-indigo-600" />
               <span>RANGE ATTENDANCE (GEO-FENCING)</span>
             </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
-          </button>
+
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedSection('range');
+                  handleFetchCurrentLocation();
+                }}
+                disabled={isLocating}
+                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors"
+                title="Fetch live GPS coordinates from this device"
+              >
+                {isLocating ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Fetching GPS...</span>
+                  </>
+                ) : (
+                  <>
+                    <Crosshair className="w-3.5 h-3.5" />
+                    <span>Fetch Current Location</span>
+                  </>
+                )}
+              </button>
+              <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
 
           {expandedSection === 'range' && (
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white border-t border-slate-200 text-xs">
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Latitude</label>
-                <input
-                  type="text"
-                  name="latitude"
-                  value={formData.latitude}
-                  onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono"
-                />
+            <div className="p-4 space-y-3.5 bg-white border-t border-slate-200 text-xs">
+              {/* Quick Actions & Live Detection Banner */}
+              <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-slate-50 border border-indigo-100 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-2 bg-indigo-600 text-white rounded-lg shadow-2xs shrink-0">
+                    <Navigation className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 text-xs flex items-center gap-2">
+                      <span>Automatic GPS Coordinate Detection</span>
+                      {locationStatus?.type === 'success' && (
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
+                          <Check className="w-3 h-3" /> Live GPS Set
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-0.5">
+                      School campus me rehkar button dabayein taaki exact latitude & longitude automatically bhar jayein.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleFetchCurrentLocation}
+                    disabled={isLocating}
+                    className="flex-1 sm:flex-none px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                  >
+                    {isLocating ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Detecting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Crosshair className="w-3.5 h-3.5" />
+                        <span>📍 Fetch My Location (GPS)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {Number(formData.latitude) !== 0 && Number(formData.latitude) !== 1 && (
+                    <a
+                      href={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
+                      title="Verify pinned location on Google Maps"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Google Maps</span>
+                    </a>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Longitude</label>
-                <input
-                  type="text"
-                  name="longitude"
-                  value={formData.longitude}
-                  onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono"
-                />
+
+              {/* Status Message Display */}
+              {locationStatus && (
+                <div
+                  className={`p-2.5 rounded text-[11px] font-medium flex items-center gap-2 ${
+                    locationStatus.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : locationStatus.type === 'loading'
+                      ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}
+                >
+                  {locationStatus.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : locationStatus.type === 'loading' ? (
+                    <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                  )}
+                  <span>{locationStatus.message}</span>
+                </div>
+              )}
+
+              {/* Coordinates & Radius Inputs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                    Latitude <span className="text-slate-400 font-normal font-mono">(GPS Decimal)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="latitude"
+                    value={formData.latitude}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 26.9124336"
+                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                    Longitude <span className="text-slate-400 font-normal font-mono">(GPS Decimal)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="longitude"
+                    value={formData.longitude}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 75.7872709"
+                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="block text-[11px] font-medium text-slate-600">
+                      Allowed Radius (Meters)
+                    </label>
+                    <span className="text-[10px] text-slate-400">Around school center</span>
+                  </div>
+                  <input
+                    type="number"
+                    min="10"
+                    max="5000"
+                    name="attend_range"
+                    value={formData.attend_range}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 100"
+                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Allowed Radius (Meters)</label>
-                <input
-                  type="text"
-                  name="attend_range"
-                  value={formData.attend_range}
-                  onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono"
-                />
+
+              {/* Quick Radius Presets */}
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                <span className="text-[11px] font-semibold text-slate-600">Quick Radius Presets:</span>
+                {[
+                  { label: '50m (Main Gate)', value: '50' },
+                  { label: '100m (Standard School)', value: '100' },
+                  { label: '200m (Campus)', value: '200' },
+                  { label: '500m (Wide Grounds)', value: '500' }
+                ].map((preset) => (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, attend_range: preset.value }))}
+                    className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-colors ${
+                      formData.attend_range === preset.value
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Guidance Note */}
+              <div className="p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
+                <span className="text-sm">💡</span>
+                <div>
+                  <strong className="text-slate-800">Range Attendance (Geo-Fencing) Kaise Kaam Karta Hai?</strong>
+                  <p className="mt-0.5 text-slate-500">
+                    Jab staff members ya teachers mobile app se attendance lagayenge, system automatically unki device GPS check karega. Yadi wo school campus ke is radius (e.g. {formData.attend_range || 100} meters) ke andar honge tabhi attendance lag payegi.
+                  </p>
+                </div>
               </div>
             </div>
           )}
