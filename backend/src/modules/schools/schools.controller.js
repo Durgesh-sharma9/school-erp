@@ -94,7 +94,11 @@ export const getSchoolProfile = async (req, res, next) => {
       });
       if (dbSchool) {
         const extra = (dbSchool.extraData && typeof dbSchool.extraData === 'object') ? dbSchool.extraData : {};
-        responseData = { ...dbSchool, ...extra };
+        responseData = {
+          ...dbSchool,
+          ...extra,
+          brandingImages: TENANT_SCHOOL_PROFILES[schoolId]?.brandingImages || extra.brandingImages || {}
+        };
       }
     } catch (dbErr) {
       // Offline fallback
@@ -128,6 +132,13 @@ export const updateSchoolProfile = async (req, res, next) => {
     }
 
     try {
+      const dbSchool = await prisma.school.findUnique({ where: { id: schoolId } });
+      const currentExtra = (dbSchool?.extraData && typeof dbSchool.extraData === 'object') ? dbSchool.extraData : {};
+      const updatedExtra = {
+        ...currentExtra,
+        ...(payload.brandingImages ? { brandingImages: payload.brandingImages } : {})
+      };
+
       await prisma.school.upsert({
         where: { id: schoolId },
         update: {
@@ -143,14 +154,16 @@ export const updateSchoolProfile = async (req, res, next) => {
           email: payload.email,
           website: payload.website,
           receiptNotes: payload.receiptNotes,
-          logoUrl: payload.logoUrl
+          logoUrl: payload.logoUrl,
+          extraData: updatedExtra
         },
         create: {
           id: schoolId,
           schoolName: payload.schoolName || 'School Name',
           schoolCode: payload.schoolCode || 'SCH-CODE',
           phone1: payload.phone1 || '',
-          email: payload.email || ''
+          email: payload.email || '',
+          extraData: updatedExtra
         }
       });
     } catch (dbErr) {
@@ -176,16 +189,42 @@ export const uploadSchoolLogo = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'No image file uploaded' });
     }
     const schoolId = getActiveSchoolId(req);
-    const fileName = `logo_${schoolId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, '_')}`;
+    const slotId = req.body?.slotId || 'school_logo';
+    const fileName = `${slotId}_${schoolId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, '_')}`;
     const uploadResult = await uploadToImageKit(req.file.buffer, fileName, 'school-logos');
 
-    if (TENANT_SCHOOL_PROFILES[schoolId]) {
+    if (!TENANT_SCHOOL_PROFILES[schoolId]) {
+      TENANT_SCHOOL_PROFILES[schoolId] = { id: schoolId };
+    }
+    if (!TENANT_SCHOOL_PROFILES[schoolId].brandingImages) {
+      TENANT_SCHOOL_PROFILES[schoolId].brandingImages = {};
+    }
+    TENANT_SCHOOL_PROFILES[schoolId].brandingImages[slotId] = uploadResult.url;
+    if (slotId === 'school_logo') {
       TENANT_SCHOOL_PROFILES[schoolId].logoUrl = uploadResult.url;
+    }
+
+    try {
+      const dbSchool = await prisma.school.findUnique({ where: { id: schoolId } });
+      if (dbSchool) {
+        const extra = (dbSchool.extraData && typeof dbSchool.extraData === 'object') ? dbSchool.extraData : {};
+        const brandingImages = { ...(extra.brandingImages || {}), [slotId]: uploadResult.url };
+        await prisma.school.update({
+          where: { id: schoolId },
+          data: {
+            ...(slotId === 'school_logo' ? { logoUrl: uploadResult.url } : {}),
+            extraData: { ...extra, brandingImages }
+          }
+        });
+      }
+    } catch (dbErr) {
+      // In-memory fallback
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Logo uploaded successfully',
+      message: 'Image uploaded successfully',
+      slotId,
       data: uploadResult
     });
   } catch (error) {

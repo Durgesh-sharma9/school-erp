@@ -23,7 +23,15 @@ const imagekit = isConfigured ? new ImageKit({
  */
 export const uploadToImageKit = async (file, fileName, folder = 'school_erp') => {
   if (!isConfigured || !imagekit) {
-    console.warn('[ImageKit Service] Credentials not configured. Returning fallback mock URL.');
+    console.warn('[ImageKit Service] Credentials not configured. Returning Base64 data URI fallback.');
+    if (Buffer.isBuffer(file)) {
+      const ext = (fileName || '').toLowerCase();
+      const mime = ext.endsWith('.png') ? 'image/png' : ext.endsWith('.svg') ? 'image/svg+xml' : ext.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
+      return {
+        url: `data:${mime};base64,${file.toString('base64')}`,
+        fileId: `local_${Date.now()}`
+      };
+    }
     return {
       url: `/uploads/${folder}/${fileName}`,
       fileId: `mock_${Date.now()}`

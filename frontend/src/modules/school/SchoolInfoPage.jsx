@@ -17,7 +17,8 @@ import {
   ExternalLink,
   Loader2,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -28,6 +29,7 @@ export function SchoolInfoPage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationStatus, setLocationStatus] = useState(null); // { type: 'success' | 'error' | 'loading', message: string, accuracy?: number }
 
@@ -131,7 +133,8 @@ export function SchoolInfoPage() {
     paytm_merchant_id: '',
     paytm_merchant_key: '',
     study_material_url: '',
-    logoUrl: initialProfile.logoUrl || ''
+    logoUrl: initialProfile.logoUrl || '',
+    brandingImages: initialProfile.brandingImages || (initialProfile.logoUrl ? { school_logo: initialProfile.logoUrl } : {})
   });
 
   const logoUploadSlots = [
@@ -166,10 +169,15 @@ export function SchoolInfoPage() {
       address: prof.address || prev.address,
       place: prof.place || prev.place,
       postal_code: prof.pinCode || prev.postal_code,
-      logoUrl: prof.logoUrl || prev.logoUrl
+      logoUrl: prof.logoUrl || prev.logoUrl,
+      brandingImages: {
+        ...(prev.brandingImages || {}),
+        ...(prof.brandingImages || {}),
+        ...(prof.logoUrl ? { school_logo: prof.logoUrl } : {})
+      }
     }));
 
-    fetch('http://localhost:5000/api/schools/profile', {
+    fetch('/api/schools/profile', {
       headers: { 'x-school-id': schoolId || '' }
     })
       .then(r => r.json())
@@ -191,7 +199,12 @@ export function SchoolInfoPage() {
             place: item.place ?? prev.place,
             postal_code: item.pinCode ?? item.postal_code ?? prev.postal_code,
             fee_receipt_notes: item.receiptNotes ?? item.fee_receipt_notes ?? prev.fee_receipt_notes,
-            logoUrl: item.logoUrl ?? prev.logoUrl
+            logoUrl: item.logoUrl ?? prev.logoUrl,
+            brandingImages: {
+              ...(prev.brandingImages || {}),
+              ...(item.brandingImages || {}),
+              ...(item.logoUrl ? { school_logo: item.logoUrl } : {})
+            }
           }));
         }
       })
@@ -204,31 +217,99 @@ export function SchoolInfoPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLogoUpload = async (e, slotId) => {
+  const handleLogoUpload = async (e, slotId, slotLabel = 'Image') => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
 
+    // 1. Instant local preview and persistent caching via FileReader
+    const reader = new FileReader();
+    reader.onload = (uploadEvt) => {
+      const dataUrl = uploadEvt.target.result;
+      setFormData(prev => ({
+        ...prev,
+        brandingImages: {
+          ...(prev.brandingImages || {}),
+          [slotId]: dataUrl
+        },
+        ...(slotId === 'school_logo' ? { logoUrl: dataUrl } : {})
+      }));
+
+      const currentProf = tenantStore.getSchoolProfile(schoolId);
+      tenantStore.updateSchoolProfile(schoolId, {
+        brandingImages: {
+          ...(currentProf.brandingImages || {}),
+          [slotId]: dataUrl
+        },
+        ...(slotId === 'school_logo' ? { logoUrl: dataUrl } : {})
+      });
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Upload to server
     try {
-      setUploadingLogo(true);
+      setUploadingSlot(slotId);
       const fd = new FormData();
       fd.append('logo', file);
+      fd.append('slotId', slotId);
 
-      const res = await fetch('http://localhost:5000/api/schools/upload-logo', {
+      const res = await fetch('/api/schools/upload-logo', {
         method: 'POST',
+        headers: {
+          'x-school-id': schoolId || ''
+        },
         body: fd
       });
       const data = await res.json();
       if (data.success && data.data?.url) {
-        if (slotId === 'school_logo') {
-          setFormData(prev => ({ ...prev, logoUrl: data.data.url }));
-        }
-        alert(`${slotId} uploaded successfully to ImageKit!`);
+        const finalUrl = data.data.url;
+        setFormData(prev => ({
+          ...prev,
+          brandingImages: {
+            ...(prev.brandingImages || {}),
+            [slotId]: finalUrl
+          },
+          ...(slotId === 'school_logo' ? { logoUrl: finalUrl } : {})
+        }));
+        const currentProf = tenantStore.getSchoolProfile(schoolId);
+        tenantStore.updateSchoolProfile(schoolId, {
+          brandingImages: {
+            ...(currentProf.brandingImages || {}),
+            [slotId]: finalUrl
+          },
+          ...(slotId === 'school_logo' ? { logoUrl: finalUrl } : {})
+        });
+        toast.success(`${slotLabel} uploaded and saved!`);
+      } else {
+        toast.success(`${slotLabel} saved successfully!`);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Server upload fallback:', err);
+      toast.success(`${slotLabel} saved locally!`);
     } finally {
-      setUploadingLogo(false);
+      setUploadingSlot(null);
     }
+  };
+
+  const handleRemoveLogo = (slotId, slotLabel, e) => {
+    if (e) e.stopPropagation();
+    setFormData(prev => {
+      const updated = { ...(prev.brandingImages || {}) };
+      delete updated[slotId];
+      return {
+        ...prev,
+        brandingImages: updated,
+        ...(slotId === 'school_logo' ? { logoUrl: '' } : {})
+      };
+    });
+    const currentProf = tenantStore.getSchoolProfile(schoolId);
+    const updated = { ...(currentProf.brandingImages || {}) };
+    delete updated[slotId];
+    tenantStore.updateSchoolProfile(schoolId, {
+      brandingImages: updated,
+      ...(slotId === 'school_logo' ? { logoUrl: '' } : {})
+    });
+    toast.success(`${slotLabel || 'Image'} removed`);
   };
 
   const handleSave = async (e) => {
@@ -248,7 +329,8 @@ export function SchoolInfoPage() {
         place: formData.place,
         pinCode: formData.postal_code,
         receiptNotes: formData.fee_receipt_notes,
-        logoUrl: formData.logoUrl,
+        logoUrl: formData.brandingImages?.['school_logo'] || formData.logoUrl,
+        brandingImages: formData.brandingImages,
         latitude: formData.latitude,
         longitude: formData.longitude,
         attend_range: formData.attend_range
@@ -259,23 +341,25 @@ export function SchoolInfoPage() {
 
       // 2. Put to backend with tenant boundary header
       try {
-        const res = await fetch('http://localhost:5000/api/schools/profile', {
+        const res = await fetch('/api/schools/profile', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'x-school-id': schoolId || 'sch_jd_intl'
+            'x-school-id': schoolId || ''
           },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        await res.json();
       } catch (netErr) {
         // Proceed with tenant store
       }
 
       setSavedSuccess(true);
+      toast.success('School profile and branding updated successfully!');
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {
       console.error(err);
+      toast.error('Failed to save profile changes');
     }
   };
 
@@ -533,30 +617,64 @@ export function SchoolInfoPage() {
           </button>
 
           {expandedSection === 'logo' && (
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 bg-white border-t border-slate-200">
-              {logoUploadSlots.map((slot) => (
-                <div key={slot.id} className="border border-slate-200 rounded-lg p-2.5 flex flex-col items-center text-center space-y-2 bg-slate-50/50">
-                  <div className="w-full h-24 bg-white border border-slate-200 rounded flex items-center justify-center overflow-hidden">
-                    {slot.id === 'school_logo' && formData.logoUrl ? (
-                      <img src={formData.logoUrl} alt={slot.label} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl text-slate-300">🖼️</span>
-                    )}
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-white border-t border-slate-200">
+              {logoUploadSlots.map((slot) => {
+                const currentImg = formData.brandingImages?.[slot.id] || (slot.id === 'school_logo' ? formData.logoUrl : null);
+                const isSlotUploading = uploadingSlot === slot.id;
+
+                return (
+                  <div
+                    key={slot.id}
+                    className="group relative border border-slate-200 rounded-lg p-2.5 flex flex-col items-center text-center space-y-2 bg-slate-50/50 hover:border-indigo-300 hover:shadow-xs transition-all"
+                  >
+                    <div className="relative w-full h-24 bg-white border border-slate-200 rounded flex items-center justify-center overflow-hidden">
+                      {isSlotUploading ? (
+                        <div className="flex flex-col items-center justify-center space-y-1">
+                          <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                          <span className="text-[10px] text-slate-500 font-medium">Uploading...</span>
+                        </div>
+                      ) : currentImg ? (
+                        <>
+                          <img
+                            src={currentImg}
+                            alt={slot.label}
+                            className="w-full h-full object-contain p-1"
+                          />
+                          <button
+                            type="button"
+                            title={`Remove ${slot.label}`}
+                            onClick={(e) => handleRemoveLogo(slot.id, slot.label, e)}
+                            className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity shadow-xs"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center text-slate-300">
+                          <ImageIcon className="w-8 h-8 stroke-1 text-slate-300" />
+                          <span className="text-[9px] text-slate-400 mt-1">No file</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-[11px] font-bold text-slate-700 truncate w-full" title={slot.label}>
+                      {slot.label}
+                    </div>
+
+                    <label className={`cursor-pointer px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold rounded shadow-2xs transition-colors flex items-center space-x-1 ${isSlotUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <Upload className="w-3 h-3" />
+                      <span>{currentImg ? 'Change' : 'Upload'}</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        disabled={isSlotUploading}
+                        onChange={(e) => handleLogoUpload(e, slot.id, slot.label)}
+                      />
+                    </label>
                   </div>
-                  <div className="text-[11px] font-bold text-slate-700 truncate w-full" title={slot.label}>
-                    {slot.label}
-                  </div>
-                  <label className="cursor-pointer px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold rounded shadow-2xs">
-                    <span>Upload</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => handleLogoUpload(e, slot.id)}
-                    />
-                  </label>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
