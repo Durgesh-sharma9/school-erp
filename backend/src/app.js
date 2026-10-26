@@ -56,6 +56,7 @@ import accountsRoutes from './modules/accounts/accounts.routes.js';
 import timetableRoutes from './modules/timetable/timetable.routes.js';
 import noticesRoutes from './modules/notices/notices.routes.js';
 import announcementsRoutes from './modules/announcements/announcements.routes.js';
+import whatsappRoutes from './modules/whatsapp/whatsapp.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -81,6 +82,7 @@ app.use('/api/accounts', accountsRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/notices', noticesRoutes);
 app.use('/api/announcements', announcementsRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 
 // Global Error Handler

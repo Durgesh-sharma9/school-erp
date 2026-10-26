@@ -10,7 +10,6 @@ import { StaffPortalPage } from './modules/staff-portal/StaffPortalPage';
 import { SuperAdminDashboardPage } from './modules/superadmin/SuperAdminDashboardPage';
 import { StudentRegistrationPage } from './modules/students/StudentRegistrationPage';
 import { AssignRollNumberPage } from './modules/students/AssignRollNumberPage';
-import { OnlineClassesPage } from './modules/students/OnlineClassesPage';
 import { PromotionPage } from './modules/students/PromotionPage';
 import { StudentPortfolioPage } from './modules/students/StudentPortfolioPage';
 import { IdCardGeneratorPage } from './modules/students/IdCardGeneratorPage';
@@ -116,7 +115,8 @@ import {
   TcReportPage,
   CancelTcReportPage,
   StudentCallListPage,
-  SubjectWiseStudentListPage
+  SubjectWiseStudentListPage,
+  StudentReportsHubPage
 } from './modules/students/reports';
 import {
   CertificateGeneratorPage,
@@ -452,7 +452,7 @@ function AppContent() {
               case '/student-attendance':
                 return <StudentAttendancePage onNavigate={handleNavigate} />;
               case '/create-online-classes':
-                return <OnlineClassesPage onNavigate={handleNavigate} />;
+                return <StudentRegistrationPage onNavigate={handleNavigate} />;
               case '/promotion':
                 return <PromotionPage onNavigate={handleNavigate} />;
               case '/student-portfolio':
@@ -626,8 +626,9 @@ function AppContent() {
                 return <MonthlyStaffAttendanceReportPage onNavigate={handleNavigate} />;
               case '/staff-attendance-time-report':
                 return <StaffAttendanceTimeReportPage onNavigate={handleNavigate} />;
-              case '/students-report':
               case '/student-reports':
+                return <StudentReportsHubPage onNavigate={handleNavigate} />;
+              case '/students-report':
                 return <StudentListPage onNavigate={handleNavigate} />;
               case '/donation-collection-report':
                 return <DonationReportPage onNavigate={handleNavigate} />;

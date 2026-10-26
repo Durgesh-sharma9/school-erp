@@ -33,6 +33,7 @@ import {
   Megaphone
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { STUDENT_REPORT_PATHS } from '../../modules/students/reports/studentReportsCatalog';
 
 export const studentMenuCategories = [
   {
@@ -199,36 +200,12 @@ export const menuCategories = [
       { title: 'Assign Roll/Feebook No.', path: '/assign-roll-number' },
       { title: 'Attendance', path: '/student-attendance' },
       { title: 'Biometric Machine Sync', path: '/biometric-sync' },
-      { title: 'Online Classes', path: '/create-online-classes' },
       { title: 'Promotion', path: '/promotion' },
       { title: 'Student Portfolio', path: '/student-portfolio' },
       { title: 'ID Card Generator', path: '/id-card-generator' },
       { title: 'Admit Card Generator', path: '/admit-card-generator' },
       { title: 'Exam Date Sheet', path: '/exam-date-sheet' },
-      {
-        id: 'student-reports',
-        title: 'Reports',
-        children: [
-          { title: 'Student List', path: '/students-report' },
-          { title: 'Donation Report', path: '/donation-collection-report' },
-          { title: 'Student Board Data Summary', path: '/student-upload-data-summary' },
-          { title: 'Student Promotion List', path: '/students-promotion-report' },
-          { title: 'Inactive Student List', path: '/inactive-student-list' },
-          { title: 'Student Board Registration', path: '/student-board-registration' },
-          { title: 'Student Consolidated Report', path: '/student-consolidated-report' },
-          { title: 'Generate Slips', path: '/generate-slips-report' },
-          { title: 'Attendance Report', path: '/attendance-report' },
-          { title: 'Day Wise Attendance Summary', path: '/student-attedance-summary' },
-          { title: 'Monthly Attendance Report', path: '/monthly-attendance-report' },
-          { title: 'Student Wise Subject List', path: '/student-wise-subject-list' },
-          { title: 'Date Sheet Report', path: '/date-sheet-report' },
-          { title: 'Sibling Report', path: '/sibling-report' },
-          { title: 'TC Report', path: '/tc-report' },
-          { title: 'Cancel Tc Report', path: '/cancel-tc-report' },
-          { title: 'Student Call List', path: '/student-call-list' },
-          { title: 'Subject Wise Student List', path: '/subject-wise-student-details' }
-        ]
-      }
+      { title: 'Reports', path: '/student-reports' }
     ]
   },
   {
@@ -284,7 +261,6 @@ export const menuCategories = [
     subItems: [
       { title: 'Study Material', path: '/study-material' },
       { title: 'Homework', path: '/homework' },
-      { title: 'Online Classes', path: '/create-online-classes' },
       { title: 'Upload Pre Year Paper', path: '/upload-pre-year-paper' },
       { title: 'Reports', path: '/study-material-reports' }
     ]
@@ -589,7 +565,7 @@ export const menuCategories = [
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const getInitialActiveDropdown = (path) => {
     if (path.includes('transport')) return { transport: true };
-    if (path.includes('student') || path.includes('admission')) return { student: true };
+    if (path.includes('student') || path.includes('admission') || STUDENT_REPORT_PATHS.includes(path)) return { student: true };
     if (path.includes('user')) return { users: true };
     if (path.includes('fee')) return { fee: true };
     if (path.includes('hostel')) return { hostel: true };
@@ -606,7 +582,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
   const [openDropdowns, setOpenDropdowns] = useState(() => {
     const initial = getInitialActiveDropdown(currentPath);
     menuCategories.forEach(item => {
-      if (item.subItems?.some(sub => sub.path === currentPath || sub.children?.some(c => c.path === currentPath))) {
+      if (item.subItems?.some(sub => sub.path === currentPath || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(currentPath)) || sub.children?.some(c => c.path === currentPath))) {
         initial[item.id] = true;
       }
     });
@@ -654,7 +630,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       }
       if (item.subItems && item.subItems.length > 0) {
         for (const sub of item.subItems) {
-          if (sub.path === normCurrent) {
+          if (sub.path === normCurrent || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(normCurrent))) {
             activeKey = item.id;
             break;
           }
@@ -729,6 +705,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
             const isActive = normCurrent === item.path || (hasChildren && item.subItems.some(sub => {
               if (sub.path === normCurrent) return true;
+              if (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(normCurrent)) return true;
               if (sub.children && sub.children.some(c => c.path === normCurrent)) return true;
               return false;
             }));
@@ -825,7 +802,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                         );
                       }
 
-                      const isSubActive = normCurrent === sub.path;
+                      const isSubActive = normCurrent === sub.path || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(normCurrent));
                       return (
                         <button
                           key={sub.path}

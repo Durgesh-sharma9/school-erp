@@ -6,6 +6,7 @@ import {
   deleteClass,
   getAllSubjectGroups,
   createSubjectGroup,
+  updateSubjectGroup,
   deleteSubjectGroup,
   getAllSubjects,
   createSubject,
@@ -28,6 +29,7 @@ router.delete('/classes/:id', deleteClass);
 // 2. Subject Groups
 router.get('/subject-groups', getAllSubjectGroups);
 router.post('/subject-groups', createSubjectGroup);
+router.put('/subject-groups/:id', updateSubjectGroup);
 router.delete('/subject-groups/:id', deleteSubjectGroup);
 
 // 3. Subjects

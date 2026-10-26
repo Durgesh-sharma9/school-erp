@@ -2,90 +2,66 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
   QrCode,
-  Plus,
   Trash2,
   X,
   Send,
   CheckCheck,
-  Smartphone,
   RefreshCw,
-  ShieldCheck,
-  AlertCircle,
-  MessageSquare,
-  Clock,
-  Power,
   FileText,
   Calendar,
   DollarSign,
   Copy,
-  Info,
   CheckCircle2,
-  ExternalLink
+  LogOut,
+  Smartphone,
+  AlertCircle,
+  GraduationCap,
+  UserCheck,
+  Search,
+  Users
 } from 'lucide-react';
 
 const STORAGE_KEY = 'school_whatsapp_session';
 const LOGS_STORAGE_KEY = 'school_whatsapp_test_logs';
-const RULES_STORAGE_KEY = 'school_whatsapp_automation_rules';
-
-const DEFAULT_RULES = {
-  absentAlerts: true,
-  feeReceipts: true,
-  marksheetDispatch: true,
-  holidayCirculars: true,
-};
 
 const SAMPLE_TEMPLATES = [
   {
     id: 'absent',
-    title: 'Daily Absent Alert (Attendance)',
+    title: 'Absent Alert',
     module: 'Attendance',
     icon: Calendar,
-    color: 'amber',
-    message: 'Dear Parent, Your ward Rahul Sharma (Class 8-A, Roll: 14) is marked ABSENT today, 21-Oct-2026. If this is an uninformed absence, please contact school desk immediately.',
+    message: 'Dear Parent, Your ward Rahul Sharma (Class 8-A, Roll: 14) is marked ABSENT today. If this is an uninformed absence, please contact school desk immediately.',
   },
   {
     id: 'fee',
-    title: 'Fee Payment Receipt (Accounts)',
+    title: 'Fee Receipt',
     module: 'Fees',
     icon: DollarSign,
-    color: 'emerald',
     message: 'Dear Parent, Fee payment of ₹8,500 has been received successfully for Aditi Verma (Class 10-B). Receipt No: #REC-2026-904. Thank you, J D International School.',
   },
   {
     id: 'marksheet',
-    title: 'Exam Marksheet PDF Link (Exam Studio)',
+    title: 'Marksheet PDF',
     module: 'Examinations',
     icon: FileText,
-    color: 'indigo',
-    message: 'Dear Parent, Term-1 Examination 2025-26 Progress Report Card for Priya Sen (Class 10-A) is published. Click here to download verified digital Marksheet: https://jdischool.edu.in/marksheet/2026/jd-8049',
-  },
-  {
-    id: 'circular',
-    title: 'School Notice / Circular (Announcements)',
-    module: 'Circulars',
-    icon: MessageSquare,
-    color: 'sky',
-    message: 'Dear Parents, Please note that the school will remain closed tomorrow on account of district administrative orders. Online classes will be conducted as per schedule.',
+    message: 'Dear Parent, Term-1 Examination Progress Report Card for Priya Sen (Class 10-A) is published. Click here to download verified digital Marksheet: https://jdischool.edu.in/marksheet/2026/jd-8049',
   },
   {
     id: 'custom',
-    title: 'Custom Message',
+    title: 'Custom',
     module: 'Manual',
     icon: Send,
-    color: 'purple',
-    message: 'Greetings from J D International School! This is a verification message sent directly from your connected WhatsApp instance.',
+    message: 'Greetings from J D International School! This is a test message sent directly from your connected WhatsApp instance.',
   }
 ];
 
 export function WhatsappQrPage() {
-  // Session State with localStorage persistence
+  // Session State
   const [session, setSession] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
+    } catch {}
     return {
       loggedIn: false,
       phone: '',
@@ -94,54 +70,111 @@ export function WhatsappQrPage() {
       accessToken: '',
       status: 'Disconnected',
       connectedAt: null,
-      deviceInfo: ''
     };
   });
 
   const isActive = session.loggedIn && session.status === 'Connected';
 
-  // Automation Rules
-  const [rules, setRules] = useState(() => {
-    try {
-      const saved = localStorage.getItem(RULES_STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
-    return DEFAULT_RULES;
-  });
+  // Modal & Loading States
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [liveQr, setLiveQr] = useState(null);
+  const [isQrLoading, setIsQrLoading] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
 
-  // Test Message Sandbox state
+  // Test sandbox fields
+  const [recipientType, setRecipientType] = useState('student'); // 'student' | 'staff' | 'manual'
+  const [studentsList, setStudentsList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [searchContactQuery, setSearchContactQuery] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const [testPhone, setTestPhone] = useState('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState('absent');
+  const [testMessageText, setTestMessageText] = useState(SAMPLE_TEMPLATES[0].message);
+  const [isSending, setIsSending] = useState(false);
+
+  // Fetch Students & Staff Contacts for Auto-fill
+  useEffect(() => {
+    fetch('http://localhost:5000/api/students')
+      .then((r) => r.json())
+      .then((d) => {
+        const list = Array.isArray(d) ? d : (d.data || []);
+        setStudentsList(list);
+        if (list.length > 0) {
+          // Pre-select first student as demo
+          const s = list[0];
+          const phone = s.smsWhatsappNo || s.fatherMobile || s.motherMobile || '';
+          setTestPhone(phone);
+          setSelectedContact({
+            type: 'student',
+            name: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+            parentName: s.fatherName || 'Parent',
+            className: `${s.className || ''}-${s.section || ''}`,
+            phone,
+          });
+          setTestMessageText(
+            `Dear Parent, Your ward ${s.firstName} ${s.lastName || ''} (Class ${s.className}-${s.section}) is marked ABSENT today. If this is an uninformed absence, please contact school desk immediately.`
+          );
+        }
+      })
+      .catch(() => {});
+
+    fetch('http://localhost:5000/api/user-management/users')
+      .then((r) => r.json())
+      .then((d) => {
+        const list = Array.isArray(d) ? d : (d.data || []);
+        setStaffList(list);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Helper to re-generate message based on template + contact
+  const applyTemplateToContact = (templateId, contact = selectedContact) => {
+    setSelectedTemplateId(templateId);
+    if (!contact) {
+      const defaultTpl = SAMPLE_TEMPLATES.find((t) => t.id === templateId);
+      if (defaultTpl) setTestMessageText(defaultTpl.message);
+      return;
+    }
+
+    if (contact.type === 'student') {
+      const sName = contact.name || 'Student';
+      const cName = contact.className || 'Class';
+      const pName = contact.parentName || 'Parent';
+
+      if (templateId === 'absent') {
+        setTestMessageText(`Dear Parent, Your ward ${sName} (${cName}) is marked ABSENT today. If this is an uninformed absence, please contact school desk immediately.`);
+      } else if (templateId === 'fee') {
+        setTestMessageText(`Dear ${pName}, Fee payment of ₹8,500 has been received successfully for ${sName} (${cName}). Receipt No: #REC-2026-904. Thank you, J D International School.`);
+      } else if (templateId === 'marksheet') {
+        setTestMessageText(`Dear Parent, Term-1 Examination Progress Report Card for ${sName} (${cName}) is published. Click here to download verified digital Marksheet: https://jdischool.edu.in/marksheet/2026/jd-8049`);
+      } else {
+        setTestMessageText(`Greetings from J D International School! This is an official notice regarding your ward ${sName} (${cName}).`);
+      }
+    } else if (contact.type === 'staff') {
+      setTestMessageText(`Dear ${contact.name} (${contact.designation || 'Staff'}),\nThis is an official communication from J D International School administration desk regarding academic schedule.`);
+    }
+  };
+
+  // Test logs
   const [testLogs, setTestLogs] = useState(() => {
     try {
       const saved = localStorage.getItem(LOGS_STORAGE_KEY);
       if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
+    } catch {}
     return [
       {
         id: 'msg_init_01',
-        recipient: '+91 98290 54321',
+        recipient: '+91 7891008092',
         template: 'Absent Alert',
         message: 'Dear Parent, Your ward Rahul Sharma is marked ABSENT today.',
-        time: 'Today, 09:35 AM',
+        time: 'Today, 02:30 PM',
         status: 'Delivered',
       }
     ];
   });
-
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrTab, setQrTab] = useState('qr'); // 'qr' | 'code'
-  const [qrCountdown, setQrCountdown] = useState(45);
-  const [customPhone, setCustomPhone] = useState('98290 12345');
-  const [customDeskName, setCustomDeskName] = useState('J D International School Desk');
-
-  // Test sandbox fields
-  const [testPhone, setTestPhone] = useState('98290 54321');
-  const [selectedTemplateId, setSelectedTemplateId] = useState('absent');
-  const [testMessageText, setTestMessageText] = useState(SAMPLE_TEMPLATES[0].message);
-  const [isSending, setIsSending] = useState(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -149,108 +182,110 @@ export function WhatsappQrPage() {
   }, [session]);
 
   useEffect(() => {
-    localStorage.setItem(RULES_STORAGE_KEY, JSON.stringify(rules));
-  }, [rules]);
-
-  useEffect(() => {
     localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(testLogs));
   }, [testLogs]);
 
-  // Countdown timer for QR refresh
+  // Fetch live backend status
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/whatsapp/status');
+      const data = await res.json();
+      if (data.success && data.active && data.session?.loggedIn) {
+        setSession(data.session);
+        return data.session;
+      } else if (data.success && !data.active) {
+        setSession((prev) => ({
+          ...prev,
+          status: 'Disconnected',
+          loggedIn: false,
+        }));
+      }
+    } catch {}
+    return null;
+  };
+
+  // Poll status periodically (every 3 seconds)
   useEffect(() => {
-    if (!qrModalOpen) {
-      setQrCountdown(45);
-      return;
-    }
-    const timer = setInterval(() => {
-      setQrCountdown((prev) => {
-        if (prev <= 1) return 45;
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Poll for real Baileys QR code when modal is open
+  useEffect(() => {
+    if (!qrModalOpen) return;
+
+    let isMounted = true;
+    setIsQrLoading(true);
+
+    fetch('http://localhost:5000/api/whatsapp/start-session', { method: 'POST' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.qr && isMounted) {
+          setLiveQr(d.qr);
+          setIsQrLoading(false);
+        }
+      })
+      .catch(() => {});
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/whatsapp/status');
+        const data = await res.json();
+        if (data.success && isMounted) {
+          if (data.qr) {
+            setLiveQr(data.qr);
+            setIsQrLoading(false);
+          }
+          if (data.active && data.session?.loggedIn) {
+            setSession(data.session);
+            setQrModalOpen(false);
+            toast.success(`WhatsApp Linked with ${data.session.phone}!`, {
+              icon: '🟢',
+              duration: 5000,
+            });
+            clearInterval(interval);
+          }
+        }
+      } catch {}
+    }, 2000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [qrModalOpen]);
 
-  // Handle template switch
-  const handleTemplateSelect = (tplId) => {
-    setSelectedTemplateId(tplId);
-    const found = SAMPLE_TEMPLATES.find((t) => t.id === tplId);
-    if (found) {
-      setTestMessageText(found.message);
-    }
-  };
+  // Disconnect Handler
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    try {
+      await fetch('http://localhost:5000/api/whatsapp/logout', { method: 'POST' });
+    } catch {}
 
-  // Connect Simulation
-  const handleSimulateScan = () => {
-    const formattedPhone = customPhone.startsWith('+91')
-      ? customPhone
-      : `+91 ${customPhone.trim()}`;
-
-    const newSession = {
-      loggedIn: true,
-      phone: formattedPhone,
-      accountName: customDeskName.trim() || 'School Reception Desk',
-      instanceId: `INST-JD-${Math.floor(100000 + Math.random() * 900000)}`,
-      accessToken: `wa_sec_live_${Math.random().toString(36).substring(2, 12)}${Math.random().toString(36).substring(2, 8)}`,
-      status: 'Connected',
-      connectedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-      deviceInfo: 'WhatsApp for Android (Verified Session)'
-    };
-
-    setSession(newSession);
-    setQrModalOpen(false);
-    toast.success(`WhatsApp successfully linked with ${formattedPhone}!`, {
-      icon: '🟢',
-      duration: 4000
+    setSession({
+      loggedIn: false,
+      phone: '',
+      accountName: '',
+      instanceId: '',
+      accessToken: '',
+      status: 'Disconnected',
+      connectedAt: null,
     });
-  };
-
-  // Reset / Disconnect
-  const handleReset = () => {
-    if (!session.loggedIn) {
-      toast('Instance is already disconnected', { icon: 'ℹ️' });
-      return;
-    }
-    if (window.confirm('Are you sure you want to delete and reset the WhatsApp instance? Outgoing automated messages will be paused.')) {
-      setSession({
-        loggedIn: false,
-        phone: '',
-        accountName: '',
-        instanceId: '',
-        accessToken: '',
-        status: 'Disconnected',
-        connectedAt: null,
-        deviceInfo: ''
-      });
-      toast.success('WhatsApp session disconnected and instance reset', {
-        icon: '🗑️'
-      });
-    }
-  };
-
-  // Toggle Automation Rules
-  const handleRuleToggle = (key) => {
-    setRules((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
-      toast.success(
-        `Automation rule "${key}" ${updated[key] ? 'ENABLED' : 'PAUSED'}`
-      );
-      return updated;
+    setLiveQr(null);
+    setShowConfirmDisconnect(false);
+    setIsDisconnecting(false);
+    toast.success('WhatsApp device disconnected successfully.', {
+      icon: '🔌'
     });
   };
 
   // Send Test Message
-  const handleSendTestMessage = (e) => {
+  const handleSendTestMessage = async (e) => {
     e.preventDefault();
-    if (!session.loggedIn || session.status !== 'Connected') {
-      toast.error('Cannot send: WhatsApp instance is disconnected. Please scan QR code first!', {
-        icon: '⚠️'
-      });
-      return;
-    }
 
     if (!testPhone.trim()) {
-      toast.error('Please enter a recipient mobile number');
+      toast.error('Please enter recipient mobile number');
       return;
     }
 
@@ -261,22 +296,51 @@ export function WhatsappQrPage() {
 
     setIsSending(true);
 
-    setTimeout(() => {
+    // Refresh live status first in case frontend state was stale
+    let currentSession = session;
+    if (!currentSession.loggedIn || currentSession.status !== 'Connected') {
+      const fresh = await fetchStatus();
+      if (fresh) currentSession = fresh;
+    }
+
+    if (!currentSession.loggedIn || currentSession.status !== 'Connected') {
       setIsSending(false);
-      const newLog = {
-        id: `msg_${Date.now()}`,
-        recipient: testPhone.startsWith('+91') ? testPhone : `+91 ${testPhone}`,
-        template: SAMPLE_TEMPLATES.find((t) => t.id === selectedTemplateId)?.title || 'Custom',
-        message: testMessageText,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }),
-        status: 'Delivered',
-      };
-      setTestLogs((prev) => [newLog, ...prev.slice(0, 9)]);
-      toast.success(`Message successfully delivered to ${newLog.recipient}!`, {
-        icon: '✅',
-        duration: 3500
+      toast.error('WhatsApp device is not linked. Please scan QR code first!', {
+        icon: '⚠️'
       });
-    }, 800);
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: testPhone, message: testMessageText }),
+      });
+      const data = await res.json();
+      setIsSending(false);
+
+      if (data.success) {
+        const newLog = {
+          id: `msg_${Date.now()}`,
+          recipient: data.recipient || (testPhone.startsWith('+91') ? testPhone : `+91 ${testPhone}`),
+          template: SAMPLE_TEMPLATES.find((t) => t.id === selectedTemplateId)?.title || 'Custom',
+          message: testMessageText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }),
+          status: 'Delivered',
+        };
+        setTestLogs((prev) => [newLog, ...prev.slice(0, 9)]);
+        toast.success(`Message sent live to ${newLog.recipient}!`, {
+          icon: '✅',
+          duration: 4000,
+        });
+      } else {
+        toast.error(data.error || 'Failed to dispatch live message');
+      }
+    } catch {
+      setIsSending(false);
+      toast.error('Could not connect to WhatsApp backend server.');
+    }
   };
 
   const copyToken = () => {
@@ -287,596 +351,617 @@ export function WhatsappQrPage() {
   };
 
   return (
-    <div className="bg-[#f3f4f6] min-h-screen text-slate-800 pb-16">
-      {/* 1:1 UAB Exact Sticky Sub-Navbar */}
-      <div className="bg-[#f8fafc] px-6 h-14 border-b border-slate-200 sticky top-0 left-0 flex justify-between items-center z-10 shadow-2xs">
-        <div className="flex items-center space-x-3">
-          {/* WhatsApp Brand Icon & Status */}
-          <div className="flex items-center space-x-2 mr-2">
-            <span className={`text-3xl ${isActive ? 'text-emerald-500' : 'text-rose-500'}`}>
-              <svg
-                className="w-7 h-7 fill-current transition-colors"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M12.001 2.002c-5.522 0-9.999 4.477-9.999 9.999 0 1.763.456 3.42 1.254 4.863l-1.256 4.606 4.735-1.242c1.393.754 2.979 1.173 4.666 1.173 5.522 0 9.999-4.477 9.999-9.999s-4.477-10-9.999-10zm5.836 14.154c-.244.686-1.233 1.258-1.789 1.341-.519.077-1.189.109-3.486-.843-2.673-1.109-4.385-3.83-4.518-4.009-.133-.178-1.077-1.433-1.077-2.733 0-1.3.686-1.942.93-2.208.244-.266.533-.333.71-.333.178 0 .355.002.511.01.166.009.388-.063.609.467.244.577.822 2.019.889 2.164.067.144.111.311.022.489-.089.178-.133.289-.267.444-.133.155-.278.344-.4.466-.133.133-.272.278-.117.544.155.266.69 1.133 1.48 1.834 1.017.904 1.874 1.185 2.14 1.318.266.133.422.111.577-.067.155-.178.666-.777.844-1.043.178-.266.355-.222.6-.133.244.089 1.555.733 1.821.866.266.133.444.2.511.311.066.111.066.644-.178 1.33z" />
-              </svg>
+    <div className="bg-[#f3f4f6] min-h-screen p-3 md:p-4 space-y-4 font-sans text-slate-800">
+      <div className="space-y-4">
+        {/* Device Status Card */}
+        <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
+          <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Connected WhatsApp Instance
             </span>
-
-            <span className="text-xs font-bold tracking-wide uppercase">
-              <span className={`inline-block w-2 h-2 rounded-full mr-1.5 ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
-              {isActive ? 'Active' : 'In-Active'}
-            </span>
-          </div>
-
-          {/* Circular Mini FAB 1: QR Scan (Indigo circle) */}
-          <button
-            type="button"
-            onClick={() => setQrModalOpen(true)}
-            title="Scan WhatsApp QR Code"
-            className="w-9 h-9 rounded-full bg-[#5c67f6] hover:bg-[#4a55ea] text-white flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <QrCode className="w-4 h-4 text-white" />
-          </button>
-
-          {/* Circular Mini FAB 2: Add */}
-          <button
-            type="button"
-            onClick={() => {
-              if (session.loggedIn) {
-                toast.error('Maximum 1 active WhatsApp instance is allowed per school account.');
-              } else {
-                setQrModalOpen(true);
-              }
-            }}
-            title={session.loggedIn ? 'Instance already configured' : 'Add New WhatsApp Instance'}
-            className="w-9 h-9 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center cursor-pointer shadow-none transition-colors"
-          >
-            <Plus className="w-4 h-4 text-slate-600" />
-          </button>
-        </div>
-
-        {/* Quick summary info */}
-        <div className="hidden md:flex items-center space-x-3 text-xs text-slate-600">
-          <span className="font-medium">Gateway Protocol:</span>
-          <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono font-semibold border border-emerald-200">
-            Multi-Device v2.24
-          </span>
-          <span className="text-slate-400">|</span>
-          <span>School: <strong className="text-slate-800">J D International School</strong></span>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
-
-        {/* 1:1 UAB Table Section */}
-        <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h2 className="text-xs font-bold text-slate-700 tracking-wider uppercase flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-indigo-600" />
-              Connected School Instance Details
-            </h2>
             {isActive && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                Device Synchronized ({session.connectedAt || 'Active'})
+              <span className="text-[11px] text-slate-500 font-medium">
+                Last synced: Just now
               </span>
             )}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-100/90 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
-                  <th className="py-3 px-4 text-center w-48">Logged In</th>
-                  <th className="py-3 px-4 text-center">Instance ID</th>
-                  <th className="py-3 px-4 text-center">Access Token</th>
-                  <th className="py-3 px-4 text-center w-36">Status</th>
-                  <th className="py-3 px-4 text-center w-28">Reset Instance</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs text-slate-700 divide-y divide-slate-100">
-                <tr className="text-center hover:bg-slate-50/70 transition-colors">
-                  {/* Logged In */}
-                  <td className="py-4 px-4 font-semibold">
-                    {session.loggedIn ? (
+          {isActive ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse table-fixed min-w-[700px]">
+                <thead>
+                  <tr className="bg-[#f8fafc] text-slate-600 font-bold text-[12px] border-b border-slate-200">
+                    <th className="py-3 px-5 text-center w-[22%] font-semibold">Phone Number</th>
+                    <th className="py-3 px-5 text-center w-[20%] font-semibold">Instance ID</th>
+                    <th className="py-3 px-5 text-center w-[25%] font-semibold">Access Token</th>
+                    <th className="py-3 px-5 text-center w-[18%] font-semibold">Status</th>
+                    <th className="py-3 px-5 text-center w-[15%] font-semibold">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs text-slate-700">
+                  <tr className="text-center h-16 border-b border-slate-100 hover:bg-slate-50/40 transition-colors">
+                    {/* Logged In Phone */}
+                    <td className="py-3 px-5 font-semibold">
                       <div className="flex flex-col items-center justify-center">
-                        <div className="flex items-center space-x-1.5 text-emerald-600 font-bold">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>{session.phone || 'Connected'}</span>
+                        <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>{session.phone}</span>
                         </div>
-                        {session.accountName && (
-                          <span className="text-[11px] text-slate-500 font-normal mt-0.5">
-                            {session.accountName}
-                          </span>
-                        )}
+                        <span className="text-[10px] text-slate-500 font-normal">
+                          {session.accountName || 'School Official WhatsApp'}
+                        </span>
                       </div>
-                    ) : (
-                      <span className="text-slate-400 font-mono">--</span>
-                    )}
-                  </td>
+                    </td>
 
-                  {/* Instance ID */}
-                  <td className="py-4 px-4 font-mono font-medium text-slate-800">
-                    {session.instanceId ? (
-                      <span className="px-2.5 py-1 bg-slate-100 rounded text-indigo-700 font-semibold border border-slate-200">
-                        {session.instanceId}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 font-mono">--</span>
-                    )}
-                  </td>
+                    {/* Instance ID */}
+                    <td className="py-3 px-5 font-mono text-slate-800 font-semibold">
+                      {session.instanceId || 'INST-JD-725239'}
+                    </td>
 
-                  {/* Access Token */}
-                  <td className="py-4 px-4 font-mono text-slate-600">
-                    {session.accessToken ? (
+                    {/* Access Token */}
+                    <td className="py-3 px-5 font-mono text-slate-600">
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200 text-slate-700 select-all">
-                          {session.accessToken.substring(0, 14)}••••••••••
+                        <span className="select-all text-slate-600">
+                          {session.accessToken ? `${session.accessToken.substring(0, 10)}••••••••` : 'wa_sec_live_••••'}
                         </span>
                         <button
                           type="button"
                           onClick={copyToken}
                           title="Copy Full Access Token"
-                          className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                          className="p-1 text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors"
                         >
                           <Copy className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    ) : (
-                      <span className="text-slate-400 font-mono">--</span>
-                    )}
-                  </td>
+                    </td>
 
-                  {/* Status Column */}
-                  <td className="py-4 px-4">
-                    {session.loggedIn && session.status === 'Connected' ? (
-                      <div className="text-emerald-600 flex justify-center items-center space-x-1.5 font-bold">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-4 h-4 fill-current inline-block text-emerald-500"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M17 4h3v16h-3V4zM5 14h3v6H5v-6zm6-5h3v11h-3V9z" />
-                        </svg>
+                    {/* Status */}
+                    <td className="py-3 px-5">
+                      <div className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full inline-flex items-center space-x-1.5 font-semibold text-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Connected</span>
                       </div>
-                    ) : (
-                      <div className="text-red-500 flex justify-center items-center space-x-1.5 font-bold">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-4 h-4 fill-current inline-block"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M17 4h3v16h-3V4zM5 14h3v6H5v-6zm6-5h3v11h-3V9z" />
-                        </svg>
-                        <span>Disconnected</span>
-                      </div>
-                    )}
-                  </td>
+                    </td>
 
-                  {/* Reset Instance (Delete bin icon) */}
-                  <td className="py-4 px-4">
-                    <button
-                      type="button"
-                      onClick={handleReset}
-                      title={session.loggedIn ? "Delete / Reset Instance" : "No active instance"}
-                      disabled={!session.loggedIn}
-                      className={`p-2 rounded-full transition-all inline-flex items-center justify-center ${
-                        session.loggedIn
-                          ? 'hover:bg-rose-50 text-slate-500 hover:text-rose-600 cursor-pointer shadow-2xs hover:scale-110'
-                          : 'text-slate-300 cursor-not-allowed'
-                      }`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                    {/* Action: Clear Disconnect Button */}
+                    <td className="py-3 px-5">
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmDisconnect(true)}
+                        className="px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Disconnect</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-8 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+                <Smartphone className="w-7 h-7 text-slate-400" />
+              </div>
+              <h3 className="font-bold text-sm text-slate-800">No WhatsApp Device Connected</h3>
+              <p className="text-xs text-slate-500 max-w-md">
+                Link your school smartphone to enable automated attendance notifications, fee receipts, and marksheet PDF delivery to parents.
+              </p>
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(true)}
+                className="mt-2 px-5 py-2 rounded-xl bg-[#5058e5] hover:bg-[#434ac9] text-white font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>Scan QR Code to Connect</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* 2-Column Grid: Test Sandbox + ERP Automation Triggers */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-          {/* Left Column (7 cols): Live WhatsApp Test Sandbox */}
-          <div className="lg:col-span-7 bg-white rounded-xl shadow-xs border border-slate-200 p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <Send className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-800">Send Test WhatsApp Message</h3>
-                  <p className="text-[11px] text-slate-500">
-                    Live interactive sandbox to verify WhatsApp delivery to any parent mobile number
-                  </p>
-                </div>
+        {/* Live Test Messenger Sandbox */}
+        <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-5 md:p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Send className="w-4 h-4" />
               </div>
-              <span className={`text-[11px] px-2 py-0.5 rounded font-medium ${
-                isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-              }`}>
-                {isActive ? '● Gateway Ready' : '○ Offline'}
-              </span>
+              <div>
+                <h3 className="font-bold text-xs text-slate-800">Test Live WhatsApp Delivery</h3>
+                <p className="text-[11px] text-slate-500">Verify real-time delivery from linked school number</p>
+              </div>
+            </div>
+            <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border ${
+              isActive
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-slate-100 text-slate-500 border-slate-200'
+            }`}>
+              {isActive ? '● Socket Active' : '○ Standby'}
+            </span>
+          </div>
+
+          <form onSubmit={handleSendTestMessage} className="space-y-4">
+            {/* Preset Templates */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                Choose Template:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {SAMPLE_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => applyTemplateToContact(tpl.id)}
+                    className={`text-left p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${
+                      selectedTemplateId === tpl.id
+                        ? 'border-indigo-600 bg-indigo-50/70 font-semibold text-indigo-900 shadow-2xs'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px] truncate">{tpl.module}</div>
+                    <div className="text-[10px] text-slate-500 truncate">{tpl.title}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <form onSubmit={handleSendTestMessage} className="space-y-4">
-              {/* Quick Template Picker */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Choose ERP Message Template:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {SAMPLE_TEMPLATES.map((tpl) => (
+            {/* Target Audience Switcher */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                Select Recipient:
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { id: 'student', label: 'Student / Parent', icon: GraduationCap },
+                  { id: 'staff', label: 'Teacher / Staff', icon: UserCheck },
+                  { id: 'manual', label: 'Direct Mobile No', icon: Smartphone },
+                ].map((t) => {
+                  const Icon = t.icon;
+                  const active = recipientType === t.id;
+                  return (
                     <button
-                      key={tpl.id}
+                      key={t.id}
                       type="button"
-                      onClick={() => handleTemplateSelect(tpl.id)}
-                      className={`text-left p-2 rounded-lg border text-xs transition-all ${
-                        selectedTemplateId === tpl.id
-                          ? 'border-indigo-600 bg-indigo-50/60 font-semibold text-indigo-900 shadow-2xs'
-                          : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50/50'
+                      onClick={() => {
+                        setRecipientType(t.id);
+                        setSelectedContact(null);
+                        setSearchContactQuery('');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        active
+                          ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 shadow-2xs'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-slate-50/50'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <tpl.icon className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span className="truncate">{tpl.module}</span>
-                      </div>
-                      <div className="text-[10px] text-slate-500 truncate font-normal">
-                        {tpl.title}
-                      </div>
+                      <Icon className={`w-3.5 h-3.5 ${active ? 'text-indigo-600' : 'text-slate-400'}`} />
+                      <span>{t.label}</span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Recipient Phone Number */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Recipient Mobile No (Parent / Staff):
+            {/* Contact Search or Manual Input */}
+            {recipientType === 'student' && (
+              <div className="relative">
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  Search & Fetch Student / Parent Contact:
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-mono">
-                    +91
-                  </span>
                   <input
                     type="text"
-                    value={testPhone.replace(/^\+91\s*/, '')}
+                    value={searchContactQuery}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    onChange={(e) => {
+                      setSearchContactQuery(e.target.value);
+                      setIsDropdownOpen(true);
+                    }}
+                    placeholder="Search by student name, father name, class (e.g. Aaditya, Choudhary, Class I)..."
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  {selectedContact && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedContact(null);
+                        setSearchContactQuery('');
+                        setTestPhone('');
+                      }}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Selected Contact Chip Preview */}
+                {selectedContact && (
+                  <div className="mt-2 p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <span className="font-bold text-slate-800">{selectedContact.name}</span>
+                        <span className="text-slate-500 text-[11px] ml-2">Class: {selectedContact.className}</span>
+                        <span className="text-slate-500 text-[11px] ml-2">• Parent: {selectedContact.parentName}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-emerald-800 font-bold bg-white px-2 py-0.5 rounded border border-emerald-200 text-[11px]">
+                        📱 +91 {selectedContact.phone}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Autocomplete Dropdown List */}
+                {isDropdownOpen && (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-52 overflow-y-auto divide-y divide-slate-100">
+                    {studentsList
+                      .filter((s) => {
+                        if (!searchContactQuery.trim()) return true;
+                        const q = searchContactQuery.toLowerCase();
+                        const fullName = `${s.firstName || ''} ${s.lastName || ''}`.toLowerCase();
+                        const father = (s.fatherName || '').toLowerCase();
+                        const cls = `${s.className || ''}-${s.section || ''}`.toLowerCase();
+                        const phone = String(s.smsWhatsappNo || s.fatherMobile || '');
+                        return fullName.includes(q) || father.includes(q) || cls.includes(q) || phone.includes(q);
+                      })
+                      .slice(0, 10)
+                      .map((s) => {
+                        const sName = `${s.firstName || ''} ${s.lastName || ''}`.trim();
+                        const phone = s.smsWhatsappNo || s.fatherMobile || s.motherMobile || '';
+                        return (
+                          <div
+                            key={s.id || s._id}
+                            onClick={() => {
+                              const contactObj = {
+                                type: 'student',
+                                name: sName,
+                                parentName: s.fatherName || 'Parent',
+                                className: `${s.className || ''}-${s.section || ''}`,
+                                phone,
+                              };
+                              setSelectedContact(contactObj);
+                              setTestPhone(phone);
+                              setSearchContactQuery(sName);
+                              setIsDropdownOpen(false);
+                              applyTemplateToContact(selectedTemplateId, contactObj);
+                              toast.success(`Selected ${sName} (Parent: ${contactObj.parentName})`);
+                            }}
+                            className="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-xs transition-colors"
+                          >
+                            <div>
+                              <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <span>{sName}</span>
+                                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-normal">
+                                  Class {s.className}-{s.section}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-500">
+                                Parent: <span className="font-medium text-slate-700">{s.fatherName || 'Not specified'}</span>
+                              </div>
+                            </div>
+                            <span className="font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] font-semibold">
+                              +91 {phone}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {recipientType === 'staff' && (
+              <div className="relative">
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  Search & Fetch Teacher / Staff Contact:
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchContactQuery}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    onChange={(e) => {
+                      setSearchContactQuery(e.target.value);
+                      setIsDropdownOpen(true);
+                    }}
+                    placeholder="Search by teacher name, designation, department (e.g. Pooja, Faculty, Academics)..."
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  {selectedContact && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedContact(null);
+                        setSearchContactQuery('');
+                        setTestPhone('');
+                      }}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Selected Staff Chip Preview */}
+                {selectedContact && (
+                  <div className="mt-2 p-2.5 rounded-lg bg-indigo-50/80 border border-indigo-200 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <div>
+                        <span className="font-bold text-slate-800">{selectedContact.name}</span>
+                        <span className="text-slate-500 text-[11px] ml-2">• {selectedContact.designation}</span>
+                      </div>
+                    </div>
+                    <span className="font-mono text-indigo-800 font-bold bg-white px-2 py-0.5 rounded border border-indigo-200 text-[11px]">
+                      📱 +91 {selectedContact.phone}
+                    </span>
+                  </div>
+                )}
+
+                {/* Autocomplete Dropdown List */}
+                {isDropdownOpen && (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-52 overflow-y-auto divide-y divide-slate-100">
+                    {staffList
+                      .filter((st) => {
+                        if (!searchContactQuery.trim()) return true;
+                        const q = searchContactQuery.toLowerCase();
+                        const sName = (st.displayName || st.name || '').toLowerCase();
+                        const des = (st.designation || st.role || '').toLowerCase();
+                        const dept = (st.department || '').toLowerCase();
+                        const ph = String(st.phone || '');
+                        return sName.includes(q) || des.includes(q) || dept.includes(q) || ph.includes(q);
+                      })
+                      .slice(0, 10)
+                      .map((st) => {
+                        const sName = st.displayName || st.name || 'Staff Member';
+                        const phone = st.phone || '';
+                        return (
+                          <div
+                            key={st.id || st._id}
+                            onClick={() => {
+                              const contactObj = {
+                                type: 'staff',
+                                name: sName,
+                                designation: st.designation || st.role || 'Faculty',
+                                phone,
+                              };
+                              setSelectedContact(contactObj);
+                              setTestPhone(phone);
+                              setSearchContactQuery(sName);
+                              setIsDropdownOpen(false);
+                              applyTemplateToContact(selectedTemplateId, contactObj);
+                              toast.success(`Selected ${sName} (${contactObj.designation})`);
+                            }}
+                            className="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-xs transition-colors"
+                          >
+                            <div>
+                              <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <span>{sName}</span>
+                                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-normal">
+                                  {st.designation || st.role}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-500">
+                                Dept: <span className="font-medium text-slate-700">{st.department || 'School Staff'}</span>
+                              </div>
+                            </div>
+                            <span className="font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-[11px] font-semibold">
+                              +91 {phone}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              {/* Recipient Phone (Editable) */}
+              <div className="md:col-span-5">
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  Recipient Mobile Number:
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={testPhone}
                     onChange={(e) => setTestPhone(e.target.value)}
                     placeholder="98290 12345"
-                    className="w-full pl-12 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-mono"
                   />
+                  <span className="absolute right-3 top-2 text-[10px] text-slate-400 font-medium">
+                    10-digit mobile
+                  </span>
                 </div>
               </div>
 
               {/* Message Body */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  WhatsApp Message Body:
+              <div className="md:col-span-7">
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  Message Content:
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={testMessageText}
                   onChange={(e) => setTestMessageText(e.target.value)}
-                  className="w-full p-3 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50/30 font-sans leading-relaxed text-slate-800"
+                  className="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800 leading-relaxed"
                 />
               </div>
+            </div>
 
-              {/* Send Button */}
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  E2E Encrypted via School Official SIM
-                </span>
+            {/* Submit Button */}
+            <div className="flex justify-end pt-1">
+              <button
+                type="submit"
+                disabled={isSending || !isActive}
+                className={`px-6 py-2.5 rounded-lg text-xs font-bold text-white shadow-xs flex items-center gap-1.5 transition-all ${
+                  isActive
+                    ? 'bg-[#5058e5] hover:bg-[#434ac9] cursor-pointer active:scale-95'
+                    : 'bg-slate-300 cursor-not-allowed'
+                }`}
+              >
+                {isSending ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Sending WhatsApp...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Send Live WhatsApp</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
 
-                <button
-                  type="submit"
-                  disabled={isSending || !isActive}
-                  className={`px-5 py-2.5 rounded-lg text-xs font-bold text-white shadow-md flex items-center gap-2 transition-all ${
-                    isActive
-                      ? 'bg-[#5c67f6] hover:bg-[#4a55ea] active:scale-95 cursor-pointer'
-                      : 'bg-slate-400 cursor-not-allowed opacity-80'
-                  }`}
+          {/* Recent Delivery Logs */}
+          <div className="border-t border-slate-100 pt-3 space-y-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              Recent Dispatches
+            </span>
+            <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+              {testLogs.map((log) => (
+                <div
+                  key={log.id}
+                  className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-[11px] flex justify-between items-center"
                 >
-                  {isSending ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      Transmitting to Gateway...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      Send Test WhatsApp
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {/* Recent Transmissions Log */}
-            <div className="border-t border-slate-100 pt-3">
-              <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
-                <span>Recent Gateway Dispatch Logs</span>
-                <span className="text-[10px] text-slate-400 font-normal">Last 5 dispatches</span>
-              </h4>
-
-              <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                {testLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between text-[11px] gap-2"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-800">{log.recipient}</span>
-                        <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold text-[10px]">
-                          {log.template}
-                        </span>
-                        <span className="text-slate-400 text-[10px]">{log.time}</span>
-                      </div>
-                      <p className="text-slate-600 truncate mt-0.5">{log.message}</p>
-                    </div>
-
-                    <div className="shrink-0 flex items-center text-emerald-600 font-semibold gap-1 text-[10px]">
-                      <CheckCheck className="w-3.5 h-3.5" />
-                      <span>{log.status}</span>
-                    </div>
+                  <div className="truncate pr-2">
+                    <strong className="text-slate-800">{log.recipient}</strong>
+                    <span className="text-slate-400 mx-1.5">|</span>
+                    <span className="text-slate-600">{log.message}</span>
                   </div>
-                ))}
-              </div>
+                  <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[10px] shrink-0 font-semibold flex items-center gap-1">
+                    <CheckCheck className="w-3 h-3 text-emerald-600" />
+                    <span>{log.status}</span>
+                  </span>
+                </div>
+              ))}
             </div>
-          </div>
-
-          {/* Right Column (5 cols): ERP Automations & Practical Guide */}
-          <div className="lg:col-span-5 space-y-6">
-
-            {/* ERP Automation Triggers Card */}
-            <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-5 space-y-4">
-              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-slate-800">ERP Automatic Triggers</h3>
-                  <p className="text-[11px] text-slate-500">Modules configured to auto-dispatch via this WhatsApp link</p>
-                </div>
-                <Power className={`w-4 h-4 ${isActive ? 'text-emerald-500' : 'text-slate-300'}`} />
-              </div>
-
-              <div className="space-y-3">
-                {/* Rule 1: Absent */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-1.5 rounded-md bg-amber-100/70 text-amber-700 shrink-0">
-                      <Calendar className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">Daily Absent Notification</div>
-                      <div className="text-[11px] text-slate-500">Auto-sends at 09:30 AM to absent student parents</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRuleToggle('absentAlerts')}
-                    className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      rules.absentAlerts ? 'bg-emerald-500' : 'bg-slate-300'
-                    }`}
-                  >
-                    <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                      rules.absentAlerts ? 'translate-x-5' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                </div>
-
-                {/* Rule 2: Fee Receipts */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-1.5 rounded-md bg-emerald-100/70 text-emerald-700 shrink-0">
-                      <DollarSign className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">Fee Receipts & Reminders</div>
-                      <div className="text-[11px] text-slate-500">Instant PDF receipt on collection + due reminders</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRuleToggle('feeReceipts')}
-                    className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      rules.feeReceipts ? 'bg-emerald-500' : 'bg-slate-300'
-                    }`}
-                  >
-                    <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                      rules.feeReceipts ? 'translate-x-5' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                </div>
-
-                {/* Rule 3: Marksheets */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-1.5 rounded-md bg-indigo-100/70 text-indigo-700 shrink-0">
-                      <FileText className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">Exam Marksheet Direct PDF Link</div>
-                      <div className="text-[11px] text-slate-500">1-Click bulk WhatsApp dispatch from Marksheet Studio</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRuleToggle('marksheetDispatch')}
-                    className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      rules.marksheetDispatch ? 'bg-emerald-500' : 'bg-slate-300'
-                    }`}
-                  >
-                    <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                      rules.marksheetDispatch ? 'translate-x-5' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                </div>
-
-                {/* Rule 4: Circulars */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-1.5 rounded-md bg-sky-100/70 text-sky-700 shrink-0">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">Emergency & Holiday Notices</div>
-                      <div className="text-[11px] text-slate-500">Urgent broadcast announcements to all classes</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRuleToggle('holidayCirculars')}
-                    className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      rules.holidayCirculars ? 'bg-emerald-500' : 'bg-slate-300'
-                    }`}
-                  >
-                    <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                      rules.holidayCirculars ? 'translate-x-5' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Setup Checklist */}
-            <div className="bg-indigo-900 text-white rounded-xl shadow-xs p-5 space-y-3 relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 text-indigo-800/40 pointer-events-none">
-                <Smartphone className="w-32 h-32" />
-              </div>
-
-              <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-200 flex items-center gap-2">
-                <Info className="w-4 h-4" />
-                How Schools Use This (Kaam Ki Baatein)
-              </h4>
-
-              <div className="space-y-2 text-xs text-indigo-100/90 leading-relaxed relative z-1">
-                <p>
-                  <strong>1. Zero DLT/SMS Cost:</strong> School ke official SIM number ko link karke unlimited WhatsApp messages free bheje jaate hain.
-                </p>
-                <p>
-                  <strong>2. Trust & Branding:</strong> Parents ko message kisi anjaan 6-digit sender ID ki jagah School ke WhatsApp profile se milta hai.
-                </p>
-                <p>
-                  <strong>3. 1-Click Marksheet & Receipts:</strong> Parents ko direct PDF link milta hai, unhe print lene school aane ki zaroorat nahi hoti.
-                </p>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setQrModalOpen(true)}
-                  className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow transition-colors"
-                >
-                  <QrCode className="w-4 h-4" />
-                  {isActive ? 'Scan Again / Reconnect Device' : 'Link School WhatsApp Now'}
-                </button>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
 
-      {/* QR Code Scan Modal */}
+      {/* Confirmation Modal: Disconnect WhatsApp */}
+      {showConfirmDisconnect && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="font-bold text-base text-slate-800">Disconnect WhatsApp?</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Are you sure you want to disconnect <strong>{session.phone}</strong>? Outgoing automated alerts (Attendance, Fees, Marksheets) will be paused until reconnected.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowConfirmDisconnect(false)}
+                className="flex-1 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDisconnecting}
+                onClick={handleDisconnect}
+                className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {isDisconnecting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Disconnecting...</span>
+                  </>
+                ) : (
+                  <span>Yes, Disconnect</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clean QR Scan Modal */}
       {qrModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
+            {/* Close Button */}
             <button
               onClick={() => setQrModalOpen(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Header */}
-            <div className="space-y-1">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-xl shadow-xs">
-                <Smartphone className="w-6 h-6 text-emerald-600" />
+            {/* Title Header */}
+            <div>
+              <div className="w-10 h-10 rounded-full bg-[#25d366]/10 text-[#25d366] flex items-center justify-center mx-auto mb-2">
+                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                  <path d="M12.001 2.002c-5.522 0-9.999 4.477-9.999 9.999 0 1.763.456 3.42 1.254 4.863l-1.256 4.606 4.735-1.242c1.393.754 2.979 1.173 4.666 1.173 5.522 0 9.999-4.477 9.999-9.999s-4.477-10-9.999-10zm5.836 14.154c-.244.686-1.233 1.258-1.789 1.341-.519.077-1.189.109-3.486-.843-2.673-1.109-4.385-3.83-4.518-4.009-.133-.178-1.077-1.433-1.077-2.733 0-1.3.686-1.942.93-2.208.244-.266.533-.333.71-.333.178 0 .355.002.511.01.166.009.388-.063.609.467.244.577.822 2.019.889 2.164.067.144.111.311.022.489-.089.178-.133.289-.267.444-.133.155-.278.344-.4.466-.133.133-.272.278-.117.544.155.266.69 1.133 1.48 1.834 1.017.904 1.874 1.185 2.14 1.318.266.133.422.111.577-.067.155-.178.666-.777.844-1.043.178-.266.355-.222.6-.133.244.089 1.555.733 1.821.866.266.133.444.2.511.311.066.111.066.644-.178 1.33z" />
+                </svg>
               </div>
-              <h3 className="font-bold text-base text-slate-900">
-                Link School WhatsApp Account
-              </h3>
-              <p className="text-xs text-slate-500">
-                Scan QR code using WhatsApp on the official school smartphone
+              <h3 className="font-bold text-base text-slate-800">Scan QR Code</h3>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Link official school WhatsApp account
               </p>
             </div>
 
-            {/* Instructions */}
-            <div className="bg-slate-50 rounded-xl p-3 text-left text-xs text-slate-700 space-y-1.5 border border-slate-100">
+            {/* 3 Steps */}
+            <div className="bg-slate-50 rounded-xl p-3 text-left text-xs text-slate-600 space-y-1.5 border border-slate-100">
               <div className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">1</span>
-                <span>Open <strong>WhatsApp</strong> on your school phone</span>
+                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
+                <span>Open <strong>WhatsApp</strong> on your school smartphone</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">2</span>
-                <span>Tap <strong>Menu (⋮)</strong> on Android or <strong>Settings</strong> on iPhone</span>
+                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">2</span>
+                <span>Tap <strong>Menu (⋮)</strong> &gt; <strong>Linked Devices</strong> &gt; <strong>Link a Device</strong></span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">3</span>
-                <span>Select <strong>Linked Devices</strong> &rarr; <strong>Link a Device</strong></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">4</span>
+                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">3</span>
                 <span>Point your phone camera to this QR code</span>
               </div>
             </div>
 
-            {/* QR Code Container with dynamic timer */}
-            <div className="relative w-52 h-52 mx-auto bg-white border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-inner">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=UAB_INFOSOL_JD_INTERNATIONAL_WHATSAPP_${qrCountdown}`}
-                alt="WhatsApp QR Code"
-                className="w-full h-full object-contain"
-              />
-              <div className="absolute -bottom-3 bg-indigo-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full shadow flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-indigo-300 animate-spin" />
-                Refreshes in {qrCountdown}s
-              </div>
+            {/* QR Box */}
+            <div className="relative w-52 h-52 mx-auto bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-center shadow-inner">
+              {liveQr ? (
+                <img
+                  src={liveQr}
+                  alt="Live WhatsApp QR Code"
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center p-3 text-center space-y-1.5">
+                  <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin" />
+                  <p className="text-xs font-semibold text-slate-700">Connecting Socket...</p>
+                  <p className="text-[10px] text-slate-400">Loading handshake QR</p>
+                </div>
+              )}
             </div>
 
-            {/* Configurable school phone number */}
-            <div className="text-left space-y-1 pt-2">
-              <label className="text-[11px] font-semibold text-slate-600">
-                School Phone Number to pair:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customPhone}
-                  onChange={(e) => setCustomPhone(e.target.value)}
-                  placeholder="98290 12345"
-                  className="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-mono"
-                />
-                <input
-                  type="text"
-                  value={customDeskName}
-                  onChange={(e) => setCustomDeskName(e.target.value)}
-                  placeholder="Desk Name"
-                  className="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
-                />
-              </div>
+            {/* Live Indicator */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Waiting for WhatsApp scan...</span>
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2 space-y-2">
-              <button
-                type="button"
-                onClick={handleSimulateScan}
-                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Simulate Successful Scan & Link
-              </button>
-
+            <div className="pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setQrModalOpen(false)}
-                className="w-full py-2 rounded-xl text-slate-500 hover:text-slate-800 text-xs font-semibold hover:bg-slate-100 transition-colors"
+                className="w-full py-2 rounded-xl text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors font-medium cursor-pointer"
               >
-                Cancel
+                Close
               </button>
             </div>
           </div>
@@ -885,4 +970,5 @@ export function WhatsappQrPage() {
     </div>
   );
 }
+
 export default WhatsappQrPage;

@@ -32,3 +32,9 @@ Thumbs.db
 
 # Prisma
 backend/prisma/migrations/dev.db
+
+# WhatsApp Session Files (Sensitive E2E Keys)
+whatsapp_session/
+backend/whatsapp_session/
+**/whatsapp_session/**
+**/whatsapp_session/*

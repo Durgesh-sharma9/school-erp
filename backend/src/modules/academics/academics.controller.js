@@ -1,56 +1,64 @@
 // Complete 1:1 In-Memory & Database-backed Store for Academics / Master Module
 
 let classesStore = [
-  { id: '1', name: 'Nursery - PP3+', sections: ['A'], priority: 1, studentCount: 26 },
-  { id: '2', name: 'Lower Kindergarten - PP4+', sections: ['A'], priority: 2, studentCount: 49 },
-  { id: '3', name: 'Upper Kindergarten - PP5+', sections: ['A'], priority: 3, studentCount: 71 },
-  { id: '4', name: 'I', sections: ['A'], priority: 4, studentCount: 82 },
-  { id: '5', name: 'II', sections: ['A'], priority: 5, studentCount: 72 },
-  { id: '6', name: 'III', sections: ['A'], priority: 6, studentCount: 65 },
-  { id: '7', name: 'IV', sections: ['A'], priority: 7, studentCount: 78 },
-  { id: '8', name: 'V', sections: ['A'], priority: 8, studentCount: 80 },
-  { id: '9', name: 'VI', sections: ['A'], priority: 9, studentCount: 85 },
-  { id: '10', name: 'VII', sections: ['A'], priority: 10, studentCount: 90 },
-  { id: '11', name: 'VIII', sections: ['A'], priority: 11, studentCount: 88 },
-  { id: '12', name: 'IX', sections: ['A'], priority: 12, studentCount: 92 },
-  { id: '13', name: 'X', sections: ['A'], priority: 13, studentCount: 95 },
-  { id: '14', name: 'XI- HUMANITIES', sections: ['A'], priority: 14, studentCount: 35 },
-  { id: '15', name: 'XII-HUMANITIES', sections: ['A'], priority: 15, studentCount: 32 },
-  { id: '16', name: 'XI-MEDICAL', sections: ['A'], priority: 16, studentCount: 28 },
-  { id: '17', name: 'XII-MEDICAL', sections: ['A'], priority: 17, studentCount: 25 },
-  { id: '18', name: 'XI-NON-MEDICAL', sections: ['A'], priority: 18, studentCount: 30 },
-  { id: '19', name: 'XII-NON-MEDICAL', sections: ['A'], priority: 19, studentCount: 28 },
-  { id: '20', name: 'XII- COMMERCE', sections: ['A'], priority: 20, studentCount: 29 }
+  { id: '1', name: 'Nursery - PP3+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 1, studentCount: 26, classTeacher: 'Mrs. Suman Meena', roomNo: 'KG-01' },
+  { id: '2', name: 'Lower Kindergarten - PP4+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 2, studentCount: 49, classTeacher: 'Mrs. Aarti Sen', roomNo: 'KG-02' },
+  { id: '3', name: 'Upper Kindergarten - PP5+', wing: 'Pre-Primary', stream: '', sections: ['A', 'B'], priority: 3, studentCount: 71, classTeacher: 'Mrs. Rekha Sharma', roomNo: 'KG-03' },
+  { id: '4', name: 'Class I', wing: 'Primary', stream: '', sections: ['A', 'B'], priority: 4, studentCount: 82, classTeacher: 'Mrs. Monika Rani', roomNo: '101' },
+  { id: '5', name: 'Class II', wing: 'Primary', stream: '', sections: ['A', 'B'], priority: 5, studentCount: 72, classTeacher: 'Mrs. Sunita Kumari', roomNo: '102' },
+  { id: '6', name: 'Class III', wing: 'Primary', stream: '', sections: ['A', 'B'], priority: 6, studentCount: 65, classTeacher: 'Mr. Rajesh Meena', roomNo: '103' },
+  { id: '7', name: 'Class IV', wing: 'Primary', stream: '', sections: ['A', 'B'], priority: 7, studentCount: 78, classTeacher: 'Ms. Neha Gupta', roomNo: '104' },
+  { id: '8', name: 'Class V', wing: 'Primary', stream: '', sections: ['A', 'B'], priority: 8, studentCount: 80, classTeacher: 'Mrs. Priya Kanwar', roomNo: '105' },
+  { id: '9', name: 'Class VI', wing: 'Middle', stream: '', sections: ['A', 'B'], priority: 9, studentCount: 85, classTeacher: 'Mr. Amit Pareek', roomNo: '201' },
+  { id: '10', name: 'Class VII', wing: 'Middle', stream: '', sections: ['A', 'B'], priority: 10, studentCount: 90, classTeacher: 'Mrs. Kavita Verma', roomNo: '202' },
+  { id: '11', name: 'Class VIII', wing: 'Middle', stream: '', sections: ['A', 'B'], priority: 11, studentCount: 88, classTeacher: 'Mr. Vikram Rathore', roomNo: '203' },
+  { id: '12', name: 'Class IX', wing: 'Secondary', stream: '', sections: ['A', 'B', 'C'], priority: 12, studentCount: 92, classTeacher: 'Dr. Arun Joshi', roomNo: '204' },
+  { id: '13', name: 'Class X', wing: 'Secondary', stream: '', sections: ['A', 'B', 'C'], priority: 13, studentCount: 95, classTeacher: 'Mr. Rakesh Sharma', roomNo: '205' },
+  { id: '14', name: 'Class XI - Humanities', wing: 'Senior Secondary', stream: 'HUMANITIES', sections: ['A'], priority: 14, studentCount: 35, classTeacher: 'Ms. Ananya Roy', roomNo: '301' },
+  { id: '15', name: 'Class XII - Humanities', wing: 'Senior Secondary', stream: 'HUMANITIES', sections: ['A'], priority: 15, studentCount: 32, classTeacher: 'Mr. Manish Yadav', roomNo: '302' },
+  { id: '16', name: 'Class XI - Science (Medical)', wing: 'Senior Secondary', stream: 'SCIENCE', sections: ['A'], priority: 16, studentCount: 28, classTeacher: 'Dr. Arun Joshi', roomNo: '303' },
+  { id: '17', name: 'Class XII - Science (Medical)', wing: 'Senior Secondary', stream: 'SCIENCE', sections: ['A'], priority: 17, studentCount: 25, classTeacher: 'Mrs. Deepa Bhatt', roomNo: '304' },
+  { id: '18', name: 'Class XI - Science (Non-Medical)', wing: 'Senior Secondary', stream: 'SCIENCE', sections: ['A'], priority: 18, studentCount: 30, classTeacher: 'Mr. Rakesh Sharma', roomNo: '305' },
+  { id: '19', name: 'Class XII - Science (Non-Medical)', wing: 'Senior Secondary', stream: 'SCIENCE', sections: ['A'], priority: 19, studentCount: 28, classTeacher: 'Mr. Dinesh Choudhary', roomNo: '306' },
+  { id: '20', name: 'Class XI - Commerce', wing: 'Senior Secondary', stream: 'COMMERCE', sections: ['A'], priority: 20, studentCount: 31, classTeacher: 'Ms. Pooja Saxena', roomNo: '307' },
+  { id: '21', name: 'Class XII - Commerce', wing: 'Senior Secondary', stream: 'COMMERCE', sections: ['A'], priority: 21, studentCount: 29, classTeacher: 'Mr. Hemant Soni', roomNo: '308' }
 ];
 
 let subjectGroupsStore = [
-  { id: '1', name: 'ART EDUCATION' },
-  { id: '2', name: 'CLASS XI & XII' },
-  { id: '3', name: 'COMMERCE' },
-  { id: '4', name: 'COMPUTER' },
-  { id: '5', name: 'CONFIDENCE' },
-  { id: '6', name: 'CREATIVITY SKILLS' },
-  { id: '7', name: 'DISCIPLINE' },
-  { id: '8', name: 'ENGLISH' },
-  { id: '9', name: 'EVS' },
-  { id: '10', name: 'GENERAL AWARENESS' },
-  { id: '11', name: 'GENERAL KNOWLEDGE' },
-  { id: '12', name: 'HEALTH & PHYSICAL EDUCATION' },
-  { id: '13', name: 'HINDI' },
-  { id: '14', name: 'HUMANITIES' },
-  { id: '15', name: 'ICT' },
-  { id: '16', name: 'MATHEMATICS' },
-  { id: '17', name: 'MORAL SCIENCE' },
-  { id: '18', name: 'NEATNESS' },
-  { id: '19', name: 'PHYSICAL EDUCATION' },
-  { id: '20', name: 'REGULARITY & PUNCTUALITY' },
-  { id: '21', name: 'SCIENCE' },
-  { id: '22', name: 'SCIENCE STREAM' },
-  { id: '23', name: 'SKILL SUBJECTS' },
-  { id: '24', name: 'SOCIAL SCIENCE' },
-  { id: '25', name: 'SPORTS' },
-  { id: '26', name: 'THIRD LANGUAGE' },
-  { id: '27', name: 'WORK EDUCATION' }
+  // 1. Scholastic (Core Academic Subjects - Graded by Marks & Grades)
+  { id: '1', name: 'MATHEMATICS', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Core math curriculum for standard grades' },
+  { id: '2', name: 'SCIENCE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'General Science, Physics, Chemistry, Biology' },
+  { id: '3', name: 'ENGLISH', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'English Language, Literature & Grammar' },
+  { id: '4', name: 'HINDI', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Hindi Course A/B, Grammar & Reader' },
+  { id: '5', name: 'SOCIAL SCIENCE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'History, Civics, Geography & Economics' },
+  { id: '6', name: 'EVS', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Environmental Studies for Primary Wing' },
+  { id: '7', name: 'THIRD LANGUAGE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Sanskrit, French, Regional Languages' },
+  { id: '8', name: 'GENERAL KNOWLEDGE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'GK & Current Affairs' },
+  { id: '9', name: 'GENERAL AWARENESS', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Primary awareness modules' },
+  { id: '10', name: 'MORAL SCIENCE', category: 'Scholastic', evaluationType: 'Marks & Grade', description: 'Values & Ethics Education' },
+
+  // 2. Senior Secondary Streams (Classes 11 & 12)
+  { id: '11', name: 'COMMERCE', category: 'Senior Streams', evaluationType: 'Marks & Grade', description: 'Accountancy, Business Studies, Economics' },
+  { id: '12', name: 'HUMANITIES', category: 'Senior Streams', evaluationType: 'Marks & Grade', description: 'History, Political Science, Geography, Sociology' },
+  { id: '13', name: 'SCIENCE STREAM', category: 'Senior Streams', evaluationType: 'Marks & Grade', description: 'Physics, Chemistry, Biology, Comp. Sci.' },
+  { id: '14', name: 'CLASS XI & XII', category: 'Senior Streams', evaluationType: 'Marks & Grade', description: 'General Studies, Work Experience, HPE' },
+
+  // 3. Co-Scholastic & Vocational Skills
+  { id: '15', name: 'ART EDUCATION', category: 'Co-Scholastic', evaluationType: 'CCE Grade (A-E)', description: 'Visual arts, Drawing, Painting & Crafts' },
+  { id: '16', name: 'HEALTH & PHYSICAL EDUCATION', category: 'Co-Scholastic', evaluationType: 'CCE Grade (A-E)', description: 'Physical fitness, Yoga, Health habits' },
+  { id: '17', name: 'WORK EDUCATION', category: 'Co-Scholastic', evaluationType: 'CCE Grade (A-E)', description: 'Socially useful productive work (SUPW)' },
+  { id: '18', name: 'COMPUTER', category: 'Co-Scholastic', evaluationType: 'Marks & Grade', description: 'Computer Applications & Coding' },
+  { id: '19', name: 'ICT', category: 'Co-Scholastic', evaluationType: 'Marks & Grade', description: 'Information & Communication Technology' },
+  { id: '20', name: 'SPORTS', category: 'Co-Scholastic', evaluationType: 'CCE Grade (A-E)', description: 'Athletics, Outdoor Games & Sports Meet' },
+  { id: '21', name: 'SKILL SUBJECTS', category: 'Co-Scholastic', evaluationType: 'Marks & Grade', description: 'IT, Abacus, Front Office Operations' },
+  { id: '22', name: 'PHYSICAL EDUCATION', category: 'Co-Scholastic', evaluationType: 'CCE Grade (A-E)', description: 'Sports & Physical Drill' },
+
+  // 4. Discipline & Personality Traits (Report Card CCE Grading)
+  { id: '23', name: 'DISCIPLINE', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Classroom conduct, behavior & obedience' },
+  { id: '24', name: 'REGULARITY & PUNCTUALITY', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Attendance, timely arrival & task completion' },
+  { id: '25', name: 'NEATNESS', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Uniform, notebook upkeep & personal hygiene' },
+  { id: '26', name: 'CONFIDENCE', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Public speaking, participation & initiative' },
+  { id: '27', name: 'CREATIVITY SKILLS', category: 'Discipline & Habits', evaluationType: 'Rating (1-5 / A-E)', description: 'Original thinking & project presentations' }
 ];
 
 let subjectsStore = [
@@ -147,7 +155,7 @@ export const getAllClasses = async (req, res, next) => {
 export const createClass = async (req, res, next) => {
   try {
     const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
-    const { name, sections, priority } = req.body;
+    const { name, sections, priority, studentCount, wing, stream, classTeacher, roomNo, sectionDetails } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Class name required' });
     
     if (!TENANT_CLASSES[schoolId]) {
@@ -158,9 +166,14 @@ export const createClass = async (req, res, next) => {
       id: String(Date.now()),
       schoolId,
       name,
+      wing: wing || '',
+      stream: stream || '',
       sections: Array.isArray(sections) ? sections : (sections ? sections.split(',').map(s => s.trim()) : ['A']),
       priority: Number(priority) || TENANT_CLASSES[schoolId].length + 1,
-      studentCount: 0
+      studentCount: Number(studentCount) || 0,
+      classTeacher: classTeacher || '',
+      roomNo: roomNo || '',
+      sectionDetails: sectionDetails || []
     };
     TENANT_CLASSES[schoolId].push(newClass);
     return res.status(201).json({ success: true, message: 'Class created', data: newClass });
@@ -173,15 +186,20 @@ export const updateClass = async (req, res, next) => {
   try {
     const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
     const { id } = req.params;
-    const { name, sections, priority, studentCount } = req.body;
+    const { name, sections, priority, studentCount, wing, stream, classTeacher, roomNo, sectionDetails } = req.body;
     
     if (TENANT_CLASSES[schoolId]) {
       const cls = TENANT_CLASSES[schoolId].find(c => c.id === id);
       if (cls) {
-        if (name) cls.name = name;
-        if (sections) cls.sections = Array.isArray(sections) ? sections : sections.split(',').map(s => s.trim());
+        if (name !== undefined) cls.name = name;
+        if (sections !== undefined) cls.sections = Array.isArray(sections) ? sections : sections.split(',').map(s => s.trim());
         if (priority !== undefined) cls.priority = Number(priority);
         if (studentCount !== undefined) cls.studentCount = Number(studentCount);
+        if (wing !== undefined) cls.wing = wing;
+        if (stream !== undefined) cls.stream = stream;
+        if (classTeacher !== undefined) cls.classTeacher = classTeacher;
+        if (roomNo !== undefined) cls.roomNo = roomNo;
+        if (sectionDetails !== undefined) cls.sectionDetails = sectionDetails;
         return res.status(200).json({ success: true, message: 'Class updated successfully', data: cls });
       }
     }
@@ -217,11 +235,35 @@ export const getAllSubjectGroups = async (req, res, next) => {
 
 export const createSubjectGroup = async (req, res, next) => {
   try {
-    const { name } = req.body;
+    const { name, category, evaluationType, description } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Group name required' });
-    const newGroup = { id: String(Date.now()), name: name.toUpperCase() };
+    const newGroup = {
+      id: String(Date.now()),
+      name: name.toUpperCase().trim(),
+      category: category || 'Scholastic',
+      evaluationType: evaluationType || 'Marks & Grade',
+      description: description || ''
+    };
     subjectGroupsStore.push(newGroup);
     return res.status(201).json({ success: true, message: 'Subject Group created', data: newGroup });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSubjectGroup = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, category, evaluationType, description } = req.body;
+    const group = subjectGroupsStore.find(g => g.id === id);
+    if (!group) return res.status(404).json({ success: false, message: 'Subject group not found' });
+
+    if (name) group.name = name.toUpperCase().trim();
+    if (category) group.category = category;
+    if (evaluationType) group.evaluationType = evaluationType;
+    if (description !== undefined) group.description = description;
+
+    return res.status(200).json({ success: true, message: 'Subject group updated', data: group });
   } catch (error) {
     next(error);
   }

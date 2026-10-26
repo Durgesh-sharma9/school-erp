@@ -12,11 +12,21 @@
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js"
   },
-  "keywords": ["school-erp", "saas", "multi-tenant", "express", "prisma", "postgresql", "imagekit", "whatsapp"],
+  "keywords": [
+    "school-erp",
+    "saas",
+    "multi-tenant",
+    "express",
+    "prisma",
+    "postgresql",
+    "imagekit",
+    "whatsapp"
+  ],
   "author": "WebNCode",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -26,7 +36,9 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "pino": "^10.4.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",
