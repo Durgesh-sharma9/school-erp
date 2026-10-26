@@ -108,22 +108,24 @@ function OutlineSelect({
   );
 }
 
-// Student Graduate Silhouette Avatar Component
+// Student / Parent Avatar Component
 function StudentAvatar({
   previewUrl,
   onFileSelect,
   rollNo = '',
   compNo = '',
-  status = 'Studying'
+  status = 'Studying',
+  isStudent = true,
+  role = 'student'
 }) {
   const fileInputRef = React.useRef(null);
 
   return (
-    <div className="col-span-12 sm:col-span-3 flex flex-col items-center rounded-lg border-2 border-indigo-100 bg-[#eef2ff] p-3 md:mb-0 mb-3 shadow-xs">
+    <div className="col-span-12 sm:col-span-3 flex flex-col items-center justify-center rounded-lg border border-indigo-100 bg-[#eef2ff] p-3 md:mb-0 mb-3 shadow-xs">
       <div className="w-28 h-28 mb-2 flex items-center justify-center bg-[#e0e7ff] rounded overflow-hidden">
         {previewUrl ? (
-          <img src={previewUrl} alt="Student" className="w-full h-full object-cover" />
-        ) : (
+          <img src={previewUrl} alt={role} className="w-full h-full object-cover" />
+        ) : isStudent ? (
           <svg className="w-24 h-24 text-gray-700" viewBox="0 0 100 100" fill="currentColor">
             {/* Cap */}
             <polygon points="50,15 85,28 50,40 15,28" fill="#1e293b" />
@@ -138,6 +140,13 @@ function StudentAvatar({
             {/* Body Gown */}
             <path d="M25,88 C25,65 38,62 50,62 C62,62 75,65 75,88 Z" fill="#1e293b" />
           </svg>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-indigo-400 p-2 text-center">
+            <User className="w-14 h-14 stroke-1 mb-1 text-indigo-500" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
+              {role === 'father' ? "Father's Photo" : role === 'mother' ? "Mother's Photo" : "Parent Photo"}
+            </span>
+          </div>
         )}
       </div>
 
@@ -149,12 +158,12 @@ function StudentAvatar({
         className="hidden"
       />
 
-      {/* Red Browse + Dark Camera Buttons matching Live UAB */}
-      <div className="flex items-center w-full max-w-[160px] text-white rounded bg-red-500 overflow-hidden shadow-xs mb-2">
+      {/* Red Browse + Dark Camera Buttons */}
+      <div className="flex items-center w-full max-w-[160px] text-white rounded bg-red-500 overflow-hidden shadow-xs mb-1">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-1 bg-red-500 hover:bg-red-600 transition-colors p-1.5 flex items-center justify-center gap-1.5 text-xs font-semibold"
+          className="flex-1 bg-red-500 hover:bg-red-600 transition-colors p-1.5 flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer"
         >
           <CloudUpload className="w-3.5 h-3.5" />
           Browse
@@ -169,16 +178,19 @@ function StudentAvatar({
         </button>
       </div>
 
-      <div className="flex justify-around items-center w-full mt-1 font-medium text-xs text-gray-700">
-        <span>Roll No. : {rollNo || ''}</span>
-        <span>Comp. No. : {compNo || ''}</span>
-      </div>
-
-      <div className="flex justify-center items-center w-full my-1 font-medium text-xs text-gray-700">
-        <span>
-          Status: <span className="text-green-600 font-semibold">{status}</span>
-        </span>
-      </div>
+      {isStudent && (
+        <>
+          <div className="flex justify-around items-center w-full mt-1 font-medium text-xs text-gray-700">
+            <span>Roll No. : {rollNo || ''}</span>
+            <span>Comp. No. : {compNo || ''}</span>
+          </div>
+          <div className="flex justify-center items-center w-full my-1 font-medium text-xs text-gray-700">
+            <span>
+              Status: <span className="text-green-600 font-semibold">{status}</span>
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1137,420 +1149,191 @@ export function StudentRegistrationPage({ onNavigate }) {
 
         {/* Tab 2: Parent's Details */}
         {activeTab === 'parents_details' && (
-          <div>
+          <div className="space-y-6">
             {/* Father Details Section */}
-            <h3 className="text-xs font-bold text-gray-700 tracking-wider mb-2">FATHER DETAILS</h3>
-            <div className="grid grid-cols-12 gap-x-4 mb-2">
-              <StudentAvatar
-                previewUrl={formData.father_photo}
-                onFileSelect={(e) => handleFileUpload(e, 'father_photo')}
-                status="Active"
-              />
+            <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs">
+              <h3 className="text-xs font-bold text-gray-800 tracking-wider mb-3 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                FATHER DETAILS
+              </h3>
+              <div className="grid grid-cols-12 gap-4">
+                <StudentAvatar
+                  previewUrl={formData.father_photo}
+                  onFileSelect={(e) => handleFileUpload(e, 'father_photo')}
+                  isStudent={false}
+                  role="father"
+                />
 
-              <div className="col-span-12 sm:col-span-9">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4">
-                  <OutlineInput
-                    label="Father D.O.B"
-                    name="fathers_dob"
-                    type="date"
-                    value={formData.fathers_dob}
-                    onChange={handleInputChange}
-                    rightIcon={<Calendar className="w-4 h-4" />}
-                  />
-                  <OutlineInput
-                    label="Father Phone"
-                    name="fathers_phone_no_alt"
-                    value={formData.fathers_phone_no_alt}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Father Email"
-                    name="fathers_email"
-                    value={formData.fathers_email}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Father Aadhaar No."
-                    name="fathers_aadhaar"
-                    value={formData.fathers_aadhaar}
-                    onChange={handleInputChange}
-                  />
+                <div className="col-span-12 sm:col-span-9">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
+                    <OutlineInput
+                      label="Father Name"
+                      name="fathers_name"
+                      value={formData.fathers_name}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father Mobile No."
+                      name="fathers_mobile_no"
+                      value={formData.fathers_mobile_no}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father Email"
+                      name="fathers_email"
+                      value={formData.fathers_email}
+                      onChange={handleInputChange}
+                    />
 
-                  <OutlineInput
-                    label="Father Pan No."
-                    name="fathers_pan_no"
-                    value={formData.fathers_pan_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Father Occupation"
-                    name="fathers_occupation"
-                    value={formData.fathers_occupation}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Father Designation"
-                    name="fathers_designation"
-                    value={formData.fathers_designation}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Father Qualification"
-                    name="fathers_alternate_email"
-                    value={formData.fathers_alternate_email}
-                    onChange={handleInputChange}
-                  />
+                    <OutlineInput
+                      label="Father Occupation"
+                      name="fathers_occupation"
+                      value={formData.fathers_occupation}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father Qualification"
+                      name="fathers_alternate_email"
+                      value={formData.fathers_alternate_email}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Annual Income"
+                      name="fathers_income"
+                      value={formData.fathers_income}
+                      onChange={handleInputChange}
+                    />
+
+                    <OutlineInput
+                      label="Father Aadhaar No."
+                      name="fathers_aadhaar"
+                      value={formData.fathers_aadhaar}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father PAN No."
+                      name="fathers_pan_no"
+                      value={formData.fathers_pan_no}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father D.O.B"
+                      name="fathers_dob"
+                      type="date"
+                      value={formData.fathers_dob}
+                      onChange={handleInputChange}
+                      rightIcon={<Calendar className="w-4 h-4" />}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Below Father Avatar Full Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4">
-              <OutlineInput
-                label="Father Department"
-                name="fathers_department"
-                value={formData.fathers_department}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Annual Income"
-                name="fathers_income"
-                value={formData.fathers_income}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Address"
-                name="fathers_address"
-                value={formData.fathers_address}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father BPL Card"
-                name="fathers_bpl_number"
-                value={formData.fathers_bpl_number}
-                onChange={handleInputChange}
-              />
-              <div className="relative mb-3 flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-gray-500 mb-1">Father Service In</span>
-                <div className="flex items-center gap-4 text-xs text-gray-700">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fathers_service_in"
-                      value="No"
-                      checked={formData.fathers_service_in === 'No'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>No</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fathers_service_in"
-                      value="Yes"
-                      checked={formData.fathers_service_in === 'Yes'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>Yes</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4">
-              <div className="relative mb-3 flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-gray-500 mb-1">Parents Status</span>
-                <div className="flex items-center gap-4 text-xs text-gray-700">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="parents_status"
-                      value="is alive"
-                      checked={formData.parents_status === 'is alive'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>is alive</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="parents_status"
-                      value="No"
-                      checked={formData.parents_status === 'No'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>No</span>
-                  </label>
-                </div>
-              </div>
-              <OutlineInput
-                label="Father Bussiness Detail"
-                name="fathers_bussiness_details"
-                value={formData.fathers_bussiness_details}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Company Name"
-                name="fathers_company_name"
-                value={formData.fathers_company_name}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Office Phone"
-                name="fathers_office_phone"
-                value={formData.fathers_office_phone}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Office Email"
-                name="fathers_office_email"
-                value={formData.fathers_office_email}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 mb-6">
-              <OutlineInput
-                label="Father Office Website"
-                name="fathers_office_website"
-                value={formData.fathers_office_website}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Office Address"
-                name="fathers_office_address"
-                value={formData.fathers_office_address}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Father Samagra Id"
-                name="fathers_samagra_id"
-                value={formData.fathers_samagra_id}
-                onChange={handleInputChange}
-              />
             </div>
 
             {/* Mother Details Section */}
-            <h3 className="text-xs font-bold text-gray-700 tracking-wider mb-2">MOTHER DETAILS</h3>
-            <div className="grid grid-cols-12 gap-x-4 mb-2">
-              <StudentAvatar
-                previewUrl={formData.mother_photo}
-                onFileSelect={(e) => handleFileUpload(e, 'mother_photo')}
-                status="Active"
-              />
+            <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs">
+              <h3 className="text-xs font-bold text-gray-800 tracking-wider mb-3 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-pink-600"></span>
+                MOTHER DETAILS
+              </h3>
+              <div className="grid grid-cols-12 gap-4">
+                <StudentAvatar
+                  previewUrl={formData.mother_photo}
+                  onFileSelect={(e) => handleFileUpload(e, 'mother_photo')}
+                  isStudent={false}
+                  role="mother"
+                />
 
-              <div className="col-span-12 sm:col-span-9">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4">
-                  <OutlineInput
-                    label="Mother DOB"
-                    name="mothers_dob"
-                    type="date"
-                    value={formData.mothers_dob}
-                    onChange={handleInputChange}
-                    rightIcon={<Calendar className="w-4 h-4" />}
-                  />
-                  <OutlineInput
-                    label="Mother Phone"
-                    name="mothers_phone_no_alt"
-                    value={formData.mothers_phone_no_alt}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Mother Email"
-                    name="mothers_email"
-                    value={formData.mothers_email}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Mother Aadhaar No."
-                    name="mothers_aadhaar"
-                    value={formData.mothers_aadhaar}
-                    onChange={handleInputChange}
-                  />
+                <div className="col-span-12 sm:col-span-9">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
+                    <OutlineInput
+                      label="Mother Name"
+                      name="mothers_name"
+                      value={formData.mothers_name}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother Mobile No."
+                      name="mothers_mobile_no"
+                      value={formData.mothers_mobile_no}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother Email"
+                      name="mothers_email"
+                      value={formData.mothers_email}
+                      onChange={handleInputChange}
+                    />
 
-                  <OutlineInput
-                    label="Mother Pan No."
-                    name="mothers_pan_no"
-                    value={formData.mothers_pan_no}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Mother Occupation"
-                    name="mothers_occupation"
-                    value={formData.mothers_occupation}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Mother Designation"
-                    name="mothers_designation"
-                    value={formData.mothers_designation}
-                    onChange={handleInputChange}
-                  />
-                  <OutlineInput
-                    label="Mother Qualification"
-                    name="mothers_alternate_email"
-                    value={formData.mothers_alternate_email}
-                    onChange={handleInputChange}
-                  />
+                    <OutlineInput
+                      label="Mother Occupation"
+                      name="mothers_occupation"
+                      value={formData.mothers_occupation}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother Qualification"
+                      name="mothers_alternate_email"
+                      value={formData.mothers_alternate_email}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother Annual Income"
+                      name="mothers_income"
+                      value={formData.mothers_income}
+                      onChange={handleInputChange}
+                    />
+
+                    <OutlineInput
+                      label="Mother Aadhaar No."
+                      name="mothers_aadhaar"
+                      value={formData.mothers_aadhaar}
+                      onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother D.O.B"
+                      name="mothers_dob"
+                      type="date"
+                      value={formData.mothers_dob}
+                      onChange={handleInputChange}
+                      rightIcon={<Calendar className="w-4 h-4" />}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Below Mother Avatar Full Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4">
-              <OutlineInput
-                label="Mother Department"
-                name="mothers_department"
-                value={formData.mothers_department}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Annual Income"
-                name="mothers_income"
-                value={formData.mothers_income}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Address"
-                name="mothers_address"
-                value={formData.mothers_address}
-                onChange={handleInputChange}
-              />
-              <div className="relative mb-3 flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-gray-500 mb-1">Mother Service In</span>
-                <div className="flex items-center gap-4 text-xs text-gray-700">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="mothers_service_in"
-                      value="No"
-                      checked={formData.mothers_service_in === 'No'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>No</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="mothers_service_in"
-                      value="Yes"
-                      checked={formData.mothers_service_in === 'Yes'}
-                      onChange={handleInputChange}
-                      className="text-indigo-600"
-                    />
-                    <span>Yes</span>
-                  </label>
-                </div>
-              </div>
-              <OutlineInput
-                label="Mother Business Detail"
-                name="mothers_bussiness_details"
-                value={formData.mothers_bussiness_details}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4">
-              <OutlineInput
-                label="Mother Company Name"
-                name="mothers_company_name"
-                value={formData.mothers_company_name}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Office Phone Number"
-                name="mothers_office_phone"
-                value={formData.mothers_office_phone}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Office Email"
-                name="mothers_office_email"
-                value={formData.mothers_office_email}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Office Website"
-                name="mothers_office_website"
-                value={formData.mothers_office_website}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Mother Office Address"
-                name="mothers_office_address"
-                value={formData.mothers_office_address}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 mb-6">
-              <OutlineInput
-                label="Mother Samagra Id"
-                name="mothers_samagra_id"
-                value={formData.mothers_samagra_id}
-                onChange={handleInputChange}
-              />
             </div>
 
             {/* Guardians Section */}
-            <h3 className="text-xs font-bold text-gray-700 tracking-wider mb-2">GUARDIAN DETAILS</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4 mb-4">
-              <OutlineInput
-                label="Guardian1 Name"
-                name="guardian1_name"
-                value={formData.guardian1_name}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian1 Mobile"
-                name="guardian1_mobile_no"
-                value={formData.guardian1_mobile_no}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian1 Relation"
-                name="guardian1_relation"
-                value={formData.guardian1_relation}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian1 Remark"
-                name="guardian1_remark"
-                value={formData.guardian1_remark}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4">
-              <OutlineInput
-                label="Guardian2 Name"
-                name="guardian2_name"
-                value={formData.guardian2_name}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian2 Mobile"
-                name="guardian2_mobile_no"
-                value={formData.guardian2_mobile_no}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian2 Relation"
-                name="guardian2_relation"
-                value={formData.guardian2_relation}
-                onChange={handleInputChange}
-              />
-              <OutlineInput
-                label="Guardian2 Remark"
-                name="guardian2_remark"
-                value={formData.guardian2_remark}
-                onChange={handleInputChange}
-              />
+            <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs">
+              <h3 className="text-xs font-bold text-gray-800 tracking-wider mb-3 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                LOCAL GUARDIAN DETAILS (OPTIONAL)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4">
+                <OutlineInput
+                  label="Guardian Name"
+                  name="guardian1_name"
+                  value={formData.guardian1_name}
+                  onChange={handleInputChange}
+                />
+                <OutlineInput
+                  label="Guardian Relation"
+                  name="guardian1_relation"
+                  value={formData.guardian1_relation}
+                  onChange={handleInputChange}
+                />
+                <OutlineInput
+                  label="Guardian Mobile No."
+                  name="guardian1_mobile_no"
+                  value={formData.guardian1_mobile_no}
+                  onChange={handleInputChange}
+                />
+                <OutlineInput
+                  label="Guardian Address / Remark"
+                  name="guardian1_remark"
+                  value={formData.guardian1_remark}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
           </div>
         )}
