@@ -342,3 +342,91 @@ export const MOCK_DATE_SHEET_ROWS = [
   { sNo: 5, date: '2026-10-26', day: 'Monday', time: '09:00 AM - 12:00 PM', subject: 'Social Science', roomNo: 'Room 104' },
   { sNo: 6, date: '2026-10-28', day: 'Wednesday', time: '09:00 AM - 11:00 AM', subject: 'Information Technology', roomNo: 'Computer Lab 1' }
 ];
+
+export const MOCK_INACTIVE_STUDENTS = [
+  {
+    sNo: 1,
+    admNo: 'JD-2023-089',
+    srNo: '889',
+    name: 'KABIR MEENA',
+    className: 'X',
+    section: 'A',
+    fatherName: 'DINESH MEENA',
+    reason: 'Parent Transfer / Relocated to Delhi',
+    inactiveDate: '2026-08-14',
+    status: 'Inactive',
+    type: 'Left School',
+    contactNo: '9829044551'
+  },
+  {
+    sNo: 2,
+    admNo: 'JD-2022-142',
+    srNo: '942',
+    name: 'RIYA KUMARI',
+    className: 'VIII',
+    section: 'B',
+    fatherName: 'RAMESHWAR PRASAD',
+    reason: 'Long Absent (Without Leave > 45 days)',
+    inactiveDate: '2026-09-02',
+    status: 'Inactive',
+    type: 'Long Absent',
+    contactNo: '9414022334'
+  },
+  {
+    sNo: 3,
+    admNo: 'JD-2021-023',
+    srNo: '623',
+    name: 'ANANYA JOSHI',
+    className: 'XII-HUMANITIES',
+    section: 'A',
+    fatherName: 'DR. SUNIL JOSHI',
+    reason: 'TC Issued (Shifted to Kota Coaching Institute)',
+    inactiveDate: '2026-07-20',
+    status: 'Inactive',
+    type: 'Left School',
+    contactNo: '9828011223'
+  },
+  {
+    sNo: 4,
+    admNo: 'JD-2024-310',
+    srNo: '1310',
+    name: 'YASHVARDHAN SINGH',
+    className: 'IX',
+    section: 'A',
+    fatherName: 'MAHENDRA SINGH',
+    reason: 'Struck Off (Non-payment of session dues)',
+    inactiveDate: '2026-09-15',
+    status: 'Inactive',
+    type: 'Struck Off',
+    contactNo: '9784033445'
+  },
+  {
+    sNo: 5,
+    admNo: 'JD-2023-205',
+    srNo: '1005',
+    name: 'PRIYANSHI JAIN',
+    className: 'V',
+    section: 'B',
+    fatherName: 'VIKAS JAIN',
+    reason: 'Shifted to Native Place (Udaipur)',
+    inactiveDate: '2026-08-30',
+    status: 'Inactive',
+    type: 'Left School',
+    contactNo: '9928055667'
+  },
+  {
+    sNo: 6,
+    admNo: 'JD-2024-415',
+    srNo: '1415',
+    name: 'HARSHIT AGARWAL',
+    className: 'XI-COMMERCE',
+    section: 'A',
+    fatherName: 'ALOK AGARWAL',
+    reason: 'Struck Off (Disciplinary Actions & Attendance Shortage)',
+    inactiveDate: '2026-10-01',
+    status: 'Inactive',
+    type: 'Struck Off',
+    contactNo: '9413066778'
+  }
+];
+

@@ -16,6 +16,7 @@ export { TcReportPage } from './TcReportPage';
 export { CancelTcReportPage } from './CancelTcReportPage';
 export { StudentCallListPage } from './StudentCallListPage';
 export { SubjectWiseStudentListPage } from './SubjectWiseStudentListPage';
+export { StudentReportsPage } from './StudentReportsPage';
 export { StudentReportsHubPage } from './StudentReportsHubPage';
 export {
   STUDENT_REPORT_CATEGORIES,

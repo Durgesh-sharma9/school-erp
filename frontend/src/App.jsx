@@ -116,6 +116,7 @@ import {
   CancelTcReportPage,
   StudentCallListPage,
   SubjectWiseStudentListPage,
+  StudentReportsPage,
   StudentReportsHubPage
 } from './modules/students/reports';
 import {
@@ -634,6 +635,7 @@ function AppContent() {
               case '/student-reports':
               case '/student-report-hub':
               case '/students-reports':
+                return <StudentReportsPage onNavigate={handleNavigate} />;
               case '/students-report':
               case '/student-report':
               case '/student-list':
