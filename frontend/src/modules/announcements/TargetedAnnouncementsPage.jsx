@@ -482,10 +482,12 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto pb-32">
       {/* Header matching Test Master Pro */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">School Communications</h1>
-          <p className="text-xs font-medium text-slate-500 mt-0.5">
+      <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between w-full max-w-full">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 break-words leading-tight">
+            School Communications
+          </h1>
+          <p className="mt-0.5 text-xs text-slate-500 break-words leading-normal">
             Manage notifications, feedback, and interactive polls comprehensively.
           </p>
         </div>
