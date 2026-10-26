@@ -634,58 +634,67 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
   const { role, user } = useAuth();
 
-  const rawCategories = role === 'STUDENT'
-    ? studentMenuCategories
-    : role === 'STAFF'
-    ? staffMenuCategories
-    : menuCategories;
+  const activeCategories = React.useMemo(() => {
+    const rawCategories = role === 'STUDENT'
+      ? studentMenuCategories
+      : role === 'STAFF'
+      ? staffMenuCategories
+      : menuCategories;
 
-  const activeCategories = rawCategories.filter(item => {
-    // SuperAdmin Analytics tab should ONLY appear when role is SUPER_ADMIN
-    if (item.id === 'superadmin-analytics') {
-      return role === 'SUPER_ADMIN';
-    }
-    return true;
-  });
+    return rawCategories.filter(item => {
+      // SuperAdmin Analytics tab should ONLY appear when role is SUPER_ADMIN
+      if (item.id === 'superadmin-analytics') {
+        return role === 'SUPER_ADMIN';
+      }
+      return true;
+    });
+  }, [role]);
+
+  // Track previous path to ONLY auto-expand dropdowns on real route transitions
+  const prevPathRef = React.useRef(currentPath);
 
   React.useEffect(() => {
-    let activeKey = null;
-    let activeSubKey = null;
+    // Only auto-expand parent when the route actually changes, so user manual toggles are respected
+    if (prevPathRef.current !== currentPath) {
+      prevPathRef.current = currentPath;
 
-    const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
+      let activeKey = null;
+      let activeSubKey = null;
+      const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
 
-    // Dynamically search activeCategories for currentPath to expand parent and sub-reports
-    for (const item of activeCategories) {
-      if (item.path && item.path === normCurrent) {
-        activeKey = item.id;
-        break;
-      }
-      if (item.subItems && item.subItems.length > 0) {
-        for (const sub of item.subItems) {
-          if (sub.path === normCurrent || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(normCurrent))) {
-            activeKey = item.id;
-            break;
-          }
-          if (sub.children && sub.children.length > 0) {
-            for (const child of sub.children) {
-              if (child.path === normCurrent) {
-                activeKey = item.id;
-                activeSubKey = sub.id || `${item.id}-${sub.title}`;
-                break;
+      // Dynamically search activeCategories for currentPath to expand parent and sub-reports
+      for (const item of activeCategories) {
+        if (item.path && item.path === normCurrent) {
+          activeKey = item.id;
+          break;
+        }
+        if (item.subItems && item.subItems.length > 0) {
+          for (const sub of item.subItems) {
+            if (sub.path === normCurrent || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(normCurrent))) {
+              activeKey = item.id;
+              break;
+            }
+            if (sub.children && sub.children.length > 0) {
+              for (const child of sub.children) {
+                if (child.path === normCurrent) {
+                  activeKey = item.id;
+                  activeSubKey = sub.id || `${item.id}-${sub.title}`;
+                  break;
+                }
               }
             }
+            if (activeKey) break;
           }
-          if (activeKey) break;
         }
+        if (activeKey) break;
       }
-      if (activeKey) break;
-    }
 
-    if (activeKey) {
-      setOpenDropdowns(prev => ({ ...prev, [activeKey]: true }));
-    }
-    if (activeSubKey) {
-      setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
+      if (activeKey) {
+        setOpenDropdowns(prev => ({ ...prev, [activeKey]: true }));
+      }
+      if (activeSubKey) {
+        setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
+      }
     }
 
     // Auto-scroll active item within the sidebar ONLY (never scroll window or main content)
