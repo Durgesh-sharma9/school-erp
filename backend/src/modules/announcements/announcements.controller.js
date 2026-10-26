@@ -158,18 +158,18 @@ const TARGET_METADATA = {
     { name: 'XII', sections: ['A (Sci)', 'B (Comm)', 'C (Arts)'] }
   ],
   students: [
-    { id: 'std_1', className: 'I', section: 'A', rollNo: '1', admNo: '1621', name: 'Aaditya Singh Choudhary', fatherName: 'Narendra Singh', phone: '9829012345' },
-    { id: 'std_2', className: 'I', section: 'A', rollNo: '2', admNo: 'A135', name: 'Advik Rao', fatherName: 'Pradeep Rao', phone: '9414023456' },
-    { id: 'std_3', className: 'I', section: 'A', rollNo: '3', admNo: '1625', name: 'Ananya Sharma', fatherName: 'Manish Sharma', phone: '9829033445' },
-    { id: 'std_4', className: 'X', section: 'A', rollNo: '14', admNo: '1402', name: 'Rohan Meena', fatherName: 'Suresh Meena', phone: '9829044556' },
-    { id: 'std_5', className: 'X', section: 'A', rollNo: '22', admNo: '1408', name: 'Priya Shekhawat', fatherName: 'Rajendra Singh', phone: '9829055667' },
-    { id: 'std_6', className: 'X', section: 'A', rollNo: '31', admNo: '1415', name: 'Dhruv Agarwal', fatherName: 'Alok Agarwal', phone: '9829066778' },
-    { id: 'std_7', className: 'X', section: 'B', rollNo: '8', admNo: '1420', name: 'Aryan Joshi', fatherName: 'Hemant Joshi', phone: '9829077889' },
-    { id: 'std_8', className: 'X', section: 'B', rollNo: '19', admNo: '1424', name: 'Tanya Verma', fatherName: 'Kamal Verma', phone: '9829088990' },
-    { id: 'std_9', className: 'XII', section: 'A (Sci)', rollNo: '5', admNo: '1205', name: 'Sameer Khan', fatherName: 'Imran Khan', phone: '9829099001' },
-    { id: 'std_10', className: 'XII', section: 'A (Sci)', rollNo: '18', admNo: '1218', name: 'Divya Rathore', fatherName: 'Mahendra Singh', phone: '9829011223' },
-    { id: 'std_11', className: 'IX', section: 'A', rollNo: '12', admNo: '1501', name: 'Kartik Somani', fatherName: 'Rajesh Somani', phone: '9829022334' },
-    { id: 'std_12', className: 'VIII', section: 'B', rollNo: '9', admNo: '1540', name: 'Bhavya Patel', fatherName: 'Nitin Patel', phone: '9829033445' }
+    { id: 'std_1', className: 'I', section: 'A', rollNo: '1', admNo: '1621', name: 'Aaditya Singh Choudhary', fatherName: 'Narendra Singh', phone: '7891008092' },
+    { id: 'std_2', className: 'I', section: 'A', rollNo: '2', admNo: 'A135', name: 'Advik Rao', fatherName: 'Pradeep Rao', phone: '7891008092' },
+    { id: 'std_3', className: 'I', section: 'A', rollNo: '3', admNo: '1625', name: 'Ananya Sharma', fatherName: 'Manish Sharma', phone: '7891008092' },
+    { id: 'std_4', className: 'X', section: 'A', rollNo: '14', admNo: '1402', name: 'Rohan Meena', fatherName: 'Suresh Meena', phone: '7891008092' },
+    { id: 'std_5', className: 'X', section: 'A', rollNo: '22', admNo: '1408', name: 'Priya Shekhawat', fatherName: 'Rajendra Singh', phone: '7891008092' },
+    { id: 'std_6', className: 'X', section: 'A', rollNo: '31', admNo: '1415', name: 'Dhruv Agarwal', fatherName: 'Alok Agarwal', phone: '7891008092' },
+    { id: 'std_7', className: 'X', section: 'B', rollNo: '8', admNo: '1420', name: 'Aryan Joshi', fatherName: 'Hemant Joshi', phone: '7891008092' },
+    { id: 'std_8', className: 'X', section: 'B', rollNo: '19', admNo: '1424', name: 'Tanya Verma', fatherName: 'Kamal Verma', phone: '7891008092' },
+    { id: 'std_9', className: 'XII', section: 'A (Sci)', rollNo: '5', admNo: '1205', name: 'Sameer Khan', fatherName: 'Imran Khan', phone: '7891008092' },
+    { id: 'std_10', className: 'XII', section: 'A (Sci)', rollNo: '18', admNo: '1218', name: 'Divya Rathore', fatherName: 'Mahendra Singh', phone: '7891008092' },
+    { id: 'std_11', className: 'IX', section: 'A', rollNo: '12', admNo: '1501', name: 'Kartik Somani', fatherName: 'Rajesh Somani', phone: '7891008092' },
+    { id: 'std_12', className: 'VIII', section: 'B', rollNo: '9', admNo: '1540', name: 'Bhavya Patel', fatherName: 'Nitin Patel', phone: '7891008092' }
   ]
 };
 

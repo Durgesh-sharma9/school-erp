@@ -690,9 +690,10 @@ export function SchoolInfoPage() {
           )}
         </div>
 
-        {/* Card 4: Collapsible Accordion 3 - RANGE ATTENDANCE (Geo-Fencing) with Auto-Fetch */}
+        {/* Card 4: Collapsible Accordion 3 - RANGE ATTENDANCE (GEO-FENCING) */}
         <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
-          <div
+          <button
+            type="button"
             onClick={() => setExpandedSection(prev => prev === 'range' ? '' : 'range')}
             className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer select-none"
           >
@@ -700,34 +701,8 @@ export function SchoolInfoPage() {
               <MapPin className="w-4 h-4 text-indigo-600" />
               <span>RANGE ATTENDANCE (GEO-FENCING)</span>
             </span>
-
-            <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedSection('range');
-                  handleFetchCurrentLocation();
-                }}
-                disabled={isLocating}
-                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors"
-                title="Fetch live GPS coordinates from this device"
-              >
-                {isLocating ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Fetching GPS...</span>
-                  </>
-                ) : (
-                  <>
-                    <Crosshair className="w-3.5 h-3.5" />
-                    <span>Fetch Current Location</span>
-                  </>
-                )}
-              </button>
-              <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
-            </div>
-          </div>
+            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
+          </button>
 
           {expandedSection === 'range' && (
             <div className="p-4 space-y-3.5 bg-white border-t border-slate-200 text-xs">
