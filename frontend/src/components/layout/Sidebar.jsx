@@ -712,11 +712,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         {/* Top Header matching Test Master Pro */}
         <div className="relative flex h-16 items-center justify-between border-b border-slate-100 pl-5 pr-3 shrink-0 bg-white">
           <div className="flex items-center gap-1.5 select-none cursor-pointer" onClick={() => onNavigate && onNavigate('/dashboard')}>
-            <span className="font-extrabold text-sm md:text-base tracking-tight text-slate-900">
-              TEST MASTER
-            </span>
-            <span className="text-[11px] font-bold text-teal-600 tracking-wider">
-              PRO
+            <span className="font-extrabold text-base md:text-lg tracking-tight text-slate-900">
+              SCHOOL ERP
             </span>
           </div>
 
