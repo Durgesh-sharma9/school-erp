@@ -1,93 +1,94 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Megaphone,
+  Bell,
+  Check,
   BarChart3,
-  MessageSquare,
-  Users,
-  CheckCircle2,
-  Clock,
-  Search,
-  Filter,
-  Trash2,
-  RefreshCw,
-  FileText,
-  Send,
-  Plus,
-  X,
-  Sparkles,
-  AlertCircle,
-  Eye,
-  CheckSquare,
-  Square,
-  ShieldAlert,
-  ArrowRight,
-  MessageCircle,
-  Phone,
-  User,
   Vote,
-  Calendar,
+  Clock3,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Download,
+  FileText,
+  MessageSquare,
+  Paperclip,
+  X,
+  Send,
+  User,
+  GraduationCap,
+  Eye,
+  CheckCheck,
+  ExternalLink,
+  Plus,
+  RefreshCw,
+  Trash2,
   Lock,
   Unlock,
-  Radio
+  Radio,
+  FileIcon,
+  ShieldCheck,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AnnouncementModal } from '../../components/announcements/AnnouncementModal';
 
 export default function TargetedAnnouncementsPage({ onNavigate }) {
-  // Main Module Tab: 'announcements' | 'polls' | 'feedback'
-  const [currentModuleTab, setCurrentModuleTab] = useState('announcements');
+  // Top Tabs matching Test Master Pro: 'notifications' | 'feedback' | 'polls'
+  const [activeTab, setActiveTab] = useState('notifications');
 
-  // Modal open states
+  // Announcement Modal State
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   const [announcementModalTab, setAnnouncementModalTab] = useState('announcement');
 
   // ==========================================
-  // 1. ANNOUNCEMENTS STATE & LOGIC
+  // TAB 1: NOTIFICATIONS & ANNOUNCEMENTS
   // ==========================================
-  const [announcements, setAnnouncements] = useState([]);
-  const [annCounts, setAnnCounts] = useState({ all: 0, teachers: 0, classes: 0, urgent: 0 });
-  const [annLoading, setAnnLoading] = useState(true);
-  const [annSearch, setAnnSearch] = useState('');
-  const [annPriorityFilter, setAnnPriorityFilter] = useState('ALL');
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const fetchAnnouncements = async () => {
+  const fetchNotifications = async () => {
     try {
-      setAnnLoading(true);
-      const res = await fetch(`/api/announcements?priority=${annPriorityFilter}&search=${encodeURIComponent(annSearch)}`);
+      setLoading(true);
+      const res = await fetch(`/api/announcements?priority=${priorityFilter}&search=${encodeURIComponent(searchQuery)}`);
       const d = await res.json();
       if (d.success) {
-        setAnnouncements(d.data.announcements || []);
-        if (d.data.counts) setAnnCounts(d.data.counts);
+        const list = d.data.announcements || [];
+        setNotifications(list);
+        setUnreadCount(list.filter(n => n.priority === 'High' || n.priority === 'Urgent').length);
       }
     } catch {
-      toast.error('Failed to load announcements');
+      toast.error('Failed to load notifications');
     } finally {
-      setAnnLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleResendAnnouncement = async (id) => {
+  const handleResend = async (id) => {
     try {
       const res = await fetch(`/api/announcements/${id}/resend`, { method: 'POST' });
       const d = await res.json();
       if (d.success) {
-        toast.success('Announcement re-sent to all channels! 🚀');
-        fetchAnnouncements();
+        toast.success('Broadcast re-sent to all channels! 🚀');
+        fetchNotifications();
       }
     } catch {
       toast.error('Failed to resend');
     }
   };
 
-  const handleDeleteAnnouncement = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this broadcast?')) return;
+  const handleDeleteNotification = async (id) => {
+    if (!window.confirm('Delete this announcement?')) return;
     try {
       const res = await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
       const d = await res.json();
       if (d.success) {
         toast.success('Announcement removed');
-        fetchAnnouncements();
+        fetchNotifications();
       }
     } catch {
       toast.error('Failed to delete');
@@ -95,12 +96,145 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
   };
 
   // ==========================================
-  // 2. INTERACTIVE POLLS STATE & LOGIC
+  // TAB 2: FEEDBACK & COMPLAINTS
+  // ==========================================
+  const [feedback, setFeedback] = useState([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackFilter, setFeedbackFilter] = useState('all');
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [feedbackCounts, setFeedbackCounts] = useState({ all: 0, open: 0, inProgress: 0, resolved: 0 });
+
+  // Conversation Modal
+  const [conversationOpen, setConversationOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+
+  // Create Feedback Form
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    senderName: '',
+    senderRole: 'Parent',
+    senderContact: '7891008092',
+    category: 'Academic',
+    subject: '',
+    description: '',
+    priority: 'Medium'
+  });
+
+  const fetchFeedback = async () => {
+    try {
+      setFeedbackLoading(true);
+      const res = await fetch(`/api/announcements/feedback/list?status=${feedbackFilter}&search=${encodeURIComponent(feedbackSearch)}`);
+      const d = await res.json();
+      if (d.success) {
+        setFeedback(d.data.tickets || []);
+        if (d.data.counts) setFeedbackCounts(d.data.counts);
+      }
+    } catch {
+      toast.error('Failed to load feedback tickets');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const openConversation = (ticket) => {
+    setSelectedFeedback(ticket);
+    setConversationOpen(true);
+    setReplyContent('');
+  };
+
+  const closeConversation = () => {
+    setConversationOpen(false);
+    setSelectedFeedback(null);
+    setReplyContent('');
+  };
+
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || !selectedFeedback) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(`/api/announcements/feedback/${selectedFeedback.id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          replyText: replyContent.trim(),
+          senderName: 'Principal Office / Admin',
+          senderRole: 'Admin'
+        })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Reply dispatched! 💬');
+        setReplyContent('');
+        setSelectedFeedback(d.data);
+        fetchFeedback();
+      }
+    } catch {
+      toast.error('Failed to send reply');
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    if (!selectedFeedback) return;
+    try {
+      const res = await fetch(`/api/announcements/feedback/${selectedFeedback.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Status updated to ${newStatus}`);
+        setSelectedFeedback(d.data);
+        fetchFeedback();
+      }
+    } catch {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleCreateFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!createForm.subject.trim() || !createForm.description.trim()) {
+      toast.error('Title and description are required');
+      return;
+    }
+    try {
+      const res = await fetch('/api/announcements/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm)
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Feedback ticket created successfully! 📋');
+        setIsCreateFormOpen(false);
+        setCreateForm({
+          senderName: '',
+          senderRole: 'Parent',
+          senderContact: '7891008092',
+          category: 'Academic',
+          subject: '',
+          description: '',
+          priority: 'Medium'
+        });
+        fetchFeedback();
+      }
+    } catch {
+      toast.error('Failed to create ticket');
+    }
+  };
+
+  // ==========================================
+  // TAB 3: POLLS & POLL ANALYTICS
   // ==========================================
   const [polls, setPolls] = useState([]);
-  const [pollsLoading, setPollsLoading] = useState(true);
-  const [pollFilter, setPollFilter] = useState('ALL'); // 'ALL' | 'Active' | 'Closed'
-  const [userSelectedVote, setUserSelectedVote] = useState({}); // { [pollId]: ['opt_1'] }
+  const [pollsLoading, setPollsLoading] = useState(false);
+  const [selectedPoll, setSelectedPoll] = useState(null);
+  const [userSelectedVote, setUserSelectedVote] = useState({});
 
   const fetchPolls = async () => {
     try {
@@ -117,663 +251,417 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
     }
   };
 
-  const handleOptionSelect = (pollId, optId, isMultiple) => {
-    setUserSelectedVote(prev => {
-      const current = prev[pollId] || [];
-      if (isMultiple) {
-        const next = current.includes(optId)
-          ? current.filter(id => id !== optId)
-          : [...current, optId];
-        return { ...prev, [pollId]: next };
-      } else {
-        return { ...prev, [pollId]: [optId] };
-      }
-    });
-  };
-
-  const handleCastVote = async (pollId) => {
+  const handleVoteSubmit = async (pollId) => {
     const selected = userSelectedVote[pollId];
     if (!selected || selected.length === 0) {
       toast.error('Please choose at least one option to vote');
       return;
     }
-
     try {
       const res = await fetch(`/api/announcements/polls/${pollId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ optionIds: selected, userId: 'user_admin' })
+        body: JSON.stringify({ optionIds: selected, userId: 'admin' })
       });
       const d = await res.json();
       if (d.success) {
         toast.success('Your vote has been counted! 🗳️');
         fetchPolls();
-      } else {
-        toast.error(d.message || 'Failed to submit vote');
       }
     } catch {
-      toast.error('Failed to submit vote');
+      toast.error('Failed to vote');
     }
   };
 
   const handleTogglePollStatus = async (pollId, currentStatus) => {
-    const nextStatus = currentStatus === 'Active' ? 'Closed' : 'Active';
+    const next = currentStatus === 'Active' ? 'Closed' : 'Active';
     try {
       const res = await fetch(`/api/announcements/polls/${pollId}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus })
+        body: JSON.stringify({ status: next })
       });
       const d = await res.json();
       if (d.success) {
-        toast.success(`Poll marked as ${nextStatus}`);
+        toast.success(`Poll marked as ${next}`);
         fetchPolls();
-      }
-    } catch {
-      toast.error('Failed to update poll status');
-    }
-  };
-
-  const handleDeletePoll = async (pollId) => {
-    if (!window.confirm('Delete this poll and its voting telemetry?')) return;
-    try {
-      const res = await fetch(`/api/announcements/polls/${pollId}`, { method: 'DELETE' });
-      const d = await res.json();
-      if (d.success) {
-        toast.success('Poll deleted');
-        fetchPolls();
-      }
-    } catch {
-      toast.error('Failed to delete poll');
-    }
-  };
-
-  // ==========================================
-  // 3. COMPLAINTS & FEEDBACK STATE & LOGIC
-  // ==========================================
-  const [feedbackTickets, setFeedbackTickets] = useState([]);
-  const [feedbackCounts, setFeedbackCounts] = useState({ all: 0, open: 0, inProgress: 0, resolved: 0 });
-  const [feedbackLoading, setFeedbackLoading] = useState(true);
-  const [feedbackFilter, setFeedbackFilter] = useState('ALL'); // 'ALL' | 'Open' | 'In Progress' | 'Resolved'
-  const [feedbackCategory, setFeedbackCategory] = useState('ALL');
-  const [feedbackSearch, setFeedbackSearch] = useState('');
-
-  // Conversation Modal state
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const [replyText, setReplyText] = useState('');
-  const [replying, setReplying] = useState(false);
-
-  // New Ticket Modal state
-  const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
-  const [newTicketForm, setNewTicketForm] = useState({
-    senderName: '',
-    senderRole: 'Parent',
-    senderContact: '7891008092',
-    category: 'Academic',
-    subject: '',
-    description: '',
-    priority: 'Medium'
-  });
-
-  const fetchFeedback = async () => {
-    try {
-      setFeedbackLoading(true);
-      const res = await fetch(`/api/announcements/feedback/list?status=${feedbackFilter}&category=${feedbackCategory}&search=${encodeURIComponent(feedbackSearch)}`);
-      const d = await res.json();
-      if (d.success) {
-        setFeedbackTickets(d.data.tickets || []);
-        if (d.data.counts) setFeedbackCounts(d.data.counts);
-      }
-    } catch {
-      toast.error('Failed to load complaints');
-    } finally {
-      setFeedbackLoading(false);
-    }
-  };
-
-  const handleSendReply = async (e) => {
-    e.preventDefault();
-    if (!replyText.trim() || !selectedTicket) return;
-
-    setReplying(true);
-    try {
-      const res = await fetch(`/api/announcements/feedback/${selectedTicket.id}/reply`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          replyText: replyText.trim(),
-          senderName: 'Principal Office / School Admin',
-          senderRole: 'Admin'
-        })
-      });
-      const d = await res.json();
-      if (d.success) {
-        toast.success('Reply dispatched to parent/student! 💬');
-        setReplyText('');
-        setSelectedTicket(d.data);
-        fetchFeedback();
-      }
-    } catch {
-      toast.error('Failed to send reply');
-    } finally {
-      setReplying(false);
-    }
-  };
-
-  const handleUpdateTicketStatus = async (ticketId, newStatus) => {
-    try {
-      const res = await fetch(`/api/announcements/feedback/${ticketId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      const d = await res.json();
-      if (d.success) {
-        toast.success(`Ticket marked as ${newStatus}`);
-        if (selectedTicket && selectedTicket.id === ticketId) {
-          setSelectedTicket(d.data);
-        }
-        fetchFeedback();
       }
     } catch {
       toast.error('Failed to update status');
     }
   };
 
-  const handleCreateTicketSubmit = async (e) => {
-    e.preventDefault();
-    if (!newTicketForm.subject.trim() || !newTicketForm.description.trim()) {
-      toast.error('Please enter subject and description');
-      return;
-    }
-
+  const handleDeletePoll = async (pollId) => {
+    if (!window.confirm('Delete this poll?')) return;
     try {
-      const res = await fetch('/api/announcements/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTicketForm)
-      });
+      const res = await fetch(`/api/announcements/polls/${pollId}`, { method: 'DELETE' });
       const d = await res.json();
       if (d.success) {
-        toast.success('Complaint ticket registered successfully! 📋');
-        setIsNewTicketOpen(false);
-        setNewTicketForm({
-          senderName: '',
-          senderRole: 'Parent',
-          senderContact: '7891008092',
-          category: 'Academic',
-          subject: '',
-          description: '',
-          priority: 'Medium'
-        });
-        fetchFeedback();
+        toast.success('Poll removed');
+        fetchPolls();
       }
     } catch {
-      toast.error('Failed to create ticket');
+      toast.error('Failed to delete');
     }
   };
 
-  // Initial Data Fetch
+  const exportPollCSV = (poll) => {
+    const headers = ['Option Number', 'Option Text', 'Votes Received', 'Percentage (%)'];
+    const rows = poll.options.map((opt, i) => [
+      `"${i + 1}"`,
+      `"${opt.text.replace(/"/g, '""')}"`,
+      `"${opt.votes || 0}"`,
+      `"${opt.percentage || 0}%"`
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `poll_analytics_${poll.id}.csv`;
+    link.click();
+    toast.success('Poll telemetry exported to CSV! 📥');
+  };
+
+  // Switch Tabs Effect
   useEffect(() => {
-    if (currentModuleTab === 'announcements') fetchAnnouncements();
-    else if (currentModuleTab === 'polls') fetchPolls();
-    else if (currentModuleTab === 'feedback') fetchFeedback();
-  }, [currentModuleTab, annPriorityFilter, feedbackFilter, feedbackCategory]);
+    if (activeTab === 'notifications') fetchNotifications();
+    else if (activeTab === 'feedback') fetchFeedback();
+    else if (activeTab === 'polls') fetchPolls();
+  }, [activeTab, priorityFilter, feedbackFilter]);
+
+  const buttonGradient = "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-500/25 text-white";
 
   return (
-    <div className="p-3 sm:p-5 bg-slate-50 min-h-screen text-slate-800 space-y-4">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen text-slate-800 space-y-5">
       
-      {/* Top Header Card matching Test Master Pro styling */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
-              <Megaphone className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                Communication & Announcement Hub
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wider">
-                  Test Master Suite
-                </span>
-              </h1>
-              <p className="text-xs text-slate-500">
-                Broadcast announcements, run community polls, and resolve complaints & grievances.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => {
-              setAnnouncementModalTab('announcement');
-              setIsAnnouncementModalOpen(true);
-            }}
-            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <Megaphone className="w-3.5 h-3.5" />
-            Broadcast Notice
-          </button>
-
-          <button
-            onClick={() => {
-              setAnnouncementModalTab('poll');
-              setIsAnnouncementModalOpen(true);
-            }}
-            className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold shadow-2xs transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            Create Poll
-          </button>
-        </div>
+      {/* Page Title & Subtitle matching Test Master Pro PageHeader */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          School Communications
+        </h1>
+        <p className="text-xs text-slate-500 font-medium">
+          Manage notifications, feedback, and interactive polls comprehensively.
+        </p>
       </div>
 
-      {/* 3 Main Unified Tabs Matching Test Master Pro */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <button
-          onClick={() => setCurrentModuleTab('announcements')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            currentModuleTab === 'announcements'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
-          }`}
-        >
-          <Megaphone className="w-4 h-4" />
-          <span>Announcements</span>
-          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-            currentModuleTab === 'announcements' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {announcements.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setCurrentModuleTab('polls')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            currentModuleTab === 'polls'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4" />
-          <span>Interactive Polls</span>
-          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-            currentModuleTab === 'polls' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {polls.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setCurrentModuleTab('feedback')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            currentModuleTab === 'feedback'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>Complaints & Feedback</span>
-          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-            currentModuleTab === 'feedback' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {feedbackCounts.open > 0 ? `${feedbackCounts.open} Open` : feedbackTickets.length}
-          </span>
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* TAB 1: ANNOUNCEMENTS CONTENT */}
-      {/* ========================================================= */}
-      {currentModuleTab === 'announcements' && (
-        <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs font-bold text-slate-500">Priority:</span>
-              <div className="flex items-center gap-1">
-                {['ALL', 'Normal', 'High', 'Urgent'].map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setAnnPriorityFilter(p)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                      annPriorityFilter === p
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative w-full sm:w-72">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search announcements..."
-                value={annSearch}
-                onChange={e => setAnnSearch(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && fetchAnnouncements()}
-                className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          {/* Announcements Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {announcements.map(ann => (
-              <div
-                key={ann.id}
-                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                      ann.priority === 'Urgent'
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                        : ann.priority === 'High'
-                        ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                        : 'bg-blue-50 text-blue-700 border border-blue-200'
-                    }`}>
-                      {ann.priority} Priority
-                    </span>
-                    <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {new Date(ann.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-1.5 hover:text-indigo-600 transition-colors">
-                    {ann.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-3">
-                    {ann.content}
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div className="text-[11px] font-semibold text-slate-500">
-                    Target: <strong className="text-slate-700">{ann.targetSummary || 'Faculty & Students'}</strong>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleResendAnnouncement(ann.id)}
-                      title="Resend broadcast"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAnnouncement(ann.id)}
-                      title="Delete broadcast"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {announcements.length === 0 && !annLoading && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
-              <Megaphone className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-              <p className="text-xs font-semibold">No announcements found matching criteria</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* TAB 2: INTERACTIVE POLLS CONTENT */}
-      {/* ========================================================= */}
-      {currentModuleTab === 'polls' && (
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500">Status:</span>
-              <div className="flex items-center gap-1">
-                {['ALL', 'Active', 'Closed'].map(st => (
-                  <button
-                    key={st}
-                    onClick={() => setPollFilter(st)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                      pollFilter === st
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    {st}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                setAnnouncementModalTab('poll');
-                setIsAnnouncementModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> New Poll
-            </button>
-          </div>
-
-          {/* Polls Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {polls
-              .filter(p => pollFilter === 'ALL' || p.status === pollFilter)
-              .map(poll => {
-                const isSingle = poll.pollType === 'single';
-                const selectedOpts = userSelectedVote[poll.id] || [];
-                return (
-                  <div
-                    key={poll.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Poll Header Badges */}
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                            poll.status === 'Active'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}>
-                            {poll.status}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase">
-                            Audience: {poll.audience}
-                          </span>
-                        </div>
-
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                          {poll.totalVotes || 0} Total Votes
-                        </span>
-                      </div>
-
-                      <h3 className="font-bold text-slate-900 text-sm leading-snug mb-1">
-                        {poll.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                        {poll.description}
-                      </p>
-
-                      {/* Options with Live Voting & Bar Charts */}
-                      <div className="space-y-2.5 mb-4">
-                        {poll.options.map(opt => {
-                          const isSelected = selectedOpts.includes(opt.id);
-                          return (
-                            <div
-                              key={opt.id}
-                              onClick={() => poll.status === 'Active' && handleOptionSelect(poll.id, opt.id, !isSingle)}
-                              className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
-                                isSelected
-                                  ? 'border-indigo-600 bg-indigo-50/40 shadow-xs'
-                                  : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                              }`}
-                            >
-                              {/* Background Percentage Progress Fill */}
-                              <div
-                                className="absolute left-0 top-0 bottom-0 bg-indigo-100/60 transition-all duration-500 pointer-events-none"
-                                style={{ width: `${opt.percentage || 0}%` }}
-                              />
-
-                              <div className="relative z-10 flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <div className={`w-4 h-4 rounded-${isSingle ? 'full' : 'md'} border flex items-center justify-center shrink-0 ${
-                                    isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white'
-                                  }`}>
-                                    {isSelected && <div className={`w-1.5 h-1.5 rounded-${isSingle ? 'full' : 'xs'} bg-white`} />}
-                                  </div>
-                                  <span className="text-xs font-semibold text-slate-800 truncate">
-                                    {opt.text}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <span className="text-[11px] font-bold text-slate-700">
-                                    {opt.votes || 0} votes
-                                  </span>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-600 text-white shadow-2xs">
-                                    {opt.percentage || 0}%
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Bottom Actions */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                      {poll.status === 'Active' ? (
-                        <button
-                          type="button"
-                          onClick={() => handleCastVote(poll.id)}
-                          className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Vote className="w-3.5 h-3.5" /> Submit Vote
-                        </button>
-                      ) : (
-                        <span className="text-xs font-semibold text-slate-400 italic">Voting Closed</span>
-                      )}
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePollStatus(poll.id, poll.status)}
-                          title={poll.status === 'Active' ? 'Close poll' : 'Reopen poll'}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer"
-                        >
-                          {poll.status === 'Active' ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeletePoll(poll.id)}
-                          title="Delete poll"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-
-          {polls.length === 0 && !pollsLoading && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
-              <BarChart3 className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-              <p className="text-xs font-semibold">No interactive polls published yet</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* TAB 3: COMPLAINTS & GRIEVANCE FEEDBACK */}
-      {/* ========================================================= */}
-      {currentModuleTab === 'feedback' && (
-        <div className="space-y-4">
-          
-          {/* Summary Metric Counters */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs">
-              <span className="text-[11px] font-bold text-slate-400 uppercase">Total Tickets</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">{feedbackCounts.all}</p>
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-rose-200/80 bg-rose-50/20 shadow-2xs">
-              <span className="text-[11px] font-bold text-rose-600 uppercase">Open / Pending</span>
-              <p className="text-xl font-extrabold text-rose-700 mt-0.5">{feedbackCounts.open}</p>
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-amber-200/80 bg-amber-50/20 shadow-2xs">
-              <span className="text-[11px] font-bold text-amber-600 uppercase">In Progress</span>
-              <p className="text-xl font-extrabold text-amber-700 mt-0.5">{feedbackCounts.inProgress}</p>
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-emerald-200/80 bg-emerald-50/20 shadow-2xs">
-              <span className="text-[11px] font-bold text-emerald-600 uppercase">Resolved</span>
-              <p className="text-xl font-extrabold text-emerald-700 mt-0.5">{feedbackCounts.resolved}</p>
-            </div>
-          </div>
-
-          {/* Controls Bar */}
-          <div className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-              {['ALL', 'Open', 'In Progress', 'Resolved'].map(st => (
-                <button
-                  key={st}
-                  onClick={() => setFeedbackFilter(st)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
-                    feedbackFilter === st
-                      ? 'bg-slate-900 text-white font-bold'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {st}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-60">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search complaints..."
-                  value={feedbackSearch}
-                  onChange={e => setFeedbackSearch(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchFeedback()}
-                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
-              </div>
-
+      {/* Classy Pill Tabs Bar (Exact 1:1 Test Master Pro styling) */}
+      <div className="mb-2">
+        <div className="inline-flex items-center gap-1.5 p-1.5 bg-slate-100/90 backdrop-blur-md border border-slate-200/80 rounded-full shadow-inner overflow-x-auto max-w-full custom-scrollbar">
+          {[
+            { id: 'notifications', label: 'Alerts & Notices', icon: Bell },
+            { id: 'feedback', label: 'Feedback Center', icon: MessageSquare },
+            { id: 'polls', label: 'Poll Analytics', icon: BarChart3 }
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
               <button
-                onClick={() => setIsNewTicketOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1 cursor-pointer shrink-0"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 text-[13px] font-bold rounded-full transition-all duration-300 whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-sm border-0'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'
+                }`}
               >
-                <Plus className="w-3.5 h-3.5" /> Log Ticket
+                <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 1. NOTIFICATIONS TAB (Matching Test Master Pro AdminNotifications.jsx) */}
+      {/* ========================================================================= */}
+      {activeTab === 'notifications' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 rounded-2xl border border-slate-200/80 shadow-md bg-white overflow-hidden">
+          
+          {/* Header Bar matching Test Master Pro */}
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50/30 p-4 border-b border-emerald-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-emerald-800">
+              <Bell className="h-5 w-5" />
+              <h3 className="font-bold text-[15px]">Received Notifications</h3>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => {
+                  setAnnouncementModalTab('announcement');
+                  setIsAnnouncementModalOpen(true);
+                }}
+                className={`h-8 text-[11px] font-bold rounded-lg px-4 flex items-center gap-1.5 cursor-pointer ${buttonGradient}`}
+              >
+                <Bell className="h-3 w-3" /> Create Announcement
+              </button>
+              <button
+                onClick={() => {
+                  setAnnouncementModalTab('poll');
+                  setIsAnnouncementModalOpen(true);
+                }}
+                className="h-8 text-[11px] font-bold rounded-lg px-4 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <BarChart3 className="h-3 w-3 text-indigo-600" /> Create Poll
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('feedback');
+                  setIsCreateFormOpen(true);
+                }}
+                className="h-8 text-[11px] font-bold rounded-lg px-4 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <MessageSquare className="h-3 w-3 text-indigo-600" /> Create Feedback
               </button>
             </div>
           </div>
 
+          {/* Subbar with Counts and Filters */}
+          <div className="p-3 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between text-[12px] font-bold text-slate-600 border-b border-slate-100 gap-3">
+            <div className="flex items-center gap-4">
+              <span>Total: <strong className="text-slate-900">{notifications.length}</strong></span>
+              <span>Important/Urgent: <strong className="text-rose-600">{unreadCount}</strong></span>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={priorityFilter}
+                onChange={e => setPriorityFilter(e.target.value)}
+                className="text-[11px] font-semibold border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none"
+              >
+                <option value="ALL">All Priorities</option>
+                <option value="Normal">Normal</option>
+                <option value="High">Important</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+
+              <div className="relative flex-1 sm:w-60">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search notices..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchNotifications()}
+                  className="w-full text-xs pl-8 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Notifications List */}
+          <div className="divide-y divide-slate-100">
+            {notifications.map((n) => {
+              const isUrgent = n.priority === 'Urgent';
+              const isHigh = n.priority === 'High';
+              return (
+                <div
+                  key={n.id}
+                  className={`p-4 transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+                    isUrgent ? 'bg-rose-50/20 hover:bg-rose-50/40' : 'bg-white hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className={`border px-2.5 py-0.5 text-[9px] font-black uppercase rounded-full tracking-wider ${
+                        isUrgent
+                          ? 'bg-rose-100 text-rose-700 border-rose-200'
+                          : isHigh
+                          ? 'bg-amber-100 text-amber-800 border-amber-200'
+                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}>
+                        {n.priority || 'INFO'}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-500">
+                        Target: <strong className="text-slate-800">{n.targetSummary || 'Community'}</strong>
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        • {new Date(n.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-[14px] text-slate-900 leading-snug mb-1">
+                      {n.title}
+                    </h4>
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {n.content}
+                    </p>
+
+                    <div className="mt-2 text-[11px] font-semibold text-slate-400 flex items-center gap-3">
+                      <span>Sender: <strong className="text-slate-700">{n.sender}</strong></span>
+                      {n.attachmentUrl && (
+                        <span className="flex items-center gap-1 text-indigo-600">
+                          <Paperclip className="w-3 h-3" /> Attachment
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => handleResend(n.id)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                      title="Resend broadcast"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteNotification(n.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      title="Delete notice"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {notifications.length === 0 && !loading && (
+            <div className="text-center py-16 bg-gradient-to-b from-slate-50/50 to-white">
+              <Bell className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-[14px] font-bold text-slate-500">No active notices found</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. FEEDBACK CENTER TAB (Matching Test Master Pro AdminNotifications.jsx) */}
+      {/* ========================================================================= */}
+      {activeTab === 'feedback' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4">
+          
+          {/* Header with Filters and Create Button */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <select
+                value={feedbackFilter}
+                onChange={e => setFeedbackFilter(e.target.value)}
+                className="h-8 text-[11px] font-bold border border-slate-200 bg-white rounded-lg px-2 shadow-xs focus:outline-none"
+              >
+                <option value="all">All Tickets</option>
+                <option value="open">Open</option>
+                <option value="in progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+              </select>
+              <span className="text-[11px] font-bold text-slate-500">{feedback.length} tickets</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsCreateFormOpen(true)}
+                className={`h-8 text-[11px] font-bold rounded-lg px-4 flex items-center gap-1.5 cursor-pointer ${buttonGradient}`}
+              >
+                <Plus className="h-3 w-3" /> Create Feedback
+              </button>
+              <button
+                onClick={() => {
+                  setAnnouncementModalTab('poll');
+                  setIsAnnouncementModalOpen(true);
+                }}
+                className="h-8 text-[11px] font-bold rounded-lg px-4 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <BarChart3 className="h-3 w-3 text-indigo-600" /> Create Poll
+              </button>
+            </div>
+          </div>
+
+          {/* Create Feedback Form (Dropdown Panel) */}
+          {isCreateFormOpen && (
+            <form onSubmit={handleCreateFeedbackSubmit} className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-white p-4 sm:p-5 shadow-md space-y-3 animate-in fade-in">
+              <div className="flex items-center justify-between border-b border-indigo-100 pb-2">
+                <h4 className="text-[14px] font-bold text-indigo-900">Create New Feedback Ticket</h4>
+                <button type="button" onClick={() => setIsCreateFormOpen(false)} className="p-1 text-slate-400 hover:text-rose-500 rounded-md hover:bg-rose-50 transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Complainant Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Kumar (Parent)"
+                    value={createForm.senderName}
+                    onChange={e => setCreateForm({ ...createForm, senderName: e.target.value })}
+                    className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Category</label>
+                  <select
+                    value={createForm.category}
+                    onChange={e => setCreateForm({ ...createForm, category: e.target.value })}
+                    className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg bg-white"
+                  >
+                    <option value="Academic">Academic</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Fees">Fees & Accounts</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Discipline">Discipline</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Priority</label>
+                  <select
+                    value={createForm.priority}
+                    onChange={e => setCreateForm({ ...createForm, priority: e.target.value })}
+                    className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg bg-white"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Subject *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Brief summary of feedback..."
+                  value={createForm.subject}
+                  onChange={e => setCreateForm({ ...createForm, subject: e.target.value })}
+                  className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Detailed Description *</label>
+                <textarea
+                  required
+                  rows={2}
+                  placeholder="Elaborate details..."
+                  value={createForm.description}
+                  onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
+                  className="w-full text-xs p-2 border border-slate-200 rounded-lg bg-white resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setIsCreateFormOpen(false)} className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">
+                  Cancel
+                </button>
+                <button type="submit" className={`px-4 py-1.5 text-xs font-bold rounded-lg ${buttonGradient}`}>
+                  Save & Publish Ticket
+                </button>
+              </div>
+            </form>
+          )}
+
           {/* Feedback Tickets List */}
           <div className="space-y-3">
-            {feedbackTickets.map(ticket => (
+            {feedback.map((ticket) => (
               <div
                 key={ticket.id}
-                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
                       {ticket.id}
                     </span>
@@ -794,38 +682,40 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-slate-900 text-sm mb-1 leading-snug">
+                  <h4 className="font-bold text-slate-900 text-sm leading-snug mb-1">
                     {ticket.subject}
-                  </h3>
+                  </h4>
                   <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed">
                     {ticket.description}
                   </p>
 
                   <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-slate-400" />
-                      <strong>{ticket.senderName}</strong>
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-slate-400" />
-                      {ticket.senderContact}
-                    </span>
+                    <span className="font-semibold text-slate-700">{ticket.senderName}</span>
+                    <span>• {ticket.senderContact}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => setSelectedTicket(ticket)}
-                    className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    onClick={() => openConversation(ticket)}
+                    className="h-8 px-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <MessageSquare className="h-3.5 w-3.5" />
                     Conversation ({ticket.conversation?.length || 1})
                   </button>
-
                   <select
                     value={ticket.status}
-                    onChange={e => handleUpdateTicketStatus(ticket.id, e.target.value)}
-                    className="text-xs font-semibold px-2 py-1.5 border border-slate-200 rounded-xl bg-white focus:outline-none"
+                    onChange={async (e) => {
+                      const newStatus = e.target.value;
+                      await fetch(`/api/announcements/feedback/${ticket.id}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: newStatus })
+                      });
+                      toast.success(`Marked as ${newStatus}`);
+                      fetchFeedback();
+                    }}
+                    className="h-8 text-xs font-semibold px-2 border border-slate-200 rounded-xl bg-white focus:outline-none"
                   >
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
@@ -836,62 +726,221 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
             ))}
           </div>
 
-          {feedbackTickets.length === 0 && !feedbackLoading && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
-              <MessageSquare className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-              <p className="text-xs font-semibold">No complaints or feedback found</p>
+          {feedback.length === 0 && !feedbackLoading && (
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
+              <MessageSquare className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-sm font-bold text-slate-500">No feedback tickets logged</p>
             </div>
           )}
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 2-WAY CONVERSATION CHAT MODAL (COMPLAINTS) */}
-      {/* ========================================================= */}
-      {selectedTicket && (
+      {/* ========================================================================= */}
+      {/* 3. POLL ANALYTICS TAB (Matching Test Master Pro AdminNotifications.jsx) */}
+      {/* ========================================================================= */}
+      {activeTab === 'polls' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4">
+          
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Active Polls & Survey Analytics</h3>
+              <p className="text-xs text-slate-500">Live community participation, vote breakdowns, and CSV export.</p>
+            </div>
+            <button
+              onClick={() => {
+                setAnnouncementModalTab('poll');
+                setIsAnnouncementModalOpen(true);
+              }}
+              className={`h-8 text-[11px] font-bold rounded-lg px-4 flex items-center gap-1.5 cursor-pointer ${buttonGradient}`}
+            >
+              <Plus className="h-3 w-3" /> Create Poll
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {polls.map((poll) => {
+              const isSingle = poll.pollType === 'single';
+              const selectedOpts = userSelectedVote[poll.id] || [];
+              return (
+                <div
+                  key={poll.id}
+                  className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          poll.status === 'Active'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {poll.status}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase">
+                          {poll.audience}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+                        {poll.totalVotes || 0} Total Votes
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-slate-900 text-sm leading-snug mb-1">
+                      {poll.title}
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                      {poll.description}
+                    </p>
+
+                    {/* Progress Options with Live Voting */}
+                    <div className="space-y-2.5 mb-4">
+                      {poll.options.map((opt) => {
+                        const isSelected = selectedOpts.includes(opt.id);
+                        return (
+                          <div
+                            key={opt.id}
+                            onClick={() => {
+                              if (poll.status !== 'Active') return;
+                              setUserSelectedVote(prev => {
+                                const cur = prev[poll.id] || [];
+                                return {
+                                  ...prev,
+                                  [poll.id]: isSingle ? [opt.id] : (cur.includes(opt.id) ? cur.filter(x => x !== opt.id) : [...cur, opt.id])
+                                };
+                              });
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+                              isSelected
+                                ? 'border-indigo-600 bg-indigo-50/40 shadow-xs'
+                                : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                            }`}
+                          >
+                            <div
+                              className="absolute left-0 top-0 bottom-0 bg-indigo-100/60 transition-all duration-500 pointer-events-none"
+                              style={{ width: `${opt.percentage || 0}%` }}
+                            />
+                            <div className="relative z-10 flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className={`w-4 h-4 rounded-${isSingle ? 'full' : 'md'} border flex items-center justify-center shrink-0 ${
+                                  isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white'
+                                }`}>
+                                  {isSelected && <div className={`w-1.5 h-1.5 rounded-${isSingle ? 'full' : 'xs'} bg-white`} />}
+                                </div>
+                                <span className="text-xs font-semibold text-slate-800 truncate">
+                                  {opt.text}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-[11px] font-bold text-slate-700">{opt.votes || 0} votes</span>
+                                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-600 text-white">
+                                  {opt.percentage || 0}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    {poll.status === 'Active' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleVoteSubmit(poll.id)}
+                        className={`h-8 px-4 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${buttonGradient}`}
+                      >
+                        <Vote className="h-3.5 w-3.5" /> Submit Vote
+                      </button>
+                    ) : (
+                      <span className="text-xs font-semibold text-slate-400 italic">Voting Closed</span>
+                    )}
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => exportPollCSV(poll)}
+                        title="Export responses to CSV"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePollStatus(poll.id, poll.status)}
+                        title={poll.status === 'Active' ? 'Close poll' : 'Reopen poll'}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer"
+                      >
+                        {poll.status === 'Active' ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePoll(poll.id)}
+                        title="Delete poll"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {polls.length === 0 && !pollsLoading && (
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
+              <BarChart3 className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-sm font-bold text-slate-500">No active polls running</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2-WAY CHAT THREAD CONVERSATION MODAL (Matching Test Master Pro) */}
+      {/* ========================================================================= */}
+      {conversationOpen && selectedFeedback && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
             
-            {/* Modal Header */}
-            <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3 shrink-0">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-indigo-50/30 flex items-center justify-between gap-3 shrink-0">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
-                    {selectedTicket.id}
+                  <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                    {selectedFeedback.id}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                    selectedTicket.status === 'Resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {selectedTicket.status}
-                  </span>
+                  <select
+                    value={selectedFeedback.status}
+                    onChange={e => handleStatusChange(e.target.value)}
+                    className="text-xs font-bold px-2 py-0.5 rounded-lg border border-slate-200 bg-white"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                  </select>
                 </div>
-                <h3 className="font-bold text-slate-900 text-sm mt-1">{selectedTicket.subject}</h3>
-                <p className="text-[11px] text-slate-500">From: {selectedTicket.senderName} ({selectedTicket.senderContact})</p>
+                <h4 className="font-bold text-slate-900 text-[15px] mt-1">{selectedFeedback.subject}</h4>
+                <p className="text-[11px] text-slate-500">From: {selectedFeedback.senderName} ({selectedFeedback.senderContact})</p>
               </div>
-
-              <button
-                onClick={() => setSelectedTicket(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={closeConversation} className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors">
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Conversation Messages Thread */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/30">
-              {selectedTicket.conversation?.map((msg, i) => {
+            {/* Chat Messages Thread */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar bg-slate-50/50">
+              {selectedFeedback.conversation?.map((msg, i) => {
                 const isAdmin = msg.senderRole === 'Admin' || msg.senderRole === 'School Staff';
                 return (
-                  <div
-                    key={msg.id || i}
-                    className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}
-                  >
+                  <div key={msg.id || i} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
                     <span className="text-[10px] font-bold text-slate-400 mb-0.5">
                       {msg.sender} ({msg.senderRole}) • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    <div className={`p-3 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
+                    <div className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
                       isAdmin
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-tr-none shadow-sm'
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-tr-none shadow-md'
                         : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-2xs'
                     }`}>
                       {msg.text}
@@ -901,127 +950,27 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
               })}
             </div>
 
-            {/* Fast Reply Box */}
-            <form onSubmit={handleSendReply} className="p-3 border-t border-slate-200 bg-white flex items-center gap-2 shrink-0">
+            {/* Input Reply Area */}
+            <div className="p-3 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
               <input
                 type="text"
-                placeholder="Type response to parent/student..."
-                value={replyText}
-                onChange={e => setReplyText(e.target.value)}
-                className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                placeholder="Draft your reply as Admin..."
+                value={replyContent}
+                onChange={e => setReplyContent(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSendReply()}
+                className="flex-1 text-xs px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
               />
               <button
-                type="submit"
-                disabled={replying || !replyText.trim()}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                type="button"
+                onClick={handleSendReply}
+                disabled={sendingReply || !replyContent.trim()}
+                className={`h-9 px-4 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${buttonGradient}`}
               >
-                <Send className="w-3.5 h-3.5" />
-                {replying ? 'Sending...' : 'Reply'}
-              </button>
-            </form>
-
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* NEW TICKET REGISTRATION MODAL */}
-      {/* ========================================================= */}
-      {isNewTicketOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm">Register New Grievance / Complaint</h3>
-              <button onClick={() => setIsNewTicketOpen(false)} className="text-slate-400 hover:text-rose-600">
-                <X className="w-4 h-4" />
+                <Send className="h-3.5 w-3.5" />
+                {sendingReply ? 'Sending...' : 'Send Reply'}
               </button>
             </div>
 
-            <form onSubmit={handleCreateTicketSubmit} className="p-4 space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Complainant / Parent Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh Kumar (Father of Rohan - II-B)"
-                  value={newTicketForm.senderName}
-                  onChange={e => setNewTicketForm({ ...newTicketForm, senderName: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                  <select
-                    value={newTicketForm.category}
-                    onChange={e => setNewTicketForm({ ...newTicketForm, category: e.target.value })}
-                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white"
-                  >
-                    <option value="Academic">Academic</option>
-                    <option value="Transport">Transport</option>
-                    <option value="Fees">Fees & Accounts</option>
-                    <option value="Infrastructure">Infrastructure</option>
-                    <option value="Discipline">Discipline</option>
-                    <option value="General">General</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Priority</label>
-                  <select
-                    value={newTicketForm.priority}
-                    onChange={e => setNewTicketForm({ ...newTicketForm, priority: e.target.value })}
-                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Subject *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Delayed textbook delivery"
-                  value={newTicketForm.subject}
-                  onChange={e => setNewTicketForm({ ...newTicketForm, subject: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Description / Details *</label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="Detailed description of issue..."
-                  value={newTicketForm.description}
-                  onChange={e => setNewTicketForm({ ...newTicketForm, description: e.target.value })}
-                  className="w-full text-xs p-2.5 border border-slate-300 rounded-xl outline-none resize-none"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsNewTicketOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg"
-                >
-                  Register Ticket
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -1032,8 +981,9 @@ export default function TargetedAnnouncementsPage({ onNavigate }) {
         onClose={() => setIsAnnouncementModalOpen(false)}
         initialTab={announcementModalTab}
         onSuccess={() => {
-          if (currentModuleTab === 'announcements') fetchAnnouncements();
-          else if (currentModuleTab === 'polls') fetchPolls();
+          if (activeTab === 'notifications') fetchNotifications();
+          else if (activeTab === 'polls') fetchPolls();
+          else if (activeTab === 'feedback') fetchFeedback();
         }}
       />
 
