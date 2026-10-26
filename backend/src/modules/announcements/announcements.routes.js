@@ -11,6 +11,7 @@ import {
   castVote,
   togglePollStatus,
   deletePoll,
+  getPollAnalytics,
   // Complaints & Feedback
   getFeedbackTickets,
   createFeedbackTicket,
@@ -29,6 +30,7 @@ router.delete('/:id', deleteAnnouncement);
 
 // Interactive Polls
 router.get('/polls/list', getPolls);
+router.get('/polls/:id/analytics', getPollAnalytics);
 router.post('/polls', createPoll);
 router.post('/polls/:id/vote', castVote);
 router.post('/polls/:id/status', togglePollStatus);

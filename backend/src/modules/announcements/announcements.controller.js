@@ -103,7 +103,7 @@ const TENANT_ANNOUNCEMENTS = {
         className: 'X',
         section: 'A',
         parentName: 'Suresh Meena',
-        phone: '9829044556'
+        phone: '7891008092'
       },
       priority: 'Urgent',
       category: 'Academic',
@@ -121,16 +121,16 @@ const TENANT_ANNOUNCEMENTS = {
 // Targetable metadata pool
 const TARGET_METADATA = {
   teachers: [
-    { id: 't_1', name: 'Mr. Rakesh Sharma', subject: 'Mathematics (PGT)', department: 'Mathematics Faculty', phone: '9829989330', email: 'rakesh.sharma@jd.edu' },
-    { id: 't_2', name: 'Mrs. Kavita Verma', subject: 'Science (TGT)', department: 'Science & Technology', phone: '9870943695', email: 'kavita.v@jd.edu' },
-    { id: 't_3', name: 'Dr. Arun Joshi', subject: 'Physics (PGT)', department: 'Science & Technology', phone: '9414023456', email: 'arun.joshi@jd.edu' },
-    { id: 't_4', name: 'Ms. Neha Gupta', subject: 'English (TGT)', department: 'Languages & Humanities', phone: '9829012345', email: 'neha.gupta@jd.edu' },
-    { id: 't_5', name: 'Mrs. Monika Rani', subject: 'Social Science (PRT)', department: 'Primary Wing Faculty', phone: '9511719644', email: 'monika.r@jd.edu' },
-    { id: 't_6', name: 'Mr. Vikram Rathore', subject: 'Physical Education (PTI)', department: 'Sports & Activities', phone: '8107187618', email: 'vikram.r@jd.edu' },
-    { id: 't_7', name: 'Ms. Pooja Saxena', subject: 'Computer Science (PGT)', department: 'Science & Technology', phone: '9079909813', email: 'pooja.s@jd.edu' },
-    { id: 't_8', name: 'Mrs. Sunita Kumari', subject: 'Hindi (TGT)', department: 'Languages & Humanities', phone: '9672992836', email: 'sunita.k@jd.edu' },
-    { id: 't_9', name: 'Mr. Rajesh Meena', subject: 'Art & Craft (PRT)', department: 'Primary Wing Faculty', phone: '9636644293', email: 'rajesh.m@jd.edu' },
-    { id: 't_10', name: 'Mrs. Deepa Bhatt', subject: 'Chemistry (PGT)', department: 'Science & Technology', phone: '9829112233', email: 'deepa.b@jd.edu' }
+    { id: 't_1', name: 'Mr. Rakesh Sharma', subject: 'Mathematics (PGT)', department: 'Mathematics Faculty', phone: '7891008092', email: 'rakesh.sharma@jd.edu' },
+    { id: 't_2', name: 'Mrs. Kavita Verma', subject: 'Science (TGT)', department: 'Science & Technology', phone: '7891008092', email: 'kavita.v@jd.edu' },
+    { id: 't_3', name: 'Dr. Arun Joshi', subject: 'Physics (PGT)', department: 'Science & Technology', phone: '7891008092', email: 'arun.joshi@jd.edu' },
+    { id: 't_4', name: 'Ms. Neha Gupta', subject: 'English (TGT)', department: 'Languages & Humanities', phone: '7891008092', email: 'neha.gupta@jd.edu' },
+    { id: 't_5', name: 'Mrs. Monika Rani', subject: 'Social Science (PRT)', department: 'Primary Wing Faculty', phone: '7891008092', email: 'monika.r@jd.edu' },
+    { id: 't_6', name: 'Mr. Vikram Rathore', subject: 'Physical Education (PTI)', department: 'Sports & Activities', phone: '7891008092', email: 'vikram.r@jd.edu' },
+    { id: 't_7', name: 'Ms. Pooja Saxena', subject: 'Computer Science (PGT)', department: 'Science & Technology', phone: '7891008092', email: 'pooja.s@jd.edu' },
+    { id: 't_8', name: 'Mrs. Sunita Kumari', subject: 'Hindi (TGT)', department: 'Languages & Humanities', phone: '7891008092', email: 'sunita.k@jd.edu' },
+    { id: 't_9', name: 'Mr. Rajesh Meena', subject: 'Art & Craft (PRT)', department: 'Primary Wing Faculty', phone: '7891008092', email: 'rajesh.m@jd.edu' },
+    { id: 't_10', name: 'Mrs. Deepa Bhatt', subject: 'Chemistry (PGT)', department: 'Science & Technology', phone: '7891008092', email: 'deepa.b@jd.edu' }
   ],
   teacherGroups: [
     { id: 'grp_science', name: 'Science & Technology Department', description: 'Physics, Chemistry, Biology, and Computer Science Faculty', memberCount: 4 },
@@ -531,6 +531,106 @@ export const deletePoll = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(200, { id }, 'Poll deleted successfully')
+  );
+});
+
+// GET /api/announcements/polls/:id/analytics
+export const getPollAnalytics = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+
+  const list = TENANT_POLLS[schoolId] || [];
+  const poll = list.find(p => p.id === id);
+
+  if (!poll) {
+    return res.status(404).json(new ApiResponse(404, null, 'Poll not found'));
+  }
+
+  const totalVotes = poll.options.reduce((sum, o) => sum + (o.votes || 0), 0);
+  const totalAudience = poll.audience === 'teachers' ? 24 : 320;
+  const pendingResponses = Math.max(0, totalAudience - totalVotes);
+  const completionPercent = totalAudience > 0 ? Math.round((totalVotes / totalAudience) * 100) : 0;
+
+  const optionSummary = poll.options.map(opt => ({
+    option: opt.text,
+    count: opt.votes || 0,
+    percent: totalVotes > 0 ? Math.round(((opt.votes || 0) / totalVotes) * 100) : 0
+  }));
+
+  const parentBreakdown = [
+    { className: 'X-A', totalParents: 42, responded: 34, pending: 8, completion: 81 },
+    { className: 'IX-B', totalParents: 40, responded: 32, pending: 8, completion: 80 },
+    { className: 'VIII-A', totalParents: 38, responded: 28, pending: 10, completion: 74 },
+    { className: 'VII-C', totalParents: 36, responded: 24, pending: 12, completion: 67 },
+    { className: 'VI-A', totalParents: 35, responded: 22, pending: 13, completion: 63 },
+    { className: 'V-B', totalParents: 32, responded: 18, pending: 14, completion: 56 }
+  ];
+
+  const sampleNames = [
+    { name: 'Suresh Verma', studentName: 'Ananya Verma', rollNo: '04', className: 'II-A', timeOffset: 12 },
+    { name: 'Dr. Meenakshi Joshi', studentName: 'Aditya Joshi', rollNo: '11', className: 'X-A', timeOffset: 25 },
+    { name: 'Rajesh Sharma', studentName: 'Aarav Sharma', rollNo: '01', className: 'I-A', timeOffset: 45 },
+    { name: 'Pooja Choudhary', studentName: 'Kabir Choudhary', rollNo: '18', className: 'IX-B', timeOffset: 80 },
+    { name: 'Sunil Rao', studentName: 'Diya Rao', rollNo: '22', className: 'VIII-A', timeOffset: 110 },
+    { name: 'Anita Saxena', studentName: 'Manav Saxena', rollNo: '09', className: 'VII-C', timeOffset: 140 },
+    { name: 'Manoj Kumar', studentName: 'Tanya Kumar', rollNo: '15', className: 'VI-A', timeOffset: 175 },
+    { name: 'Geeta Rathore', studentName: 'Kunal Rathore', rollNo: '07', className: 'V-B', timeOffset: 210 },
+    { name: 'Vikram Shekhawat', studentName: 'Pranav Shekhawat', rollNo: '14', className: 'X-A', timeOffset: 260 },
+    { name: 'Rekha Agarwal', studentName: 'Ishaan Agarwal', rollNo: '19', className: 'IX-B', timeOffset: 310 }
+  ];
+
+  const teacherNames = [
+    { name: 'Dr. Arun Joshi', selectedOption: poll.options[0]?.text || '', timeOffset: 15 },
+    { name: 'Mrs. Kavita Verma', selectedOption: poll.options[1]?.text || poll.options[0]?.text || '', timeOffset: 45 },
+    { name: 'Mr. Rakesh Sharma', selectedOption: poll.options[0]?.text || '', timeOffset: 70 },
+    { name: 'Ms. Neha Gupta', selectedOption: poll.options[1]?.text || '', timeOffset: 120 },
+    { name: 'Mr. Vikram Rathore', selectedOption: poll.options[2]?.text || poll.options[0]?.text || '', timeOffset: 180 },
+    { name: 'Ms. Pooja Saxena', selectedOption: poll.options[0]?.text || '', timeOffset: 220 }
+  ];
+
+  const now = Date.now();
+  const responses = poll.audience === 'teachers' 
+    ? teacherNames.map(t => ({
+        name: t.name,
+        selectedOption: t.selectedOption,
+        submittedAt: new Date(now - t.timeOffset * 60000).toISOString()
+      }))
+    : sampleNames.map((s, idx) => ({
+        name: s.name,
+        studentName: s.studentName,
+        rollNo: s.rollNo,
+        className: s.className,
+        selectedOption: poll.options[idx % poll.options.length]?.text || poll.options[0]?.text || '',
+        submittedAt: new Date(now - s.timeOffset * 60000).toISOString()
+      }));
+
+  const analytics = {
+    poll: {
+      _id: poll.id,
+      title: poll.title,
+      description: poll.description,
+      audience: poll.audience,
+      audienceScope: poll.audienceScope,
+      pollType: poll.pollType,
+      options: poll.options,
+      createdAt: poll.createdAt,
+      expiryDate: poll.expiryDate,
+      createdByName: 'Admin Office',
+      status: poll.status
+    },
+    summary: {
+      totalAudience,
+      responsesReceived: totalVotes,
+      pendingResponses,
+      completionPercent
+    },
+    optionSummary,
+    parentBreakdown: poll.audience === 'teachers' ? [] : parentBreakdown,
+    responses
+  };
+
+  return res.status(200).json(
+    new ApiResponse(200, { analytics }, 'Poll analytics retrieved successfully')
   );
 });
 
