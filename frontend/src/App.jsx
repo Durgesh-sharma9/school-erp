@@ -262,6 +262,7 @@ import {
 } from './modules/attendance/BiometricSyncPage';
 import TargetedAnnouncementsPage from './modules/announcements/TargetedAnnouncementsPage';
 import { Toaster } from 'react-hot-toast';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 function AppContent() {
   const { user, isAuthenticated, role } = useAuth();
@@ -374,6 +375,7 @@ function AppContent() {
 
         {/* Dynamic Canvas Routing */}
         <main id="main-content" className="flex-1 overflow-y-auto custom-scrollbar">
+          <ErrorBoundary onNavigate={handleNavigate}>
           {(() => {
             switch (normalizePath(currentPath)) {
               case '/':
@@ -382,6 +384,9 @@ function AppContent() {
               case '/register':
                 return <SchoolRegistrationPage onNavigate={handleNavigate} />;
               case '/superadmin-analytics':
+                if (role !== 'SUPER_ADMIN') {
+                  return renderDashboardByRole();
+                }
                 return <SuperAdminDashboardPage onNavigate={handleNavigate} />;
               case '/student-portal':
               case '/get-homework':
@@ -627,24 +632,34 @@ function AppContent() {
               case '/staff-attendance-time-report':
                 return <StaffAttendanceTimeReportPage onNavigate={handleNavigate} />;
               case '/student-reports':
-                return <StudentReportsHubPage onNavigate={handleNavigate} />;
+              case '/student-report-hub':
+              case '/students-reports':
               case '/students-report':
+              case '/student-report':
+              case '/student-list':
                 return <StudentListPage onNavigate={handleNavigate} />;
               case '/donation-collection-report':
+              case '/donation-report':
                 return <DonationReportPage onNavigate={handleNavigate} />;
               case '/student-upload-data-summary':
+              case '/student-board-data-summary':
                 return <StudentBoardDataSummaryPage onNavigate={handleNavigate} />;
               case '/students-promotion-report':
+              case '/student-promotion-list':
                 return <StudentPromotionListPage onNavigate={handleNavigate} />;
               case '/inactive-student-list':
+              case '/inactive-students':
+              case '/inactive-student':
                 return <InactiveStudentListPage onNavigate={handleNavigate} />;
               case '/student-board-registration':
                 return <StudentBoardRegistrationPage onNavigate={handleNavigate} />;
               case '/student-consolidated-report':
                 return <StudentConsolidatedReportPage onNavigate={handleNavigate} />;
               case '/generate-slips-report':
+              case '/generate-slips':
                 return <GenerateSlipsReportPage onNavigate={handleNavigate} />;
               case '/attendance-report':
+              case '/student-attendance-report':
                 return <AttendanceReportPage onNavigate={handleNavigate} />;
               case '/student-attedance-summary':
                 return <DayWiseAttendanceSummaryPage onNavigate={handleNavigate} />;
@@ -908,6 +923,7 @@ function AppContent() {
                 );
             }
           })()}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

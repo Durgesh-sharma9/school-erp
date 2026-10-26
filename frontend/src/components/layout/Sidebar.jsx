@@ -634,11 +634,19 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
   const { role, user } = useAuth();
 
-  const activeCategories = role === 'STUDENT'
+  const rawCategories = role === 'STUDENT'
     ? studentMenuCategories
     : role === 'STAFF'
     ? staffMenuCategories
     : menuCategories;
+
+  const activeCategories = rawCategories.filter(item => {
+    // SuperAdmin Analytics tab should ONLY appear when role is SUPER_ADMIN
+    if (item.id === 'superadmin-analytics') {
+      return role === 'SUPER_ADMIN';
+    }
+    return true;
+  });
 
   React.useEffect(() => {
     let activeKey = null;
