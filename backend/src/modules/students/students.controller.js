@@ -450,6 +450,16 @@ export const saveAttendance = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { date, className, section, records = [] } = req.body;
+    const userRole = req.user?.role || req.headers['x-user-role'] || 'ADMIN';
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Attender role is strictly restricted to today's date
+    if (userRole === 'ATTENDER' && date && date !== todayStr) {
+      return res.status(403).json({
+        success: false,
+        message: `Attenders are only allowed to submit attendance for today (${todayStr}).`
+      });
+    }
     const presentCount = records.filter((r) => r.status === 'Present').length;
     const absentCount = records.filter((r) => r.status === 'Absent').length;
 

@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
+import { tenantStore } from '../../services/tenantStore';
 import {
   FileSpreadsheet,
   Save,
   CheckCircle2,
   Filter,
   Check,
-  Award
+  Award,
+  FileText,
+  Lock,
+  X
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-export function MarksEntryPage() {
+export function MarksEntryPage({ onNavigate }) {
   const [examName, setExamName] = useState('Half Yearly Examination');
   const [selectedClass, setSelectedClass] = useState('Class 10');
   const [selectedSubject, setSelectedSubject] = useState('Mathematics');
@@ -44,7 +49,7 @@ export function MarksEntryPage() {
   const handleSave = (e) => {
     e.preventDefault();
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    toast.success('Marks saved successfully!');
   };
 
   return (
@@ -63,20 +68,63 @@ export function MarksEntryPage() {
           </h2>
         </div>
 
-        <button
-          onClick={handleSave}
-          className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs"
-        >
-          <Save className="w-3.5 h-3.5" />
-          <span>Save Marks</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate?.('/progress-report-card')}
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Report Cards</span>
+          </button>
+          <button
+            onClick={handleSave}
+            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Marks</span>
+          </button>
+        </div>
       </div>
 
       {savedSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-sm shadow-xs">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <div>
-            Marks for <span className="font-bold">{selectedClass} - {selectedSubject}</span> saved successfully!
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex flex-wrap items-center justify-between gap-3 text-sm shadow-xs">
+          <div className="flex items-center space-x-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <div>
+              Marks for <span className="font-bold">{selectedClass} - {selectedSubject}</span> saved successfully!
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                tenantStore.setPendingReportCardClass({
+                  className: selectedClass,
+                  examName: examName
+                });
+                onNavigate?.('/progress-report-card');
+              }}
+              className="px-3.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Generate Progress Report Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('/marks-entry-locking')}
+              className="px-3 py-1.5 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Lock Marks</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSavedSuccess(false)}
+              className="p-1 rounded-lg text-emerald-600 hover:text-emerald-900 hover:bg-emerald-100 transition-colors cursor-pointer"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

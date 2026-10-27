@@ -3,7 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { tenantStore } from '../../../services/tenantStore';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES } from './studentReportsData';
-import { Search, Building2, ShieldCheck } from 'lucide-react';
+import { Search, Building2, ShieldCheck, IndianRupee, CreditCard, MessageSquare } from 'lucide-react';
 
 export function StudentListPage({ onNavigate }) {
   const { schoolId, schoolName } = useAuth();
@@ -207,6 +207,7 @@ export function StudentListPage({ onNavigate }) {
                   <th className="py-3 px-4">FATHER'S NAME</th>
                   <th className="py-3 px-4">MOTHER'S NAME</th>
                   <th className="py-3 px-4">CONTACT SMS NO.</th>
+                  <th className="py-3 px-4 text-center">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -226,11 +227,67 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4">{r.fatherName}</td>
                       <td className="py-3 px-4">{r.motherName}</td>
                       <td className="py-3 px-4 font-mono text-slate-600">{r.contactNo}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              tenantStore.setPendingFeeStudent({
+                                admNo: r.admNo,
+                                name: r.name,
+                                className: r.className,
+                                section: r.section,
+                                fatherName: r.fatherName,
+                                mobileNo: r.contactNo
+                              });
+                              onNavigate && onNavigate('/fee-collection');
+                            }}
+                            title="Collect Fee POS"
+                            className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors cursor-pointer"
+                          >
+                            <IndianRupee className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              tenantStore.setPendingIdCardStudent({
+                                admNo: r.admNo,
+                                name: r.name,
+                                className: r.className,
+                                fatherName: r.fatherName,
+                                mobile: r.contactNo
+                              });
+                              onNavigate && onNavigate('/id-card-generator');
+                            }}
+                            title="Generate ID Card"
+                            className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors cursor-pointer"
+                          >
+                            <CreditCard className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              tenantStore.setPendingDirectSms({
+                                admNo: r.admNo,
+                                name: r.name,
+                                className: r.className,
+                                section: r.section,
+                                mobile: r.contactNo
+                              });
+                              onNavigate && onNavigate('/student-sms');
+                            }}
+                            title="Send SMS to Parent"
+                            className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors cursor-pointer"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-12 text-slate-400">
+                    <td colSpan="10" className="text-center py-12 text-slate-400">
                       <div className="flex flex-col items-center justify-center space-y-2 max-w-sm mx-auto">
                         <span className="text-3xl">📋</span>
                         <p className="font-semibold text-slate-700 text-sm">No Student Records Found</p>

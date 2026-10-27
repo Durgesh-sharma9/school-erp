@@ -474,6 +474,109 @@ class TenantDataStore {
     localStorage.setItem(this.getStorageKey(schoolId, 'receipts'), JSON.stringify(updated));
     return newReceipt;
   }
+
+  // Seamless Multi-Module Cross-Linking & Navigation Flow Helpers
+  setPendingRegistration(data) {
+    try {
+      sessionStorage.setItem('erp_pending_registration', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingRegistration() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_registration');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_registration');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  setPendingFeeStudent(data) {
+    try {
+      sessionStorage.setItem('erp_pending_fee_student', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingFeeStudent() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_fee_student');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_fee_student');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  setPendingAbsenteeNotice(data) {
+    try {
+      sessionStorage.setItem('erp_pending_absentee_notice', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingAbsenteeNotice() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_absentee_notice');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_absentee_notice');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  setPendingIdCardStudent(data) {
+    try {
+      sessionStorage.setItem('erp_pending_id_card_student', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingIdCardStudent() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_id_card_student');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_id_card_student');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  setPendingDirectSms(data) {
+    try {
+      sessionStorage.setItem('erp_pending_direct_sms', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingDirectSms() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_direct_sms');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_direct_sms');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  setPendingReportCardClass(data) {
+    try {
+      sessionStorage.setItem('erp_pending_report_card_class', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingReportCardClass() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_report_card_class');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_report_card_class');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
 }
 
 export const tenantStore = new TenantDataStore();

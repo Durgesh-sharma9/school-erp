@@ -22,8 +22,19 @@ import {
   ShieldCheck,
   ArrowRight,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Users,
+  CalendarDays,
+  GraduationCap,
+  Activity,
+  PartyPopper,
+  CheckCircle2,
+  XCircle,
+  HelpCircle
 } from 'lucide-react';
+import StatsCard from '../../components/StatsCard';
+import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
+import { cn } from '../../utils/cn';
 
 export function DashboardPage({ onNavigate }) {
   const { schoolId, schoolName, switchSchool } = useAuth();
@@ -74,7 +85,7 @@ export function DashboardPage({ onNavigate }) {
   const ytdBank = isSchoolA ? '2,07,090' : isSchoolB ? '85,000' : '0';
   const ytdTotal = isSchoolA ? '2,50,445' : isSchoolB ? '1,03,500' : '0';
 
-  // Live vehicles data strictly partitioned per school (0 dummy data for newly registered school)
+  // Live vehicles data strictly partitioned per school
   const vehicles = isSchoolB ? [
     { sNo: 1, name: "[DL01PA4512] School Bus 1", driver: "[1] MANOJ KUMAR", capacity: 45, status: "Active" },
     { sNo: 2, name: "[DL01PA4513] School Bus 2", driver: "[2] SATISH CHANDRA", capacity: 40, status: "Active" }
@@ -88,7 +99,7 @@ export function DashboardPage({ onNavigate }) {
     { sNo: 7, name: "[RJ14PE0832] Van", driver: "[3] RAMESH MEENA", capacity: 25, status: "Active" }
   ] : [];
 
-  // Live student birthdays strictly partitioned per school (0 dummy data for newly registered school)
+  // Live student birthdays strictly partitioned per school
   const birthdays = isSchoolB ? [
     { name: "ROHAN SHARMA", classSec: "Class 10-A", roll: "01" },
     { name: "PRIYA PATEL", classSec: "Class 9-B", roll: "02" }
@@ -99,400 +110,265 @@ export function DashboardPage({ onNavigate }) {
   ] : [];
 
   return (
-    <div className="testmaster-bg min-h-screen p-3 sm:p-5 max-w-[1600px] mx-auto space-y-3.5 pb-28">
-      {/* Multi-Tenant Isolation Status Banner */}
-      <div className={`p-3 sm:p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs ${
-        isNewSchool
-          ? 'bg-gradient-to-r from-amber-50 via-orange-50/60 to-white border-amber-200/80 text-amber-950'
-          : isSchoolB
-          ? 'bg-gradient-to-r from-emerald-50 via-teal-50/60 to-white border-emerald-200/80 text-emerald-950'
-          : 'bg-gradient-to-r from-blue-50 via-indigo-50/60 to-white border-blue-200/80 text-indigo-950'
-      }`}>
-        <div className="flex items-center space-x-2.5">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-2xs shrink-0 ${
+    <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">
+      {/* Multi-Tenant Header & Branch Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            'w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-2xs shrink-0',
             isNewSchool ? 'bg-amber-600' : isSchoolB ? 'bg-emerald-600' : 'bg-indigo-600'
-          }`}>
+          )}>
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">{schoolName}</h2>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-tight">
+                {schoolName}
+              </h1>
+              <span className={cn(
+                'text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider',
                 isNewSchool
                   ? 'bg-amber-100 text-amber-800 border border-amber-200'
                   : isSchoolB
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                   : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-              }`}>
-                {isNewSchool ? '✨ Fresh Registered Tenant' : isSchoolB ? 'Tenant B (Delhi Public)' : 'Tenant A (J D Intl)'}
+              )}>
+                {isNewSchool ? 'Fresh Tenant' : isSchoolB ? 'Tenant B' : 'Tenant A'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {isNewSchool ? (
-                <span>
-                  🛡️ <strong>Zero Data Sandbox:</strong> Newly registered school. Zero dummy data, 0 records from other schools. Start by registering students and fee structure.
-                </span>
-              ) : (
-                <span>
-                  🔒 <strong>Multi-Tenant Data Sandbox:</strong> School A ka data School B me nahi dikhega. Viewing strictly isolated metrics.
-                </span>
-              )}
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+              Multi-tenant data isolation active &bull; Academic Session 2026-2027
             </p>
           </div>
         </div>
 
-        {/* 1-Tap Switcher Pill for Testing */}
-        <div className="flex items-center space-x-2 shrink-0">
+        {/* 1-Tap Quick Switch Demo Tenant */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => switchSchool(isSchoolB ? 'sch_jd_intl' : 'sch_dps_branch2')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 flex items-center space-x-1.5 shadow-2xs transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+            title="Switch demo school for instant preview"
           >
             <span>Switch Demo: {isSchoolB ? 'School A' : 'School B'}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
           </button>
         </div>
       </div>
 
-      {/* Breadcrumb Bar */}
-      <div className="flex items-center space-x-2 text-xs text-slate-500 pt-0.5 pb-0.5">
-        <span className="font-bold text-slate-900 text-sm">Dashboard</span>
-        <span>&bull;</span>
-        <Home className="w-3.5 h-3.5 text-slate-400" />
-        <span className="text-slate-500">&bull; Dashboard ({schoolName})</span>
-      </div>
-
-      {/* Row 1: 4 Core Top Cards (1:1 Exact Dimensions & Colors, Elevated to Super Admin Polish) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Card 1: Today Collection (Blue-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden relative select-none transition-all duration-200">
-          <button
-            onClick={() => onNavigate && onNavigate('/fee-collection')}
-            className="absolute top-2 right-2.5 text-slate-400 hover:text-indigo-600 transition-colors"
-            title="Open Fee Register"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
-
-          <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-white border-b border-blue-100/80 py-1.5 px-3.5 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-            <h3 className="font-bold text-xs text-slate-800 tracking-tight">Today Collection</h3>
-          </div>
-
-          <div className="p-3.5 pt-2.5">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xl font-black text-slate-900 tracking-tight font-mono">
-                ₹{formatINR(stats.todayCollection.total)}
-              </span>
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold px-2 py-0.5 text-[10.5px] rounded-full">
-                Receipts: <strong>{stats.todayCollection.receiptsCount}</strong>
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-100">
-              <div className="text-left">
-                <p className="text-emerald-700 font-bold font-mono leading-none">₹{formatINR(stats.todayCollection.cash)}</p>
-                <p className="text-[10.5px] text-slate-500 mt-1 flex items-center font-medium">
-                  <span className="text-emerald-600 font-bold mr-1">₹</span> Cash Counter
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-blue-700 font-bold font-mono leading-none">₹{formatINR(stats.todayCollection.bank)}</p>
-                <p className="text-[10.5px] text-slate-500 mt-1 flex items-center justify-end font-medium">
-                  <Building2 className="w-3 h-3 text-blue-600 mr-1" /> Bank / Online
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Fee Revenue Summary (Orange-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden relative select-none transition-all duration-200">
-          <div className="bg-gradient-to-r from-orange-50/90 via-amber-50/40 to-white border-b border-orange-100/80 py-1.5 px-3.5 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-            <h3 className="font-bold text-xs text-slate-800 tracking-tight">Fee Revenue Summary</h3>
-          </div>
-
-          <div className="p-3.5 pt-2.5 space-y-2">
-            <p className="text-xl font-black text-slate-900 tracking-tight font-mono">
-              ₹{formatINR(stats.feeRevenueSummary.totalRevenue)}
-            </p>
-
-            {/* Total Due Row */}
-            <div>
-              <div className="flex justify-between items-center text-[10px] text-slate-600">
-                <span className="font-medium">Total Due</span>
-                <span className="font-semibold text-slate-800 font-mono">
-                  ₹{formatINR(stats.feeRevenueSummary.totalDue)}{' '}
-                  <span className="text-rose-600 font-bold">&nbsp;({stats.feeRevenueSummary.duePercentage}%)</span>
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                <div className="bg-rose-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.feeRevenueSummary.duePercentage || 0)}%` }}></div>
-              </div>
-            </div>
-
-            {/* Total Received (YTD) Row */}
-            <div>
-              <div className="flex justify-between items-center text-[10px] text-slate-600">
-                <span className="font-medium">Total Received (YTD)</span>
-                <span className="font-semibold text-slate-800 font-mono">
-                  ₹{formatINR(stats.feeRevenueSummary.totalReceivedYTD)}{' '}
-                  <span className="text-emerald-700 font-bold">&nbsp;({stats.feeRevenueSummary.receivedPercentage}%)</span>
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                <div className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.feeRevenueSummary.receivedPercentage || 0)}%` }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Total Student (Yellow-50 Header with Boy/Girl breakdown) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden relative select-none transition-all duration-200">
-          <div className="bg-gradient-to-r from-amber-50/90 via-yellow-50/40 to-white border-b border-amber-100/80 py-1.5 px-3.5 flex justify-between items-center">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Total Student</h3>
-            </div>
-            <span className="text-sm font-black text-slate-900 font-mono flex items-center">
-              {stats.totalStudents.total}&nbsp;
-              <span className="text-emerald-700 text-[10px] font-bold">({stats.totalStudents.growthRate})</span>
+      {/* Top 5 KPI Stats Cards (Test Master Pro Design: Compact, Tinted Backgrounds, Inside Elegance) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3.5">
+        <StatsCard
+          title="Today Collection"
+          value={`₹${formatINR(stats?.todayCollection?.total || 0)}`}
+          icon={IndianRupee}
+          themeIndex={0}
+          onClick={() => onNavigate && onNavigate('/fee-collection')}
+          badge={`${stats?.todayCollection?.receiptsCount || 0} Receipts`}
+          subtitle={
+            <span className="flex items-center gap-1 text-[11px] font-medium text-blue-700 truncate">
+              <span>Cash: ₹{formatINR(stats?.todayCollection?.cash || 0)}</span>
+              <span className="text-blue-300">·</span>
+              <span>Bank: ₹{formatINR(stats?.todayCollection?.bank || 0)}</span>
             </span>
-          </div>
+          }
+        />
 
-          <div className="p-3.5 pt-2.5 space-y-2">
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="flex items-center text-slate-600 font-medium">
-                  <span className="text-blue-600 mr-1.5 font-bold">👦</span> Boy
-                </span>
-                <span className="font-bold text-slate-900 font-mono">{stats.totalStudents.boys}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="flex items-center text-slate-600 font-medium">
-                  <span className="text-pink-600 mr-1.5 font-bold">👧</span> Girl
-                </span>
-                <span className="font-bold text-slate-900 font-mono">{stats.totalStudents.girls}</span>
-              </div>
-            </div>
+        <StatsCard
+          title="Fee Revenue"
+          value={`₹${formatINR(stats?.feeRevenueSummary?.totalRevenue || 0)}`}
+          icon={Receipt}
+          themeIndex={4}
+          onClick={() => onNavigate && onNavigate('/fee-reports')}
+          badge={`${stats?.feeRevenueSummary?.receivedPercentage || 0}% Paid`}
+          subtitle={
+            <span className="flex items-center gap-1 text-[11px] font-medium text-orange-700 truncate">
+              <span>Due: ₹{formatINR(stats?.feeRevenueSummary?.totalDue || 0)}</span>
+              <span className="text-orange-300">·</span>
+              <span className="font-bold text-rose-600">({stats?.feeRevenueSummary?.duePercentage || 0}%)</span>
+            </span>
+          }
+        />
 
-            <div className="flex justify-between pt-2 border-t border-slate-100 text-[10.5px]">
-              <div className="bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2 py-0.5 rounded-md font-semibold">
-                New : <strong className="font-mono">{stats.totalStudents.newAdmissions}</strong>
-              </div>
-              <div className="bg-purple-50 text-purple-800 border border-purple-200/70 px-2 py-0.5 rounded-md font-semibold">
-                Old : <strong className="font-mono">{stats.totalStudents.oldStudents}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          title="Total Students"
+          value={stats?.totalStudents?.total ?? 0}
+          icon={Users}
+          themeIndex={1}
+          onClick={() => onNavigate && onNavigate('/student-reports')}
+          badge={stats?.totalStudents?.growthRate || '+5.4%'}
+          subtitle={
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-violet-700">
+              <span className="font-bold">👦 {stats?.totalStudents?.boys ?? 0}</span>
+              <span className="text-violet-300">·</span>
+              <span className="font-bold">👧 {stats?.totalStudents?.girls ?? 0}</span>
+              <span className="text-violet-300">·</span>
+              <span className="text-[10px] text-violet-600 font-semibold">New: {stats?.totalStudents?.newAdmissions ?? 0}</span>
+            </span>
+          }
+        />
 
-        {/* Card 4: Student Attendance (Rose-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden relative select-none transition-all duration-200">
-          <button
-            onClick={() => onNavigate && onNavigate('/student-attendance')}
-            className="absolute top-2 right-2.5 text-slate-400 hover:text-indigo-600 transition-colors"
-            title="Mark Attendance"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
+        <StatsCard
+          title="Student Attendance"
+          value={`${stats?.attendanceToday?.percentage || 0}%`}
+          icon={UserCheck}
+          themeIndex={2}
+          onClick={() => onNavigate && onNavigate('/student-attendance')}
+          badge={stats?.attendanceToday?.trend || 'Today'}
+          subtitle={
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-800">
+              <span className="font-bold">✓ {stats?.attendanceToday?.totalPresent || 0} P</span>
+              <span className="text-emerald-300">·</span>
+              <span className="font-bold text-rose-600">✕ {stats?.attendanceToday?.totalAbsent || 0} A</span>
+            </span>
+          }
+        />
 
-          <div className="bg-gradient-to-r from-rose-50/90 via-pink-50/40 to-white border-b border-rose-100/80 py-1.5 px-3.5 flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-            <h3 className="font-bold text-xs text-slate-800 tracking-tight">Student Attendance</h3>
-          </div>
-
-          <div className="p-3.5 pt-2.5">
-            <div className="flex justify-between items-baseline mb-3">
-              <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
-                {stats.attendanceToday.trend}
-              </span>
-              <span className="text-xl font-black text-slate-900 font-mono">
-                {stats.attendanceToday.percentage}%
-              </span>
-            </div>
-
-            <div className="flex justify-around items-center pt-2 border-t border-slate-100 text-xs">
-              <div className="text-center">
-                <p className="text-rose-600 font-bold font-mono leading-none">{stats.attendanceToday.totalAbsent}</p>
-                <p className="text-[10px] text-slate-500 mt-1 font-medium">Absent</p>
-              </div>
-              <div className="text-center">
-                <p className="text-emerald-600 font-bold font-mono leading-none">{stats.attendanceToday.totalPresent}</p>
-                <p className="text-[10px] text-slate-500 mt-1 font-medium">Present</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          title="Staff Attendance"
+          value="Daily Register"
+          icon={ShieldCheck}
+          themeIndex={3}
+          onClick={() => onNavigate && onNavigate('/staff-attendance')}
+          badge="Faculty"
+          subtitle={
+            <span className="text-amber-800 text-[11px] font-bold hover:underline">
+              Mark Staff Biometrics →
+            </span>
+          }
+        />
       </div>
 
-      {/* Row 2: Today's Paymode Summary (Lime-50 Header Grid) */}
-      <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-        <div className="bg-gradient-to-r from-emerald-50/70 via-teal-50/40 to-white border-b border-emerald-100 px-3.5 py-2 flex items-center space-x-2">
-          <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
-            🔍
+      {/* Today's Paymode Summary (ErpSection with Emerald Tone) */}
+      <ErpSection title="Today's Paymode Summary" icon={CreditCard} tone="green">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+          {/* CASH */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-100 bg-emerald-50/50 hover:bg-white hover:border-emerald-300 transition-all">
+            <IndianRupee className="w-4 h-4 text-emerald-700 shrink-0" />
+            <div className="text-center text-emerald-800">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CASH</p>
+            </div>
           </div>
-          <h3 className="font-bold text-xs text-slate-800 tracking-tight">
-            Today's Paymode Summary
-          </h3>
-        </div>
 
-        <div className="p-3.5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 max-w-5xl mx-auto">
-            {/* CASH */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-emerald-300 transition-all">
-              <IndianRupee className="w-4 h-4 text-emerald-700" />
-              <div className="text-center text-emerald-800">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CASH</p>
-              </div>
+          {/* BANK */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-white hover:border-blue-300 transition-all">
+            <Building2 className="w-4 h-4 text-blue-700 shrink-0" />
+            <div className="text-center text-blue-800">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">BANK</p>
             </div>
+          </div>
 
-            {/* BANK */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-blue-300 transition-all">
-              <Building2 className="w-4 h-4 text-blue-700" />
-              <div className="text-center text-blue-800">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">BANK</p>
-              </div>
+          {/* CHEQUE */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-white hover:border-amber-300 transition-all">
+            <Receipt className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="text-center text-amber-700">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CHEQUE</p>
             </div>
+          </div>
 
-            {/* CHEQUE */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-amber-300 transition-all">
-              <Receipt className="w-4 h-4 text-amber-600" />
-              <div className="text-center text-amber-700">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CHEQUE</p>
-              </div>
+          {/* ONLINE */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-white hover:border-sky-300 transition-all">
+            <Globe className="w-4 h-4 text-sky-700 shrink-0" />
+            <div className="text-center text-sky-800">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">ONLINE</p>
             </div>
+          </div>
 
-            {/* ONLINE */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-sky-300 transition-all">
-              <Globe className="w-4 h-4 text-sky-700" />
-              <div className="text-center text-sky-800">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">ONLINE</p>
-              </div>
+          {/* UPI */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-violet-100 bg-violet-50/50 hover:bg-white hover:border-violet-300 transition-all">
+            <QrCode className="w-4 h-4 text-violet-700 shrink-0" />
+            <div className="text-center text-violet-800">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">UPI</p>
             </div>
+          </div>
 
-            {/* UPI */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-violet-300 transition-all">
-              <QrCode className="w-4 h-4 text-violet-700" />
-              <div className="text-center text-violet-800">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">UPI</p>
-              </div>
-            </div>
-
-            {/* DEBIT/CREDIT */}
-            <div className="flex items-center justify-center space-x-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-fuchsia-300 transition-all">
-              <CreditCard className="w-4 h-4 text-fuchsia-700" />
-              <div className="text-center text-fuchsia-800">
-                <p className="text-xs font-black font-mono leading-none">0</p>
-                <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CARD</p>
-              </div>
+          {/* CARD */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-white hover:border-rose-300 transition-all">
+            <CreditCard className="w-4 h-4 text-rose-700 shrink-0" />
+            <div className="text-center text-rose-800">
+              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CARD</p>
             </div>
           </div>
         </div>
-      </div>
+      </ErpSection>
 
-      {/* Row 3: Estimated Fee Collection Chart, Recent Transactions, and Accounts Widget */}
+      {/* Row 3: Estimated Fee Collection, Recent Transactions, and Accounts Widget */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Estimated Fee Collection */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden relative">
-          <div className="bg-gradient-to-r from-rose-50/80 via-pink-50/40 to-white border-b border-rose-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
-                🏦
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">
-                Estimated Fee Collection
-              </h3>
-            </div>
+        <ErpSection
+          title="Estimated Fee Collection"
+          icon={Building2}
+          tone="rose"
+          action={
             <button
               type="button"
               onClick={handleRefreshEstimates}
               title="Refresh Estimates"
               className="text-slate-400 hover:text-slate-700 cursor-pointer p-1 rounded-md transition-colors"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-indigo-600' : ''}`} />
+              <RefreshCw className={cn('w-3.5 h-3.5', isRefreshing && 'animate-spin text-rose-600')} />
             </button>
-          </div>
-
-          <div className="p-3.5">
-            <div className="flex items-center justify-center space-x-4 text-[11px] font-semibold mb-3">
-              <span className="flex items-center space-x-1.5">
+          }
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-4 text-[11px] font-semibold">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                 <span className="text-slate-700">Expected</span>
               </span>
-              <span className="flex items-center space-x-1.5">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span className="text-slate-700">Received</span>
               </span>
-              <span className="flex items-center space-x-1.5">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                 <span className="text-slate-700">Due</span>
               </span>
             </div>
 
             {/* Bar Visual Representation */}
-            <div className="h-44 flex items-end justify-around border-b border-slate-100 pb-2 px-4">
-              <div className="flex flex-col items-center space-y-1.5">
+            <div className="h-40 flex items-end justify-around border-b border-slate-100 pb-2 px-2">
+              <div className="flex flex-col items-center gap-1.5">
                 <div className="w-8 bg-gradient-to-t from-rose-600 to-rose-400 rounded-t-md shadow-2xs transition-all duration-500" style={{ height: `${expectedHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Expected</span>
                 <span className="text-[11px] font-bold font-mono text-slate-800">{formatShortAmount(expectedAmount)}</span>
               </div>
-              <div className="flex flex-col items-center space-y-1.5">
+              <div className="flex flex-col items-center gap-1.5">
                 <div className="w-8 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-md shadow-2xs transition-all duration-500" style={{ height: `${receivedHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Received</span>
                 <span className="text-[11px] font-bold font-mono text-slate-800">{formatShortAmount(receivedAmount)}</span>
               </div>
-              <div className="flex flex-col items-center space-y-1.5">
+              <div className="flex flex-col items-center gap-1.5">
                 <div className="w-8 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-md shadow-2xs transition-all duration-500" style={{ height: `${dueHeight}px` }}></div>
                 <span className="text-[10px] text-slate-500 font-medium">Due</span>
                 <span className="text-[11px] font-bold font-mono text-slate-800">{formatShortAmount(dueAmount)}</span>
               </div>
             </div>
           </div>
-        </div>
+        </ErpSection>
 
-        {/* Recent Transactions Widget (Orange-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden flex flex-col">
-          <div className="bg-gradient-to-r from-orange-50/80 via-amber-50/40 to-white border-b border-orange-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-xs">
-                📜
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">
-                Recent Transactions
-              </h3>
-            </div>
-          </div>
-
-          <div className="p-4 flex-1 flex flex-col items-center justify-center text-center text-slate-400 text-xs py-10">
+        {/* Recent Transactions Widget */}
+        <ErpSection title="Recent Transactions" icon={Receipt} tone="orange" className="flex flex-col justify-between">
+          <div className="py-8 flex-1 flex flex-col items-center justify-center text-center text-slate-400 text-xs">
             <Receipt className="w-8 h-8 text-slate-300 mb-2" />
             <p className="font-bold text-slate-700 text-xs">No Transactions Today</p>
             <p className="text-[11px] text-slate-400 mt-0.5">All collected receipts will appear here in real-time</p>
           </div>
-        </div>
+        </ErpSection>
 
-        {/* Accounts Widget (Teal-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-50/80 via-emerald-50/40 to-white border-b border-teal-100 px-3.5 py-2 flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center text-xs">
-              💰
-            </div>
-            <h3 className="font-bold text-xs text-slate-800 tracking-tight">
-              Accounts
-            </h3>
-          </div>
-
-          <div className="p-3.5 space-y-3">
+        {/* Accounts Widget */}
+        <ErpSection title="Accounts" icon={CreditCard} tone="blue">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               {/* Total Transactions Counter */}
               <div className="w-1/2 flex flex-col items-center justify-center border-r border-slate-100 pr-2">
-                <span className="text-4xl font-black text-emerald-600 font-mono leading-none">0</span>
+                <span className="text-3xl sm:text-4xl font-black text-emerald-600 font-mono leading-none">0</span>
                 <span className="text-[11px] text-slate-600 mt-1 font-semibold">Transactions</span>
               </div>
 
@@ -520,14 +396,14 @@ export function DashboardPage({ onNavigate }) {
 
                 <div className="mt-2 text-center">
                   <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10.5px] font-bold">
-                    Net: 0 ↑
+                    Net: ₹0 ↑
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Year Till Date Summary */}
-            <div className="pt-2.5 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100">
               <p className="text-[10px] text-center font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                 Year Till Date Summary
               </p>
@@ -547,38 +423,35 @@ export function DashboardPage({ onNavigate }) {
               </div>
             </div>
           </div>
-        </div>
+        </ErpSection>
       </div>
 
-      {/* Row 4: Fee Reminders, Complaints, Calendar, and Staff Attendance */}
+      {/* Row 4: Fee Reminders, Complaints, Calendar, and Live Vehicle Tracking */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Fee Reminders (Cyan-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-cyan-50/80 via-sky-50/40 to-white border-b border-cyan-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center text-xs">
-                🔔
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Fee Reminders</h3>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />
-          </div>
-
-          <div className="p-3.5">
+        {/* Fee Reminders */}
+        <ErpSection
+          title="Fee Reminders"
+          icon={Bell}
+          tone="blue"
+          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />}
+        >
+          <div>
             <div className="flex border-b border-slate-100 text-xs font-semibold mb-2">
               <button
                 onClick={() => setActiveReminderTab('Today')}
-                className={`flex-1 pb-1.5 text-center transition-colors cursor-pointer ${
-                  activeReminderTab === 'Today' ? 'border-b-2 border-cyan-600 text-cyan-700 font-bold' : 'text-slate-400 hover:text-slate-600'
-                }`}
+                className={cn(
+                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer',
+                  activeReminderTab === 'Today' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-slate-400 hover:text-slate-600'
+                )}
               >
                 Today
               </button>
               <button
                 onClick={() => setActiveReminderTab('Upcoming')}
-                className={`flex-1 pb-1.5 text-center transition-colors cursor-pointer ${
-                  activeReminderTab === 'Upcoming' ? 'border-b-2 border-cyan-600 text-cyan-700 font-bold' : 'text-slate-400 hover:text-slate-600'
-                }`}
+                className={cn(
+                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer',
+                  activeReminderTab === 'Upcoming' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-slate-400 hover:text-slate-600'
+                )}
               >
                 Upcoming
               </button>
@@ -587,39 +460,29 @@ export function DashboardPage({ onNavigate }) {
               No fee reminders scheduled for {activeReminderTab.toLowerCase()}
             </div>
           </div>
-        </div>
+        </ErpSection>
 
-        {/* Complaints (Yellow-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-50/80 via-yellow-50/40 to-white border-b border-amber-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
-                ✏️
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Complaints</h3>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />
-          </div>
-
-          <div className="p-3.5 py-9 text-center text-xs text-slate-400">
+        {/* Complaints */}
+        <ErpSection
+          title="Complaints"
+          icon={AlertCircle}
+          tone="yellow"
+          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-amber-600 transition-colors" />}
+        >
+          <div className="py-9 text-center text-xs text-slate-400">
             <p className="font-bold text-slate-700">No Open Complaints</p>
             <p className="text-[10.5px] text-slate-400 mt-0.5">Parent &amp; student grievance box clear</p>
           </div>
-        </div>
+        </ErpSection>
 
-        {/* Calendar (Teal-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-50/80 via-emerald-50/40 to-white border-b border-teal-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center text-xs">
-                📅
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Calendar (October)</h3>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />
-          </div>
-
-          <div className="p-3.5">
+        {/* Calendar */}
+        <ErpSection
+          title="Calendar (October)"
+          icon={CalendarDays}
+          tone="purple"
+          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-purple-600 transition-colors" />}
+        >
+          <div>
             <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1.5">
               <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
             </div>
@@ -627,130 +490,30 @@ export function DashboardPage({ onNavigate }) {
               {[...Array(31)].map((_, i) => (
                 <span
                   key={i}
-                  className={`p-1 rounded-md transition-colors ${
+                  className={cn(
+                    'p-1 rounded-md transition-colors',
                     i + 1 === 10
-                      ? 'bg-indigo-600 text-white font-bold shadow-2xs'
+                      ? 'bg-purple-600 text-white font-bold shadow-2xs'
                       : 'hover:bg-slate-100 text-slate-600'
-                  }`}
+                  )}
                 >
                   {i + 1}
                 </span>
               ))}
             </div>
           </div>
-        </div>
+        </ErpSection>
 
-        {/* Staff Attendance (Orange-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-orange-50/80 via-amber-50/40 to-white border-b border-orange-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs">
-                👆
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Staff Attendance</h3>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />
-          </div>
-
-          <div className="p-4 space-y-2.5 text-xs">
-            <div className="flex justify-between items-center bg-slate-50 border border-slate-100 p-2.5 rounded-lg">
-              <span className="font-semibold text-slate-700">Present (P):</span>
-              <span className="font-bold text-emerald-600 font-mono text-sm">0</span>
-            </div>
-            <div className="flex justify-between items-center bg-slate-50 border border-slate-100 p-2.5 rounded-lg">
-              <span className="font-semibold text-slate-700">Absent (Ab):</span>
-              <span className="font-bold text-rose-600 font-mono text-sm">0</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 5: Student Birthdays, Staff Birthdays, Leave Requests, and Live Vehicle Tracking */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Student Birthday ({birthdays.length}) (Pink-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-pink-50/80 via-rose-50/40 to-white border-b border-pink-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center text-xs">
-                🎂
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">
-                Student Birthday ({birthdays.length})
-              </h3>
-            </div>
-          </div>
-
-          <div className="p-3.5 divide-y divide-slate-100 text-xs">
-            {birthdays.length > 0 ? (
-              birthdays.map((b, i) => (
-                <div key={i} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-slate-900 leading-tight">{b.name}</p>
-                    <p className="text-[10.5px] text-pink-600 font-semibold mt-0.5">{b.classSec}</p>
-                  </div>
-                  <span className="text-base" title="Wish Birthday">🎂</span>
-                </div>
-              ))
-            ) : (
-              <div className="py-9 text-center text-xs text-slate-400">
-                No student birthdays today
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Staff Birthday (0) (Blue-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white border-b border-blue-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
-                🎂
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Staff Birthday (0)</h3>
-            </div>
-          </div>
-
-          <div className="p-3.5 py-11 text-center text-xs text-slate-400">
-            No staff birthdays today
-          </div>
-        </div>
-
-        {/* Staff/Student Leave Request (Blue-50 Header) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white border-b border-indigo-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">
-                📝
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Staff/Student Leave Request</h3>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />
-          </div>
-
-          <div className="p-3.5 py-11 text-center text-xs text-slate-400">
-            No Data Found !
-          </div>
-        </div>
-
-        {/* Live Vehicle Tracking (Teal-50 Header Table) */}
-        <div className="bg-white rounded-xl shadow-2xs border border-slate-200/90 overflow-hidden flex flex-col">
-          <div className="bg-gradient-to-r from-teal-50/80 via-emerald-50/40 to-white border-b border-teal-100 px-3.5 py-2 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center text-xs">
-                🚌
-              </div>
-              <h3 className="font-bold text-xs text-slate-800 tracking-tight">Vehicle Tracking</h3>
-            </div>
-          </div>
-
-          <div className="p-3 overflow-y-auto max-h-48 flex-1">
+        {/* Live Vehicle Tracking */}
+        <ErpSection title="Vehicle Tracking" icon={Bus} tone="green" className="flex flex-col">
+          <div className="overflow-y-auto max-h-48 flex-1">
             <table className="w-full text-left text-[11px] border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="py-1.5">S.No</th>
-                  <th className="py-1.5">Vehicle</th>
-                  <th className="py-1.5">Driver</th>
-                  <th className="py-1.5 text-right">Cap</th>
+                  <th className="py-1">S.No</th>
+                  <th className="py-1">Vehicle</th>
+                  <th className="py-1">Driver</th>
+                  <th className="py-1 text-right">Cap</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -760,7 +523,7 @@ export function DashboardPage({ onNavigate }) {
                       <td className="py-1.5 text-slate-400 font-mono">{v.sNo}</td>
                       <td className="py-1.5 font-bold text-slate-800">{v.name}</td>
                       <td className="py-1.5 text-slate-600">{v.driver}</td>
-                      <td className="py-1.5 text-right font-mono font-bold text-indigo-700">{v.capacity}</td>
+                      <td className="py-1.5 text-right font-mono font-bold text-teal-700">{v.capacity}</td>
                     </tr>
                   ))
                 ) : (
@@ -773,8 +536,70 @@ export function DashboardPage({ onNavigate }) {
               </tbody>
             </table>
           </div>
-        </div>
+        </ErpSection>
       </div>
-    </div>
+
+      {/* Row 5: Student Birthdays & Staff Birthdays (Test Master Pro Carousel / Card styling) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+        {/* Student Birthday Widget */}
+        <ErpSection
+          title={`Student Birthdays (${birthdays.length})`}
+          icon={PartyPopper}
+          tone="rose"
+          action={
+            <span className="text-[11px] text-pink-600 font-semibold bg-pink-100/60 px-2.5 py-0.5 rounded-full border border-pink-200/50">
+              {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+            </span>
+          }
+        >
+          {birthdays.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {birthdays.map((b, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-pink-100 bg-gradient-to-b from-pink-50/50 to-white hover:border-pink-300 transition-all group select-none shadow-2xs"
+                >
+                  <div className="relative">
+                    <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-pink-300 shadow-xs flex items-center justify-center bg-pink-100 text-pink-600 font-black text-sm">
+                      {b.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 text-sm">🎂</span>
+                  </div>
+                  <div className="text-center w-full">
+                    <p className="font-bold text-slate-900 text-xs truncate" title={b.name}>{b.name}</p>
+                    <p className="text-[10.5px] text-pink-600 font-semibold truncate">{b.classSec}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-slate-400">
+              <span className="text-2xl block mb-1">🎈</span>
+              <p className="font-semibold text-slate-600">No student birthdays today</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Upcoming birthdays will appear here automatically</p>
+            </div>
+          )}
+        </ErpSection>
+
+        {/* Staff Birthday & Leave Request */}
+        <ErpSection title="Staff Birthdays & Leave Requests" icon={Cake} tone="indigo">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 flex flex-col items-center justify-center text-center">
+              <span className="text-2xl mb-1">🎂</span>
+              <p className="text-xs font-bold text-slate-800">Staff Birthdays</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">0 Staff birthdays today</p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 flex flex-col items-center justify-center text-center">
+              <span className="text-2xl mb-1">📝</span>
+              <p className="text-xs font-bold text-slate-800">Pending Leave Requests</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">No pending leave requests</p>
+            </div>
+          </div>
+        </ErpSection>
+      </div>
+    </PageStack>
   );
 }
+
+export default DashboardPage;

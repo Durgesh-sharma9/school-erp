@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Printer,
   ChevronDown,
@@ -29,6 +30,7 @@ const CLASSES = [
 ];
 
 export function IdCardGeneratorPage({ onNavigate }) {
+  const [highlightStudent, setHighlightStudent] = useState(null);
   const [selectedClass, setSelectedClass] = useState('I');
   const [cardType, setCardType] = useState('Horizontal');
   const [format, setFormat] = useState('Standard Format');
@@ -100,6 +102,39 @@ export function IdCardGeneratorPage({ onNavigate }) {
     );
   };
 
+  useEffect(() => {
+    const pending = tenantStore.getPendingIdCardStudent();
+    if (pending) {
+      setHighlightStudent(pending);
+      if (pending.className) {
+        setSelectedClass(pending.className);
+      }
+      setStudents((prev) => {
+        const exists = prev.find((s) => String(s.admNo) === String(pending.admNo));
+        if (exists) {
+          return prev.map((s) => ({
+            ...s,
+            selected: String(s.admNo) === String(pending.admNo)
+          }));
+        }
+        const newCard = {
+          id: `pending_${Date.now()}`,
+          rollNo: pending.rollNo || '1',
+          admNo: pending.admNo || '',
+          srNo: pending.admNo || '',
+          name: (pending.name || '').toUpperCase(),
+          className: pending.className || 'I',
+          fatherName: (pending.fatherName || '').toUpperCase(),
+          dob: pending.dob || '01-01-2019',
+          mobile: pending.mobile || '',
+          address: pending.address || 'Local',
+          selected: true
+        };
+        return [newCard, ...prev.map((s) => ({ ...s, selected: false }))];
+      });
+    }
+  }, []);
+
   const selectedCount = students.filter((s) => s.selected).length;
 
   return (
@@ -115,6 +150,31 @@ export function IdCardGeneratorPage({ onNavigate }) {
           <span className="text-gray-600 font-medium">ID Card Generator</span>
         </span>
       </div>
+
+      {highlightStudent && (
+        <div className="mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl flex items-center justify-between shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+              🪪
+            </div>
+            <div>
+              <p className="text-xs font-bold text-indigo-900">
+                Ready to print ID Card for {highlightStudent.name} (Adm: #{highlightStudent.admNo})
+              </p>
+              <p className="text-[11px] text-indigo-600">
+                Student pre-selected from registration / student directory action.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowPrintPreview(true)}
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Instant Preview & Print</span>
+          </button>
+        </div>
+      )}
 
       {/* Main Card */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-2xs p-4 md:p-5 mb-4">

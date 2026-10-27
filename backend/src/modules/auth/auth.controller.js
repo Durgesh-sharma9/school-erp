@@ -41,6 +41,23 @@ const USERS = {
     sessionId: '2026-2027',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
   },
+  // School A - Attender (Ramesh Kumar)
+  '9876543210': {
+    id: 'usr_attender_101',
+    username: '9876543210',
+    password: '12345678',
+    name: 'RAMESH KUMAR (Attender)',
+    employeeCode: 'ATT-101',
+    designation: 'Attendance Attender',
+    department: 'ATTENDANCE & OPERATIONS',
+    role: 'ATTENDER',
+    privilegeId: 5,
+    schoolId: 'sch_jd_intl',
+    schoolName: 'J D International School',
+    schoolCode: '10964',
+    sessionId: '2026-2027',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
+  },
   // School A - Staff (Priti Verma)
   '9079909813': {
     id: 'usr_staff_102',
@@ -667,6 +684,9 @@ export const switchRole = asyncHandler(async (req, res) => {
       break;
     case 'STAFF':
       user = USERS['9079909813'];
+      break;
+    case 'ATTENDER':
+      user = USERS['9876543210'];
       break;
     case 'STUDENT':
       user = USERS['6377281034'];

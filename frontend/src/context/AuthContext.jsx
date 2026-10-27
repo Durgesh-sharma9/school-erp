@@ -49,6 +49,22 @@ export const DEMO_USERS = {
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
     email: 'priti.verma@jdisjr.com'
   },
+  ATTENDER: {
+    id: 'usr_attender_101',
+    username: '9876543210',
+    name: 'RAMESH KUMAR (Attender)',
+    employeeCode: 'ATT-101',
+    designation: 'Attendance Attender',
+    department: 'ATTENDANCE & OPERATIONS',
+    role: 'ATTENDER',
+    privilegeId: 5,
+    schoolId: 'sch_jd_intl',
+    schoolName: 'J D International School',
+    schoolCode: '10964',
+    sessionId: '2026-2027',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    email: 'ramesh.attender@jdisjr.com'
+  },
   STUDENT: {
     id: 'usr_std_822',
     username: '6377281034',
@@ -109,6 +125,22 @@ export const DEMO_USERS = {
     sessionId: '2026-2027',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     email: 'r.gupta@dpsacademy.edu.in'
+  },
+  ATTENDER_B: {
+    id: 'usr_attender_dps_101',
+    username: '9876543211',
+    name: 'SURESH VERMA (Attender)',
+    employeeCode: 'ATT-201',
+    designation: 'Attendance Attender',
+    department: 'ATTENDANCE & OPERATIONS',
+    role: 'ATTENDER',
+    privilegeId: 5,
+    schoolId: 'sch_dps_branch2',
+    schoolName: 'Delhi Public Academy',
+    schoolCode: 'DPA-2026',
+    sessionId: '2026-2027',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    email: 'suresh.attender@dpsacademy.edu.in'
   },
   STUDENT_B: {
     id: 'usr_std_dps_101',
@@ -265,6 +297,7 @@ export function AuthProvider({ children }) {
         isSuperAdmin: currentRole === 'SUPER_ADMIN',
         isAdmin: currentRole === 'ADMIN' || currentRole === 'SUPER_ADMIN',
         isStaff: currentRole === 'STAFF',
+        isAttender: currentRole === 'ATTENDER',
         isStudent: currentRole === 'STUDENT',
         login,
         logout,

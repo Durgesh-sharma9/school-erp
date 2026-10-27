@@ -11,6 +11,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { tenantStore } from '../../services/tenantStore';
 
 const MOCK_CLASSES = ['All Classes', 'Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI - SCI', 'XII - SCI'];
 const MOCK_SECTIONS = ['All Sections', 'A', 'B', 'C'];
@@ -40,6 +41,34 @@ export function StudentSmsPage({ onNavigate }) {
       .then(res => res.json())
       .then(d => { if (d.success) setTemplates(d.data); })
       .catch(() => {});
+
+    // Prefill from attendance absentee alert flow if available
+    const pendingNotice = tenantStore.getPendingAbsenteeNotice();
+    if (pendingNotice) {
+      setSelectedClass(pendingNotice.className || 'All Classes');
+      setSelectedSection(pendingNotice.section || 'All Sections');
+      setTitle('Daily Student Absence Notice');
+      setMessage(`Dear Parent, your ward was marked ABSENT today (${pendingNotice.date}) in Class ${pendingNotice.className}-${pendingNotice.section}. Please contact school office if this was unforeseen.`);
+      toast.success(`Prefilled absentee notice for Class ${pendingNotice.className}-${pendingNotice.section}`);
+    }
+
+    // Prefill from direct student / fee dues flow if available
+    const pendingDirect = tenantStore.getPendingDirectSms();
+    if (pendingDirect) {
+      if (pendingDirect.className) setSelectedClass(pendingDirect.className);
+      if (pendingDirect.section) setSelectedSection(pendingDirect.section);
+      if (pendingDirect.dueAmount || pendingDirect.totalDue) {
+        setTitle('Fee Dues Reminder Notice');
+      } else {
+        setTitle('Student Parent Notification');
+      }
+      if (pendingDirect.message) {
+        setMessage(pendingDirect.message);
+      } else if (pendingDirect.name) {
+        setMessage(`Dear Parent, this is an official message from the school regarding ${pendingDirect.name} (Adm No: ${pendingDirect.admNo}).`);
+      }
+      toast.success('Prefilled message details from previous view');
+    }
   }, []);
 
   const handleTemplateSelect = (tplContent) => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { User, Eye, EyeOff, Smile } from 'lucide-react';
+import { User, Eye, EyeOff, Smile, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function LoginPage({ onNavigate }) {
@@ -34,6 +34,14 @@ export function LoginPage({ onNavigate }) {
         setPassword('12345678');
       } else {
         setUsername('9079909813');
+        setPassword('12345678');
+      }
+    } else if (tab === 'attender') {
+      if (tenant === 'sch_dps_branch2') {
+        setUsername('9876543211');
+        setPassword('12345678');
+      } else {
+        setUsername('9876543210');
         setPassword('12345678');
       }
     } else if (tab === 'student') {
@@ -179,8 +187,8 @@ export function LoginPage({ onNavigate }) {
           <p className="text-[11px] text-slate-400">Sign in to access your dashboard</p>
         </div>
 
-        {/* 3 Role Tabs: Admin | Staff | Student */}
-        <div className="grid grid-cols-3 border border-slate-200 rounded-xl overflow-hidden mb-4 p-1 bg-slate-50 gap-1">
+        {/* 4 Role Tabs: Admin | Staff | Attender | Student */}
+        <div className="grid grid-cols-4 border border-slate-200 rounded-xl overflow-hidden mb-4 p-1 bg-slate-50 gap-1">
           {/* Admin Tab */}
           <button
             type="button"
@@ -207,6 +215,20 @@ export function LoginPage({ onNavigate }) {
           >
             <User className="w-4 h-4 mb-0.5 text-orange-600" />
             <span>Staff</span>
+          </button>
+
+          {/* Attender Tab */}
+          <button
+            type="button"
+            onClick={() => handleTabChange('attender')}
+            className={`flex flex-col items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+              activeTab === 'attender'
+                ? 'bg-teal-100 text-teal-800 shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 mb-0.5 text-teal-600" />
+            <span>Attender</span>
           </button>
 
           {/* Student Tab */}

@@ -2,6 +2,32 @@
 
 export let usersList = [
   {
+    id: 'att_101',
+    empCode: 'ATT-101',
+    name: '[ATT-101] RAMESH KUMAR',
+    displayName: 'Ramesh Kumar',
+    category: 'Non-Teaching',
+    role: 'Attender',
+    designation: 'Attendance Attender',
+    department: 'Attendance & Operations',
+    phone: '9876543210',
+    email: 'ramesh.attender@jdintl.edu',
+    driverLicense: '',
+    vehicleAssigned: '',
+    pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
+    division: 'All Wings',
+    modules: ['Attendance'],
+    classes: ['All Classes'],
+    subjects: [],
+    examNames: [],
+    bulkEditingColumns: [],
+    isAdd: true,
+    isView: true,
+    isModify: false,
+    isDelete: false,
+    isActive: true
+  },
+  {
     id: '1',
     empCode: '301',
     name: '[301] POOJA KANWAR',

@@ -153,6 +153,23 @@ export const studentMenuCategories = [
   }
 ];
 
+export const attenderMenuCategories = [
+  { id: 'attender-dashboard', title: 'Attender Dashboard', icon: PieChart, path: '/dashboard' },
+  {
+    id: 'attender-attendance-group',
+    title: 'Attendance',
+    icon: CalendarCheck,
+    subItems: [
+      { title: 'Student Attendance', path: '/student-attendance' },
+      { title: 'Staff Attendance', path: '/staff-attendance' },
+      { title: 'Attendance Register', path: '/attendance-report' },
+      { title: 'Staff Attendance Report', path: '/staff-attendance-report' }
+    ]
+  },
+  { id: 'attender-biometric', title: 'Biometric Machine Sync', icon: CalendarDays, path: '/biometric-sync' },
+  { id: 'attender-school', title: 'School Info', icon: Home, path: '/school-info' }
+];
+
 export const staffMenuCategories = [
   { id: 'staff-dashboard', title: 'Staff Dashboard', icon: PieChart, path: '/dashboard' },
   {
@@ -545,6 +562,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       ? studentMenuCategories
       : role === 'STAFF'
       ? staffMenuCategories
+      : role === 'ATTENDER'
+      ? attenderMenuCategories
       : menuCategories;
 
     return rawCategories.filter(item => {

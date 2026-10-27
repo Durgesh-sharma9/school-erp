@@ -9,13 +9,87 @@ import {
   Award,
   Sparkles,
   FileCheck2,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
 import { ReportHeader } from './ReportHeader';
 import {
   STUDENT_REPORT_CATEGORIES,
   ALL_STUDENT_REPORTS
 } from './studentReportsCatalog';
+
+const COLOR_THEMES = {
+  blue: {
+    gradient: 'from-blue-600 to-indigo-600',
+    glow: 'shadow-blue-500/20',
+    badgeBg: 'bg-blue-50/80 text-blue-700 border-blue-200/70',
+  },
+  slate: {
+    gradient: 'from-slate-700 to-slate-900',
+    glow: 'shadow-slate-500/20',
+    badgeBg: 'bg-slate-100 text-slate-700 border-slate-200',
+  },
+  indigo: {
+    gradient: 'from-indigo-600 to-violet-600',
+    glow: 'shadow-indigo-500/20',
+    badgeBg: 'bg-indigo-50/80 text-indigo-700 border-indigo-200/70',
+  },
+  teal: {
+    gradient: 'from-teal-500 to-emerald-600',
+    glow: 'shadow-teal-500/20',
+    badgeBg: 'bg-teal-50/80 text-teal-700 border-teal-200/70',
+  },
+  cyan: {
+    gradient: 'from-cyan-500 to-blue-600',
+    glow: 'shadow-cyan-500/20',
+    badgeBg: 'bg-cyan-50/80 text-cyan-700 border-cyan-200/70',
+  },
+  purple: {
+    gradient: 'from-purple-600 to-pink-600',
+    glow: 'shadow-purple-500/20',
+    badgeBg: 'bg-purple-50/80 text-purple-700 border-purple-200/70',
+  },
+  violet: {
+    gradient: 'from-violet-600 to-indigo-600',
+    glow: 'shadow-violet-500/20',
+    badgeBg: 'bg-violet-50/80 text-violet-700 border-violet-200/70',
+  },
+  fuchsia: {
+    gradient: 'from-fuchsia-500 to-purple-600',
+    glow: 'shadow-fuchsia-500/20',
+    badgeBg: 'bg-fuchsia-50/80 text-fuchsia-700 border-fuchsia-200/70',
+  },
+  emerald: {
+    gradient: 'from-emerald-500 to-teal-600',
+    glow: 'shadow-emerald-500/20',
+    badgeBg: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/70',
+  },
+  green: {
+    gradient: 'from-emerald-600 to-green-600',
+    glow: 'shadow-green-500/20',
+    badgeBg: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/70',
+  },
+  lime: {
+    gradient: 'from-emerald-500 to-teal-700',
+    glow: 'shadow-teal-500/20',
+    badgeBg: 'bg-teal-50/80 text-teal-700 border-teal-200/70',
+  },
+  amber: {
+    gradient: 'from-amber-500 to-orange-600',
+    glow: 'shadow-amber-500/20',
+    badgeBg: 'bg-amber-50/80 text-amber-800 border-amber-200/70',
+  },
+  rose: {
+    gradient: 'from-rose-500 to-pink-600',
+    glow: 'shadow-rose-500/20',
+    badgeBg: 'bg-rose-50/80 text-rose-700 border-rose-200/70',
+  },
+  orange: {
+    gradient: 'from-orange-500 to-amber-600',
+    glow: 'shadow-orange-500/20',
+    badgeBg: 'bg-orange-50/80 text-orange-700 border-orange-200/70',
+  }
+};
 
 export function StudentReportsHubPage({ onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +111,7 @@ export function StudentReportsHubPage({ onNavigate }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* 1:1 Unified Top Reports Navbar */}
+      {/* Unified Top Reports Navbar */}
       <ReportHeader
         title="Student Reports Center"
         subtitle="Student"
@@ -45,64 +119,28 @@ export function StudentReportsHubPage({ onNavigate }) {
         showBack={false}
       />
 
-      <div className="p-4 md:p-6 max-w-7xl mx-auto w-full space-y-6 flex-1">
-        {/* Hero KPI Summary Bar */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-indigo-500/10 to-transparent pointer-events-none" />
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Centralized Student Reporting Suite</span>
-              </div>
-              <h2 className="text-xl md:text-2xl font-black tracking-tight text-white">
-                Student Reports & Records Directory
-              </h2>
-              <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Access, analyze, and export all 18 student lists, attendance matrices, board registrations, academic progression, and TC records in one click.
-              </p>
-            </div>
-
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Reports</span>
-                <p className="text-xl font-extrabold text-white mt-0.5">18</p>
-                <span className="text-[10px] text-indigo-300">Available</span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Students</span>
-                <p className="text-xl font-extrabold text-white mt-0.5">1,248</p>
-                <span className="text-[10px] text-emerald-400">Active Roster</span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Attendance</span>
-                <p className="text-xl font-extrabold text-white mt-0.5">94.8%</p>
-                <span className="text-[10px] text-cyan-300">Today</span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">TC Issued</span>
-                <p className="text-xl font-extrabold text-white mt-0.5">14</p>
-                <span className="text-[10px] text-amber-300">2026-27</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search & Category Filter Toolbar */}
-        <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs space-y-3">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Live Search */}
+      <div className="p-3 md:p-4 max-w-7xl mx-auto w-full space-y-4 flex-1">
+        {/* Filter & Search Bar - Compact */}
+        <div className="bg-white rounded-xl p-3.5 md:p-4 border border-slate-200/90 shadow-2xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Search Input */}
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search report by name, keywords (e.g. Attendance, TC, Board)..."
-                className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
+                placeholder="Search report by name, keywords..."
+                className="w-full pl-8 pr-8 py-1.5 text-xs bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-md"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
 
             {/* Results count */}
@@ -112,12 +150,12 @@ export function StudentReportsHubPage({ onNavigate }) {
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-slate-100">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 cursor-pointer ${
                 activeCategory === 'all'
-                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-2xs'
                   : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700'
               }`}
             >
@@ -125,20 +163,23 @@ export function StudentReportsHubPage({ onNavigate }) {
             </button>
             {STUDENT_REPORT_CATEGORIES.map(cat => {
               const count = ALL_STUDENT_REPORTS.filter(r => r.categoryId === cat.id).length;
+              const isSelected = activeCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                    activeCategory === cat.id
+                  className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
                       ? 'bg-slate-900 text-white shadow-2xs'
                       : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700'
                   }`}
                 >
                   <span>{cat.title}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                    activeCategory === cat.id ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isSelected ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700'
+                    }`}
+                  >
                     {count}
                   </span>
                 </button>
@@ -147,65 +188,64 @@ export function StudentReportsHubPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* Reports Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Reports Grid with Compact Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {filteredReports.map(report => {
             const Icon = report.icon;
+            const theme = COLOR_THEMES[report.color] || COLOR_THEMES.blue;
+
             return (
               <div
                 key={report.id}
                 onClick={() => onNavigate && onNavigate(report.path)}
-                className="group bg-white rounded-xl border border-slate-200/90 hover:border-indigo-300 p-5 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
+                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-lg hover:shadow-indigo-500/10 hover:border-indigo-400 hover:-translate-y-1 transition-all duration-200 cursor-pointer p-3.5 sm:p-4 flex flex-col justify-between group relative overflow-hidden"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200 flex items-center justify-center font-bold shrink-0">
-                      <Icon className="w-5 h-5" />
+                {/* Subtle Interior Gradient Wash */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 via-transparent to-transparent pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                <div className="relative z-10 flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* Top Row: Icon + Badge */}
+                    <div className="flex items-start justify-between gap-2.5 mb-2.5">
+                      <div
+                        className={`w-9 h-9 rounded-lg bg-gradient-to-br ${theme.gradient} text-white shadow-sm ${theme.glow} flex items-center justify-center font-bold shrink-0 group-hover:scale-105 transition-all duration-200`}
+                      >
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+
+                      <span
+                        className={`px-2 py-0.5 text-[9.5px] font-bold tracking-wide rounded-md border ${theme.badgeBg} shadow-2xs truncate max-w-[125px]`}
+                      >
+                        {report.badge}
+                      </span>
                     </div>
-                    <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 rounded-full transition-colors">
-                      {report.badge}
-                    </span>
+
+                    {/* Title & Description */}
+                    <h3 className="font-bold text-slate-900 text-[13.5px] leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
+                      {report.title}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-normal line-clamp-2 min-h-[30px]">
+                      {report.description}
+                    </p>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                    {report.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
-                    {report.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
-                  <span className="group-hover:underline">Open Report</span>
-                  <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                  {/* Compact Action Footer */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-600 group-hover:text-indigo-600 transition-colors">
+                      Open Report
+                    </span>
+                    <div className="w-6 h-6 rounded-md bg-slate-100 group-hover:bg-indigo-600 text-slate-400 group-hover:text-white flex items-center justify-center transition-all duration-200 group-hover:translate-x-0.5 shadow-2xs">
+                      <ArrowRight className="w-3 h-3 transition-transform" />
+                    </div>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-
-        {filteredReports.length === 0 && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
-              <Filter className="w-6 h-6" />
-            </div>
-            <h4 className="text-base font-bold text-slate-800">No matching reports found</h4>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              We couldn't find any student report matching "{searchQuery}". Try searching for words like Attendance, TC, Board, or Promotion.
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setActiveCategory('all');
-              }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
 }
+
 export default StudentReportsHubPage;

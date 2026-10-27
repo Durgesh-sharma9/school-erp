@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   Users,
   Plus,
@@ -29,10 +30,20 @@ const INITIAL_STAFF_ROSTER = [
 ];
 
 export function StaffAttendancePage({ onNavigate }) {
+  const { role } = useAuth();
+  const isAttender = role === 'ATTENDER';
+  const todayStr = new Date().toISOString().split('T')[0];
+
   const [data, setData] = useState(INITIAL_ATTENDANCE_LOGS);
   const [searchTerm, setSearchTerm] = useState('');
   const [isTakeAttendanceOpen, setIsTakeAttendanceOpen] = useState(false);
-  const [attendanceDate, setAttendanceDate] = useState('2026-10-16');
+  const [attendanceDate, setAttendanceDate] = useState(todayStr);
+
+  useEffect(() => {
+    if (isAttender) {
+      setAttendanceDate(todayStr);
+    }
+  }, [isAttender, todayStr]);
   const [staffRoster, setStaffRoster] = useState(INITIAL_STAFF_ROSTER);
 
   const filteredData = data.filter(item =>
@@ -211,9 +222,26 @@ export function StaffAttendancePage({ onNavigate }) {
                 <input
                   type="date"
                   value={attendanceDate}
-                  onChange={(e) => setAttendanceDate(e.target.value)}
-                  className="px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-mono font-bold"
+                  max={isAttender ? todayStr : undefined}
+                  min={isAttender ? todayStr : undefined}
+                  readOnly={isAttender}
+                  disabled={isAttender}
+                  onChange={(e) => !isAttender && setAttendanceDate(e.target.value)}
+                  className={`px-2.5 py-1.5 border rounded-lg font-mono font-bold ${
+                    isAttender
+                      ? 'bg-slate-100 text-slate-600 border-slate-300 cursor-not-allowed'
+                      : 'bg-white border-slate-300 focus:border-indigo-600'
+                  }`}
                 />
+                {isAttender ? (
+                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200">
+                    🔒 Today Only ({todayStr})
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                    🔓 Admin (Any Date)
+                  </span>
+                )}
               </div>
 
               <div className="flex gap-2">

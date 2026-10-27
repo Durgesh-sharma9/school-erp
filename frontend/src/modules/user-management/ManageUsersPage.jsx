@@ -9,6 +9,7 @@ import {
   UserPlus,
   Bus,
   Briefcase,
+  UserCheck,
   GraduationCap,
   Shield,
   Phone,
@@ -43,6 +44,7 @@ import toast from 'react-hot-toast';
 const ROLES = [
   { id: 'Teacher', label: 'Teacher', icon: GraduationCap, color: 'emerald', defaultDept: 'Academics', defaultDesignation: 'Subject Teacher' },
   { id: 'Staff', label: 'Office Staff', icon: Briefcase, color: 'blue', defaultDept: 'Accounts & Finance', defaultDesignation: 'Office Staff' },
+  { id: 'Attender', label: 'Attender', icon: UserCheck, color: 'teal', defaultDept: 'Attendance & Operations', defaultDesignation: 'Attendance Attender' },
   { id: 'Driver', label: 'Driver & Transport Crew', icon: Bus, color: 'amber', defaultDept: 'Transport & Fleet', defaultDesignation: 'School Bus Driver' },
   { id: 'Admin', label: 'Admin', icon: Shield, color: 'purple', defaultDept: 'Administration', defaultDesignation: 'Principal' }
 ];
@@ -579,7 +581,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       empCode: formData.empCode.trim(),
       pic: formData.pic.trim() || getRoleDefaultAvatar(formData.role),
       role: formData.role,
-      designation: formData.designation.trim() || (formData.role === 'Driver' ? 'School Bus Driver' : formData.role === 'Teacher' ? 'Subject Teacher' : 'Office Staff'),
+      designation: formData.designation.trim() || (formData.role === 'Attender' ? 'Attendance Attender' : formData.role === 'Driver' ? 'School Bus Driver' : formData.role === 'Teacher' ? 'Subject Teacher' : 'Office Staff'),
       department: formData.department,
       phone: formData.phone.trim(),
       email: formData.email.trim(),
@@ -589,7 +591,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       driverLicense: formData.role === 'Driver' ? formData.driverLicense.trim() : '',
       classes: formData.role === 'Teacher' && formData.assignedClass ? formData.assignedClass.split(',').map(s => s.trim()).filter(Boolean) : [],
       subjects: formData.role === 'Teacher' && formData.teachingSubject ? formData.teachingSubject.split(',').map(s => s.trim()).filter(Boolean) : [],
-      modules: formData.role === 'Driver' ? ['Transport'] : formData.role === 'Teacher' ? ['Student', 'Attendance', 'Academics'] : ['Fee', 'Payroll', 'Front Office'],
+      modules: formData.role === 'Attender' ? ['Attendance'] : formData.role === 'Driver' ? ['Transport'] : formData.role === 'Teacher' ? ['Student', 'Attendance', 'Academics'] : ['Fee', 'Payroll', 'Front Office'],
       // Accounts & Payroll
       basicSalary: Number(formData.basicSalary) || 0,
       bankName: formData.bankName,
@@ -727,7 +729,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
     return users.filter(u => {
       // Role Filter
       if (roleTab === 'Teacher' && u.role !== 'Teacher' && u.category !== 'Teaching') return false;
-      if (roleTab === 'Staff' && u.role !== 'Staff' && u.role !== 'Accountant' && u.role !== 'Office Staff' && u.category !== 'Non-Teaching') return false;
+      if (roleTab === 'Staff' && (u.role === 'Attender' || (u.role !== 'Staff' && u.role !== 'Accountant' && u.role !== 'Office Staff' && u.category !== 'Non-Teaching'))) return false;
+      if (roleTab === 'Attender' && u.role !== 'Attender') return false;
       if (roleTab === 'Driver' && u.role !== 'Driver' && u.category !== 'Transport') return false;
       if (roleTab === 'Admin' && u.role !== 'Admin' && u.category !== 'Management') return false;
 
@@ -759,7 +762,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   // Counts
   const totalCount = users.length;
   const teachersCount = users.filter(u => u.role === 'Teacher' || u.category === 'Teaching').length;
-  const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Accountant' || u.role === 'Office Staff' || u.category === 'Non-Teaching').length;
+  const staffCount = users.filter(u => (u.role === 'Staff' || u.role === 'Accountant' || u.role === 'Office Staff' || (u.category === 'Non-Teaching' && u.role !== 'Attender')) && u.role !== 'Attender').length;
+  const attendersCount = users.filter(u => u.role === 'Attender').length;
   const driversCount = users.filter(u => u.role === 'Driver' || u.category === 'Transport').length;
   const adminCount = users.filter(u => u.role === 'Admin' || u.category === 'Management').length;
 
@@ -805,6 +809,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
               { id: 'ALL', label: 'All Staff', count: totalCount, icon: Users },
               { id: 'Teacher', label: 'Teachers', count: teachersCount, icon: GraduationCap },
               { id: 'Staff', label: 'Office Staff', count: staffCount, icon: Briefcase },
+              { id: 'Attender', label: 'Attenders', count: attendersCount, icon: UserCheck },
               { id: 'Driver', label: 'Drivers & Transport', count: driversCount, icon: Bus },
               { id: 'Admin', label: 'Admins', count: adminCount, icon: Shield },
               { id: 'PRIVILEGE', label: 'User Privileges', count: null, icon: ShieldCheck }
@@ -1579,7 +1584,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                       <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                         Staff Role Category <span className="text-rose-500">*</span>
                       </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                         {ROLES.map(r => {
                           const isSelected = formData.role === r.id;
                           const IconComp = r.icon;

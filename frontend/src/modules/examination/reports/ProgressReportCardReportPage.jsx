@@ -30,6 +30,7 @@ import {
   CheckCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { tenantStore } from '../../../services/tenantStore';
 import JdInternationalMarksheet from './components/JdInternationalMarksheet';
 
 // Default Fallback Sample Student from J D International School
@@ -338,6 +339,13 @@ export function ProgressReportCardReportPage() {
     };
 
     fetchBackendData();
+
+    // Check if coming from Marks Entry flow with pre-selected class
+    const pendingClass = tenantStore.getPendingReportCardClass();
+    if (pendingClass && pendingClass.className) {
+      setSelectedClass(pendingClass.className);
+      toast.success(`Loaded report cards for ${pendingClass.className}`);
+    }
   }, []);
 
   // Filter student list by class and search query

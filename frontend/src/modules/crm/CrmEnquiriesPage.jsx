@@ -29,6 +29,7 @@ import {
   Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { tenantStore } from '../../services/tenantStore';
 import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
 import { DEFAULT_ENQUIRIES } from './crmData';
 import AdmissionJourneyTimeline from './components/AdmissionJourneyTimeline';
@@ -372,9 +373,22 @@ export function CrmEnquiriesPage({ onNavigate }) {
                                 <Eye className="w-4 h-4" />
                               </button>
 
-                              {/* Convert to Student Registration */}
+                              {/* Convert to Student Registration with prefilled data flow */}
                               <button
-                                onClick={() => onNavigate && onNavigate('/student-registration')}
+                                onClick={() => {
+                                  tenantStore.setPendingRegistration({
+                                    first_name: enq.studentName?.split(' ')[0] || '',
+                                    last_name: enq.studentName?.split(' ').slice(1).join(' ') || '',
+                                    fathers_name: enq.fatherName || '',
+                                    contact_no_sms: enq.mobileNo || '',
+                                    fathers_mobile_no: enq.mobileNo || '',
+                                    class_id: enq.classSeeking || 'I',
+                                    email: enq.email || '',
+                                    address: enq.address || ''
+                                  });
+                                  toast.success(`Transferring ${enq.studentName}'s enquiry to Admission Registration...`);
+                                  onNavigate?.('/student-registration');
+                                }}
                                 className="p-1.5 rounded-lg text-purple-600 hover:bg-purple-50 cursor-pointer"
                                 title="Convert to Admission Registration"
                               >
@@ -640,8 +654,21 @@ export function CrmEnquiriesPage({ onNavigate }) {
         data={selectedProfile}
         type="school"
         onConvert={() => {
+          if (selectedProfile) {
+            tenantStore.setPendingRegistration({
+              first_name: selectedProfile.studentName?.split(' ')[0] || '',
+              last_name: selectedProfile.studentName?.split(' ').slice(1).join(' ') || '',
+              fathers_name: selectedProfile.fatherName || '',
+              contact_no_sms: selectedProfile.mobileNo || '',
+              fathers_mobile_no: selectedProfile.mobileNo || '',
+              class_id: selectedProfile.classSeeking || 'I',
+              email: selectedProfile.email || '',
+              address: selectedProfile.address || ''
+            });
+            toast.success(`Transferring ${selectedProfile.studentName}'s enquiry to Admission Registration...`);
+          }
           setSelectedProfile(null);
-          onNavigate && onNavigate('/student-registration');
+          onNavigate?.('/student-registration');
         }}
         onSaveJourney={(updatedJourney, journeyStatus) => {
           if (selectedProfile) {

@@ -207,6 +207,19 @@ export function FeeCollectionPage({ onNavigate }) {
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
   // Fetch student fee ledger from backend with tenant header
+  useEffect(() => {
+    const pendingFeeStudent = tenantStore.getPendingFeeStudent();
+    if (pendingFeeStudent) {
+      setSelectedStudent(prev => ({
+        ...prev,
+        ...pendingFeeStudent
+      }));
+      setStudentSearch(pendingFeeStudent.admNo || '');
+      fetchStudentLedger(pendingFeeStudent.admNo);
+      toast.success('Loaded fee ledger for ' + pendingFeeStudent.name + ' (' + pendingFeeStudent.admNo + ')');
+    }
+  }, []);
+
   const fetchStudentLedger = async (admNo) => {
     if (!admNo) return;
     try {
@@ -342,10 +355,39 @@ export function FeeCollectionPage({ onNavigate }) {
       </div>
 
       {savedSuccess && (
-        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-xs shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <div>
-            Fee Receipt <span className="font-bold font-mono">#{receiptNo}</span> for <span className="font-bold">{selectedStudent.name}</span> saved successfully!
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm animate-fade-in">
+          <div className="flex items-center space-x-3">
+            <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+            <div>
+              <p className="font-bold text-sm">
+                Payment Recorded &bull; Receipt <span className="font-mono text-emerald-700">#{receiptNo}</span>
+              </p>
+              <p className="text-[11px] text-emerald-700">
+                Student: <strong>{selectedStudent?.name}</strong> &bull; Class: <strong>{selectedStudent?.className}</strong> &bull; Mode: <strong>{payMode}</strong>
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Receipt</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSavedSuccess(false);
+                setStudentSearch('');
+                toast('POS Ready for next fee collection');
+              }}
+              className="px-3.5 py-2 bg-white border border-emerald-300 hover:bg-emerald-100/50 text-emerald-800 font-semibold text-xs rounded-xl shadow-2xs cursor-pointer"
+            >
+              <span>+ Next Collection</span>
+            </button>
           </div>
         </div>
       )}

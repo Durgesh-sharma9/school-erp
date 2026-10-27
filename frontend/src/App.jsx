@@ -68,6 +68,7 @@ import {
   HostelReportsPage
 } from './modules/hostel';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
+import { AttendanceHubPage } from './modules/attendance/AttendanceHubPage';
 import {
   ExamTermsPage,
   ExamNamesPage,
@@ -360,6 +361,9 @@ function AppContent() {
     if (role === 'STAFF') {
       return <StaffPortalPage onNavigate={handleNavigate} />;
     }
+    if (role === 'ATTENDER') {
+      return <StudentAttendancePage onNavigate={handleNavigate} />;
+    }
     if (role === 'SUPER_ADMIN') {
       return <SuperAdminDashboardPage onNavigate={handleNavigate} />;
     }
@@ -472,6 +476,7 @@ function AppContent() {
               case '/assign-roll-number':
                 return <AssignRollNumberPage onNavigate={handleNavigate} />;
               case '/attendance':
+                return <AttendanceHubPage onNavigate={handleNavigate} />;
               case '/student-attendance':
                 return <StudentAttendancePage onNavigate={handleNavigate} />;
               case '/create-online-classes':

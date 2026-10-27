@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { tenantStore } from '../../services/tenantStore';
 import {
@@ -14,6 +15,7 @@ import {
   Building,
   Truck,
   FileText,
+  CreditCard,
   AlertCircle,
   Trophy,
   User,
@@ -546,6 +548,16 @@ export function StudentRegistrationPage({ onNavigate }) {
     }
   };
 
+  const [registeredStudent, setRegisteredStudent] = useState(null);
+
+  useEffect(() => {
+    const pending = tenantStore.getPendingRegistration();
+    if (pending) {
+      setFormData(prev => ({ ...prev, ...pending }));
+      toast.success('Form prefilled from CRM: ' + (pending.first_name || '') + ' ' + (pending.last_name || ''));
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
     try {
@@ -586,8 +598,9 @@ export function StudentRegistrationPage({ onNavigate }) {
         // Successfully cached in tenant store
       }
 
-      setSaveStatus(`Registered successfully in ${schoolName}!`);
-      setTimeout(() => setSaveStatus(null), 3000);
+      setRegisteredStudent(newStudentData);
+      setSaveStatus(`Registered successfully in ${schoolName}! (Adm No: #${newStudentData.admNo})`);
+      toast.success(`Student ${newStudentData.name} registered successfully!`);
     } catch {
       setSaveStatus('Error saving student registration');
       setTimeout(() => setSaveStatus(null), 3000);
@@ -605,6 +618,94 @@ export function StudentRegistrationPage({ onNavigate }) {
 
   return (
     <div className="p-4 md:p-6 bg-[#f3f4f6] min-h-screen text-slate-800">
+      {/* Post-Registration Success Actions Banner */}
+      {registeredStudent && (
+        <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-2xs shrink-0">
+              ✓
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-800">
+                {registeredStudent.name} is successfully registered!
+              </h3>
+              <p className="text-xs text-slate-500 font-mono">
+                Admission No: <strong>#{registeredStudent.admNo}</strong> &bull; Class: <strong>{registeredStudent.className} ({registeredStudent.section})</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                tenantStore.setPendingFeeStudent({
+                  admNo: registeredStudent.admNo,
+                  name: registeredStudent.name,
+                  className: registeredStudent.className,
+                  fatherName: registeredStudent.fatherName,
+                  mobileNo: registeredStudent.contactNo
+                });
+                onNavigate?.('/fee-collection');
+              }}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>Collect Fee POS</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                tenantStore.setPendingIdCardStudent({
+                  admNo: registeredStudent.admNo,
+                  name: registeredStudent.name,
+                  className: registeredStudent.className || 'I',
+                  fatherName: registeredStudent.fatherName || '',
+                  mobile: registeredStudent.contactNo || '',
+                  address: registeredStudent.address || ''
+                });
+                onNavigate?.('/id-card-generator');
+              }}
+              className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Generate ID Card</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigate?.('/assign-roll-number')}
+              className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Assign Roll No.</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setRegisteredStudent(null);
+                setSaveStatus(null);
+                setFormData(prev => ({
+                  ...prev,
+                  adm_no: String(Math.floor(2000 + Math.random() * 8000)),
+                  first_name: '',
+                  last_name: '',
+                  fathers_name: '',
+                  mothers_name: '',
+                  fathers_mobile_no: '',
+                  contact_no_sms: ''
+                }));
+                toast('Ready for next student registration');
+              }}
+              className="px-3.5 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs cursor-pointer"
+            >
+              <span>+ Register Next</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Breadcrumb & Print Action matching Live UAB */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">

@@ -218,6 +218,7 @@ export function Navbar({
               <option value="SUPER_ADMIN">SuperAdmin</option>
               <option value="ADMIN">Admin</option>
               <option value="STAFF">Staff</option>
+              <option value="ATTENDER">Attender</option>
               <option value="STUDENT">Student</option>
             </select>
           </div>
@@ -301,6 +302,7 @@ export function Navbar({
                     <option value="SUPER_ADMIN">SuperAdmin</option>
                     <option value="ADMIN">Admin</option>
                     <option value="STAFF">Staff</option>
+                    <option value="ATTENDER">Attender</option>
                     <option value="STUDENT">Student</option>
                   </select>
                 </div>
