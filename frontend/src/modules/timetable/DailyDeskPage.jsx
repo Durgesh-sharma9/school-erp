@@ -246,114 +246,232 @@ export function DailyDeskPage({ onNavigate }) {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 uppercase tracking-wider">
-            <Clock className="w-4 h-4" /> Daily Desk Operations & Substitution Engine
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Top Breadcrumb Toolbar */}
+      <div className="bg-white border-b border-slate-200/80 px-4 md:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-30">
+        <div className="flex items-center space-x-3">
+          <h1 className="text-base md:text-lg font-semibold text-slate-800">
+            Daily Desk Operations & Substitutions
+          </h1>
+          <div className="hidden sm:flex items-center space-x-2 text-xs text-slate-400 pl-3 border-l border-slate-200">
+            <button onClick={() => onNavigate && onNavigate('/')} className="hover:text-indigo-600 transition-colors">
+              <Clock className="w-3.5 h-3.5" />
+            </button>
+            <span>•</span>
+            <button onClick={() => onNavigate && onNavigate('/timetable-dashboard')} className="hover:text-indigo-600 transition-colors">
+              Timetable Pro
+            </button>
+            <span>•</span>
+            <span className="text-indigo-600 font-medium">Daily Desk</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">Live Daily Operations Matrix</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Real-time absent faculty tracking, single-click substitute allocation & period coverage
-          </p>
         </div>
 
-        {/* Date Selector & Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Date Selector */}
+          <div className="flex items-center bg-slate-50 p-1 rounded-lg border border-slate-200 shadow-2xs">
             <button
               onClick={() => changeDateBy(-1)}
-              className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors"
+              className="p-1 hover:bg-white rounded-md text-slate-600 transition-colors"
               title="Previous Day"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-slate-800 px-2 py-1 focus:outline-hidden"
+              className="bg-transparent text-xs font-semibold text-slate-800 px-1.5 py-0.5 focus:outline-hidden cursor-pointer"
             />
             <button
               onClick={() => changeDateBy(1)}
-              className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors"
+              className="p-1 hover:bg-white rounded-md text-slate-600 transition-colors"
               title="Next Day"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <button
             onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-            className="px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+            className="h-9 px-2.5 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
           >
             Today
           </button>
 
           <button
-            onClick={() => setAbsentModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold text-xs border border-rose-200 transition-colors"
+            onClick={fetchDailyDesk}
+            title="Refresh Matrix"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs transition-colors"
           >
-            <UserX className="w-4 h-4 text-rose-600" />
-            Mark Faculty Absent
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
 
           <button
             onClick={handleOpenHistory}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors"
+            className="h-9 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
             title="Substitution History"
           >
-            <History className="w-4 h-4" />
+            <History className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden md:inline">History</span>
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors"
+            className="h-9 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
             title="Export CSV"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden md:inline">Export</span>
+          </button>
+
+          <button
+            onClick={() => setAbsentModalOpen(true)}
+            className="h-9 px-3 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white flex items-center space-x-1.5 shadow-xs text-xs font-semibold transition-colors"
+          >
+            <UserX className="w-4 h-4" />
+            <span>Mark Faculty Absent</span>
           </button>
         </div>
       </div>
 
-      {/* Operational Highlights Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Faculty On Leave Today</span>
-            <p className="text-2xl font-black text-rose-600 mt-0.5">{absentTeachersList.length}</p>
-            <span className="text-[11px] text-slate-500">
-              {absentTeachersList.length === 0 ? 'No absences reported' : 'Requires substitutions'}
-            </span>
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
+        {/* Metric Cards Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Faculty On Leave</span>
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <UserX className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-rose-600 mt-2">{absentTeachersList.length}</h3>
+            <p className="text-[11px] text-rose-500 font-semibold flex items-center gap-1 mt-1">
+              <AlertTriangle className="w-3 h-3" />
+              {absentTeachersList.length === 0 ? 'Full attendance recorded' : 'Requires substitutions'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <UserX className="w-5 h-5" />
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Proxies Deployed</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Clock className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-amber-600 mt-2">{replacements.length}</h3>
+            <p className="text-[11px] text-amber-600 font-semibold flex items-center gap-1 mt-1">
+              <CheckCircle className="w-3 h-3" /> Cover duties assigned today
+            </p>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Active Class Sections</span>
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Users className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mt-2">{grid.length}</h3>
+            <p className="text-[11px] text-indigo-600 font-semibold flex items-center gap-1 mt-1">
+              <Clock className="w-3 h-3" /> {periods.filter(p => !p.isBreak).length} teaching periods/day
+            </p>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Coverage Efficiency</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-emerald-600 mt-2">100%</h3>
+            <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+              <CheckCircle className="w-3 h-3" /> All slots fully supervised
+            </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Substitutions Deployed</span>
-            <p className="text-2xl font-black text-amber-600 mt-0.5">{replacements.length}</p>
-            <span className="text-[11px] text-emerald-600 font-medium">Cover duties assigned</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
+        {/* Quick Module Navigation Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-dashboard')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Dashboard</p>
+              <p className="text-[10px] text-slate-400 truncate">Live Metrics</p>
+            </div>
+          </button>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Coverage Efficiency</span>
-            <p className="text-2xl font-black text-emerald-600 mt-0.5">100%</p>
-            <span className="text-[11px] text-slate-500">All periods supervised</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <CheckCircle className="w-5 h-5" />
-          </div>
+          <button
+            onClick={() => onNavigate && onNavigate('/timetables')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Time Tables</p>
+              <p className="text-[10px] text-slate-400 truncate">Master routines</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-builder')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Visual Editor</p>
+              <p className="text-[10px] text-slate-400 truncate">Interactive builder</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/lesson-planning')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Lesson Plans</p>
+              <p className="text-[10px] text-slate-400 truncate">Curriculum tracker</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-reports')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <History className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Reports & Logs</p>
+              <p className="text-[10px] text-slate-400 truncate">Teacher activity</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-homework')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Homework</p>
+              <p className="text-[10px] text-slate-400 truncate">Class assignments</p>
+            </div>
+          </button>
         </div>
-      </div>
 
       {/* Matrix Controls & Zoom Bar */}
       <div className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
@@ -507,6 +625,7 @@ export function DailyDeskPage({ onNavigate }) {
           </table>
         </div>
       </div>
+      </div>
 
       {/* Assign Substitute Modal */}
       {assignModalOpen && (
@@ -592,7 +711,7 @@ export function DailyDeskPage({ onNavigate }) {
                 <button
                   type="submit"
                   disabled={submittingSub}
-                  className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-[#5c67f6] hover:bg-indigo-600 rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
                 >
                   {submittingSub ? 'Assigning...' : 'Confirm Substitution'}
                 </button>
@@ -689,7 +808,7 @@ export function DailyDeskPage({ onNavigate }) {
                 <button
                   type="submit"
                   disabled={submittingAbsent}
-                  className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-[#5c67f6] hover:bg-indigo-600 rounded-lg shadow-xs transition-colors"
                 >
                   {submittingAbsent ? 'Saving...' : 'Update Attendance'}
                 </button>
