@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Home,
   Plus,
@@ -151,7 +152,7 @@ export function CrmPage({ onNavigate }) {
   const handleAddLeadSubmit = (e) => {
     e.preventDefault();
     if (!newLeadForm.studentName || !newLeadForm.mobile) {
-      alert('Please fill mandatory fields: Student Name and Mobile Number');
+      toast.error('Please fill mandatory fields: Student Name and Mobile Number');
       return;
     }
 

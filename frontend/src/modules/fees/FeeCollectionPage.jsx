@@ -190,7 +190,12 @@ export function FeeCollectionPage({ onNavigate }) {
 
     // 2. Background sync with backend
     try {
+<<<<<<< HEAD
       const res = await fetch(`http://localhost:5000/api/fees/student/${admNo}`, {
+=======
+      setLoadingStudent(true);
+      const res = await fetch(`/api/fees/student/${admNo}`, {
+>>>>>>> a749a72aba24759585dfd7a59eb9e8ba112e2a59
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       const result = await res.json();
@@ -417,7 +422,11 @@ export function FeeCollectionPage({ onNavigate }) {
 
       // 5. Send to backend
       try {
+<<<<<<< HEAD
         await fetch('http://localhost:5000/api/fees/collect', {
+=======
+        const res = await fetch('/api/fees/collect', {
+>>>>>>> a749a72aba24759585dfd7a59eb9e8ba112e2a59
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

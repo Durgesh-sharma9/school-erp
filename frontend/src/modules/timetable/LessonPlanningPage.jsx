@@ -69,7 +69,7 @@ export function LessonPlanningPage({ onNavigate }) {
   const fetchLessonPlans = async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:5000/api/timetable/lesson-plans?`;
+      let url = `/api/timetable/lesson-plans?`;
       if (dateFrom) url += `dateFrom=${dateFrom}&`;
       if (dateTo) url += `dateTo=${dateTo}&`;
       if (classFilter !== 'all') url += `classId=${classFilter}&`;
@@ -105,7 +105,7 @@ export function LessonPlanningPage({ onNavigate }) {
 
     setSubmittingPlan(true);
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/lesson-plans', {
+      const res = await fetch('/api/timetable/lesson-plans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export function LessonPlanningPage({ onNavigate }) {
 
   const handleStatusChange = async (planId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/lesson-plans/${planId}`, {
+      const res = await fetch(`/api/timetable/lesson-plans/${planId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ export function LessonPlanningPage({ onNavigate }) {
 
     setSubmittingComment(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/lesson-plans/${activeLesson.id}/comments`, {
+      const res = await fetch(`/api/timetable/lesson-plans/${activeLesson.id}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export function LessonPlanningPage({ onNavigate }) {
   const handleDeletePlan = async (id) => {
     if (!window.confirm('Delete this lesson plan?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/lesson-plans/${id}`, {
+      const res = await fetch(`/api/timetable/lesson-plans/${id}`, {
         method: 'DELETE',
         headers: { 'x-school-id': schoolId }
       });

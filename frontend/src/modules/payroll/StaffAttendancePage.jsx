@@ -87,17 +87,34 @@ export function StaffAttendancePage({ onNavigate }) {
               <Home className="w-3.5 h-3.5 mr-1" />
             </button>
             <span>•</span>
-            <span className="hover:text-indigo-600 cursor-pointer" onClick={() => onNavigate?.('/staff-attendance')}>Payroll</span>
+            <span>Attendance</span>
             <span>•</span>
             <span className="text-slate-800 font-medium">Staff Attendance</span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-3">
+          {/* Quick Sub-Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl shadow-2xs">
+            <button
+              type="button"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-emerald-700 shadow-2xs transition-all cursor-default"
+            >
+              Staff Attendance
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('/student-attendance')}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all cursor-pointer"
+            >
+              Student Attendance
+            </button>
+          </div>
+
           <button
             onClick={exportCSV}
             title="Export CSV"
-            className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 text-xs font-semibold flex items-center gap-1.5"
+            className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
             <FileDown className="w-4 h-4" />
             <span className="hidden sm:inline">Export</span>

@@ -442,8 +442,8 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const fetchMasterData = async () => {
     try {
       const [cRes, sRes] = await Promise.all([
-        fetch('http://localhost:5000/api/academics/classes').catch(() => null),
-        fetch('http://localhost:5000/api/academics/subjects').catch(() => null)
+        fetch('/api/academics/classes').catch(() => null),
+        fetch('/api/academics/subjects').catch(() => null)
       ]);
       if (cRes && cRes.ok) {
         const cData = await cRes.json();

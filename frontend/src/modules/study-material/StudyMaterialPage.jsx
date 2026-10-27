@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Home, Plus, Search, CheckSquare, Menu, FileText, Download, Trash2, X, Eye } from 'lucide-react';
 import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
 
@@ -77,7 +78,7 @@ export function StudyMaterialPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.title) {
-      alert('Please enter a title for the study material');
+      toast.error('Please enter a title for the study material');
       return;
     }
 
@@ -436,7 +437,18 @@ export function StudyMaterialPage({ onNavigate }) {
 
               <div className="flex justify-end space-x-2 pt-2">
                 <button
-                  onClick={() => alert(`Downloading ${selectedPreview.fileName}...`)}
+                  onClick={() => (() => {
+                      const blob = new Blob([`Study Material: ${selectedPreview.title}\nClass: ${selectedPreview.className}\nSubject: ${selectedPreview.subject}\nDescription: ${selectedPreview.description || ''}`], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = selectedPreview.fileName || 'material.pdf';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      toast.success(`Downloaded ${selectedPreview.fileName}`);
+                    })()}
                   className="px-4 py-2 bg-[#5c67f6] text-white text-xs font-semibold rounded-lg shadow-xs inline-flex items-center space-x-1"
                 >
                   <Download className="w-3.5 h-3.5" />

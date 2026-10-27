@@ -31,7 +31,7 @@ export function ClassTimetablePage({ onNavigate }) {
   const fetchTimetable = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/class?className=${selectedClass}&section=${selectedSection}`, {
+      const res = await fetch(`/api/timetable/class?className=${selectedClass}&section=${selectedSection}`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       if (res.ok) {

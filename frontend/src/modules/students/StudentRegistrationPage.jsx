@@ -574,7 +574,7 @@ export function StudentRegistrationPage({ onNavigate }) {
 
       // 2. Transmit to backend with tenant identifier
       try {
-        await fetch('http://localhost:5000/api/students', {
+        await fetch('/api/students', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

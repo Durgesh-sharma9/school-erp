@@ -18,7 +18,7 @@ export function StreamMasterPage() {
   // Fetch streams
   const fetchStreams = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/streams');
+      const res = await fetch('/api/academics/streams');
       const data = await res.json();
       if (data.success && data.data) {
         setStreams(data.data);
@@ -37,7 +37,7 @@ export function StreamMasterPage() {
     if (!newStreamName) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/academics/streams', {
+      const res = await fetch('/api/academics/streams', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stream: newStreamName })
@@ -56,7 +56,7 @@ export function StreamMasterPage() {
   const handleDeleteStream = async (id) => {
     if (!window.confirm('Are you sure you want to delete this stream?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/streams/${id}`, {
+      const res = await fetch(`/api/academics/streams/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();

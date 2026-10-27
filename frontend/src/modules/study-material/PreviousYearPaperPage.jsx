@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Home, Plus, Search, Trash2, X, Eye, FileText, Download, Calendar, GraduationCap } from 'lucide-react';
 import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
 
@@ -78,7 +79,7 @@ export function PreviousYearPaperPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.title || !formData.paperName) {
-      alert('Please fill all mandatory fields: Title and Paper Name');
+      toast.error('Please fill all mandatory fields: Title and Paper Name');
       return;
     }
 
@@ -358,7 +359,18 @@ export function PreviousYearPaperPage({ onNavigate }) {
                   <span className="font-semibold text-slate-800 truncate">{selectedPreview.fileName}</span>
                 </div>
                 <button
-                  onClick={() => alert(`Downloading paper: ${selectedPreview.fileName}`)}
+                  onClick={() => (() => {
+                      const blob = new Blob([`Previous Year Paper: ${selectedPreview.title}\nClass: ${selectedPreview.className}\nSubject: ${selectedPreview.subject}\nAcademic Year: ${selectedPreview.year}`], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = selectedPreview.fileName || 'paper.pdf';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      toast.success(`Downloaded ${selectedPreview.fileName}`);
+                    })()}
                   className="flex items-center space-x-1 text-xs px-2.5 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shrink-0 font-medium"
                 >
                   <Download className="w-3.5 h-3.5" />

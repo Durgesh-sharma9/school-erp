@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Home,
   Save,
@@ -50,14 +51,14 @@ export function CrmAdmissionFormPage({ onNavigate }) {
   const handleManualSubmit = (e) => {
     e.preventDefault();
     if (!formData.studentName || !formData.mobile) {
-      alert('Please fill mandatory fields: Student Name and Contact Mobile');
+      toast.error('Please fill mandatory fields: Student Name and Contact Mobile');
       return;
     }
 
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);
-      alert(`Admission Enquiry registered successfully for ${formData.studentName}!`);
+      toast.success(`Admission Enquiry registered successfully for ${formData.studentName}!`);
       if (onNavigate) onNavigate('/crm/enquiries');
     }, 800);
   };
@@ -438,7 +439,7 @@ export function CrmAdmissionFormPage({ onNavigate }) {
 
               <div className="flex justify-end pt-3 border-t">
                 <button
-                  onClick={() => alert('Form configuration settings saved successfully!')}
+                  onClick={() => toast.success('Form configuration settings saved successfully!')}
                   className="px-5 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold shadow-xs"
                 >
                   Save Settings

@@ -296,7 +296,7 @@ export function ProgressReportCardReportPage() {
     const fetchBackendData = async () => {
       try {
         // Fetch classes
-        const classRes = await fetch('http://localhost:5000/api/academics/classes').catch(() => null);
+        const classRes = await fetch('/api/academics/classes').catch(() => null);
         if (classRes && classRes.ok) {
           const classData = await classRes.json();
           if (classData?.data && Array.isArray(classData.data)) {
@@ -306,7 +306,7 @@ export function ProgressReportCardReportPage() {
         }
 
         // Fetch students
-        const stdRes = await fetch('http://localhost:5000/api/students').catch(() => null);
+        const stdRes = await fetch('/api/students').catch(() => null);
         if (stdRes && stdRes.ok) {
           const stdData = await stdRes.json();
           if (stdData?.data && Array.isArray(stdData.data) && stdData.data.length > 0) {

@@ -81,8 +81,8 @@ export function SubjectGroupPage({ onNavigate }) {
     try {
       setLoading(true);
       const [groupsRes, subjectsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/academics/subject-groups'),
-        fetch('http://localhost:5000/api/academics/subjects')
+        fetch('/api/academics/subject-groups'),
+        fetch('/api/academics/subjects')
       ]);
 
       const groupsData = await groupsRes.json();
@@ -151,7 +151,7 @@ export function SubjectGroupPage({ onNavigate }) {
 
     try {
       if (editingGroup) {
-        const res = await fetch(`http://localhost:5000/api/academics/subject-groups/${editingGroup.id}`, {
+        const res = await fetch(`/api/academics/subject-groups/${editingGroup.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -165,7 +165,7 @@ export function SubjectGroupPage({ onNavigate }) {
           toast.error(data.message || 'Failed to update group');
         }
       } else {
-        const res = await fetch('http://localhost:5000/api/academics/subject-groups', {
+        const res = await fetch('/api/academics/subject-groups', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -189,7 +189,7 @@ export function SubjectGroupPage({ onNavigate }) {
     if (!window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/subject-groups/${id}`, {
+      const res = await fetch(`/api/academics/subject-groups/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();

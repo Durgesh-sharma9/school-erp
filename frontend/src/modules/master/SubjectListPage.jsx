@@ -14,7 +14,7 @@ export function SubjectListPage() {
   // Fetch from backend
   const fetchSubjects = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subjects');
+      const res = await fetch('/api/academics/subjects');
       const data = await res.json();
       if (data.success && data.data) {
         setSubjects(data.data);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Home, Plus, Search, Printer, Trash2, X, Award, CheckCircle } from 'lucide-react';
 
 export function ManualCcBcPage({ onNavigate }) {
@@ -64,7 +65,7 @@ export function ManualCcBcPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.admNo) {
-      alert('Please fill at least Student Name and Adm No');
+      toast.error('Please fill at least Student Name and Admission No');
       return;
     }
 

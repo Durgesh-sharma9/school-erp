@@ -67,7 +67,7 @@ export function LoginPage({ onNavigate }) {
 
     try {
       // Call backend auth endpoint with tenant header
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

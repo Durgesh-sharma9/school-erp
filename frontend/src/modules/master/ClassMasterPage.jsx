@@ -175,7 +175,7 @@ export function ClassMasterPage({ onNavigate }) {
   const fetchClasses = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/academics/classes');
+      const res = await fetch('/api/academics/classes');
       const data = await res.json();
       if (data.success && data.data) {
         setClasses(data.data);
@@ -242,7 +242,7 @@ export function ClassMasterPage({ onNavigate }) {
     const updatedSections = [...currentSections, nextSec].sort();
 
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/classes/${cls.id}`, {
+      const res = await fetch(`/api/academics/classes/${cls.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -274,7 +274,7 @@ export function ClassMasterPage({ onNavigate }) {
     const updatedSections = currentSections.filter(s => s !== secToRemove);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/classes/${cls.id}`, {
+      const res = await fetch(`/api/academics/classes/${cls.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -316,7 +316,7 @@ export function ClassMasterPage({ onNavigate }) {
     try {
       if (editingClass) {
         // Update
-        const res = await fetch(`http://localhost:5000/api/academics/classes/${editingClass.id}`, {
+        const res = await fetch(`/api/academics/classes/${editingClass.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -331,7 +331,7 @@ export function ClassMasterPage({ onNavigate }) {
         }
       } else {
         // Add New
-        const res = await fetch('http://localhost:5000/api/academics/classes', {
+        const res = await fetch('/api/academics/classes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -354,7 +354,7 @@ export function ClassMasterPage({ onNavigate }) {
   const handleDeleteClass = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/classes/${id}`, {
+      const res = await fetch(`/api/academics/classes/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();

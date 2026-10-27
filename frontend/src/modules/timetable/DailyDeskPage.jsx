@@ -60,7 +60,7 @@ export function DailyDeskPage({ onNavigate }) {
   const fetchDailyDesk = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/daily-desk?date=${selectedDate}`, {
+      const res = await fetch(`/api/timetable/daily-desk?date=${selectedDate}`, {
         headers: { 'x-school-id': schoolId }
       });
       if (res.ok) {
@@ -117,7 +117,7 @@ export function DailyDeskPage({ onNavigate }) {
         reason: subForm.reason
       };
 
-      const res = await fetch('http://localhost:5000/api/timetable/replacements', {
+      const res = await fetch('/api/timetable/replacements', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ export function DailyDeskPage({ onNavigate }) {
         reason: absentForm.reason
       };
 
-      const res = await fetch('http://localhost:5000/api/timetable/attendance', {
+      const res = await fetch('/api/timetable/attendance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export function DailyDeskPage({ onNavigate }) {
     setHistoryModalOpen(true);
     setLoadingHistory(true);
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/replacement-history', {
+      const res = await fetch('/api/timetable/replacement-history', {
         headers: { 'x-school-id': schoolId }
       });
       if (res.ok) {
