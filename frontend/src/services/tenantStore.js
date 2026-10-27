@@ -463,19 +463,22 @@ class TenantDataStore {
   addReceipt(schoolId, receiptData) {
     if (!schoolId) return null;
     const receipts = this.getReceipts(schoolId);
-    const prefix = schoolId === 'sch_dps_branch2' ? 'DPS' : 'REC';
+    const prefix = schoolId === 'sch_dps_branch2' ? 'DPS' : schoolId === 'sch_jd_intl' ? 'JD' : 'REC';
     const newReceipt = {
-      receiptNo: `${prefix}-2026-${String(receipts.length + 1).padStart(3, '0')}`,
+      id: `rec_${Date.now()}`,
+      receiptNo: receiptData.receiptNo || `${prefix}-2026-${String(receipts.length + 1).padStart(3, '0')}`,
       ...receiptData,
+      status: 'SUCCESS',
       schoolId: schoolId,
-      date: new Date().toISOString().split('T')[0]
+      date: receiptData.date || new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString()
     };
     const updated = [newReceipt, ...receipts];
     localStorage.setItem(this.getStorageKey(schoolId, 'receipts'), JSON.stringify(updated));
     return newReceipt;
   }
 
-  // Seamless Multi-Module Cross-Linking & Navigation Flow Helpers
+// Seamless Multi-Module Cross-Linking & Navigation Flow Helpers
   setPendingRegistration(data) {
     try {
       sessionStorage.setItem('erp_pending_registration', JSON.stringify(data));
@@ -576,6 +579,56 @@ class TenantDataStore {
       }
     } catch (e) {}
     return null;
+
+  // 8. Cancel a fee receipt
+  cancelReceipt(schoolId, receiptNo, reason = 'Operator Cancellation') {
+    if (!schoolId || !receiptNo) return false;
+    const receipts = this.getReceipts(schoolId);
+    const target = receipts.find(r => r.receiptNo === receiptNo);
+    if (!target) return false;
+    
+    target.status = 'CANCELLED';
+    target.cancelReason = reason;
+    target.cancelledAt = new Date().toISOString();
+    localStorage.setItem(this.getStorageKey(schoolId, 'receipts'), JSON.stringify(receipts));
+    return true;
+  }
+
+  // 9. Update student paid and due fee balance
+  updateStudentFees(schoolId, admNo, amountPaid) {
+    if (!schoolId || !admNo) return null;
+    const students = this.getStudents(schoolId);
+    const student = students.find(s => String(s.admNo) === String(admNo));
+    if (!student) return null;
+
+    student.paidFees = (Number(student.paidFees) || 0) + Number(amountPaid);
+    student.dueFees = Math.max(0, (Number(student.totalFees) || 0) - student.paidFees);
+
+    localStorage.setItem(this.getStorageKey(schoolId, 'students'), JSON.stringify(students));
+    return student;
+  }
+
+  // 10. Persist student custom fee heads per tenant
+  getStudentFeeHeads(schoolId, admNo) {
+    if (!schoolId || !admNo) return null;
+    try {
+      const key = this.getStorageKey(schoolId, `heads_${admNo}`);
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  }
+
+  saveStudentFeeHeads(schoolId, admNo, heads) {
+    if (!schoolId || !admNo) return;
+    try {
+      const key = this.getStorageKey(schoolId, `heads_${admNo}`);
+      localStorage.setItem(key, JSON.stringify(heads));
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 

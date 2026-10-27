@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { LoginPage } from './modules/auth/LoginPage';
 import { SchoolRegistrationPage } from './modules/auth/SchoolRegistrationPage';
+import { LandingPage } from './modules/landing/LandingPage';
 import { DashboardPage } from './modules/dashboard/DashboardPage';
 import { StudentPortalPage } from './modules/student-portal/StudentPortalPage';
 import { StaffPortalPage } from './modules/staff-portal/StaffPortalPage';
@@ -278,20 +279,22 @@ function AppContent() {
   const { user, isAuthenticated, role } = useAuth();
 
   const normalizePath = (rawPath) => {
-    if (!rawPath) return '/dashboard';
+    if (!rawPath) return '/';
     let p = String(rawPath).trim();
     try {
       p = decodeURIComponent(p);
     } catch {}
-    if (p === 'dashboard' || p === '/dashboard' || p === '' || p === '/') return '/dashboard';
+    if (p === 'dashboard' || p === '/dashboard') return '/dashboard';
+    if (p === '' || p === '/' || p === '/landing' || p === 'landing') return '/';
     if (!p.startsWith('/')) p = '/' + p;
     // Normalize spaces to hyphens and lowercase
     p = p.replace(/\s+/g, '-').toLowerCase();
+    if (p === '/landing') return '/';
     return p;
   };
 
   const getCleanRoute = (rawPath) => {
-    if (!rawPath) return '/dashboard';
+    if (!rawPath) return '/';
     const clean = String(rawPath).split('?')[0].split('#')[0];
     return normalizePath(clean);
   };
@@ -324,14 +327,24 @@ function AppContent() {
 
   // Route protection and canonical redirects
   useEffect(() => {
-    if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register') {
-      handleNavigate('/login');
+    if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register' && currentPath !== '/') {
+      handleNavigate('/');
     }
   }, [currentPath, isAuthenticated]);
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
+
+  // If navigating to root / or /landing, show public LandingPage
+  if (currentPath === '/' || currentPath === '/landing') {
+    return (
+      <div className="w-screen h-screen overflow-y-auto overflow-x-hidden custom-scrollbar bg-white">
+        <Toaster position="top-right" />
+        <LandingPage onNavigate={handleNavigate} />
+      </div>
+    );
+  }
 
   // If navigating to /register, show self-serve SchoolRegistrationPage
   if (currentPath === '/register') {
@@ -402,6 +415,8 @@ function AppContent() {
                 return renderDashboardByRole();
               case '/register':
                 return <SchoolRegistrationPage onNavigate={handleNavigate} />;
+              case '/landing':
+                return <LandingPage onNavigate={handleNavigate} />;
               case '/superadmin-analytics':
                 if (role !== 'SUPER_ADMIN') {
                   return renderDashboardByRole();

@@ -148,6 +148,24 @@ export function LoginPage({ onNavigate }) {
 
       {/* Main Centered Login Card */}
       <div className="relative z-10 w-full max-w-[440px] bg-white rounded-2xl shadow-xl border border-slate-200/80 p-6 sm:p-8 backdrop-blur-xs transition-all duration-300">
+        {/* Top Header Links */}
+        <div className="flex items-center justify-between mb-3 w-full">
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('/')}
+            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 cursor-pointer"
+          >
+            <span>&larr; Back to Overview</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('/register')}
+            className="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 cursor-pointer"
+          >
+            + Register School
+          </button>
+        </div>
+
         {/* Top Logo */}
         <div className="flex flex-col items-center justify-center mb-3">
           <div className="w-14 h-14 rounded-xl flex items-center justify-center relative shadow-sm">
