@@ -197,34 +197,43 @@ export function TimetableHomeworkPage({ onNavigate }) {
   }, [homeworkList, searchQuery]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 uppercase tracking-wider">
-            <GraduationCap className="w-4 h-4" /> Homework Pro & Daily Assignment Registry
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Top Breadcrumb Toolbar */}
+      <div className="bg-white border-b border-slate-200/80 px-4 md:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-30">
+        <div className="flex items-center space-x-3">
+          <h1 className="text-base md:text-lg font-semibold text-slate-800">
+            Homework & Class Assignment Registry
+          </h1>
+          <div className="hidden sm:flex items-center space-x-2 text-xs text-slate-400 pl-3 border-l border-slate-200">
+            <button onClick={() => onNavigate && onNavigate('/')} className="hover:text-indigo-600 transition-colors">
+              <GraduationCap className="w-3.5 h-3.5" />
+            </button>
+            <span>•</span>
+            <button onClick={() => onNavigate && onNavigate('/timetable-dashboard')} className="hover:text-indigo-600 transition-colors">
+              Timetable Pro
+            </button>
+            <span>•</span>
+            <span className="text-indigo-600 font-medium">Homework</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">Class Homework & Self-Study Central</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Track daily assignments assigned by subject teachers, submission due dates and student homework load
-          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Action Controls */}
+        <div className="flex items-center space-x-2">
           <button
             onClick={fetchHomework}
-            className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
             title="Refresh Homework"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors"
+            className="h-9 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
             title="Export CSV"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden md:inline">Export</span>
           </button>
 
           <button
@@ -240,56 +249,157 @@ export function TimetableHomeworkPage({ onNavigate }) {
               });
               setCreateModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md shadow-rose-600/20 transition-all"
+            className="h-9 px-3 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white flex items-center space-x-1.5 shadow-xs text-xs font-semibold transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Assign Homework
+            <span>Assign Homework</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Homework Records</span>
-            <p className="text-2xl font-black text-slate-900 mt-0.5">{homeworkList.length}</p>
-            <span className="text-[11px] text-slate-500">Across current curriculum</span>
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
+        {/* Metric Cards Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Active Homework</span>
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <GraduationCap className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mt-2">{homeworkList.length}</h3>
+            <p className="text-[11px] text-rose-600 font-semibold flex items-center gap-1 mt-1">
+              <Clock className="w-3 h-3" /> Across class sections
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-        </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Approved & Sent to Admin</span>
-            <p className="text-2xl font-black text-emerald-600 mt-0.5">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Published / Active</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-emerald-600 mt-2">
               {homeworkList.filter((h) => h.status === 'SENT_TO_ADMIN').length}
+            </h3>
+            <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+              <CheckCircle className="w-3 h-3" /> Visible to students & parents
             </p>
-            <span className="text-[11px] text-emerald-600 font-medium">Visible to students</span>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <CheckCircle className="w-5 h-5" />
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Drafts in Progress</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Clock className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-amber-600 mt-2">
+              {homeworkList.filter((h) => h.status === 'DRAFT').length}
+            </h3>
+            <p className="text-[11px] text-amber-600 font-semibold flex items-center gap-1 mt-1">
+              <Clock className="w-3 h-3" /> Pending faculty submission
+            </p>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">Curriculum Scope</span>
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <BookOpen className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-indigo-600 mt-2">Daily</h3>
+            <p className="text-[11px] text-indigo-600 font-semibold flex items-center gap-1 mt-1">
+              <BookOpen className="w-3 h-3" /> Self-study tasks tracked
+            </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Drafts in Progress</span>
-            <p className="text-2xl font-black text-amber-600 mt-0.5">
-              {homeworkList.filter((h) => h.status === 'DRAFT').length}
-            </p>
-            <span className="text-[11px] text-slate-500">Pending submission</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
-          </div>
+        {/* Quick Module Navigation Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-dashboard')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Dashboard</p>
+              <p className="text-[10px] text-slate-400 truncate">Live Metrics</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetables')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Time Tables</p>
+              <p className="text-[10px] text-slate-400 truncate">Master routines</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/daily-desk')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Daily Desk</p>
+              <p className="text-[10px] text-slate-400 truncate">Substitutions</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-builder')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Visual Editor</p>
+              <p className="text-[10px] text-slate-400 truncate">Interactive builder</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/lesson-planning')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Lesson Plans</p>
+              <p className="text-[10px] text-slate-400 truncate">Curriculum tracker</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-reports')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Reports & Logs</p>
+              <p className="text-[10px] text-slate-400 truncate">Teacher activity</p>
+            </div>
+          </button>
         </div>
-      </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3 flex-1">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
@@ -391,6 +501,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
           </div>
         )}
       </div>
+      </div>
 
       {/* Create / Edit Modal */}
       {(createModalOpen || editModalOpen) && (
@@ -477,7 +588,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-[#5c67f6] hover:bg-indigo-600 rounded-lg shadow-xs transition-colors"
                 >
                   {submitting ? 'Saving...' : editModalOpen ? 'Update Homework' : 'Assign Homework'}
                 </button>

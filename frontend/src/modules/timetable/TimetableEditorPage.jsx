@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
+  Home,
   ArrowLeft,
   CalendarDays,
   Plus,
@@ -19,7 +20,8 @@ import {
   Clock,
   Check,
   Layers,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -346,56 +348,153 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Top Breadcrumb Toolbar */}
+      <div className="bg-white border-b border-slate-200/80 px-4 md:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-30">
+        <div className="flex items-center space-x-3">
           <button
-            onClick={() => onNavigate('/timetables')}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            onClick={() => onNavigate && onNavigate('/timetables')}
+            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
+            title="Back to Timetables"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                {detail?.name || 'Schedule Builder'}
-              </h1>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  detail?.status === 'PUBLISHED'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {detail?.status || 'DRAFT'}
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Synced with ERP Master Classes, Subjects, and Faculty Staff
-            </p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-base md:text-lg font-semibold text-slate-800">
+              {detail?.name || 'Schedule Builder'}
+            </h1>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                detail?.status === 'PUBLISHED'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+              }`}
+            >
+              {detail?.status || 'DRAFT'}
+            </span>
+          </div>
+          <div className="hidden sm:flex items-center space-x-2 text-xs text-slate-400 pl-3 border-l border-slate-200">
+            <button onClick={() => onNavigate && onNavigate('/')} className="hover:text-indigo-600 transition-colors">
+              <Home className="w-3.5 h-3.5" />
+            </button>
+            <span>•</span>
+            <button onClick={() => onNavigate && onNavigate('/timetable-dashboard')} className="hover:text-indigo-600 transition-colors">
+              Timetable Pro
+            </button>
+            <span>•</span>
+            <span className="text-indigo-600 font-medium">Visual Editor</span>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Action Controls */}
+        <div className="flex items-center space-x-2">
           <button
-            onClick={() => setAiModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold text-xs transition-colors border border-purple-200 shadow-2xs"
+            onClick={fetchTimetableDetail}
+            title="Refresh Grid"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs transition-colors"
           >
-            <Sparkles className="w-4 h-4 text-purple-600" />
-            AI Auto-Generate
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
 
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors border border-slate-200"
+            className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
           >
-            <Printer className="w-4 h-4" />
-            Print
+            <Printer className="w-3.5 h-3.5 text-slate-500" />
+            <span>Print Grid</span>
+          </button>
+
+          <button
+            onClick={() => setAiModalOpen(true)}
+            className="h-9 px-3 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white flex items-center space-x-1.5 shadow-xs text-xs font-semibold transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>AI Clash-Free Generator</span>
           </button>
         </div>
       </div>
+
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
+        {/* Quick Module Navigation Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-dashboard')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <CalendarDays className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Dashboard</p>
+              <p className="text-[10px] text-slate-400 truncate">Live Metrics</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetables')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <CalendarDays className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Time Tables</p>
+              <p className="text-[10px] text-slate-400 truncate">Master routines</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/daily-desk')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Daily Desk</p>
+              <p className="text-[10px] text-slate-400 truncate">Substitutions</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-builder')}
+            className="p-3 bg-white border-2 border-indigo-500 rounded-xl text-left shadow-xs flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-indigo-700">Visual Editor</p>
+              <p className="text-[10px] text-indigo-500 truncate">Interactive builder</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/lesson-planning')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Lesson Plans</p>
+              <p className="text-[10px] text-slate-400 truncate">Curriculum tracker</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate('/timetable-reports')}
+            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <CalendarDays className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800">Reports & Logs</p>
+              <p className="text-[10px] text-slate-400 truncate">Teacher activity</p>
+            </div>
+          </button>
+        </div>
 
       {/* Main 2-Column Schedule Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
@@ -612,6 +711,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Edit / Assign Slot Modal */}
       {slotModalOpen && (
@@ -708,7 +808,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
                   <button
                     type="submit"
                     disabled={savingSlot}
-                    className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors"
+                    className="px-5 py-2 text-xs font-semibold text-white bg-[#5c67f6] hover:bg-indigo-600 rounded-lg shadow-xs transition-colors"
                   >
                     {savingSlot ? 'Saving...' : 'Save Slot'}
                   </button>
