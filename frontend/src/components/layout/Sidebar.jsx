@@ -45,6 +45,8 @@ const ITEM_COLORS = {
   'master': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
   'timetable-pro': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'student': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
+  'attendance': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
+  'staff-attendance-group': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
   'users': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' },
   'examination': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
   'fee': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
@@ -153,7 +155,15 @@ export const studentMenuCategories = [
 
 export const staffMenuCategories = [
   { id: 'staff-dashboard', title: 'Staff Dashboard', icon: PieChart, path: '/dashboard' },
-  { id: 'staff-attendance', title: 'Student Attendance', icon: ClipboardList, path: '/student-attendance' },
+  {
+    id: 'staff-attendance-group',
+    title: 'Attendance',
+    icon: CalendarCheck,
+    subItems: [
+      { title: 'Staff Attendance', path: '/staff-attendance' },
+      { title: 'Student Attendance', path: '/student-attendance' }
+    ]
+  },
   { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
   { id: 'staff-marks', title: 'Marks Entry Grid', icon: Award, path: '/marks-entry' },
   { id: 'staff-studymaterial', title: 'Study Material', icon: BookMarked, path: '/study-material' },
@@ -219,7 +229,6 @@ export const menuCategories = [
     subItems: [
       { title: 'Registration', path: '/student-registration' },
       { title: 'Assign Roll/Feebook No.', path: '/assign-roll-number' },
-      { title: 'Attendance', path: '/student-attendance' },
       { title: 'Biometric Machine Sync', path: '/biometric-sync' },
       { title: 'Promotion', path: '/promotion' },
       { title: 'Student Portfolio', path: '/student-portfolio' },
@@ -227,6 +236,15 @@ export const menuCategories = [
       { title: 'Admit Card Generator', path: '/admit-card-generator' },
       { title: 'Exam Date Sheet', path: '/exam-date-sheet' },
       { title: 'Reports', path: '/student-reports' }
+    ]
+  },
+  {
+    id: 'attendance',
+    title: 'Attendance',
+    icon: CalendarCheck,
+    subItems: [
+      { title: 'Staff Attendance', path: '/staff-attendance' },
+      { title: 'Student Attendance', path: '/student-attendance' }
     ]
   },
   {
@@ -477,6 +495,7 @@ export const menuCategories = [
 
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const getInitialActiveDropdown = (path) => {
+    if (path.includes('staff-attendance') || path.includes('student-attendance') || path === '/attendance') return { attendance: true, 'staff-attendance-group': true };
     if (path.includes('transport')) return { transport: true };
     if (path.includes('student') || path.includes('admission') || STUDENT_REPORT_PATHS.includes(path)) return { student: true };
     if (path.includes('user')) return { users: true };

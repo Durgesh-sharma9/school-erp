@@ -471,6 +471,7 @@ function AppContent() {
                 return <StudentRegistrationPage onNavigate={handleNavigate} />;
               case '/assign-roll-number':
                 return <AssignRollNumberPage onNavigate={handleNavigate} />;
+              case '/attendance':
               case '/student-attendance':
                 return <StudentAttendancePage onNavigate={handleNavigate} />;
               case '/create-online-classes':

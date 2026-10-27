@@ -123,16 +123,35 @@ export function StudentAttendancePage({ onNavigate }) {
 
   return (
     <div className="p-4 md:p-6 bg-[#f3f4f6] min-h-screen text-slate-800">
-      {/* Breadcrumbs matching Live UAB */}
-      <div className="flex items-center gap-2 mb-3">
-        <h1 className="text-base md:text-lg font-bold text-gray-800">Attendance</h1>
-        <span className="text-gray-400 text-xs flex items-center gap-1.5 font-normal">
-          <span>🏠</span>
-          <span>•</span>
-          <span>Students</span>
-          <span>•</span>
-          <span className="text-gray-600 font-medium">Attendance</span>
-        </span>
+      {/* Attendance Top Header & Sub-Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <h1 className="text-base md:text-lg font-bold text-gray-800">Student Attendance</h1>
+          <span className="text-gray-400 text-xs flex items-center gap-1.5 font-normal">
+            <span>🏠</span>
+            <span>•</span>
+            <span>Attendance</span>
+            <span>•</span>
+            <span className="text-gray-600 font-medium">Student</span>
+          </span>
+        </div>
+
+        {/* Attendance Sub-Tab Switcher */}
+        <div className="flex items-center gap-1.5 bg-slate-200/80 p-1 rounded-xl shadow-2xs">
+          <button
+            type="button"
+            onClick={() => onNavigate?.('/staff-attendance')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all cursor-pointer"
+          >
+            Staff Attendance
+          </button>
+          <button
+            type="button"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-emerald-700 shadow-2xs transition-all cursor-default"
+          >
+            Student Attendance
+          </button>
+        </div>
       </div>
 
       {/* Main Container Card */}
