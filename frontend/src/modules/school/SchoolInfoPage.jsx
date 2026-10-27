@@ -18,9 +18,12 @@ import {
   Loader2,
   Check,
   AlertTriangle,
-  X
+  X,
+  Home,
+  Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PageHeader, ErpSection } from '../../components/erp/PagePrimitives';
 
 export function SchoolInfoPage() {
   const { schoolId, schoolName } = useAuth();
@@ -198,7 +201,7 @@ export function SchoolInfoPage() {
             address: item.address ?? prev.address,
             place: item.place ?? prev.place,
             postal_code: item.pinCode ?? item.postal_code ?? prev.postal_code,
-            fee_receipt_notes: item.receiptNotes ?? item.fee_receipt_notes ?? prev.fee_receipt_notes,
+            receiptNotes: item.receiptNotes ?? prev.fee_receipt_notes,
             logoUrl: item.logoUrl ?? prev.logoUrl,
             brandingImages: {
               ...(prev.brandingImages || {}),
@@ -208,8 +211,7 @@ export function SchoolInfoPage() {
           }));
         }
       })
-      .catch(e => console.error(e))
-      .finally(() => setLoading(false));
+      .catch(() => {});
   }, [schoolId]);
 
   const handleInputChange = (e) => {
@@ -217,106 +219,125 @@ export function SchoolInfoPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLogoUpload = async (e, slotId, slotLabel = 'Image') => {
+  const handleLogoUpload = async (e, slotId = 'school_logo', slotLabel = 'Logo') => {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = '';
 
-    // 1. Instant local preview and persistent caching via FileReader
-    const reader = new FileReader();
-    reader.onload = (uploadEvt) => {
-      const dataUrl = uploadEvt.target.result;
-      setFormData(prev => ({
-        ...prev,
-        brandingImages: {
-          ...(prev.brandingImages || {}),
-          [slotId]: dataUrl
-        },
-        ...(slotId === 'school_logo' ? { logoUrl: dataUrl } : {})
-      }));
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (PNG, JPG, SVG, WebP)');
+      return;
+    }
 
-      const currentProf = tenantStore.getSchoolProfile(schoolId);
-      tenantStore.updateSchoolProfile(schoolId, {
-        brandingImages: {
-          ...(currentProf.brandingImages || {}),
-          [slotId]: dataUrl
-        },
-        ...(slotId === 'school_logo' ? { logoUrl: dataUrl } : {})
-      });
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image file size should not exceed 5MB');
+      return;
+    }
 
-    // 2. Upload to server
+    setUploadingSlot(slotId);
+    const toastId = toast.loading(`Uploading ${slotLabel}...`);
+
     try {
-      setUploadingSlot(slotId);
-      const fd = new FormData();
-      fd.append('logo', file);
-      fd.append('slotId', slotId);
+      const data = new FormData();
+      data.append('logo', file);
+      data.append('slotId', slotId);
 
-      const res = await fetch('/api/schools/upload-logo', {
+      const res = await fetch('/api/schools/logo', {
         method: 'POST',
-        headers: {
-          'x-school-id': schoolId || ''
-        },
-        body: fd
+        headers: { 'x-school-id': schoolId || '' },
+        body: data
       });
-      const data = await res.json();
-      if (data.success && data.data?.url) {
-        const finalUrl = data.data.url;
+
+      const json = await res.json();
+      if (json.success && json.logoUrl) {
+        const uploadedUrl = json.logoUrl;
         setFormData(prev => ({
           ...prev,
+          ...(slotId === 'school_logo' ? { logoUrl: uploadedUrl } : {}),
           brandingImages: {
             ...(prev.brandingImages || {}),
-            [slotId]: finalUrl
-          },
-          ...(slotId === 'school_logo' ? { logoUrl: finalUrl } : {})
+            [slotId]: uploadedUrl
+          }
         }));
-        const currentProf = tenantStore.getSchoolProfile(schoolId);
+
+        const existingProfile = tenantStore.getSchoolProfile(schoolId);
+        const updatedBranding = {
+          ...(existingProfile.brandingImages || {}),
+          [slotId]: uploadedUrl
+        };
         tenantStore.updateSchoolProfile(schoolId, {
-          brandingImages: {
-            ...(currentProf.brandingImages || {}),
-            [slotId]: finalUrl
-          },
-          ...(slotId === 'school_logo' ? { logoUrl: finalUrl } : {})
+          ...(slotId === 'school_logo' ? { logoUrl: uploadedUrl } : {}),
+          brandingImages: updatedBranding
         });
-        toast.success(`${slotLabel} uploaded and saved!`);
+
+        toast.success(`${slotLabel} uploaded and applied!`, { id: toastId });
       } else {
-        toast.success(`${slotLabel} saved successfully!`);
+        throw new Error(json.message || 'Upload failed');
       }
     } catch (err) {
-      console.error('Server upload fallback:', err);
-      toast.success(`${slotLabel} saved locally!`);
+      console.warn('ImageKit/Backend upload failed, converting to local Base64:', err);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Url = reader.result;
+        setFormData(prev => ({
+          ...prev,
+          ...(slotId === 'school_logo' ? { logoUrl: base64Url } : {}),
+          brandingImages: {
+            ...(prev.brandingImages || {}),
+            [slotId]: base64Url
+          }
+        }));
+
+        const existingProfile = tenantStore.getSchoolProfile(schoolId);
+        const updatedBranding = {
+          ...(existingProfile.brandingImages || {}),
+          [slotId]: base64Url
+        };
+        tenantStore.updateSchoolProfile(schoolId, {
+          ...(slotId === 'school_logo' ? { logoUrl: base64Url } : {}),
+          brandingImages: updatedBranding
+        });
+
+        toast.success(`${slotLabel} saved locally (offline preview)!`, { id: toastId });
+      };
+      reader.onerror = () => {
+        toast.error('Failed to read image file locally.', { id: toastId });
+      };
+      reader.readAsDataURL(file);
     } finally {
       setUploadingSlot(null);
+      e.target.value = '';
     }
   };
 
-  const handleRemoveLogo = (slotId, slotLabel, e) => {
-    if (e) e.stopPropagation();
+  const handleRemoveLogo = (slotId = 'school_logo', slotLabel = 'Logo', e) => {
+    e.stopPropagation();
     setFormData(prev => {
       const updated = { ...(prev.brandingImages || {}) };
       delete updated[slotId];
       return {
         ...prev,
-        brandingImages: updated,
-        ...(slotId === 'school_logo' ? { logoUrl: '' } : {})
+        ...(slotId === 'school_logo' ? { logoUrl: '' } : {}),
+        brandingImages: updated
       };
     });
-    const currentProf = tenantStore.getSchoolProfile(schoolId);
-    const updated = { ...(currentProf.brandingImages || {}) };
-    delete updated[slotId];
+
+    const existingProfile = tenantStore.getSchoolProfile(schoolId);
+    const updatedBranding = { ...(existingProfile.brandingImages || {}) };
+    delete updatedBranding[slotId];
+
     tenantStore.updateSchoolProfile(schoolId, {
-      brandingImages: updated,
-      ...(slotId === 'school_logo' ? { logoUrl: '' } : {})
+      ...(slotId === 'school_logo' ? { logoUrl: '' } : {}),
+      brandingImages: updatedBranding
     });
-    toast.success(`${slotLabel || 'Image'} removed`);
+
+    toast.success(`${slotLabel} removed`);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        ...formData,
+      tenantStore.updateSchoolProfile(schoolId, {
         schoolName: formData.name,
         schoolCode: formData.school_code,
         udiseNo: formData.udies_no,
@@ -329,18 +350,27 @@ export function SchoolInfoPage() {
         place: formData.place,
         pinCode: formData.postal_code,
         receiptNotes: formData.fee_receipt_notes,
-        logoUrl: formData.brandingImages?.['school_logo'] || formData.logoUrl,
-        brandingImages: formData.brandingImages,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        attend_range: formData.attend_range
-      };
+        logoUrl: formData.brandingImages?.school_logo || formData.logoUrl || '',
+        brandingImages: formData.brandingImages || {}
+      });
 
-      // 1. Persist strictly in active tenant store
-      tenantStore.updateSchoolProfile(schoolId, payload);
-
-      // 2. Put to backend with tenant boundary header
       try {
+        const payload = {
+          schoolName: formData.name,
+          schoolCode: formData.school_code,
+          udiseNo: formData.udies_no,
+          affiliationNo: formData.school_affl_no,
+          phone1: formData.phone_num1,
+          phone2: formData.phone_num2,
+          email: formData.email,
+          website: formData.website,
+          address: formData.address,
+          place: formData.place,
+          pinCode: formData.postal_code,
+          receiptNotes: formData.fee_receipt_notes,
+          logoUrl: formData.brandingImages?.school_logo || formData.logoUrl || '',
+          brandingImages: formData.brandingImages || {}
+        };
         const res = await fetch('/api/schools/profile', {
           method: 'PUT',
           headers: {
@@ -364,260 +394,280 @@ export function SchoolInfoPage() {
   };
 
   return (
-    <div className="bg-[#f3f4f6] min-h-screen p-3 space-y-3">
-      {/* Breadcrumb Header */}
-      <div className="flex items-center justify-between pt-1 pb-1">
-        <div className="flex items-center space-x-2 text-xs text-gray-500">
-          <span className="font-semibold text-gray-800 text-sm">School</span>
-          <span>&bull;</span>
-          <span className="text-gray-400">School &bull; Edit School</span>
-        </div>
-      </div>
+    <div className="space-y-3 max-w-6xl mx-auto pt-0 pb-12 px-2 sm:px-4">
+      {/* 1:1 Test Master Pro Page Header */}
+      <PageHeader
+        title="Edit School Profile"
+        description="Configure school registration numbers, multi-slot branding assets, official contacts, and GPS geofence."
+      >
+        <button
+          type="button"
+          onClick={handleSave}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold px-4 py-2 shadow-sm flex items-center gap-1.5 cursor-pointer"
+        >
+          <Save className="w-3.5 h-3.5" />
+          <span>Save Profile</span>
+        </button>
+      </PageHeader>
 
       {savedSuccess && (
-        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-3 text-xs shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center space-x-3 text-xs shadow-2xs animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
           <div>
-            School information and branding updated successfully!
+            School information and branding assets updated successfully!
           </div>
         </div>
       )}
 
       {/* Main Container Form */}
-      <form onSubmit={handleSave} className="space-y-4">
-        {/* Card 1: Core School Info (5-Column Grid 1:1 UAB) */}
-        <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4 space-y-3.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
-            School General Details
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-            {/* School Name */}
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Name*</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-semibold"
-                required
-              />
+      <form onSubmit={handleSave} className="space-y-3">
+        {/* Card 1: Core School Info (5-Column Grid) */}
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/30 to-white px-4 py-2.5 border-b border-blue-100 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+                🏫
+              </div>
+              <h3 className="font-bold text-xs text-slate-900 tracking-tight">
+                School General Details
+              </h3>
             </div>
-
-            {/* School Code */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Code</label>
-              <input
-                type="text"
-                name="school_code"
-                value={formData.school_code}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* UDISE No. */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">UDISE No.</label>
-              <input
-                type="text"
-                name="udies_no"
-                value={formData.udies_no}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* School Affi. No. */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Affi. No.</label>
-              <input
-                type="text"
-                name="school_affl_no"
-                value={formData.school_affl_no}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* School Category */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Category</label>
-              <select
-                name="school_category"
-                value={formData.school_category}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              >
-                <option value="Private">Private</option>
-                <option value="Government">Government</option>
-                <option value="Semi-Government">Semi-Government</option>
-              </select>
-            </div>
-
-            {/* School Type */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Type</label>
-              <select
-                name="school_type"
-                value={formData.school_type}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              >
-                <option value="Senior Secondary">Senior Secondary</option>
-                <option value="Secondary">Secondary</option>
-                <option value="Middle">Middle</option>
-                <option value="Primary">Primary</option>
-              </select>
-            </div>
-
-            {/* Place */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Place</label>
-              <input
-                type="text"
-                name="place"
-                value={formData.place}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Address</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Pin Code */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Pin Code</label>
-              <input
-                type="text"
-                name="postal_code"
-                value={formData.postal_code}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Phone No. 1 */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Phone No. 1*</label>
-              <input
-                type="text"
-                name="phone_num1"
-                value={formData.phone_num1}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-                required
-              />
-            </div>
-
-            {/* Phone No. 2 */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Phone No. 2</label>
-              <input
-                type="text"
-                name="phone_num2"
-                value={formData.phone_num2}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Website */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Website</label>
-              <input
-                type="text"
-                name="website"
-                value={formData.website}
-                onChange={handleInputChange}
-                placeholder="www.school.com"
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Official Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="info@school.com"
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* School Board */}
-            <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Board</label>
-              <select
-                name="board"
-                value={formData.board}
-                onChange={handleInputChange}
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-semibold"
-              >
-                <option value="C.B.S.E">C.B.S.E</option>
-                <option value="I.C.S.E">I.C.S.E</option>
-                <option value="Rajasthan Board">Rajasthan Board</option>
-                <option value="UP Board">UP Board</option>
-              </select>
-            </div>
-
-            {/* School Motto / Tagline (Combined) */}
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-medium text-slate-600 mb-0.5">School Motto / Tagline</label>
-              <input
-                type="text"
-                name="school_tag_line_1"
-                value={formData.school_tag_line_1}
-                onChange={handleInputChange}
-                placeholder="e.g. Lead Kindly Light &bull; Empowering Future Leaders"
-                className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
+            <span className="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-white border border-slate-200 font-bold text-slate-600">
+              ID: {schoolId || 'sch_jd_intl'}
+            </span>
           </div>
 
-          {/* Fee Receipt Notes */}
-          <div className="pt-2 text-xs">
-            <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Fee Receipt Notes (Appears on printout)</label>
-            <textarea
-              name="fee_receipt_notes"
-              rows={2}
-              value={formData.fee_receipt_notes}
-              onChange={handleInputChange}
-              className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 text-xs"
-            />
+          <div className="p-4 sm:p-5 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 text-xs">
+              {/* School Name */}
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Name*</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold text-slate-900"
+                  required
+                />
+              </div>
+
+              {/* School Code */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Code</label>
+                <input
+                  type="text"
+                  name="school_code"
+                  value={formData.school_code}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* UDISE No. */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">UDISE No.</label>
+                <input
+                  type="text"
+                  name="udies_no"
+                  value={formData.udies_no}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* School Affi. No. */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Affi. No.</label>
+                <input
+                  type="text"
+                  name="school_affl_no"
+                  value={formData.school_affl_no}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* School Category */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Category</label>
+                <select
+                  name="school_category"
+                  value={formData.school_category}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="Private">Private</option>
+                  <option value="Government">Government</option>
+                  <option value="Semi-Government">Semi-Government</option>
+                </select>
+              </div>
+
+              {/* School Type */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Type</label>
+                <select
+                  name="school_type"
+                  value={formData.school_type}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="Senior Secondary">Senior Secondary</option>
+                  <option value="Secondary">Secondary</option>
+                  <option value="Middle">Middle</option>
+                  <option value="Primary">Primary</option>
+                </select>
+              </div>
+
+              {/* Place */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Place / City</label>
+                <input
+                  type="text"
+                  name="place"
+                  value={formData.place}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Address */}
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Campus Full Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Pin Code */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Pin Code</label>
+                <input
+                  type="text"
+                  name="postal_code"
+                  value={formData.postal_code}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Phone No. 1 */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Phone No. 1*</label>
+                <input
+                  type="text"
+                  name="phone_num1"
+                  value={formData.phone_num1}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-bold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              {/* Phone No. 2 */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Phone No. 2</label>
+                <input
+                  type="text"
+                  name="phone_num2"
+                  value={formData.phone_num2}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Website */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Website</label>
+                <input
+                  type="text"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  placeholder="www.school.com"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Official Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="info@school.com"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* School Board */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Board</label>
+                <select
+                  name="board"
+                  value={formData.board}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="C.B.S.E">C.B.S.E</option>
+                  <option value="I.C.S.E">I.C.S.E</option>
+                  <option value="Rajasthan Board">Rajasthan Board</option>
+                  <option value="UP Board">UP Board</option>
+                </select>
+              </div>
+
+              {/* School Motto / Tagline */}
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">School Motto / Tagline</label>
+                <input
+                  type="text"
+                  name="school_tag_line_1"
+                  value={formData.school_tag_line_1}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Lead Kindly Light • Empowering Future Leaders"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Fee Receipt Notes */}
+            <div className="pt-2 text-xs">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                Fee Receipt Notes (Printed on computerized fee slips)
+              </label>
+              <textarea
+                name="fee_receipt_notes"
+                rows={2}
+                value={formData.fee_receipt_notes}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Card 2: Collapsible Accordion 1 - LOGO / SIGNATURE */}
-        <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+        {/* Card 2: Accordion 1 - LOGO / SIGNATURE / BRANDING ASSETS */}
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'logo' ? '' : 'logo')}
-            className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors"
+            className="w-full p-3.5 bg-gradient-to-r from-purple-50/80 via-indigo-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-purple-100"
           >
             <span className="flex items-center space-x-2">
-              <ImageIcon className="w-4 h-4 text-indigo-600" />
-              <span>LOGO / SIGNATURE</span>
+              <ImageIcon className="w-4 h-4 text-purple-600" />
+              <span>LOGO &amp; OFFICIAL SIGNATURE SLOTS ({logoUploadSlots.length})</span>
             </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'logo' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'logo' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'logo' && (
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-white border-t border-slate-200">
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 bg-white border-t border-slate-100">
               {logoUploadSlots.map((slot) => {
                 const currentImg = formData.brandingImages?.[slot.id] || (slot.id === 'school_logo' ? formData.logoUrl : null);
                 const isSlotUploading = uploadingSlot === slot.id;
@@ -625,9 +675,9 @@ export function SchoolInfoPage() {
                 return (
                   <div
                     key={slot.id}
-                    className="group relative border border-slate-200 rounded-lg p-2.5 flex flex-col items-center text-center space-y-2 bg-slate-50/50 hover:border-indigo-300 hover:shadow-xs transition-all"
+                    className="group relative border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center space-y-2.5 bg-slate-50/50 hover:bg-white hover:border-indigo-300 hover:shadow-xs transition-all"
                   >
-                    <div className="relative w-full h-24 bg-white border border-slate-200 rounded flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-24 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
                       {isSlotUploading ? (
                         <div className="flex flex-col items-center justify-center space-y-1">
                           <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
@@ -644,24 +694,24 @@ export function SchoolInfoPage() {
                             type="button"
                             title={`Remove ${slot.label}`}
                             onClick={(e) => handleRemoveLogo(slot.id, slot.label, e)}
-                            className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity shadow-xs"
+                            className="absolute top-1.5 right-1.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity shadow-xs"
                           >
                             <X className="w-3 h-3" />
                           </button>
                         </>
                       ) : (
                         <div className="flex flex-col items-center text-slate-300">
-                          <ImageIcon className="w-8 h-8 stroke-1 text-slate-300" />
-                          <span className="text-[9px] text-slate-400 mt-1">No file</span>
+                          <ImageIcon className="w-7 h-7 stroke-1 text-slate-300" />
+                          <span className="text-[9.5px] text-slate-400 mt-1 font-medium">No file</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="text-[11px] font-bold text-slate-700 truncate w-full" title={slot.label}>
+                    <div className="text-[11px] font-bold text-slate-800 truncate w-full" title={slot.label}>
                       {slot.label}
                     </div>
 
-                    <label className={`cursor-pointer px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold rounded shadow-2xs transition-colors flex items-center space-x-1 ${isSlotUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <label className={`cursor-pointer px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded-md shadow-2xs transition-colors flex items-center space-x-1 ${isSlotUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                       <Upload className="w-3 h-3" />
                       <span>{currentImg ? 'Change' : 'Upload'}</span>
                       <input
@@ -679,160 +729,137 @@ export function SchoolInfoPage() {
           )}
         </div>
 
-        {/* Card 3: Collapsible Accordion 2 - SOCIAL MEDIA LINK (1:1 UAB Match) */}
-        <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+        {/* Card 3: Accordion 2 - SOCIAL MEDIA & APP LINKS */}
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'social' ? '' : 'social')}
-            className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors"
+            className="w-full p-3.5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-amber-100"
           >
             <span className="flex items-center space-x-2">
-              <Share2 className="w-4 h-4 text-indigo-600" />
-              <span>SOCIAL MEDIA LINK</span>
+              <Share2 className="w-4 h-4 text-amber-600" />
+              <span>SOCIAL MEDIA &amp; MOBILE APP DOWNLOAD LINKS</span>
             </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'social' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'social' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'social' && (
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white border-t border-slate-200 text-xs">
-              {/* Row 1 */}
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 bg-white border-t border-slate-100 text-xs">
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Youtube</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Youtube Channel</label>
                 <input
                   type="text"
                   name="youtube_page"
                   value={formData.youtube_page}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Facebook</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Facebook Page</label>
                 <input
                   type="text"
                   name="facebook_page"
                   value={formData.facebook_page}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Instagram</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Instagram Handle</label>
                 <input
                   type="text"
                   name="twitter_page"
                   value={formData.twitter_page}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Fee URL</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">App Fee Portal URL</label>
                 <input
                   type="text"
                   name="app_fee_url"
                   value={formData.app_fee_url}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
-              {/* Row 2 */}
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Win. URL</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">App Windows URL</label>
                 <input
                   type="text"
                   name="app_win_url"
                   value={formData.app_win_url}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App Android URL</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">App Android PlayStore URL</label>
                 <input
                   type="text"
                   name="app_andr_url"
                   value={formData.app_andr_url}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">App IOS URL</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">App iOS AppStore URL</label>
                 <input
                   type="text"
                   name="app_ios_url"
                   value={formData.app_ios_url}
                   onChange={handleInputChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:border-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Online Adm Btn From Date</label>
-                <input
-                  type="text"
-                  name="online_adm_btn_from"
-                  defaultValue="27-Dec-2024 01:31:53 PM"
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
-                />
-              </div>
-
-              {/* Row 3 */}
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Online Adm Btn To Date</label>
-                <input
-                  type="text"
-                  name="online_adm_btn_to"
-                  defaultValue="27-Dec-2024 01:31:53 PM"
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Admission Limit</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Admission Seat Limit</label>
                 <input
                   type="text"
                   name="admission_limit"
                   defaultValue="0"
-                  className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-[11px]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-mono text-xs font-semibold focus:outline-none"
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* Card 4: Collapsible Accordion 3 - RANGE ATTENDANCE (GEO-FENCING) */}
-        <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+        {/* Card 4: Accordion 3 - RANGE ATTENDANCE (GEO-FENCING) */}
+        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'range' ? '' : 'range')}
-            className="w-full p-4 bg-slate-50 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer select-none"
+            className="w-full p-3.5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-emerald-100"
           >
             <span className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-indigo-600" />
-              <span>RANGE ATTENDANCE (GEO-FENCING)</span>
+              <MapPin className="w-4 h-4 text-emerald-600" />
+              <span>STAFF ATTENDANCE GEOFENCE (GPS RANGE)</span>
             </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'range' && (
-            <div className="p-4 space-y-3.5 bg-white border-t border-slate-200 text-xs">
+            <div className="p-4 sm:p-5 space-y-4 bg-white border-t border-slate-100 text-xs">
               {/* Quick Actions & Live Detection Banner */}
-              <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-slate-50 border border-indigo-100 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-start gap-2.5">
+              <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-slate-50 border border-indigo-100 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-start gap-3">
                   <div className="p-2 bg-indigo-600 text-white rounded-lg shadow-2xs shrink-0">
                     <Navigation className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="font-bold text-slate-900 text-xs flex items-center gap-2">
-                      <span>Automatic GPS Coordinate Detection</span>
+                      <span>Automatic Campus GPS Coordinate Detection</span>
                       {locationStatus?.type === 'success' && (
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
                           <Check className="w-3 h-3" /> Live GPS Set
@@ -840,7 +867,7 @@ export function SchoolInfoPage() {
                       )}
                     </div>
                     <p className="text-[11px] text-slate-600 mt-0.5">
-                      Click this button while on the school campus to automatically detect and populate the exact latitude and longitude coordinates.
+                      Click while physically present on the school campus to automatically detect and store precise latitude and longitude coordinates.
                     </p>
                   </div>
                 </div>
@@ -850,7 +877,7 @@ export function SchoolInfoPage() {
                     type="button"
                     onClick={handleFetchCurrentLocation}
                     disabled={isLocating}
-                    className="flex-1 sm:flex-none px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
                   >
                     {isLocating ? (
                       <>
@@ -870,7 +897,7 @@ export function SchoolInfoPage() {
                       href={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
+                      className="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs transition-colors"
                       title="Verify pinned location on Google Maps"
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
@@ -883,7 +910,7 @@ export function SchoolInfoPage() {
               {/* Status Message Display */}
               {locationStatus && (
                 <div
-                  className={`p-2.5 rounded text-[11px] font-medium flex items-center gap-2 ${
+                  className={`p-3 rounded-lg text-xs font-semibold flex items-center gap-2 ${
                     locationStatus.type === 'success'
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                       : locationStatus.type === 'loading'
@@ -903,9 +930,9 @@ export function SchoolInfoPage() {
               )}
 
               {/* Coordinates & Radius Inputs Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Latitude <span className="text-slate-400 font-normal font-mono">(GPS Decimal)</span>
                   </label>
                   <input
@@ -914,11 +941,11 @@ export function SchoolInfoPage() {
                     value={formData.latitude}
                     onChange={handleInputChange}
                     placeholder="e.g. 26.9124336"
-                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Longitude <span className="text-slate-400 font-normal font-mono">(GPS Decimal)</span>
                   </label>
                   <input
@@ -927,12 +954,12 @@ export function SchoolInfoPage() {
                     value={formData.longitude}
                     onChange={handleInputChange}
                     placeholder="e.g. 75.7872709"
-                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className="block text-[11px] font-medium text-slate-600">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700">
                       Allowed Radius (Meters)
                     </label>
                     <span className="text-[10px] text-slate-400">Around school center</span>
@@ -945,14 +972,14 @@ export function SchoolInfoPage() {
                     value={formData.attend_range}
                     onChange={handleInputChange}
                     placeholder="e.g. 100"
-                    className="w-full rounded border border-slate-300 px-3 py-2 bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
               {/* Quick Radius Presets */}
               <div className="flex items-center gap-2 flex-wrap pt-1">
-                <span className="text-[11px] font-semibold text-slate-600">Quick Radius Presets:</span>
+                <span className="text-[11px] font-bold text-slate-700">Quick Radius Presets:</span>
                 {[
                   { label: '50m (Main Gate)', value: '50' },
                   { label: '100m (Standard School)', value: '100' },
@@ -963,10 +990,10 @@ export function SchoolInfoPage() {
                     key={preset.value}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, attend_range: preset.value }))}
-                    className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-colors ${
+                    className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
                       formData.attend_range === preset.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-2xs'
                     }`}
                   >
                     {preset.label}
@@ -975,12 +1002,12 @@ export function SchoolInfoPage() {
               </div>
 
               {/* Guidance Note */}
-              <div className="p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
-                <span className="text-sm">💡</span>
+              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2.5">
+                <span className="text-base">💡</span>
                 <div>
-                  <strong className="text-slate-800">How Does Range Attendance (Geo-Fencing) Work?</strong>
-                  <p className="mt-0.5 text-slate-500">
-                    When staff members or teachers mark their attendance via the mobile app, the system verifies their device GPS coordinates in real time. Attendance will only be marked if they are physically within this permitted radius (e.g. {formData.attend_range || 100} meters) of the school campus center.
+                  <strong className="text-slate-800">How Does Staff Attendance Geo-Fencing Work?</strong>
+                  <p className="mt-0.5 text-slate-500 leading-relaxed">
+                    When teachers or staff mark their check-in via mobile or kiosk, their device coordinates are verified. Attendance will only be marked when physically within this allowed radius ({formData.attend_range || 100} meters) of campus center.
                   </p>
                 </div>
               </div>
@@ -992,10 +1019,10 @@ export function SchoolInfoPage() {
         <div className="pt-2 flex justify-end">
           <button
             type="submit"
-            className="px-8 py-2.5 rounded bg-[#4338ca] hover:bg-indigo-800 text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
+            className="px-8 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all flex items-center space-x-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>Modify</span>
+            <span>Save School Profile</span>
           </button>
         </div>
       </form>
