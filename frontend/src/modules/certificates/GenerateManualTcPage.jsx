@@ -87,7 +87,7 @@ export function GenerateManualTcPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.admNo) {
-      alert('Please fill at least Student Name and Adm No');
+      toast.error('Please fill at least Student Name and Admission No');
       return;
     }
 

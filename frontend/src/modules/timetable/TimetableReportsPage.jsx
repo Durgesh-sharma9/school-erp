@@ -50,7 +50,7 @@ export function TimetableReportsPage({ onNavigate }) {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      let url = 'http://localhost:5000/api/timetable/reports?';
+      let url = '/api/timetable/reports?';
       if (dateFilter) url += `date=${dateFilter}&`;
       if (teacherSearch) url += `teacherName=${encodeURIComponent(teacherSearch)}&`;
 
@@ -98,7 +98,7 @@ export function TimetableReportsPage({ onNavigate }) {
         ]
       };
 
-      const res = await fetch('http://localhost:5000/api/timetable/reports', {
+      const res = await fetch('/api/timetable/reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Home,
   Save,
@@ -45,7 +46,7 @@ export function CrmThankYouCmsPage({ onNavigate }) {
     setIsSaved(true);
     setTimeout(() => {
       setIsSaved(false);
-      alert('Enquiry banner and CMS settings saved successfully!');
+      toast.success('Enquiry banner and CMS settings saved successfully!');
     }, 600);
   };
 

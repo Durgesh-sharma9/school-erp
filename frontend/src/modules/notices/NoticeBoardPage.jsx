@@ -44,7 +44,7 @@ export function NoticeBoardPage() {
   const fetchNotices = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/notices?category=${selectedCategory}`, {
+      const res = await fetch(`/api/notices?category=${selectedCategory}`, {
         headers: { 'x-school-id': schoolId }
       });
       if (res.ok) {
@@ -70,7 +70,7 @@ export function NoticeBoardPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/notices', {
+      const res = await fetch('/api/notices', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export function NoticeBoardPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this notice circular?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/notices/${id}`, {
+      const res = await fetch(`/api/notices/${id}`, {
         method: 'DELETE',
         headers: { 'x-school-id': schoolId }
       });

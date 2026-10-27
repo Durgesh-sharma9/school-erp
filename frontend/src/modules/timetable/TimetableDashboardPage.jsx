@@ -102,7 +102,7 @@ export function TimetableDashboardPage({ onNavigate }) {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/dashboard-stats?date=${selectedDate}`, {
+      const res = await fetch(`/api/timetable/dashboard-stats?date=${selectedDate}`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       if (res.ok) {

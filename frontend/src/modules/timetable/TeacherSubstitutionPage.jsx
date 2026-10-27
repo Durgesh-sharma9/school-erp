@@ -29,7 +29,7 @@ export function TeacherSubstitutionPage({ onNavigate }) {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/substitutions`, {
+      const res = await fetch(`/api/timetable/substitutions`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       if (res.ok) {
@@ -55,7 +55,7 @@ export function TeacherSubstitutionPage({ onNavigate }) {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/assign-substitution', {
+      const res = await fetch('/api/timetable/assign-substitution', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

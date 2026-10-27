@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Home, CheckCircle2, Search, X } from 'lucide-react';
 import { SCHOOL_CLASSES, MOCK_STUDENTS } from '../students/reports/studentReportsData';
 
@@ -39,7 +40,7 @@ export function BulkTcPage({ onNavigate }) {
 
   const handleGenerate = () => {
     if (selectedStudents.length === 0) {
-      alert('Please select at least one student to generate TC');
+      toast.error('Please select at least one student to generate TC');
       return;
     }
     setGeneratedCount(selectedStudents.length);

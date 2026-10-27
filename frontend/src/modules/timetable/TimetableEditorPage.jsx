@@ -93,7 +93,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
   const fetchTimetableDetail = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/timetables/${timetableId}`, {
+      const res = await fetch(`/api/timetable/timetables/${timetableId}`, {
         headers: { 'x-school-id': schoolId }
       });
       if (res.ok) {
@@ -261,7 +261,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
         teacherId
       };
 
-      const res = await fetch(`http://localhost:5000/api/timetable/timetables/${timetableId}/slots`, {
+      const res = await fetch(`/api/timetable/timetables/${timetableId}/slots`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
     if (!activeCell?.existingSlot) return;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/timetable/timetables/${timetableId}/slots/${activeCell.existingSlot.id}`,
+        `/api/timetable/timetables/${timetableId}/slots/${activeCell.existingSlot.id}`,
         {
           method: 'DELETE',
           headers: { 'x-school-id': schoolId }
@@ -312,7 +312,7 @@ export function TimetableEditorPage({ onNavigate, currentPath }) {
   const handleAutoGenerate = async () => {
     setGenerating(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/timetables/${timetableId}/auto-generate`, {
+      const res = await fetch(`/api/timetable/timetables/${timetableId}/auto-generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

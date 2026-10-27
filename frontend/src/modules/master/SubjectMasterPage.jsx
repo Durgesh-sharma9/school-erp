@@ -24,7 +24,7 @@ export function SubjectMasterPage() {
   // Fetch subjects & groups
   const fetchSubjects = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subjects');
+      const res = await fetch('/api/academics/subjects');
       const data = await res.json();
       if (data.success && data.data) {
         setSubjects(data.data);
@@ -36,7 +36,7 @@ export function SubjectMasterPage() {
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subject-groups');
+      const res = await fetch('/api/academics/subject-groups');
       const data = await res.json();
       if (data.success && data.data) {
         setGroups(data.data);
@@ -56,7 +56,7 @@ export function SubjectMasterPage() {
     if (!formData.name) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subjects', {
+      const res = await fetch('/api/academics/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -80,7 +80,7 @@ export function SubjectMasterPage() {
   const handleDeleteSubject = async (id) => {
     if (!window.confirm('Are you sure you want to delete this subject?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/academics/subjects/${id}`, {
+      const res = await fetch(`/api/academics/subjects/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();

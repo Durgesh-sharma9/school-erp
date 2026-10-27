@@ -119,7 +119,7 @@ export function SchoolRegistrationPage({ onNavigate }) {
 
     setIsSendingCode(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/send-verification-code', {
+      const res = await fetch('/api/auth/send-verification-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -174,7 +174,7 @@ export function SchoolRegistrationPage({ onNavigate }) {
 
     setIsVerifyingCode(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/verify-code', {
+      const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -279,7 +279,7 @@ export function SchoolRegistrationPage({ onNavigate }) {
     let resultToken = null;
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register-school', {
+      const res = await fetch('/api/auth/register-school', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

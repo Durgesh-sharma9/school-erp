@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Home, Plus, Search, Trash2, X, Eye, FileText, Download, Calendar, User } from 'lucide-react';
 import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
 
@@ -74,7 +75,7 @@ export function HomeworkPage({ onNavigate }) {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size exceeds 5MB limit.');
+        toast.error('File size exceeds 5MB limit.');
         return;
       }
       setFormData(prev => ({ ...prev, fileName: file.name }));
@@ -84,7 +85,7 @@ export function HomeworkPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.title) {
-      alert('Please enter a title for the homework');
+      toast.error('Please enter a title for the homework');
       return;
     }
 
@@ -413,7 +414,18 @@ export function HomeworkPage({ onNavigate }) {
                     <span className="font-semibold text-slate-800 truncate">{selectedPreview.fileName}</span>
                   </div>
                   <button
-                    onClick={() => alert(`Downloading attachment: ${selectedPreview.fileName}`)}
+                    onClick={() => (() => {
+                      const blob = new Blob([`Homework: ${selectedPreview.title}\nClass: ${selectedPreview.className}\nSubject: ${selectedPreview.subject}\nAssigned Date: ${selectedPreview.date}`], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = selectedPreview.fileName || 'homework.txt';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      toast.success(`Downloaded ${selectedPreview.fileName}`);
+                    })()}
                     className="flex items-center space-x-1 text-xs px-2.5 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shrink-0 font-medium"
                   >
                     <Download className="w-3.5 h-3.5" />

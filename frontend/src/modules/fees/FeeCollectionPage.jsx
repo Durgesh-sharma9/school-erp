@@ -211,7 +211,7 @@ export function FeeCollectionPage({ onNavigate }) {
     if (!admNo) return;
     try {
       setLoadingStudent(true);
-      const res = await fetch(`http://localhost:5000/api/fees/student/${admNo}`, {
+      const res = await fetch(`/api/fees/student/${admNo}`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       const result = await res.json();
@@ -270,7 +270,7 @@ export function FeeCollectionPage({ onNavigate }) {
 
       // 2. Transmit to backend with tenant boundary header
       try {
-        const res = await fetch('http://localhost:5000/api/fees/collect', {
+        const res = await fetch('/api/fees/collect', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

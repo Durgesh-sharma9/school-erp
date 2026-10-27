@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Home,
   Plus,
@@ -47,7 +48,7 @@ export function CrmAssessmentsPage({ onNavigate }) {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!formData.title) {
-      alert('Please enter a title for the assessment test');
+      toast.error('Please enter a title for the assessment test');
       return;
     }
 

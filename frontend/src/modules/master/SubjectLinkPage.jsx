@@ -140,7 +140,7 @@ export function SubjectLinkPage() {
 
   const fetchLinks = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subject-links');
+      const res = await fetch('/api/academics/subject-links');
       const data = await res.json();
       if (data.success && data.data) {
         setLinks(data.data);
@@ -152,7 +152,7 @@ export function SubjectLinkPage() {
 
   const fetchClasses = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/classes');
+      const res = await fetch('/api/academics/classes');
       const data = await res.json();
       if (data.success && data.data) {
         setClasses(data.data);
@@ -184,7 +184,7 @@ export function SubjectLinkPage() {
 
   const handleSaveLinks = async (className) => {
     try {
-      const res = await fetch('http://localhost:5000/api/academics/subject-links', {
+      const res = await fetch('/api/academics/subject-links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

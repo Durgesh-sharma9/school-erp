@@ -50,7 +50,7 @@ export function SchoolExpensePage() {
   const fetchExpenses = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/accounts/expenses?head=${selectedHead}`, {
+      const res = await fetch(`/api/accounts/expenses?head=${selectedHead}`, {
         headers: { 'x-school-id': schoolId }
       });
       if (res.ok) {
@@ -76,7 +76,7 @@ export function SchoolExpensePage() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/accounts/expenses', {
+      const res = await fetch('/api/accounts/expenses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export function SchoolExpensePage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this expense voucher?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/accounts/expenses/${id}`, {
+      const res = await fetch(`/api/accounts/expenses/${id}`, {
         method: 'DELETE',
         headers: { 'x-school-id': schoolId }
       });

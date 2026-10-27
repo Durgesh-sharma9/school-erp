@@ -37,7 +37,7 @@ export function TimetablesManagerPage({ onNavigate }) {
   const fetchTimetables = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/timetables', {
+      const res = await fetch('/api/timetable/timetables', {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       if (res.ok) {
@@ -65,7 +65,7 @@ export function TimetablesManagerPage({ onNavigate }) {
 
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/timetables', {
+      const res = await fetch('/api/timetable/timetables', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export function TimetablesManagerPage({ onNavigate }) {
   const handleToggleStatus = async (item) => {
     const nextStatus = item.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/timetables/${item.id}`, {
+      const res = await fetch(`/api/timetable/timetables/${item.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export function TimetablesManagerPage({ onNavigate }) {
     if (!window.confirm('Are you sure you want to delete this timetable and all its slots?')) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/timetables/${id}`, {
+      const res = await fetch(`/api/timetable/timetables/${id}`, {
         method: 'DELETE',
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });

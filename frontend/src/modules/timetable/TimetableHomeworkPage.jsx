@@ -50,7 +50,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
   const fetchHomework = async () => {
     setLoading(true);
     try {
-      let url = 'http://localhost:5000/api/timetable/homework?';
+      let url = '/api/timetable/homework?';
       if (dateFilter) url += `date=${dateFilter}&`;
       if (classFilter !== 'all') url += `classId=${classFilter}&`;
       if (statusFilter !== 'all') url += `status=${statusFilter}&`;
@@ -82,7 +82,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
 
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/timetable/homework', {
+      const res = await fetch('/api/timetable/homework', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/homework/${editingItem.id}`, {
+      const res = await fetch(`/api/timetable/homework/${editingItem.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export function TimetableHomeworkPage({ onNavigate }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this homework assignment?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/timetable/homework/${id}`, {
+      const res = await fetch(`/api/timetable/homework/${id}`, {
         method: 'DELETE',
         headers: { 'x-school-id': schoolId }
       });
