@@ -587,22 +587,6 @@ const res = await fetch('/api/fees/collect', {
           </div>
         </div>
       )}
-          <button
-            type="button"
-            onClick={() => {
-              if (selectedStudent) {
-                const recs = receiptList.filter(r => r.admNo === selectedStudent.admNo);
-                if (recs.length > 0) setActiveReceiptModal(recs[0]);
-                else toast('No recent receipt on record to print for this student.', { icon: 'ℹ️' });
-              }
-            }}
-            className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 cursor-pointer transition-colors"
-            title="Print Last Receipt"
-          >
-            <Printer className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
       {/* Navigation Tabs Bar */}
       <div className="bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-2xs flex items-center justify-between overflow-x-auto">

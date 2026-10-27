@@ -579,6 +579,7 @@ class TenantDataStore {
       }
     } catch (e) {}
     return null;
+  }
 
   // 8. Cancel a fee receipt
   cancelReceipt(schoolId, receiptNo, reason = 'Operator Cancellation') {
