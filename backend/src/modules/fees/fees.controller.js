@@ -1,4 +1,5 @@
 import prisma from '../../config/db.js';
+import { TENANT_STUDENTS } from '../students/students.controller.js';
 
 // Multi-Tenant Partitioned Fee Accounts: schoolId -> { admNo -> account }
 export const TENANT_FEE_ACCOUNTS = {
@@ -264,9 +265,80 @@ export const getStudentFeeLedger = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { admNo } = req.params;
+    const query = String(admNo || '').trim().toLowerCase();
 
     const schoolAccounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    const account = schoolAccounts[admNo];
+    let account = schoolAccounts[admNo];
+
+    // If not found by exact admNo key, search by alternative fields in fee accounts
+    if (!account) {
+      const foundKey = Object.keys(schoolAccounts).find(k => {
+        const acc = schoolAccounts[k];
+        const s = acc?.student;
+        if (!s) return false;
+        return (
+          String(s.admNo).toLowerCase() === query ||
+          String(s.srNo).toLowerCase() === query ||
+          String(s.name).toLowerCase().includes(query) ||
+          String(s.mobile).includes(query)
+        );
+      });
+      if (foundKey) {
+        account = schoolAccounts[foundKey];
+      }
+    }
+
+    // If still not found, search in tenant student pool
+    if (!account) {
+      const studentPool = TENANT_STUDENTS[schoolId] || [];
+      const foundStudent = studentPool.find(s => {
+        const fullName = `${s.firstName || ''} ${s.lastName || ''}`.trim().toLowerCase();
+        return (
+          String(s.admNo || '').toLowerCase() === query ||
+          String(s.srNo || '').toLowerCase() === query ||
+          String(s.enrollNo || '').toLowerCase() === query ||
+          String(s.rollNo || '').toLowerCase() === query ||
+          fullName.includes(query) ||
+          String(s.fatherMobile || s.smsWhatsappNo || '').includes(query)
+        );
+      });
+
+      if (foundStudent) {
+        const sAdmNo = foundStudent.admNo || admNo;
+        const sFullName = `${foundStudent.firstName || ''} ${foundStudent.lastName || ''}`.trim() || `Student ${sAdmNo}`;
+        const sClass = `${foundStudent.className || 'Class I'} - ${foundStudent.section || 'A'}`;
+        
+        account = {
+          student: {
+            admNo: sAdmNo,
+            srNo: foundStudent.srNo || sAdmNo,
+            enrollNo: foundStudent.enrollNo || `ENR-${sAdmNo}`,
+            name: sFullName,
+            fatherName: foundStudent.fatherName || 'Guardian',
+            motherName: foundStudent.motherName || '',
+            className: sClass,
+            section: foundStudent.section || 'A',
+            feeType: foundStudent.feeType || 'Day Scholar',
+            mobile: foundStudent.fatherMobile || foundStudent.smsWhatsappNo || '',
+            address: foundStudent.address || '',
+            stuType: foundStudent.studentType || 'Old',
+            transportStatus: 'Not Opted'
+          },
+          heads: [
+            { id: `h_${schoolId}_1`, feeHead: 'Admission / Reg. Fee', amount: 4000, discount: 0, fine: 0, netPayable: 4000, isPaid: false },
+            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Quarter 1)', amount: 10000, discount: 0, fine: 0, netPayable: 1000, isPaid: false },
+            { id: `h_${schoolId}_3`, feeHead: 'Tuition Fee (Quarter 2)', amount: 10000, discount: 0, fine: 0, netPayable: 10000, isPaid: false },
+            { id: `h_${schoolId}_4`, feeHead: 'Activity & Lab Fee', amount: 2500, discount: 0, fine: 0, netPayable: 2500, isPaid: false }
+          ],
+          receipts: []
+        };
+
+        if (!TENANT_FEE_ACCOUNTS[schoolId]) {
+          TENANT_FEE_ACCOUNTS[schoolId] = {};
+        }
+        TENANT_FEE_ACCOUNTS[schoolId][sAdmNo] = account;
+      }
+    }
 
     if (!account) {
       return res.status(200).json({
@@ -284,8 +356,9 @@ export const getStudentFeeLedger = async (req, res, next) => {
             mobile: ''
           },
           heads: [
-            { id: `h_${schoolId}_1`, feeHead: 'Admission Fee', amount: 3000, discount: 0, fine: 0, netPayable: 3000, isPaid: false },
-            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee', amount: 8000, discount: 0, fine: 0, netPayable: 8000, isPaid: false }
+            { id: `h_${schoolId}_1`, feeHead: 'Tuition Fee (Q1)', amount: 9000, discount: 0, fine: 0, netPayable: 9000, isPaid: false },
+            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Q2)', amount: 9000, discount: 0, fine: 0, netPayable: 9000, isPaid: false },
+            { id: `h_${schoolId}_3`, feeHead: 'Activity Fee', amount: 2000, discount: 0, fine: 0, netPayable: 2000, isPaid: false }
           ],
           receipts: []
         }
@@ -311,6 +384,8 @@ export const collectFeePayment = async (req, res, next) => {
     const schoolId = getActiveSchoolId(req);
     const {
       admNo,
+      studentName = '',
+      className = '',
       paidAmount,
       payMode = 'Cash',
       chequeNo = '',
@@ -323,7 +398,7 @@ export const collectFeePayment = async (req, res, next) => {
       TENANT_RECEIPTS[schoolId] = [];
     }
 
-    const schoolPrefix = schoolId === 'sch_dps_branch2' ? 'DPS' : 'JD';
+    const schoolPrefix = schoolId === 'sch_dps_branch2' ? 'DPS' : schoolId === 'sch_jd_intl' ? 'JD' : 'REC';
     const count = TENANT_RECEIPTS[schoolId].length + 1;
     const receiptNo = `${schoolPrefix}-REC-${String(count).padStart(3, '0')}`;
 
@@ -331,6 +406,8 @@ export const collectFeePayment = async (req, res, next) => {
       id: `rec_${Date.now()}`,
       receiptNo,
       admNo,
+      studentName,
+      className,
       schoolId,
       paidAmount: Number(paidAmount),
       payMode,
@@ -350,8 +427,9 @@ export const collectFeePayment = async (req, res, next) => {
     }
 
     if (TENANT_FEE_ACCOUNTS[schoolId][admNo]) {
+      TENANT_FEE_ACCOUNTS[schoolId][admNo].receipts = TENANT_FEE_ACCOUNTS[schoolId][admNo].receipts || [];
       TENANT_FEE_ACCOUNTS[schoolId][admNo].receipts.unshift(newReceipt);
-      if (paidHeadIds.length > 0) {
+      if (paidHeadIds.length > 0 && TENANT_FEE_ACCOUNTS[schoolId][admNo].heads) {
         TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = TENANT_FEE_ACCOUNTS[schoolId][admNo].heads.map(h => 
           paidHeadIds.includes(h.id) ? { ...h, isPaid: true } : h
         );
