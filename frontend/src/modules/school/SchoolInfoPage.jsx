@@ -403,7 +403,7 @@ export function SchoolInfoPage() {
         <button
           type="button"
           onClick={handleSave}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold px-4 py-2 shadow-sm flex items-center gap-1.5 cursor-pointer"
+          className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold px-4 py-2.5 shadow-xs hover:shadow flex items-center gap-2 cursor-pointer transition-all"
         >
           <Save className="w-3.5 h-3.5" />
           <span>Save Profile</span>
@@ -411,33 +411,34 @@ export function SchoolInfoPage() {
       </PageHeader>
 
       {savedSuccess && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center space-x-3 text-xs shadow-2xs animate-fade-in">
+        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center space-x-3 text-xs shadow-2xs animate-fade-in">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <div>
+          <div className="font-semibold">
             School information and branding assets updated successfully!
           </div>
         </div>
       )}
 
       {/* Main Container Form */}
-      <form onSubmit={handleSave} className="space-y-3">
+      <form onSubmit={handleSave} className="space-y-4">
         {/* Card 1: Core School Info (5-Column Grid) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/30 to-white px-4 py-2.5 border-b border-blue-100 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+        <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 overflow-hidden">
+          <div className="bg-gradient-to-r from-[#FFF5EB] via-[#FFF8F2] to-[#FFEBD9] px-5 py-3.5 border-b border-orange-200/80 flex items-center justify-between rounded-t-2xl">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-7 h-7 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-bold shadow-2xs">
                 🏫
               </div>
-              <h3 className="font-bold text-xs text-slate-900 tracking-tight">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-800 tracking-tight">
                 School General Details
               </h3>
             </div>
-            <span className="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-white border border-slate-200 font-bold text-slate-600">
+            <span className="text-[10.5px] font-mono px-2.5 py-0.5 rounded-full bg-white border border-orange-200 font-bold text-orange-700 shadow-2xs">
               ID: {schoolId || 'sch_jd_intl'}
             </span>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-4">
+          {/* Test Master Pro: Crisp White Card Body */}
+          <div className="p-5 sm:p-6 bg-white space-y-4 rounded-b-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 text-xs">
               {/* School Name */}
               <div className="md:col-span-2">
@@ -447,7 +448,7 @@ export function SchoolInfoPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold text-slate-900"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-bold shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                   required
                 />
               </div>
@@ -460,7 +461,7 @@ export function SchoolInfoPage() {
                   name="school_code"
                   value={formData.school_code}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -472,7 +473,7 @@ export function SchoolInfoPage() {
                   name="udies_no"
                   value={formData.udies_no}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -484,7 +485,7 @@ export function SchoolInfoPage() {
                   name="school_affl_no"
                   value={formData.school_affl_no}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -495,7 +496,7 @@ export function SchoolInfoPage() {
                   name="school_category"
                   value={formData.school_category}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-semibold shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 cursor-pointer transition-all"
                 >
                   <option value="Private">Private</option>
                   <option value="Government">Government</option>
@@ -510,7 +511,7 @@ export function SchoolInfoPage() {
                   name="school_type"
                   value={formData.school_type}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-semibold shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 cursor-pointer transition-all"
                 >
                   <option value="Senior Secondary">Senior Secondary</option>
                   <option value="Secondary">Secondary</option>
@@ -527,7 +528,7 @@ export function SchoolInfoPage() {
                   name="place"
                   value={formData.place}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -539,7 +540,7 @@ export function SchoolInfoPage() {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -551,7 +552,7 @@ export function SchoolInfoPage() {
                   name="postal_code"
                   value={formData.postal_code}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -563,7 +564,7 @@ export function SchoolInfoPage() {
                   name="phone_num1"
                   value={formData.phone_num1}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-bold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-bold text-indigo-700 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                   required
                 />
               </div>
@@ -576,7 +577,7 @@ export function SchoolInfoPage() {
                   name="phone_num2"
                   value={formData.phone_num2}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs font-mono font-medium text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -589,7 +590,7 @@ export function SchoolInfoPage() {
                   value={formData.website}
                   onChange={handleInputChange}
                   placeholder="www.school.com"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -602,7 +603,7 @@ export function SchoolInfoPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="info@school.com"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -613,7 +614,7 @@ export function SchoolInfoPage() {
                   name="board"
                   value={formData.board}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-bold shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 cursor-pointer transition-all"
                 >
                   <option value="C.B.S.E">C.B.S.E</option>
                   <option value="I.C.S.E">I.C.S.E</option>
@@ -631,7 +632,7 @@ export function SchoolInfoPage() {
                   value={formData.school_tag_line_1}
                   onChange={handleInputChange}
                   placeholder="e.g. Lead Kindly Light • Empowering Future Leaders"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
             </div>
@@ -646,28 +647,28 @@ export function SchoolInfoPage() {
                 rows={2}
                 value={formData.fee_receipt_notes}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-xs text-slate-800 font-medium shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
               />
             </div>
           </div>
         </div>
 
         {/* Card 2: Accordion 1 - LOGO / SIGNATURE / BRANDING ASSETS */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'logo' ? '' : 'logo')}
-            className="w-full p-3.5 bg-gradient-to-r from-purple-50/80 via-indigo-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-purple-100"
+            className="w-full px-5 py-3.5 bg-gradient-to-r from-[#FFF5EB] via-[#FFF8F2] to-[#FFEBD9] flex items-center justify-between text-left font-bold text-xs sm:text-sm tracking-tight text-slate-800 hover:bg-orange-100/40 transition-colors cursor-pointer select-none border-b border-orange-200/80 rounded-t-2xl"
           >
-            <span className="flex items-center space-x-2">
-              <ImageIcon className="w-4 h-4 text-purple-600" />
+            <span className="flex items-center space-x-2.5">
+              <ImageIcon className="w-4 h-4 text-orange-600" />
               <span>LOGO &amp; OFFICIAL SIGNATURE SLOTS ({logoUploadSlots.length})</span>
             </span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'logo' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-orange-500 transition-transform ${expandedSection === 'logo' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'logo' && (
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 bg-white border-t border-slate-100">
+            <div className="p-5 sm:p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 bg-white rounded-b-2xl">
               {logoUploadSlots.map((slot) => {
                 const currentImg = formData.brandingImages?.[slot.id] || (slot.id === 'school_logo' ? formData.logoUrl : null);
                 const isSlotUploading = uploadingSlot === slot.id;
@@ -675,12 +676,12 @@ export function SchoolInfoPage() {
                 return (
                   <div
                     key={slot.id}
-                    className="group relative border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center space-y-2.5 bg-slate-50/50 hover:bg-white hover:border-indigo-300 hover:shadow-xs transition-all"
+                    className="group relative border border-slate-200 hover:border-orange-300 rounded-2xl p-3.5 flex flex-col items-center text-center space-y-2.5 bg-white shadow-2xs hover:shadow-xs transition-all"
                   >
-                    <div className="relative w-full h-24 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-24 bg-slate-50/70 border border-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
                       {isSlotUploading ? (
                         <div className="flex flex-col items-center justify-center space-y-1">
-                          <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-orange-600 animate-spin" />
                           <span className="text-[10px] text-slate-500 font-medium">Uploading...</span>
                         </div>
                       ) : currentImg ? (
@@ -694,7 +695,7 @@ export function SchoolInfoPage() {
                             type="button"
                             title={`Remove ${slot.label}`}
                             onClick={(e) => handleRemoveLogo(slot.id, slot.label, e)}
-                            className="absolute top-1.5 right-1.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity shadow-xs"
+                            className="absolute top-1.5 right-1.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity shadow-xs cursor-pointer"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -711,7 +712,7 @@ export function SchoolInfoPage() {
                       {slot.label}
                     </div>
 
-                    <label className={`cursor-pointer px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded-md shadow-2xs transition-colors flex items-center space-x-1 ${isSlotUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <label className={`cursor-pointer px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-[10px] font-bold rounded-xl shadow-2xs transition-colors flex items-center space-x-1 ${isSlotUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                       <Upload className="w-3 h-3" />
                       <span>{currentImg ? 'Change' : 'Upload'}</span>
                       <input
@@ -730,21 +731,21 @@ export function SchoolInfoPage() {
         </div>
 
         {/* Card 3: Accordion 2 - SOCIAL MEDIA & APP LINKS */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'social' ? '' : 'social')}
-            className="w-full p-3.5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-amber-100"
+            className="w-full px-5 py-3.5 bg-gradient-to-r from-[#FFF5EB] via-[#FFF8F2] to-[#FFEBD9] flex items-center justify-between text-left font-bold text-xs sm:text-sm tracking-tight text-slate-800 hover:bg-orange-100/40 transition-colors cursor-pointer select-none border-b border-orange-200/80 rounded-t-2xl"
           >
-            <span className="flex items-center space-x-2">
-              <Share2 className="w-4 h-4 text-amber-600" />
+            <span className="flex items-center space-x-2.5">
+              <Share2 className="w-4 h-4 text-orange-600" />
               <span>SOCIAL MEDIA &amp; MOBILE APP DOWNLOAD LINKS</span>
             </span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'social' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-orange-500 transition-transform ${expandedSection === 'social' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'social' && (
-            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 bg-white border-t border-slate-100 text-xs">
+            <div className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 bg-white rounded-b-2xl text-xs">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">Youtube Channel</label>
                 <input
@@ -752,7 +753,7 @@ export function SchoolInfoPage() {
                   name="youtube_page"
                   value={formData.youtube_page}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -763,7 +764,7 @@ export function SchoolInfoPage() {
                   name="facebook_page"
                   value={formData.facebook_page}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -774,7 +775,7 @@ export function SchoolInfoPage() {
                   name="twitter_page"
                   value={formData.twitter_page}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -785,7 +786,7 @@ export function SchoolInfoPage() {
                   name="app_fee_url"
                   value={formData.app_fee_url}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -796,7 +797,7 @@ export function SchoolInfoPage() {
                   name="app_win_url"
                   value={formData.app_win_url}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -807,7 +808,7 @@ export function SchoolInfoPage() {
                   name="app_andr_url"
                   value={formData.app_andr_url}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -818,7 +819,7 @@ export function SchoolInfoPage() {
                   name="app_ios_url"
                   value={formData.app_ios_url}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-[11px] shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
 
@@ -828,7 +829,7 @@ export function SchoolInfoPage() {
                   type="text"
                   name="admission_limit"
                   defaultValue="0"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white text-slate-800 font-mono text-xs font-semibold focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white text-slate-800 font-mono text-xs font-semibold shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                 />
               </div>
             </div>
@@ -836,25 +837,25 @@ export function SchoolInfoPage() {
         </div>
 
         {/* Card 4: Accordion 3 - RANGE ATTENDANCE (GEO-FENCING) */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 overflow-hidden">
           <button
             type="button"
             onClick={() => setExpandedSection(prev => prev === 'range' ? '' : 'range')}
-            className="w-full p-3.5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer select-none border-b border-emerald-100"
+            className="w-full px-5 py-3.5 bg-gradient-to-r from-[#FFF5EB] via-[#FFF8F2] to-[#FFEBD9] flex items-center justify-between text-left font-bold text-xs sm:text-sm tracking-tight text-slate-800 hover:bg-orange-100/40 transition-colors cursor-pointer select-none border-b border-orange-200/80 rounded-t-2xl"
           >
-            <span className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-emerald-600" />
+            <span className="flex items-center space-x-2.5">
+              <MapPin className="w-4 h-4 text-orange-600" />
               <span>STAFF ATTENDANCE GEOFENCE (GPS RANGE)</span>
             </span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-orange-500 transition-transform ${expandedSection === 'range' ? 'rotate-180' : ''}`} />
           </button>
 
           {expandedSection === 'range' && (
-            <div className="p-4 sm:p-5 space-y-4 bg-white border-t border-slate-100 text-xs">
-              {/* Quick Actions & Live Detection Banner */}
-              <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-slate-50 border border-indigo-100 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="p-5 sm:p-6 space-y-4 bg-white rounded-b-2xl text-xs">
+              {/* Quick Actions & Live Detection Banner - Test Master Inner Box */}
+              <div className="border border-indigo-100 rounded-2xl bg-gradient-to-b from-[#F8FAFF] to-[#EFF4FE] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-indigo-600 text-white rounded-lg shadow-2xs shrink-0">
+                  <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-2xs shrink-0">
                     <Navigation className="w-4 h-4" />
                   </div>
                   <div>
@@ -866,7 +867,7 @@ export function SchoolInfoPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-600 mt-0.5">
+                    <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
                       Click while physically present on the school campus to automatically detect and store precise latitude and longitude coordinates.
                     </p>
                   </div>
@@ -877,7 +878,7 @@ export function SchoolInfoPage() {
                     type="button"
                     onClick={handleFetchCurrentLocation}
                     disabled={isLocating}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
                   >
                     {isLocating ? (
                       <>
@@ -897,7 +898,7 @@ export function SchoolInfoPage() {
                       href={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs transition-colors"
+                      className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
                       title="Verify pinned location on Google Maps"
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
@@ -910,7 +911,7 @@ export function SchoolInfoPage() {
               {/* Status Message Display */}
               {locationStatus && (
                 <div
-                  className={`p-3 rounded-lg text-xs font-semibold flex items-center gap-2 ${
+                  className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
                     locationStatus.type === 'success'
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                       : locationStatus.type === 'loading'
@@ -941,7 +942,7 @@ export function SchoolInfoPage() {
                     value={formData.latitude}
                     onChange={handleInputChange}
                     placeholder="e.g. 26.9124336"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white font-mono text-xs font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                   />
                 </div>
                 <div>
@@ -954,7 +955,7 @@ export function SchoolInfoPage() {
                     value={formData.longitude}
                     onChange={handleInputChange}
                     placeholder="e.g. 75.7872709"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white font-mono text-xs font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                   />
                 </div>
                 <div>
@@ -972,7 +973,7 @@ export function SchoolInfoPage() {
                     value={formData.attend_range}
                     onChange={handleInputChange}
                     placeholder="e.g. 100"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-slate-50/50 focus:bg-white font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 bg-white font-mono text-xs font-semibold text-slate-800 shadow-2xs hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all"
                   />
                 </div>
               </div>
@@ -1019,7 +1020,7 @@ export function SchoolInfoPage() {
         <div className="pt-2 flex justify-end">
           <button
             type="submit"
-            className="px-8 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all flex items-center space-x-2 cursor-pointer"
+            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-bold shadow-xs hover:shadow transition-all flex items-center space-x-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>Save School Profile</span>

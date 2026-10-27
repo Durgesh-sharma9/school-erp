@@ -99,7 +99,7 @@ export function DashboardPage({ onNavigate }) {
   ] : [];
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen p-3 sm:p-5 max-w-[1600px] mx-auto space-y-3.5 pb-28">
+    <div className="testmaster-bg min-h-screen p-3 sm:p-5 max-w-[1600px] mx-auto space-y-3.5 pb-28">
       {/* Multi-Tenant Isolation Status Banner */}
       <div className={`p-3 sm:p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs ${
         isNewSchool

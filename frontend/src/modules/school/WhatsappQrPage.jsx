@@ -101,7 +101,7 @@ export function WhatsappQrPage() {
 
   // Fetch Students & Staff Contacts for Auto-fill
   useEffect(() => {
-    fetch('http://localhost:5000/api/students')
+    fetch('/api/students')
       .then((r) => r.json())
       .then((d) => {
         const list = Array.isArray(d) ? d : (d.data || []);
@@ -124,7 +124,7 @@ export function WhatsappQrPage() {
       })
       .catch(() => {});
 
-    fetch('http://localhost:5000/api/user-management/users')
+    fetch('/api/user-management/users')
       .then((r) => r.json())
       .then((d) => {
         const list = Array.isArray(d) ? d : (d.data || []);
@@ -187,7 +187,7 @@ export function WhatsappQrPage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/whatsapp/status');
+      const res = await fetch('/api/whatsapp/status');
       const data = await res.json();
       if (data.success && data.active && data.session?.loggedIn) {
         setSession(data.session);
@@ -217,7 +217,7 @@ export function WhatsappQrPage() {
 
     const checkQr = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/whatsapp/qr');
+        const res = await fetch('/api/whatsapp/qr');
         const data = await res.json();
 
         if (isMounted && data.success) {
@@ -253,7 +253,7 @@ export function WhatsappQrPage() {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/whatsapp/logout', {
+      const res = await fetch('/api/whatsapp/logout', {
         method: 'POST',
       });
       const data = await res.json();
@@ -312,7 +312,7 @@ export function WhatsappQrPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/whatsapp/send', {
+      const res = await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: testPhone, message: testMessageText }),
@@ -369,13 +369,13 @@ export function WhatsappQrPage() {
 
       <div className="space-y-4">
         {/* Device Status Card */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 overflow-hidden">
-          <div className="px-4 sm:px-5 py-3 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white border-b border-emerald-100 flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+        <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(249,115,22,0.06),0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 overflow-hidden">
+          <div className="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-[#FFF2E7] via-[#FFF9F3] to-[#FFF2E7] border-b border-orange-200/70 flex justify-between items-center">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-7 h-7 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-bold shadow-2xs">
                 📱
               </div>
-              <span className="text-xs font-bold text-slate-900 tracking-tight uppercase">
+              <span className="text-xs sm:text-sm font-bold text-orange-950 tracking-tight uppercase">
                 Connected WhatsApp Instance
               </span>
             </div>
@@ -480,14 +480,14 @@ export function WhatsappQrPage() {
         </div>
 
         {/* Live Test Messenger Sandbox */}
-        <div className="bg-white rounded-xl shadow-2xs hover:shadow-xs border border-slate-200/90 p-4 sm:p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(249,115,22,0.06),0_1px_3px_rgba(15,23,42,0.03)] border border-orange-200/80 p-4 sm:p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-orange-100/70 pb-3">
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center font-bold shadow-2xs">
                 <Send className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-xs text-slate-900 tracking-tight">Test Live WhatsApp Delivery</h3>
+                <h3 className="font-bold text-xs sm:text-sm text-orange-950 tracking-tight">Test Live WhatsApp Delivery</h3>
                 <p className="text-[11px] text-slate-500">Verify real-time delivery from linked school number</p>
               </div>
             </div>

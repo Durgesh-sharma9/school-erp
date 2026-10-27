@@ -380,7 +380,7 @@ function AppContent() {
       />
 
       {/* Main Full-Width Canvas Container */}
-      <div className="flex-1 flex flex-col h-full min-w-0 w-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full min-w-0 w-full overflow-hidden app-layout-canvas">
         {/* Top Navbar */}
         <Navbar
           session="2026-2027"
@@ -389,7 +389,7 @@ function AppContent() {
         />
 
         {/* Dynamic Canvas Routing */}
-        <main id="main-content" className="flex-1 overflow-y-auto custom-scrollbar">
+        <main id="main-content" className="flex-1 overflow-y-auto custom-scrollbar app-layout-canvas">
           <ErrorBoundary onNavigate={handleNavigate}>
           {(() => {
             switch (getCleanRoute(currentPath)) {
