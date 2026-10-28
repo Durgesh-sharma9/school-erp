@@ -86,7 +86,7 @@ export function StaffAttendancePage({ onNavigate }) {
   const [reportViewMode, setReportViewMode] = useState('matrix'); // 'matrix' | 'logs'
 
   // Analytics Tab State
-  const [selectedStaffId, setSelectedStaffId] = useState(INITIAL_STAFF_MASTER[0].id);
+  const [selectedStaffId, setSelectedStaffId] = useState(INITIAL_STAFF_MASTER[0]?.id || '');
   const [analyticsMonth, setAnalyticsMonth] = useState(new Date());
   const [analyticsViewMode, setAnalyticsViewMode] = useState('calendar'); // 'calendar' | 'chart'
 
@@ -183,13 +183,13 @@ export function StaffAttendancePage({ onNavigate }) {
 
   // Selected Staff for Analytics
   const selectedStaff = useMemo(() => {
-    return staffRoster.find(s => s.id === selectedStaffId) || staffRoster[0];
+    return staffRoster.find(s => s.id === selectedStaffId) || staffRoster[0] || null;
   }, [staffRoster, selectedStaffId]);
 
   // Deterministic Mock Monthly Attendance History for Selected Staff
   const staffMonthlyAnalytics = useMemo(() => {
     const emptySummary = { overallRate: '0.0', presentDays: 0, absentDays: 0, halfDays: 0, leaveDays: 0, workingDays: 0 };
-    if (!selectedStaff) return { historyMap: new Map(), trendData: [], summary: emptySummary };
+    if (!selectedStaff || !selectedStaff.code) return { historyMap: new Map(), trendData: [], summary: emptySummary };
 
     const year = analyticsMonth.getFullYear();
     const month = analyticsMonth.getMonth();
@@ -931,7 +931,13 @@ export function StaffAttendancePage({ onNavigate }) {
       {/* ========================================================================= */}
       {/* TAB 3: STAFF ANALYTICS & MONTHLY CALENDAR                                 */}
       {/* ========================================================================= */}
-      {activeTab === 'analytics' && (
+      {activeTab === 'analytics' && (!selectedStaff ? (
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-12 text-center shadow-2xs">
+          <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-800">Koi Staff Registered Nahi Hai</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Analytics dekhne ke liye pehle Staff Registration me jakar staff add karein.</p>
+        </div>
+      ) : (
         <div className="space-y-3.5">
           {/* Staff Selector Bar */}
           <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1151,7 +1157,7 @@ export function StaffAttendancePage({ onNavigate }) {
             </ErpSection>
           </div>
         </div>
-      )}
+      ))}
 
       {/* ========================================================================= */}
       {/* TAB 4: STAFF ROSTER & SHIFTS                                              */}
