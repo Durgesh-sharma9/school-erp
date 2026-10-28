@@ -39,23 +39,8 @@ import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrim
 import StatsCard from '../../components/StatsCard';
 import { cn } from '../../utils/cn';
 
-// Sample Staff Master Roster
-const INITIAL_STAFF_MASTER = [
-  { id: '1', code: '101', name: 'ABHILASHA BHATT', designation: 'Principal', department: 'ADMINISTRATIVE', shift: 'General (08:00 - 15:00)', mobile: '9829011101', defaultIn: '07:55', defaultOut: '15:05', status: 'Present', gender: 'Female' },
-  { id: '2', code: '102', name: 'PRITI VERMA', designation: 'Vice Principal', department: 'ADMINISTRATIVE', shift: 'General (08:00 - 15:00)', mobile: '9829011102', defaultIn: '08:00', defaultOut: '15:00', status: 'Present', gender: 'Female' },
-  { id: '3', code: '201', name: 'MONIKA RANI VERMA', designation: 'Sr. PGT Teacher', department: 'TEACHING', shift: 'Morning (07:30 - 14:00)', mobile: '9870943695', defaultIn: '07:30', defaultOut: '14:00', status: 'Present', gender: 'Female' },
-  { id: '4', code: '202', name: 'SUNITA KUMARI', designation: 'TGT Science Teacher', department: 'TEACHING', shift: 'Morning (07:30 - 14:00)', mobile: '9511719644', defaultIn: '07:35', defaultOut: '14:00', status: 'Present', gender: 'Female' },
-  { id: '5', code: '203', name: 'PRIYANKA SHARMA', designation: 'PRT English Teacher', department: 'TEACHING', shift: 'Morning (07:30 - 14:00)', mobile: '9829011105', defaultIn: '07:30', defaultOut: '14:05', status: 'Present', gender: 'Female' },
-  { id: '6', code: '204', name: 'RAKESH CHOUDHARY', designation: 'PGT Maths Teacher', department: 'TEACHING', shift: 'Morning (07:30 - 14:00)', mobile: '9829011106', defaultIn: '07:28', defaultOut: '14:00', status: 'Present', gender: 'Male' },
-  { id: '7', code: '301', name: 'RAKESH SHARMA', designation: 'Sr. Accountant', department: 'ADMINISTRATIVE', shift: 'General (08:00 - 16:00)', mobile: '9829011107', defaultIn: '08:00', defaultOut: '16:00', status: 'Present', gender: 'Male' },
-  { id: '8', code: '302', name: 'NEHA AGARWAL', designation: 'Fee Counter Clerk', department: 'ADMINISTRATIVE', shift: 'General (08:00 - 16:00)', mobile: '9829011108', defaultIn: '08:05', defaultOut: '16:00', status: 'Leave', gender: 'Female' },
-  { id: '9', code: '501', name: 'BHARAT JANGID', designation: 'Bus Driver', department: 'TRANSPORT', shift: 'Split (06:30 - 16:30)', mobile: '9829011109', defaultIn: '06:30', defaultOut: '16:30', status: 'Present', gender: 'Male' },
-  { id: '10', code: '502', name: 'HANSRAJ JAT', designation: 'Bus Driver', department: 'TRANSPORT', shift: 'Split (06:30 - 16:30)', mobile: '9829011110', defaultIn: '06:30', defaultOut: '16:30', status: 'Present', gender: 'Male' },
-  { id: '11', code: '503', name: 'LALARAM', designation: 'Bus Driver', department: 'TRANSPORT', shift: 'Split (06:30 - 16:30)', mobile: '8209323925', defaultIn: '06:35', defaultOut: '16:30', status: 'Absent', gender: 'Male' },
-  { id: '12', code: '504', name: 'SHAITAN SINGH', designation: 'Van Driver', department: 'TRANSPORT', shift: 'Split (06:30 - 16:30)', mobile: '8290058104', defaultIn: '06:30', defaultOut: '16:30', status: 'Present', gender: 'Male' },
-  { id: '13', code: '601', name: 'RAMESH MEENA', designation: 'Lab Attendant', department: 'SUPPORT', shift: 'General (08:00 - 15:30)', mobile: '8824449233', defaultIn: '08:00', defaultOut: '15:30', status: 'Half-Day', gender: 'Male' },
-  { id: '14', code: '602', name: 'SURESH VERMA', designation: 'Office Boy / Peon', department: 'SUPPORT', shift: 'General (07:30 - 16:00)', mobile: '9928461276', defaultIn: '07:30', defaultOut: '16:00', status: 'Present', gender: 'Male' }
-];
+// Clean Fresh Staff Master Roster
+const INITIAL_STAFF_MASTER = [];
 
 const DEPARTMENTS = ['ALL', 'TEACHING', 'ADMINISTRATIVE', 'TRANSPORT', 'SUPPORT'];
 
@@ -203,7 +188,8 @@ export function StaffAttendancePage({ onNavigate }) {
 
   // Deterministic Mock Monthly Attendance History for Selected Staff
   const staffMonthlyAnalytics = useMemo(() => {
-    if (!selectedStaff) return { historyMap: new Map(), trendData: [], summary: {} };
+    const emptySummary = { overallRate: '0.0', presentDays: 0, absentDays: 0, halfDays: 0, leaveDays: 0, workingDays: 0 };
+    if (!selectedStaff) return { historyMap: new Map(), trendData: [], summary: emptySummary };
 
     const year = analyticsMonth.getFullYear();
     const month = analyticsMonth.getMonth();

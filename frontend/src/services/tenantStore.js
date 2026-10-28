@@ -1,3 +1,16 @@
+
+// Auto-purge all cached dummy demo data
+if (typeof window !== 'undefined' && !localStorage.getItem('erp_data_clean_purge_v1')) {
+  try {
+    ['sch_jd_intl', 'sch_dps_branch2', 'sch_default'].forEach(sid => {
+      localStorage.removeItem(`erp_tenant_${sid}_students`);
+      localStorage.removeItem(`erp_tenant_${sid}_receipts`);
+    });
+    localStorage.removeItem('erp_staff_roster');
+    localStorage.removeItem('erp_biometric_sync_roster');
+    localStorage.setItem('erp_data_clean_purge_v1', 'true');
+  } catch (e) {}
+}
 /**
  * Enterprise Multi-Tenant Client Store
  * Guarantees strict data isolation between tenants:
@@ -167,19 +180,11 @@ const INITIAL_PROFILES = {
 };
 
 // Seed Dashboard Stats
-const INITIAL_STATS = {
-  'sch_jd_intl': {
-    todayCollection: { total: 45000, receiptsCount: 3, cash: 15000, bank: 30000 },
-    feeRevenueSummary: { totalRevenue: 31221901, totalDue: 283445, totalReceivedYTD: 30943456, receivedPercentage: 99.1, duePercentage: 0.9 },
-    totalStudents: { total: 928, boys: 494, girls: 434, newAdmissions: 168, oldStudents: 760, growthRate: "18.1% ↑" },
-    attendanceToday: { percentage: 94.2, totalPresent: 874, totalAbsent: 54, trend: "2.1% ↑" }
-  },
-  'sch_dps_branch2': {
-    todayCollection: { total: 18500, receiptsCount: 2, cash: 8500, bank: 10000 },
-    feeRevenueSummary: { totalRevenue: 14200000, totalDue: 550000, totalReceivedYTD: 13650000, receivedPercentage: 96.1, duePercentage: 3.9 },
-    totalStudents: { total: 412, boys: 218, girls: 194, newAdmissions: 84, oldStudents: 328, growthRate: "12.4% ↑" },
-    attendanceToday: { percentage: 96.5, totalPresent: 398, totalAbsent: 14, trend: "1.2% ↑" }
-  }
+const EMPTY_STATS = {
+  todayCollection: { total: 0, receiptsCount: 0, cash: 0, bank: 0 },
+  feeRevenueSummary: { totalRevenue: 0, totalDue: 0, totalReceivedYTD: 0, receivedPercentage: 0, duePercentage: 0 },
+  totalStudents: { total: 0, boys: 0, girls: 0, newAdmissions: 0, oldStudents: 0, growthRate: "0%" },
+  attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0%" }
 };
 
 class TenantDataStore {
@@ -257,16 +262,7 @@ class TenantDataStore {
       console.error(e);
     }
 
-    // Default seeds strictly for Demo School A
-    if (schoolId === 'sch_jd_intl') {
-      localStorage.setItem(key, JSON.stringify(INITIAL_SCHOOL_A_STUDENTS));
-      return INITIAL_SCHOOL_A_STUDENTS;
-    }
-    // Default seeds strictly for Demo School B
-    if (schoolId === 'sch_dps_branch2') {
-      localStorage.setItem(key, JSON.stringify(INITIAL_SCHOOL_B_STUDENTS));
-      return INITIAL_SCHOOL_B_STUDENTS;
-    }
+    return [];
 
     // Newly registered school starts with 0 students (NO DUMMY DATA)
     return [];
@@ -356,14 +352,7 @@ class TenantDataStore {
       };
     }
 
-    // Pre-seeded demo stats for School A
-    if (schoolId === 'sch_jd_intl') {
-      return INITIAL_STATS['sch_jd_intl'];
-    }
-    // Pre-seeded demo stats for School B
-    if (schoolId === 'sch_dps_branch2') {
-      return INITIAL_STATS['sch_dps_branch2'];
-    }
+    // Always calculate dynamically from live data
 
     // Dynamically calculate for newly created school: strictly 0 if no records
     const students = this.getStudents(schoolId);

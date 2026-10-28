@@ -81,33 +81,13 @@ export function DashboardPage({ onNavigate }) {
   const receivedHeight = receivedAmount > 0 ? Math.max(18, Math.round((receivedAmount / maxBar) * 120)) : 8;
   const dueHeight = dueAmount > 0 ? Math.max(18, Math.round((dueAmount / maxBar) * 120)) : 8;
 
-  const ytdCash = isSchoolA ? '43,355' : isSchoolB ? '18,500' : '0';
-  const ytdBank = isSchoolA ? '2,07,090' : isSchoolB ? '85,000' : '0';
-  const ytdTotal = isSchoolA ? '2,50,445' : isSchoolB ? '1,03,500' : '0';
+  const ytdCash = stats?.todayCollection?.cash ? formatINR(stats.todayCollection.cash) : '0';
+  const ytdBank = stats?.todayCollection?.bank ? formatINR(stats.todayCollection.bank) : '0';
+  const ytdTotal = stats?.todayCollection?.total ? formatINR(stats.todayCollection.total) : '0';
 
-  // Live vehicles data strictly partitioned per school
-  const vehicles = isSchoolB ? [
-    { sNo: 1, name: "[DL01PA4512] School Bus 1", driver: "[1] MANOJ KUMAR", capacity: 45, status: "Active" },
-    { sNo: 2, name: "[DL01PA4513] School Bus 2", driver: "[2] SATISH CHANDRA", capacity: 40, status: "Active" }
-  ] : isSchoolA ? [
-    { sNo: 1, name: "[RJ02PA2762] Bus", driver: "[5] SHAITAN SINGH", capacity: 42, status: "Active" },
-    { sNo: 2, name: "[RJ14PC1019] Bus", driver: "[1] HANSRAJ JAT", capacity: 42, status: "Active" },
-    { sNo: 3, name: "[RJ14PC1037] Bus", driver: "[10] PRAKASH CHOUDHARY", capacity: 50, status: "Active" },
-    { sNo: 4, name: "[RJ14PC2278] Bus", driver: "[7] SHYAM SUNDER", capacity: 40, status: "Active" },
-    { sNo: 5, name: "[RJ14PC5938] Bus", driver: "[8] NARESH", capacity: 45, status: "Active" },
-    { sNo: 6, name: "[RJ14PC7878] Bus", driver: "[6] BABU LAL", capacity: 42, status: "Active" },
-    { sNo: 7, name: "[RJ14PE0832] Van", driver: "[3] RAMESH MEENA", capacity: 25, status: "Active" }
-  ] : [];
+  const vehicles = [];
 
-  // Live student birthdays strictly partitioned per school
-  const birthdays = isSchoolB ? [
-    { name: "ROHAN SHARMA", classSec: "Class 10-A", roll: "01" },
-    { name: "PRIYA PATEL", classSec: "Class 9-B", roll: "02" }
-  ] : isSchoolA ? [
-    { name: "DHRITI YADAV", classSec: "Lower Kindergarten - PP4+-A", roll: "12" },
-    { name: "ABHIMANYU DUBEY", classSec: "VI-A", roll: "04" },
-    { name: "ARYA KUMARI", classSec: "IX-A", roll: "18" }
-  ] : [];
+  const birthdays = [];
 
   return (
     <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">

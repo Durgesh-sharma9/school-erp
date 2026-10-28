@@ -12,22 +12,7 @@ import {
   Phone
 } from 'lucide-react';
 
-const INITIAL_STAFF = [
-  { id: '1', code: '101', name: 'ABHILASHA BHATT', designation: 'Principal', department: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9672992836', appoinDate: '02/01/2026', basicSalary: 65000, accNo: 'SBI-489211029', status: 'Active', gender: 'Female' },
-  { id: '2', code: '102', name: 'PRITI VERMA', designation: 'Administrator', department: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9079909813', appoinDate: '02/01/2026', basicSalary: 42000, accNo: 'HDFC-88291039', status: 'Active', gender: 'Female' },
-  { id: '3', code: '501', name: 'BHARAT JANGID', designation: 'Driver', department: 'TRANSPORT', mobile: '8107187618', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'CBI-102938475', status: 'Active', gender: 'Male' },
-  { id: '4', code: '502', name: 'HANSRAJ JAT', designation: 'Driver', department: 'TRANSPORT', mobile: '9636644293', appoinDate: '01/01/2016', basicSalary: 24000, accNo: 'SBI-772910283', status: 'Active', gender: 'Male' },
-  { id: '5', code: '503', name: 'LALARAM', designation: 'Driver', department: 'TRANSPORT', mobile: '8209323925', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'SBI-991029381', status: 'Active', gender: 'Male' },
-  { id: '6', code: '504', name: 'SHAITAN SINGH', designation: 'Driver', department: 'TRANSPORT', mobile: '8290058104', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'BOB-88192019', status: 'Active', gender: 'Male' },
-  { id: '7', code: '505', name: 'BABU LAL', designation: 'Driver', department: 'TRANSPORT', mobile: '9929726638', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'SBI-118291029', status: 'Active', gender: 'Male' },
-  { id: '8', code: '506', name: 'SHYAM SUNDER', designation: 'Driver', department: 'TRANSPORT', mobile: '7742923510', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'PNB-33910293', status: 'Active', gender: 'Male' },
-  { id: '9', code: '507', name: 'NARESH', designation: 'Driver', department: 'TRANSPORT', mobile: '9928461276', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'SBI-44810293', status: 'Active', gender: 'Male' },
-  { id: '10', code: '508', name: 'RAJU IPS', designation: 'Driver', department: 'TRANSPORT', mobile: '9358520358', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'BOB-99102938', status: 'Active', gender: 'Male' },
-  { id: '11', code: '509', name: 'PRAKASH CHOUDHARY', designation: 'Driver', department: 'TRANSPORT', mobile: '9829989330', appoinDate: '30/12/2025', basicSalary: 22000, accNo: 'SBI-55829102', status: 'Active', gender: 'Male' },
-  { id: '12', code: '510', name: 'RAMESH', designation: 'Driver', department: 'TRANSPORT', mobile: '8824449233', appoinDate: '05/01/2026', basicSalary: 22000, accNo: 'CBI-88102938', status: 'Active', gender: 'Male' },
-  { id: '13', code: '201', name: 'MONIKA RANI VERMA', designation: 'Teacher', department: 'TEACHING', mobile: '9870943695', appoinDate: '05/01/2026', basicSalary: 35000, accNo: 'PNB-338291093', status: 'Active', gender: 'Female' },
-  { id: '14', code: '202', name: 'SUNITA KUMARI', designation: 'Teacher', department: 'TEACHING', mobile: '9511719644', appoinDate: '05/01/2026', basicSalary: 32000, accNo: 'BOB-992019283', status: 'Active', gender: 'Female' }
-];
+const INITIAL_STAFF = [];
 
 export function PayrollRegistrationPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_STAFF);
