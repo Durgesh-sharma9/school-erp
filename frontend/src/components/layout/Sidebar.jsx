@@ -461,6 +461,7 @@ export const menuCategories = [
     title: 'Stationary',
     icon: Package, // inventory_2 in UAB
     subItems: [
+      { title: 'School Inventory Hub (New)', path: '/inventory-hub' },
       { title: 'School Shop Info', path: '/shop-info' },
       { title: 'Supplier Shop Master', path: '/supplier-master' },
       { title: 'Category Master', path: '/category-master' },

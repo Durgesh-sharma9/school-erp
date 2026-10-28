@@ -1,4 +1,5 @@
 // Masters
+export * from './SchoolInventoryHubPage';
 export * from './SchoolShopInfoPage';
 export * from './SupplierShopMasterPage';
 export * from './CategoryMasterPage';

@@ -226,7 +226,8 @@ import {
   PurchaseItemsReportPage,
   StockReportPage,
   LowStockReportPage,
-  StationaryReportsPage
+  StationaryReportsPage,
+  SchoolInventoryHubPage
 } from './modules/stationary';
 import {
   StudentSmsPage,
@@ -854,6 +855,8 @@ function AppContent() {
                 return <PurchaseItemsPage onNavigate={handleNavigate} />;
 
               // Stationary Module Reports & Hub
+              case '/inventory-hub':
+                return <SchoolInventoryHubPage onNavigate={handleNavigate} />;
               case '/stationary-reports':
                 return <StationaryReportsPage onNavigate={handleNavigate} />;
               case '/category-items-report':
