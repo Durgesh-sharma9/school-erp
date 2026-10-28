@@ -158,12 +158,8 @@ export const getDayBook = asyncHandler(async (req, res) => {
   const schoolId = req.schoolId || 'sch_jd_intl';
   const date = req.query.date || new Date().toISOString().split('T')[0];
 
-  // Inflow from fee counter receipts on this date
-  const feeInflow = [
-    { id: 'in_1', time: '09:15 AM', type: 'Fee Collection', refNo: 'REC-2026-109', from: 'Aaditya Singh (Class I-A)', mode: 'Cash', amount: 15000 },
-    { id: 'in_2', time: '10:45 AM', type: 'Fee Collection', refNo: 'REC-2026-110', from: 'Advik Rao (Class I-A)', mode: 'Bank/UPI', amount: 30000 },
-    { id: 'in_3', time: '11:30 AM', type: 'Stationery Sale', refNo: 'ST-2026-042', from: 'Counter Sale (Notebook Set)', mode: 'Cash', amount: 3200 }
-  ];
+  // Inflow from fee counter receipts on this date (Clean fresh state: starts empty unless actual receipts recorded)
+  const feeInflow = [];
 
   // Outflow from expenses on this date
   const expenses = (TENANT_EXPENSES[schoolId] || []).filter(e => e.date === date);
@@ -180,7 +176,7 @@ export const getDayBook = asyncHandler(async (req, res) => {
 
   const totalInflow = feeInflow.reduce((acc, c) => acc + c.amount, 0);
   const totalOutflow = feeOutflow.reduce((acc, c) => acc + c.amount, 0);
-  const openingBalance = 84500;
+  const openingBalance = 0;
   const netClosingBalance = openingBalance + totalInflow - totalOutflow;
 
   return res.status(200).json(

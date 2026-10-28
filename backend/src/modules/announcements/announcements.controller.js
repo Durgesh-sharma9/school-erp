@@ -1,5 +1,6 @@
 import { ApiResponse } from '../../core/utils/apiResponse.js';
 import { asyncHandler } from '../../core/utils/asyncHandler.js';
+import { TENANT_STUDENTS } from '../students/students.controller.js';
 
 // Pre-seeded multi-tenant store for Targeted Announcements
 const TENANT_ANNOUNCEMENTS = {
@@ -157,26 +158,29 @@ const TARGET_METADATA = {
     { name: 'XI', sections: ['A (Sci)', 'B (Comm)', 'C (Arts)'] },
     { name: 'XII', sections: ['A (Sci)', 'B (Comm)', 'C (Arts)'] }
   ],
-  students: [
-    { id: 'std_1', className: 'I', section: 'A', rollNo: '1', admNo: '1621', name: 'Aaditya Singh Choudhary', fatherName: 'Narendra Singh', phone: '7891008092' },
-    { id: 'std_2', className: 'I', section: 'A', rollNo: '2', admNo: 'A135', name: 'Advik Rao', fatherName: 'Pradeep Rao', phone: '7891008092' },
-    { id: 'std_3', className: 'I', section: 'A', rollNo: '3', admNo: '1625', name: 'Ananya Sharma', fatherName: 'Manish Sharma', phone: '7891008092' },
-    { id: 'std_4', className: 'X', section: 'A', rollNo: '14', admNo: '1402', name: 'Rohan Meena', fatherName: 'Suresh Meena', phone: '7891008092' },
-    { id: 'std_5', className: 'X', section: 'A', rollNo: '22', admNo: '1408', name: 'Priya Shekhawat', fatherName: 'Rajendra Singh', phone: '7891008092' },
-    { id: 'std_6', className: 'X', section: 'A', rollNo: '31', admNo: '1415', name: 'Dhruv Agarwal', fatherName: 'Alok Agarwal', phone: '7891008092' },
-    { id: 'std_7', className: 'X', section: 'B', rollNo: '8', admNo: '1420', name: 'Aryan Joshi', fatherName: 'Hemant Joshi', phone: '7891008092' },
-    { id: 'std_8', className: 'X', section: 'B', rollNo: '19', admNo: '1424', name: 'Tanya Verma', fatherName: 'Kamal Verma', phone: '7891008092' },
-    { id: 'std_9', className: 'XII', section: 'A (Sci)', rollNo: '5', admNo: '1205', name: 'Sameer Khan', fatherName: 'Imran Khan', phone: '7891008092' },
-    { id: 'std_10', className: 'XII', section: 'A (Sci)', rollNo: '18', admNo: '1218', name: 'Divya Rathore', fatherName: 'Mahendra Singh', phone: '7891008092' },
-    { id: 'std_11', className: 'IX', section: 'A', rollNo: '12', admNo: '1501', name: 'Kartik Somani', fatherName: 'Rajesh Somani', phone: '7891008092' },
-    { id: 'std_12', className: 'VIII', section: 'B', rollNo: '9', admNo: '1540', name: 'Bhavya Patel', fatherName: 'Nitin Patel', phone: '7891008092' }
-  ]
+  students: []
 };
 
 // GET /api/announcements/meta
 export const getTargetMetadata = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || req.user?.schoolId || req.headers['x-school-id'] || 'sch_jd_intl';
+  const realStudents = TENANT_STUDENTS[schoolId] || [];
+  const meta = {
+    ...TARGET_METADATA,
+    students: realStudents.map((s) => ({
+      id: s.id,
+      className: s.className,
+      section: s.section,
+      rollNo: s.rollNo,
+      admNo: s.admNo,
+      name: s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+      fatherName: s.fatherName,
+      phone: s.smsWhatsappNo || s.fatherMobile || ''
+    }))
+  };
+
   return res.status(200).json(
-    new ApiResponse(200, TARGET_METADATA, 'Targeting metadata loaded successfully')
+    new ApiResponse(200, meta, 'Targeting metadata loaded successfully')
   );
 });
 

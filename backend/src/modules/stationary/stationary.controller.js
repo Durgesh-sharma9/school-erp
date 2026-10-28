@@ -79,68 +79,7 @@ let sets = [
   }
 ];
 
-let sales = [
-  {
-    id: '1',
-    billNo: 'SB-2026-001',
-    className: 'Class I-A',
-    name: 'AADITYA SINGH CHOUDHARY',
-    mobileNo: '8947919195',
-    shopName: 'J D Book',
-    type: 'Sale',
-    noOfSets: 1,
-    totalCost: 1250,
-    gst: 0,
-    finalCost: 1250,
-    cash: 1250,
-    bank: 0,
-    discount: 50,
-    paidAmt: 1200,
-    due: 0,
-    issueDate: '2026-10-10',
-    receipt: 'RCP-1001'
-  },
-  {
-    id: '2',
-    billNo: 'SB-2026-002',
-    className: 'Nursery - PP3+-A',
-    name: 'AADHYA CHOUDHARY',
-    mobileNo: '6377281034',
-    shopName: 'J D Uniform',
-    type: 'Sale',
-    noOfSets: 1,
-    totalCost: 1050,
-    gst: 0,
-    finalCost: 1050,
-    cash: 800,
-    bank: 0,
-    discount: 0,
-    paidAmt: 800,
-    due: 250,
-    issueDate: '2026-10-12',
-    receipt: 'RCP-1002'
-  },
-  {
-    id: '3',
-    billNo: 'SB-2026-003',
-    className: 'Class X-A',
-    name: 'ROHAN SHARMA',
-    mobileNo: '9829012345',
-    shopName: 'J D Book',
-    type: 'Sale',
-    noOfSets: 1,
-    totalCost: 1850,
-    gst: 0,
-    finalCost: 1850,
-    cash: 1500,
-    bank: 0,
-    discount: 50,
-    paidAmt: 1500,
-    due: 300,
-    issueDate: '2026-10-14',
-    receipt: 'RCP-1003'
-  }
-];
+let sales = [];
 
 let purchases = [
   {

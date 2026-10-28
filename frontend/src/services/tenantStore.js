@@ -323,44 +323,6 @@ class TenantDataStore {
       console.error(e);
     }
 
-    if (schoolId === 'sch_dps_branch2') {
-      return [
-        {
-          receiptNo: 'DPS-REC-101',
-          admNo: 'DPS-101',
-          studentName: 'ROHAN SHARMA',
-          className: 'Class 10-A',
-          paidAmount: 3500,
-          payMode: 'Bank Transfer',
-          date: '2026-04-15'
-        }
-      ];
-    }
-
-    if (schoolId === 'sch_jd_intl') {
-      return [
-        {
-          receiptNo: 'JD-REC-001',
-          admNo: '1621',
-          studentName: 'AADITYA SINGH CHOUDHARY',
-          className: 'Class I-A',
-          paidAmount: 17000,
-          payMode: 'UPI',
-          date: '2026-04-10'
-        },
-        {
-          receiptNo: 'JD-REC-002',
-          admNo: '2059',
-          studentName: 'AADHYA CHOUDHARY',
-          className: 'Nursery - PP3+-A',
-          paidAmount: 13500,
-          payMode: 'Cash',
-          date: '2026-04-12'
-        }
-      ];
-    }
-
-    // Clean empty receipts array for new schools
     return [];
   }
 
