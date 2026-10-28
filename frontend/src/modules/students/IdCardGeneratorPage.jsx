@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 
 export function IdCardGeneratorPage({ onNavigate }) {
-  const { activeSchool } = useAuth();
-  const schoolId = activeSchool?.id || 'sch_jd_intl';
+  const { schoolId: authSchoolId } = useAuth();
+  const schoolId = authSchoolId || 'sch_jd_intl';
 
   const [highlightStudent, setHighlightStudent] = useState(null);
   const [classList, setClassList] = useState([]);
@@ -44,7 +44,19 @@ export function IdCardGeneratorPage({ onNavigate }) {
         realClasses = localClasses;
       }
 
-      const enrolled = tenantStore.getStudents(schoolId);
+      let apiStudents = [];
+      try {
+        const sRes = await fetch('/api/students', { headers: { 'x-school-id': schoolId } });
+        if (sRes.ok) {
+          const sJson = await sRes.json();
+          if (sJson.success && Array.isArray(sJson.data)) {
+            apiStudents = sJson.data;
+            tenantStore.setStudents(schoolId, apiStudents);
+          }
+        }
+      } catch (e) {}
+
+      const enrolled = apiStudents.length > 0 ? apiStudents : tenantStore.getStudents(schoolId);
       const studentClasses = [...new Set(enrolled.map(s => s.className).filter(Boolean))];
 
       const names = [...new Set([
@@ -68,10 +80,40 @@ export function IdCardGeneratorPage({ onNavigate }) {
       setStudents([]);
       return;
     }
-    const enrolled = tenantStore.getStudents(schoolId);
-    const matched = enrolled.filter(s => 
-      (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase()
+    const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\\s*/i, '').trim();
+    let enrolled = tenantStore.getStudents(schoolId) || [];
+    let matched = enrolled.filter(s => 
+      (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
+      norm(s.className) === norm(selectedClass)
     );
+
+    if (matched.length === 0) {
+      fetch('/api/students', { headers: { 'x-school-id': schoolId } })
+        .then(r => r.json())
+        .then(j => {
+          if (j.data && Array.isArray(j.data)) {
+            const apiMatch = j.data.filter(s =>
+              (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
+              norm(s.className) === norm(selectedClass)
+            );
+            if (apiMatch.length > 0) {
+              setStudents(apiMatch.map((s, idx) => ({
+                id: s.id || `std_${idx}`,
+                rollNo: s.rollNo || `${idx + 1}`,
+                admNo: s.admNo || `${idx + 1}`,
+                srNo: s.srNo || s.admNo || `${idx + 1}`,
+                name: (s.name || `${s.firstName || "" } ${s.lastName || ""}`).trim().toUpperCase() || "STUDENT",
+                className: s.className || selectedClass,
+                fatherName: (s.fatherName || s.fathers_name || '').toUpperCase() || '-',
+                dob: s.dob || '01-01-2019',
+                mobile: s.contactNo || s.fatherMobile || s.fathers_mobile_no || '',
+                address: s.address || s.present_address || 'Jaipur',
+                selected: true
+              })));
+            }
+          }
+        }).catch(() => {});
+    }
 
     const formatted = matched.map((s, idx) => ({
       id: s.id || `std_${idx}`,

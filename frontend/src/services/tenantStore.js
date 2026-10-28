@@ -137,11 +137,18 @@ class TenantDataStore {
     } catch (e) {
       console.error(e);
     }
-
     return [];
+  }
 
-    // Newly registered school starts with 0 students (NO DUMMY DATA)
-    return [];
+  // Set/sync full student roster for active school tenant
+  setStudents(schoolId, students) {
+    if (!schoolId) return;
+    const key = this.getStorageKey(schoolId, 'students');
+    try {
+      localStorage.setItem(key, JSON.stringify(students || []));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // 2. Add student strictly into this school's container

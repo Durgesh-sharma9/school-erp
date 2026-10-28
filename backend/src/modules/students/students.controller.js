@@ -191,14 +191,37 @@ export const assignRollNumbers = async (req, res, next) => {
     const { updates = [] } = req.body;
     const pool = TENANT_STUDENTS[schoolId] || [];
 
-    updates.forEach(({ id, rollNo }) => {
-      const std = pool.find((s) => s.id === id);
-      if (std) std.rollNo = String(rollNo);
+    updates.forEach(({ id, admNo, rollNo, feebookNo }) => {
+      const std = pool.find((s) => (id && s.id === id) || (admNo && s.admNo === admNo));
+      if (std) {
+        if (rollNo !== undefined) std.rollNo = String(rollNo);
+        if (feebookNo !== undefined) std.feebookNo = String(feebookNo);
+      }
     });
+
+    // Also attempt DB update if connected
+    try {
+      for (const u of updates) {
+        const orClause = [];
+        if (u.id) orClause.push({ id: u.id });
+        if (u.admNo) orClause.push({ admNo: u.admNo });
+        if (orClause.length > 0) {
+          const updateData = {};
+          if (u.rollNo !== undefined) updateData.rollNo = String(u.rollNo);
+          if (u.feebookNo !== undefined) updateData.feebookNo = String(u.feebookNo);
+          await prisma.student.updateMany({
+            where: { schoolId, OR: orClause },
+            data: updateData
+          });
+        }
+      }
+    } catch (dbErr) {
+      // Memory pool is primary
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Roll numbers assigned successfully',
+      message: 'Numbers assigned successfully',
       data: pool
     });
   } catch (error) {

@@ -20,8 +20,8 @@ import {
 } from 'lucide-react';
 
 export function AssignRollNumberPage({ onNavigate }) {
-  const { activeSchool } = useAuth();
-  const schoolId = activeSchool?.id || 'sch_jd_intl';
+  const { schoolId: authSchoolId } = useAuth();
+  const schoolId = authSchoolId || 'sch_jd_intl';
 
   const [type, setType] = useState('Roll No');
   const [classList, setClassList] = useState([]);
@@ -68,33 +68,51 @@ export function AssignRollNumberPage({ onNavigate }) {
           realClasses = localClasses;
         }
 
-        // C. Also check if any real registered students exist with classes
-        const enrolledStudents = tenantStore.getStudents(schoolId);
+        // C. Fetch registered students from backend & sync with tenantStore
+        let apiStudents = [];
+        try {
+          const sRes = await fetch('/api/students', {
+            headers: { 'x-school-id': schoolId }
+          });
+          if (sRes.ok) {
+            const sJson = await sRes.json();
+            if (sJson.success && Array.isArray(sJson.data)) {
+              apiStudents = sJson.data;
+              tenantStore.setStudents(schoolId, apiStudents);
+            }
+          }
+        } catch (sErr) {}
+
+        const localStudents = tenantStore.getStudents(schoolId);
+        const enrolledStudents = apiStudents.length > 0 ? apiStudents : localStudents;
         const studentClasses = [...new Set(enrolledStudents.map((s) => s.className).filter(Boolean))];
 
         const classMap = new Map();
         realClasses.forEach((c) => {
           const name = typeof c === 'string' ? c : c.name;
-          if (name) classMap.set(name, c);
+          if (name) classMap.set(name, typeof c === 'string' ? { id: c, name: c, sections: ['A', 'B'] } : c);
         });
         studentClasses.forEach((sCls) => {
           if (!classMap.has(sCls)) {
-            classMap.set(sCls, { id: sCls, name: sCls, sections: ['A'] });
+            classMap.set(sCls, { id: sCls, name: sCls, sections: ['A', 'B', 'C', 'D'] });
           }
         });
 
-        const mergedClasses = Array.from(classMap.values());
+        let mergedClasses = Array.from(classMap.values());
+        if (mergedClasses.length === 0) {
+          // Fallback initial classes if none created yet
+          mergedClasses = [
+            'Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'
+          ].map((c) => ({ id: c, name: c, sections: ['A', 'B', 'C', 'D'] }));
+        }
 
         if (isMounted) {
           setClassList(mergedClasses);
           if (mergedClasses.length > 0) {
-            const first = mergedClasses[0];
-            const firstName = typeof first === 'string' ? first : first.name;
-            setSelectedClass((prev) => (prev && classMap.has(prev) ? prev : firstName));
-            const secList = first.sections || ['A'];
-            setSelectedDivision((prev) => (secList.includes(prev) ? prev : secList[0] || 'A'));
-          } else {
-            setSelectedClass('');
+            // If any student is enrolled, prefer selecting their class first so students show up immediately!
+            const preferredClass = studentClasses[0] || (mergedClasses[0] ? (typeof mergedClasses[0] === 'string' ? mergedClasses[0] : mergedClasses[0].name) : 'I');
+            const preferredName = typeof preferredClass === 'string' ? preferredClass : preferredClass?.name || 'I';
+            setSelectedClass((prev) => (prev && mergedClasses.some((c) => (typeof c === 'string' ? c : c.name) === prev) ? prev : preferredName));
             setSelectedDivision('A');
           }
         }
@@ -149,10 +167,32 @@ export function AssignRollNumberPage({ onNavigate }) {
         // Fallback to tenantStore
       }
 
+      // Fallback: fetch all tenant students if specific class query didn't match (for alias/case tolerance)
+      if (apiList.length === 0) {
+        try {
+          const allRes = await fetch('/api/students', { headers: { 'x-school-id': schoolId } });
+          if (allRes.ok) {
+            const allJson = await allRes.json();
+            const allData = Array.isArray(allJson.data) ? allJson.data : [];
+            const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\\s*/i, '').trim();
+            apiList = allData.filter((s) => {
+              const cMatch =
+                (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
+                norm(s.className) === norm(selectedClass);
+              const sMatch = !selectedDivision || (s.section || 'A').trim().toUpperCase() === selectedDivision.trim().toUpperCase();
+              return cMatch && sMatch;
+            });
+          }
+        } catch (e) {}
+      }
+
       // B. Query tenantStore strictly for this school
       const localStudents = tenantStore.getStudents(schoolId);
+      const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\\s*/i, '').trim();
       const matchedLocal = localStudents.filter((s) => {
-        const matchClass = (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase();
+        const matchClass =
+          (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
+          norm(s.className) === norm(selectedClass);
         const matchSection = selectedDivision
           ? (s.section || 'A').trim().toUpperCase() === selectedDivision.trim().toUpperCase()
           : true;

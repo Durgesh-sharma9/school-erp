@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { tenantStore } from '../../services/tenantStore';
 import {
@@ -51,12 +51,41 @@ export function PromotionPage({ onNavigate }) {
   // Dynamically computed class list from real registered students
   const [classList, setClassList] = useState([]);
 
+  // Dynamic classes for active school
+  const availableClasses = useMemo(() => {
+    const list = new Set();
+    allStudents.forEach((s) => {
+      const c = s.className || s.class_id;
+      if (c) list.add(c);
+    });
+    (tenantStore.getClasses(schoolId) || []).forEach((c) => {
+      const name = typeof c === 'string' ? c : c.name;
+      if (name) list.add(name);
+    });
+    if (list.size === 0) {
+      return ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+    }
+    return Array.from(list);
+  }, [allStudents, schoolId]);
+
+  const targetClassesList = useMemo(() => {
+    const stdClasses = ['Nursery', 'LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return Array.from(new Set([...availableClasses, ...stdClasses]));
+  }, [availableClasses]);
+
   // Modal State
   const [sourceSession, setSourceSession] = useState('2025-2026');
   const [sourceClass, setSourceClass] = useState('I');
   const [sourceDivision, setSourceDivision] = useState('A');
   const [targetClass, setTargetClass] = useState('II');
   const [targetDivision, setTargetDivision] = useState('A');
+
+  // Auto-set initial class
+  useEffect(() => {
+    if (availableClasses.length > 0 && !availableClasses.includes(sourceClass)) {
+      setSourceClass(availableClasses[0]);
+    }
+  }, [availableClasses]);
 
   // Source list students (dynamically filtered from allStudents)
   const [sourceStudents, setSourceStudents] = useState([]);
@@ -376,7 +405,7 @@ export function PromotionPage({ onNavigate }) {
                         onChange={(e) => setSourceClass(e.target.value)}
                         className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:border-indigo-600 focus:outline-none bg-white"
                       >
-                        {CLASSES.map((c) => (
+                        {availableClasses.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
@@ -492,7 +521,7 @@ export function PromotionPage({ onNavigate }) {
                         onChange={(e) => setTargetClass(e.target.value)}
                         className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:border-indigo-600 focus:outline-none bg-white"
                       >
-                        {CLASSES.map((c) => (
+                        {targetClassesList.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
