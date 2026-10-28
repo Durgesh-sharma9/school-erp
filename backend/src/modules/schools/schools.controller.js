@@ -18,7 +18,7 @@ export const TENANT_SCHOOL_PROFILES = {
     state: "Rajasthan",
     pinCode: "302026",
     receiptNotes: "Fees once paid is non-refundable. Please keep this computerized receipt for tax purposes.",
-    logoUrl: "https://schools.uabinfosol.com/assets/img/logo.png",
+    logoUrl: "https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg",
     extraData: {
       affiliationBoard: "CBSE",
       category: "K-12",

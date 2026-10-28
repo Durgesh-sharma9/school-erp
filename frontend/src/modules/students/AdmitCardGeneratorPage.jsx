@@ -16,7 +16,31 @@ const EXAMS = ['None', 'Mid Term Examination 2026', 'Final Board Examination 202
 export function AdmitCardGeneratorPage({ onNavigate }) {
   const { schoolId: authSchoolId, schoolName } = useAuth();
   const schoolId = authSchoolId || 'sch_jd_intl';
-  const schoolProfile = tenantStore.getSchoolProfile(schoolId) || {};
+  const [schoolProfile, setSchoolProfile] = useState(() => tenantStore.getSchoolProfile(schoolId) || {});
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/schools/profile', {
+          headers: { 'x-school-id': schoolId }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && isMounted) {
+            setSchoolProfile(json.data);
+            tenantStore.updateSchoolProfile(schoolId, json.data);
+            return;
+          }
+        }
+      } catch (e) {}
+      if (isMounted) {
+        setSchoolProfile(tenantStore.getSchoolProfile(schoolId) || {});
+      }
+    };
+    fetchProfile();
+    return () => { isMounted = false; };
+  }, [schoolId]);
 
   const [classList, setClassList] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
@@ -115,68 +139,66 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
     loadClasses();
   }, [schoolId]);
 
-  // Load real students matching selectedClass & selectedSection
+  // Load real students matching selectedClass & selectedSection dynamically
   useEffect(() => {
     if (!selectedClass) {
       setStudents([]);
       return;
     }
-    const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\\s*/i, '').trim();
-    let enrolled = tenantStore.getStudents(schoolId) || [];
-    let matched = enrolled.filter(s => {
-      const matchClass = (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
-                         norm(s.className) === norm(selectedClass);
-      const matchSection = selectedSection ? (s.section || 'A').trim().toUpperCase() === selectedSection.trim().toUpperCase() : true;
-      return matchClass && matchSection;
-    });
+    const loadRealStudents = async () => {
+      let studentList = [];
+      try {
+        const res = await fetch(`/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}`, {
+          headers: { 'x-school-id': schoolId }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            studentList = json.data;
+          }
+        }
+      } catch (e) {}
 
-    if (matched.length === 0) {
-      fetch('/api/students', { headers: { 'x-school-id': schoolId } })
-        .then(r => r.json())
-        .then(j => {
-          if (j.data && Array.isArray(j.data)) {
-            const apiMatch = j.data.filter(s => {
-              const matchClass = (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
-                                 norm(s.className) === norm(selectedClass);
-              const matchSection = selectedSection ? (s.section || 'A').trim().toUpperCase() === selectedSection.trim().toUpperCase() : true;
-              return matchClass && matchSection;
-            });
-            if (apiMatch.length > 0) {
-              setStudents(apiMatch.map((s, idx) => ({
-                id: s.id || `std_${idx}`,
-                rollNo: s.rollNo || `${idx + 1}`,
-                admNo: s.admNo || `${idx + 1}`,
-                srNo: s.srNo || s.admNo || `${idx + 1}`,
-                name: (s.name || `${s.firstName || "" } ${s.lastName || ""}`).trim().toUpperCase() || "STUDENT",
-                className: s.className || selectedClass,
-                section: s.section || selectedSection,
-                fatherName: (s.fatherName || s.fathers_name || '').toUpperCase() || '-',
-                dob: s.dob || '01-01-2019',
-                mobile: s.contactNo || s.fatherMobile || s.fathers_mobile_no || '',
-                address: s.address || s.present_address || 'Jaipur',
-                selected: true
-              })));
+      if (studentList.length === 0) {
+        try {
+          const allRes = await fetch('/api/students', { headers: { 'x-school-id': schoolId } });
+          if (allRes.ok) {
+            const allJson = await allRes.json();
+            if (allJson.data && Array.isArray(allJson.data)) {
+              const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\s*/i, '').trim();
+              studentList = allJson.data.filter((s) => {
+                const cMatch = (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase() ||
+                               norm(s.className) === norm(selectedClass);
+                const sMatch = !selectedSection || (s.section || 'A').trim().toUpperCase() === selectedSection.trim().toUpperCase();
+                return cMatch && sMatch;
+              });
             }
           }
-        }).catch(() => {});
-    }
+        } catch (e) {}
+      }
 
-    const formatted = matched.map((s, idx) => ({
-      id: s.id || `std_${idx}`,
-      rollNo: s.rollNo || `${idx + 1}`,
-      admNo: s.admNo || `${idx + 1}`,
-      srNo: s.srNo || s.admNo || `${idx + 1}`,
-      name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim().toUpperCase() || 'STUDENT',
-      fatherName: (s.fatherName || s.fathers_name || '').toUpperCase() || '-',
-      dob: s.dob || '-',
-      gender: s.gender || 'Boy',
-      photoUrl: s.photoUrl || s.student_photo || '',
-      mobile: s.contactNo || s.fatherMobile || s.smsWhatsappNo || '-',
-      address: s.address || s.present_address || '',
-      selected: true
-    }));
+      if (studentList.length === 0) {
+        studentList = tenantStore.getStudents(schoolId) || [];
+      }
 
-    setStudents(formatted);
+      const formatted = studentList.map((s, idx) => ({
+        id: s.id || `std_${idx}`,
+        rollNo: s.rollNo || '-',
+        admNo: s.admNo || `${idx + 1001}`,
+        srNo: s.srNo || s.admNo || `${idx + 1001}`,
+        name: (s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') || s.firstName || 'Student').trim().toUpperCase(),
+        fatherName: (s.fatherName || s.fathers_name || '').trim().toUpperCase() || '-',
+        dob: s.dob || '-',
+        gender: s.gender || 'Boy',
+        photoUrl: s.photoUrl || s.student_photo || '',
+        mobile: s.contactNo || s.fatherMobile || s.smsWhatsappNo || '-',
+        address: s.address || s.present_address || '',
+        selected: true
+      }));
+
+      setStudents(formatted);
+    };
+    loadRealStudents();
   }, [selectedClass, selectedSection, schoolId]);
 
   const toggleSelectAll = (checked) => {
@@ -514,7 +536,7 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
                             src={schoolProfile.logoUrl}
                             alt="Logo"
                             className="max-h-20 max-w-full object-contain"
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                            onError={(e) => { console.warn("Logo load error:", e.target.src); }}
                           />
                         ) : (
                           <div className="w-16 h-16 rounded-full bg-purple-100 border-2 border-purple-800 flex items-center justify-center font-bold text-purple-900 text-xl shadow-xs">
