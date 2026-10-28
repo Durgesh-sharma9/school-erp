@@ -1,96 +1,94 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { tenantStore } from '../../services/tenantStore';
 import {
   Printer,
   ChevronDown,
-  X
+  X,
+  Users,
+  Plus,
+  AlertCircle
 } from 'lucide-react';
 
-const CLASSES = [
-  'Nursery - PP3+',
-  'Lower Kindergarten - PP4+',
-  'Upper Kindergarten - PP5+',
-  'I',
-  'II',
-  'III',
-  'IV',
-  'V',
-  'VI',
-  'VII',
-  'VIII',
-  'IX',
-  'X',
-  'XI- HUMANITIES',
-  'XII-HUMANITIES',
-  'XI-MEDICAL',
-  'XII-MEDICAL',
-  'XI-NON-MEDICAL',
-  'XII-NON-MEDICAL',
-  'XI-COMMERCE'
-];
-
 export function IdCardGeneratorPage({ onNavigate }) {
+  const { activeSchool } = useAuth();
+  const schoolId = activeSchool?.id || 'sch_jd_intl';
+
   const [highlightStudent, setHighlightStudent] = useState(null);
-  const [selectedClass, setSelectedClass] = useState('I');
+  const [classList, setClassList] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
   const [cardType, setCardType] = useState('Horizontal');
   const [format, setFormat] = useState('Standard Format');
   const [isMultiple, setIsMultiple] = useState(true);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [students, setStudents] = useState([]);
 
-  const [students, setStudents] = useState([
-    {
-      id: '1',
-      rollNo: '1',
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'I',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      dob: '12-04-2019',
-      mobile: '9829012345',
-      address: 'Vidhyadhar Nagar, Jaipur',
-      selected: true
-    },
-    {
-      id: '2',
-      rollNo: '2',
-      admNo: 'A135',
-      srNo: '0',
-      name: 'ADVIK RAO',
-      className: 'I',
-      fatherName: 'PRADEEP RAO',
-      dob: '20-07-2019',
-      mobile: '9414023456',
-      address: 'Central Park, Jaipur',
-      selected: true
-    },
-    {
-      id: '3',
-      rollNo: '3',
-      admNo: 'A160',
-      srNo: '0',
-      name: 'ANANYA RAJESH KUMAR YADAV',
-      className: 'I',
-      fatherName: 'RAJESH KUMAR YADAV',
-      dob: '15-02-2019',
-      mobile: '9828034567',
-      address: 'Shyam Nagar, Jaipur',
-      selected: false
-    },
-    {
-      id: '4',
-      rollNo: '4',
-      admNo: '1590',
-      srNo: '1590',
-      name: 'ANVI VERMA',
-      className: 'I',
-      fatherName: 'DINESH VERMA',
-      dob: '05-09-2019',
-      mobile: '9784045678',
-      address: 'Malviya Nagar, Jaipur',
-      selected: false
+  // Load real classes dynamically strictly for active school
+  useEffect(() => {
+    const loadClasses = async () => {
+      let realClasses = [];
+      try {
+        const res = await fetch('/api/academics/classes', {
+          headers: { 'x-school-id': schoolId }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            realClasses = json.data;
+          }
+        }
+      } catch (e) {}
+
+      const localClasses = tenantStore.getClasses(schoolId);
+      if (realClasses.length === 0 && localClasses?.length > 0) {
+        realClasses = localClasses;
+      }
+
+      const enrolled = tenantStore.getStudents(schoolId);
+      const studentClasses = [...new Set(enrolled.map(s => s.className).filter(Boolean))];
+
+      const names = [...new Set([
+        ...realClasses.map(c => typeof c === 'string' ? c : c.name).filter(Boolean),
+        ...studentClasses
+      ])];
+
+      setClassList(names);
+      if (names.length > 0) {
+        setSelectedClass(prev => prev && names.includes(prev) ? prev : names[0]);
+      } else {
+        setSelectedClass('');
+      }
+    };
+    loadClasses();
+  }, [schoolId]);
+
+  // Load real students matching selectedClass (NO HARDCODED MOCKS)
+  useEffect(() => {
+    if (!selectedClass) {
+      setStudents([]);
+      return;
     }
-  ]);
+    const enrolled = tenantStore.getStudents(schoolId);
+    const matched = enrolled.filter(s => 
+      (s.className || '').trim().toLowerCase() === selectedClass.trim().toLowerCase()
+    );
+
+    const formatted = matched.map((s, idx) => ({
+      id: s.id || `std_${idx}`,
+      rollNo: s.rollNo || `${idx + 1}`,
+      admNo: s.admNo || `${idx + 1}`,
+      srNo: s.srNo || s.admNo || `${idx + 1}`,
+      name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim().toUpperCase() || 'STUDENT',
+      className: s.className || selectedClass,
+      fatherName: (s.fatherName || s.fathers_name || '').toUpperCase() || '-',
+      dob: s.dob || '01-01-2019',
+      mobile: s.contactNo || s.fatherMobile || s.fathers_mobile_no || '',
+      address: s.address || s.present_address || 'Jaipur',
+      selected: true
+    }));
+
+    setStudents(formatted);
+  }, [selectedClass, schoolId]);
 
   const toggleSelectAll = (checked) => {
     setStudents((prev) => prev.map((s) => ({ ...s, selected: checked })));
@@ -191,7 +189,7 @@ export function IdCardGeneratorPage({ onNavigate }) {
                 onChange={(e) => setSelectedClass(e.target.value)}
                 className="w-full px-3 py-2 text-xs md:text-sm bg-white border border-gray-300 rounded focus:border-indigo-600 focus:outline-none appearance-none cursor-pointer"
               >
-                {CLASSES.map((c) => (
+                {classList.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

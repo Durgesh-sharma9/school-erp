@@ -162,6 +162,26 @@ class TenantDataStore {
     return newStudent;
   }
 
+  // Get classes strictly belonging to this school
+  getClasses(schoolId) {
+    if (!schoolId) return [];
+    const key = this.getStorageKey(schoolId, 'classes');
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  }
+
+  // Save classes strictly belonging to this school
+  saveClasses(schoolId, classesList) {
+    if (!schoolId) return;
+    const key = this.getStorageKey(schoolId, 'classes');
+    localStorage.setItem(key, JSON.stringify(classesList || []));
+  }
+
   // 3. Get school profile strictly for this school
   getSchoolProfile(schoolId) {
     if (!schoolId) {
