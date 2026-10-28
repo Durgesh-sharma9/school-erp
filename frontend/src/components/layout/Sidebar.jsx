@@ -54,6 +54,7 @@ const ITEM_COLORS = {
   'hostel': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
   'payroll': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
   'library': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'inventory-hub': { iconColor: 'text-fuchsia-600', boxBg: 'bg-fuchsia-50 group-hover:bg-fuchsia-100' },
   'stationary': { iconColor: 'text-fuchsia-600', boxBg: 'bg-fuchsia-50 group-hover:bg-fuchsia-100' },
   'sms': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'notices': { iconColor: 'text-rose-600', boxBg: 'bg-rose-50 group-hover:bg-rose-100' },
@@ -263,6 +264,12 @@ export const menuCategories = [
       { title: 'Staff Attendance', path: '/staff-attendance' },
       { title: 'Student Attendance', path: '/student-attendance' }
     ]
+  },
+  {
+    id: 'inventory-hub',
+    title: 'Inventory Hub',
+    icon: Package,
+    path: '/inventory-hub'
   },
   {
     id: 'users',
