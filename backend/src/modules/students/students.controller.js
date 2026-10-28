@@ -3,7 +3,37 @@ import prisma from '../../config/db.js';
 
 // Multi-Tenant Partitioned Student Storage: schoolId -> Student[] (Clean Fresh State)
 export const TENANT_STUDENTS = {
-  'sch_jd_intl': [],
+  'sch_jd_intl': [
+    {
+      id: 'std_1001',
+      schoolId: 'sch_jd_intl',
+      admNo: '1001',
+      srNo: '1001',
+      firstName: 'dev',
+      lastName: '',
+      name: 'dev',
+      fatherName: '',
+      motherName: '',
+      fatherMobile: '',
+      fatherWhatsapp: '',
+      fatherEmail: '',
+      motherMobile: '',
+      motherWhatsapp: '',
+      motherEmail: '',
+      smsWhatsappNo: '',
+      className: 'I',
+      section: 'A',
+      dob: '2019-05-12',
+      gender: 'Male',
+      feeType: 'Day Scholar',
+      studentType: 'New',
+      status: 'Studying',
+      rollNo: '2026-101',
+      photoUrl: '',
+      createdAt: '2026-10-28T11:26:42.415Z',
+      feebookNo: ''
+    }
+  ],
   'sch_dps_branch2': []
 };
 
