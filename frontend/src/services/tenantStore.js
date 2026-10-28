@@ -37,7 +37,12 @@ const INITIAL_PROFILES = {
     place: "Jaipur",
     state: "Rajasthan",
     pinCode: "302026",
-    logoUrl: "https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg"
+    logoUrl: "https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg",
+    brandingImages: {
+      school_logo: "https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg",
+      board_logo: "",
+      principal_sig: ""
+    }
   },
   'sch_dps_branch2': {
     schoolName: "Delhi Public Academy",
@@ -51,7 +56,12 @@ const INITIAL_PROFILES = {
     place: "New Delhi",
     state: "Delhi",
     pinCode: "110075",
-    logoUrl: ""
+    logoUrl: "",
+    brandingImages: {
+      school_logo: "",
+      board_logo: "",
+      principal_sig: ""
+    }
   }
 };
 
@@ -224,7 +234,9 @@ class TenantDataStore {
       address: "",
       place: "",
       state: "",
-      pinCode: ""
+      pinCode: "",
+      logoUrl: "",
+      brandingImages: {}
     };
   }
 
