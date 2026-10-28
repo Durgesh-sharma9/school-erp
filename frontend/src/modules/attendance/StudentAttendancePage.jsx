@@ -58,7 +58,7 @@ const DIVISIONS = ['A', 'B', 'C', 'D'];
 const INITIAL_CLASS_CARDS = [];
 
 export function StudentAttendancePage({ onNavigate }) {
-  const { role, user } = useAuth();
+  const { role, user, schoolId } = useAuth();
   const isAttender = role === 'ATTENDER';
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -71,68 +71,37 @@ export function StudentAttendancePage({ onNavigate }) {
   const [selectedClass, setSelectedClass] = useState('I');
   const [selectedSection, setSelectedSection] = useState('A');
 
-  // Class Grid state
+  // Class Grid state (Clean fresh state)
   const [classCards, setClassCards] = useState(INITIAL_CLASS_CARDS);
 
-  // History state
-  const [history, setHistory] = useState([
-    {
-      id: 'att_1',
-      className: 'I',
-      section: 'A',
-      presentCount: 30,
-      absentCount: 2,
-      totalCount: 32,
-      attendanceSummary: '30 Present / 2 Absent (93.8%)',
-      markedBy: 'Ramesh (Attender)',
-      date: todayStr
-    },
-    {
-      id: 'att_2',
-      className: 'X',
-      section: 'A',
-      presentCount: 52,
-      absentCount: 3,
-      totalCount: 55,
-      attendanceSummary: '52 Present / 3 Absent (94.5%)',
-      markedBy: 'Admin',
-      date: todayStr
-    },
-    {
-      id: 'att_3',
-      className: 'IV',
-      section: 'A',
-      presentCount: 34,
-      absentCount: 0,
-      totalCount: 34,
-      attendanceSummary: '34 Present / 0 Absent (100%)',
-      markedBy: 'Ramesh (Attender)',
-      date: todayStr
-    },
-    {
-      id: 'att_4',
-      className: 'I',
-      section: 'B',
-      presentCount: 29,
-      absentCount: 1,
-      totalCount: 30,
-      attendanceSummary: '29 Present / 1 Absent (96.7%)',
-      markedBy: 'Ramesh (Attender)',
-      date: '2026-10-26'
-    }
-  ]);
+  // History state (Clean, starts empty with 0 dummy records)
+  const [history, setHistory] = useState([]);
 
-  // Student roster inside modal
-  const [modalStudents, setModalStudents] = useState([
-    { id: 'std_1', rollNo: '1', name: 'AADITYA SINGH CHOUDHARY', status: 'Present', father: 'B. S. Choudhary', mobile: '9829011101' },
-    { id: 'std_2', rollNo: '2', name: 'ADVIK RAO', status: 'Present', father: 'K. S. Rao', mobile: '9829011102' },
-    { id: 'std_3', rollNo: '3', name: 'ANANYA RAJESH KUMAR YADAV', status: 'Present', father: 'Rajesh Yadav', mobile: '9829011103' },
-    { id: 'std_4', rollNo: '4', name: 'ANVI VERMA', status: 'Present', father: 'Sunil Verma', mobile: '9829011104' },
-    { id: 'std_5', rollNo: '5', name: 'ARADIYA SAINI', status: 'Absent', father: 'Manoj Saini', mobile: '9829011105' },
-    { id: 'std_6', rollNo: '6', name: 'ARJUN SHARMA', status: 'Present', father: 'Dinesh Sharma', mobile: '9829011106' },
-    { id: 'std_7', rollNo: '7', name: 'BHAVYA JANGID', status: 'Present', father: 'P. Jangid', mobile: '9829011107' },
-    { id: 'std_8', rollNo: '8', name: 'CHETAN MEENA', status: 'Absent', father: 'R. K. Meena', mobile: '9829011108' }
-  ]);
+  // Student roster inside modal (Dynamic from tenantStore)
+  const [modalStudents, setModalStudents] = useState([]);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const realStudents = (tenantStore.getStudents(schoolId) || []).filter((s) => {
+      const cls = (s.className || s.class_id || '').toLowerCase().trim();
+      const sec = (s.section || s.division_id || 'A').toLowerCase().trim();
+      return (
+        cls === selectedClass.toLowerCase().trim() &&
+        sec === selectedSection.toLowerCase().trim()
+      );
+    });
+
+    setModalStudents(
+      realStudents.map((s, idx) => ({
+        id: s.id || `std_${idx}`,
+        rollNo: s.rollNo || String(idx + 1),
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).toUpperCase().trim() || 'STUDENT',
+        status: 'Present',
+        father: (s.fatherName || s.fathers_name || '').toUpperCase().trim() || '-',
+        mobile: s.contactNo || s.fatherMobile || '-'
+      }))
+    );
+  }, [isModalOpen, schoolId, selectedClass, selectedSection]);
 
   const [modalSearch, setModalSearch] = useState('');
   const [attendanceAlert, setAttendanceAlert] = useState(null);

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Printer,
   ChevronDown,
@@ -34,6 +36,8 @@ const TERMS = ['Term 1', 'Term 2', 'Annual Exam'];
 const EXAMS = ['None', 'Mid Term Examination 2026', 'Final Board Examination 2027'];
 
 export function AdmitCardGeneratorPage({ onNavigate }) {
+  const { schoolId, schoolName } = useAuth();
+
   const [selectedClass, setSelectedClass] = useState('I');
   const [selectedSection, setSelectedSection] = useState('A');
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
@@ -52,44 +56,32 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
 
   const [showPrintModal, setShowPrintModal] = useState(false);
 
-  const [students, setStudents] = useState([
-    {
-      id: '1',
-      rollNo: '1',
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      selected: true
-    },
-    {
-      id: '2',
-      rollNo: '2',
-      admNo: 'A135',
-      srNo: '0',
-      name: 'ADVIK RAO',
-      fatherName: 'PRADEEP RAO',
-      selected: true
-    },
-    {
-      id: '3',
-      rollNo: '3',
-      admNo: 'A160',
-      srNo: '0',
-      name: 'ANANYA RAJESH KUMAR YADAV',
-      fatherName: 'RAJESH KUMAR YADAV',
-      selected: false
-    },
-    {
-      id: '4',
-      rollNo: '4',
-      admNo: '1590',
-      srNo: '1590',
-      name: 'ANVI VERMA',
-      fatherName: 'DINESH VERMA',
-      selected: false
-    }
-  ]);
+  // Dynamic students list from tenantStore (NO SEEDED MOCK DATA)
+  const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    const rawList = tenantStore.getStudents(schoolId) || [];
+    const filtered = rawList.filter((s) => {
+      const cls = (s.className || s.class_id || '').toLowerCase().trim();
+      const sec = (s.section || s.division_id || 'A').toLowerCase().trim();
+      return (
+        (!selectedClass || cls === selectedClass.toLowerCase().trim()) &&
+        (!selectedSection || sec === selectedSection.toLowerCase().trim())
+      );
+    });
+
+    setStudents(
+      filtered.map((s, idx) => ({
+        id: s.id || `adm_${idx}`,
+        rollNo: s.rollNo || String(idx + 1),
+        admNo: s.admNo || '',
+        srNo: s.srNo || s.admNo || '',
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).toUpperCase().trim() || 'STUDENT',
+        fatherName: (s.fatherName || s.fathers_name || '').toUpperCase().trim() || '-',
+        selected: true
+      }))
+    );
+  }, [schoolId, selectedClass, selectedSection]);
 
   const toggleSelectAll = (checked) => {
     setStudents((prev) => prev.map((s) => ({ ...s, selected: checked })));
@@ -350,23 +342,31 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-gray-700 font-medium">
-              {students.map((std) => (
-                <tr key={std.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="py-2.5 px-4">
-                    <input
-                      type="checkbox"
-                      checked={std.selected}
-                      onChange={() => toggleStudent(std.id)}
-                      className="w-4 h-4 rounded text-indigo-600 accent-indigo-600 cursor-pointer"
-                    />
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-8 text-center text-gray-400">
+                    No students registered in Class {selectedClass}-{selectedSection}. Register students under Student Registration to generate admit cards.
                   </td>
-                  <td className="py-2.5 px-4 font-semibold text-gray-900">{std.rollNo}</td>
-                  <td className="py-2.5 px-4 font-semibold text-indigo-600">{std.admNo}</td>
-                  <td className="py-2.5 px-4">{std.srNo}</td>
-                  <td className="py-2.5 px-4 font-semibold text-gray-800">{std.name}</td>
-                  <td className="py-2.5 px-4 text-gray-600">{std.fatherName}</td>
                 </tr>
-              ))}
+              ) : (
+                students.map((std) => (
+                  <tr key={std.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="checkbox"
+                        checked={std.selected}
+                        onChange={() => toggleStudent(std.id)}
+                        className="w-4 h-4 rounded text-indigo-600 accent-indigo-600 cursor-pointer"
+                      />
+                    </td>
+                    <td className="py-2.5 px-4 font-semibold text-gray-900">{std.rollNo}</td>
+                    <td className="py-2.5 px-4 font-semibold text-indigo-600">{std.admNo}</td>
+                    <td className="py-2.5 px-4">{std.srNo}</td>
+                    <td className="py-2.5 px-4 font-semibold text-gray-800">{std.name}</td>
+                    <td className="py-2.5 px-4 text-gray-600">{std.fatherName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

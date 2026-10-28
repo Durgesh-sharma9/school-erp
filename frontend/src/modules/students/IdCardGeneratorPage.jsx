@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { tenantStore } from '../../services/tenantStore';
 import {
   Printer,
@@ -30,6 +31,8 @@ const CLASSES = [
 ];
 
 export function IdCardGeneratorPage({ onNavigate }) {
+  const { schoolId, schoolName } = useAuth();
+
   const [highlightStudent, setHighlightStudent] = useState(null);
   const [selectedClass, setSelectedClass] = useState('I');
   const [cardType, setCardType] = useState('Horizontal');
@@ -37,60 +40,59 @@ export function IdCardGeneratorPage({ onNavigate }) {
   const [isMultiple, setIsMultiple] = useState(true);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
 
-  const [students, setStudents] = useState([
-    {
-      id: '1',
-      rollNo: '1',
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'I',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      dob: '12-04-2019',
-      mobile: '9829012345',
-      address: 'Vidhyadhar Nagar, Jaipur',
+  // Dynamic students list from tenantStore (NO HARDCODED SEEDED DATA)
+  const [students, setStudents] = useState([]);
+
+  // Load real students based on selectedClass
+  useEffect(() => {
+    const rawList = tenantStore.getStudents(schoolId) || [];
+    const filtered = rawList.filter((s) => {
+      const cls = s.className || s.class_id || '';
+      return !selectedClass || cls.toLowerCase().trim() === selectedClass.toLowerCase().trim();
+    });
+
+    const mapped = filtered.map((s, idx) => ({
+      id: s.id || `std_${idx}`,
+      rollNo: s.rollNo || String(idx + 1),
+      admNo: s.admNo || '',
+      srNo: s.srNo || s.admNo || '',
+      name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).toUpperCase().trim() || 'STUDENT',
+      className: s.className || selectedClass,
+      fatherName: (s.fatherName || s.fathers_name || '').toUpperCase().trim() || '-',
+      dob: s.dob || '01-01-2019',
+      mobile: s.contactNo || s.fatherMobile || '-',
+      address: s.address || 'Local',
+      photoUrl: s.photoUrl || '',
       selected: true
-    },
-    {
-      id: '2',
-      rollNo: '2',
-      admNo: 'A135',
-      srNo: '0',
-      name: 'ADVIK RAO',
-      className: 'I',
-      fatherName: 'PRADEEP RAO',
-      dob: '20-07-2019',
-      mobile: '9414023456',
-      address: 'Central Park, Jaipur',
-      selected: true
-    },
-    {
-      id: '3',
-      rollNo: '3',
-      admNo: 'A160',
-      srNo: '0',
-      name: 'ANANYA RAJESH KUMAR YADAV',
-      className: 'I',
-      fatherName: 'RAJESH KUMAR YADAV',
-      dob: '15-02-2019',
-      mobile: '9828034567',
-      address: 'Shyam Nagar, Jaipur',
-      selected: false
-    },
-    {
-      id: '4',
-      rollNo: '4',
-      admNo: '1590',
-      srNo: '1590',
-      name: 'ANVI VERMA',
-      className: 'I',
-      fatherName: 'DINESH VERMA',
-      dob: '05-09-2019',
-      mobile: '9784045678',
-      address: 'Malviya Nagar, Jaipur',
-      selected: false
+    }));
+
+    const pending = tenantStore.getPendingIdCardStudent();
+    if (pending) {
+      setHighlightStudent(pending);
+      if (pending.className && pending.className !== selectedClass) {
+        setSelectedClass(pending.className);
+      }
+      const exists = mapped.find((s) => String(s.admNo) === String(pending.admNo));
+      if (!exists && (!selectedClass || pending.className === selectedClass)) {
+        mapped.unshift({
+          id: `pending_${Date.now()}`,
+          rollNo: pending.rollNo || '1',
+          admNo: pending.admNo || '',
+          srNo: pending.admNo || '',
+          name: (pending.name || '').toUpperCase(),
+          className: pending.className || selectedClass,
+          fatherName: (pending.fatherName || '').toUpperCase() || '-',
+          dob: pending.dob || '01-01-2019',
+          mobile: pending.mobile || '-',
+          address: pending.address || 'Local',
+          photoUrl: '',
+          selected: true
+        });
+      }
     }
-  ]);
+
+    setStudents(mapped);
+  }, [schoolId, selectedClass]);
 
   const toggleSelectAll = (checked) => {
     setStudents((prev) => prev.map((s) => ({ ...s, selected: checked })));
@@ -101,39 +103,6 @@ export function IdCardGeneratorPage({ onNavigate }) {
       prev.map((s) => (s.id === id ? { ...s, selected: !s.selected } : s))
     );
   };
-
-  useEffect(() => {
-    const pending = tenantStore.getPendingIdCardStudent();
-    if (pending) {
-      setHighlightStudent(pending);
-      if (pending.className) {
-        setSelectedClass(pending.className);
-      }
-      setStudents((prev) => {
-        const exists = prev.find((s) => String(s.admNo) === String(pending.admNo));
-        if (exists) {
-          return prev.map((s) => ({
-            ...s,
-            selected: String(s.admNo) === String(pending.admNo)
-          }));
-        }
-        const newCard = {
-          id: `pending_${Date.now()}`,
-          rollNo: pending.rollNo || '1',
-          admNo: pending.admNo || '',
-          srNo: pending.admNo || '',
-          name: (pending.name || '').toUpperCase(),
-          className: pending.className || 'I',
-          fatherName: (pending.fatherName || '').toUpperCase(),
-          dob: pending.dob || '01-01-2019',
-          mobile: pending.mobile || '',
-          address: pending.address || 'Local',
-          selected: true
-        };
-        return [newCard, ...prev.map((s) => ({ ...s, selected: false }))];
-      });
-    }
-  }, []);
 
   const selectedCount = students.filter((s) => s.selected).length;
 
@@ -151,35 +120,33 @@ export function IdCardGeneratorPage({ onNavigate }) {
         </span>
       </div>
 
-      {highlightStudent && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl flex items-center justify-between shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
-              🪪
-            </div>
-            <div>
-              <p className="text-xs font-bold text-indigo-900">
-                Ready to print ID Card for {highlightStudent.name} (Adm: #{highlightStudent.admNo})
-              </p>
-              <p className="text-[11px] text-indigo-600">
-                Student pre-selected from registration / student directory action.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowPrintPreview(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Instant Preview & Print</span>
-          </button>
-        </div>
-      )}
-
       {/* Main Card */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-2xs p-4 md:p-5 mb-4">
-        {/* Filters Row matching Live UAB Screenshot Step 1924 */}
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-2xs p-4 md:p-5">
+        {/* Highlight notification if arrived from student registration */}
+        {highlightStudent && (
+          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between text-xs text-indigo-900 font-medium">
+            <span>
+              Target Student Ready:{' '}
+              <strong className="font-bold text-indigo-700">
+                {highlightStudent.name} (Adm #{highlightStudent.admNo})
+              </strong>{' '}
+              is selected below.
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                tenantStore.clearPendingIdCardStudent();
+                setHighlightStudent(null);
+              }}
+              className="text-indigo-400 hover:text-indigo-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Filter Toolbar matching Live UAB Screenshot Step 1898 */}
+        <div className="flex flex-wrap items-center gap-4 mb-5 pb-4 border-b border-gray-100">
           {/* Class */}
           <div className="w-48 relative">
             <label className="absolute -top-2 left-2.5 px-1 text-[11px] font-medium text-gray-500 bg-white z-10">
@@ -192,7 +159,9 @@ export function IdCardGeneratorPage({ onNavigate }) {
                 className="w-full px-3 py-2 text-xs md:text-sm bg-white border border-gray-300 rounded focus:border-indigo-600 focus:outline-none appearance-none cursor-pointer"
               >
                 {CLASSES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
               <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
@@ -252,25 +221,23 @@ export function IdCardGeneratorPage({ onNavigate }) {
               type="button"
               disabled={selectedCount === 0}
               onClick={() => setShowPrintPreview(true)}
-              className={`px-6 py-2 rounded text-xs md:text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                selectedCount > 0
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs cursor-pointer'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              className={`px-5 py-2 text-white text-xs md:text-sm font-semibold rounded flex items-center gap-2 shadow-xs transition-all ${
+                selectedCount === 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer'
               }`}
             >
               <Printer className="w-4 h-4" />
-              Print ({selectedCount})
+              <span>Print ({selectedCount})</span>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Table matching Live UAB Screenshot Step 1924 */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-2xs overflow-hidden">
+        {/* Table matching Live UAB Screenshot Step 1898 */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs md:text-sm">
             <thead>
-              <tr className="bg-gray-400 text-gray-900 font-bold uppercase tracking-wider text-[11px]">
+              <tr className="border-b border-gray-300 text-gray-700 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-4 w-10">
                   <input
                     type="checkbox"
@@ -289,25 +256,33 @@ export function IdCardGeneratorPage({ onNavigate }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-gray-700 font-medium">
-              {students.map((std, idx) => (
-                <tr key={std.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="py-2.5 px-4">
-                    <input
-                      type="checkbox"
-                      checked={std.selected}
-                      onChange={() => toggleStudent(std.id)}
-                      className="w-4 h-4 rounded text-indigo-600 accent-indigo-600 cursor-pointer"
-                    />
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-8 text-center text-gray-400">
+                    No students registered in Class {selectedClass}. Register students under Student Registration to generate ID cards.
                   </td>
-                  <td className="py-2.5 px-4">{idx + 1}</td>
-                  <td className="py-2.5 px-4 font-semibold text-gray-900">{std.rollNo}</td>
-                  <td className="py-2.5 px-4 font-semibold text-indigo-600">{std.admNo}</td>
-                  <td className="py-2.5 px-4">{std.srNo}</td>
-                  <td className="py-2.5 px-4 font-semibold text-gray-800">{std.name}</td>
-                  <td className="py-2.5 px-4">{std.className}</td>
-                  <td className="py-2.5 px-4 text-gray-600">{std.fatherName}</td>
                 </tr>
-              ))}
+              ) : (
+                students.map((std, idx) => (
+                  <tr key={std.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="checkbox"
+                        checked={std.selected}
+                        onChange={() => toggleStudent(std.id)}
+                        className="w-4 h-4 rounded text-indigo-600 accent-indigo-600 cursor-pointer"
+                      />
+                    </td>
+                    <td className="py-2.5 px-4">{idx + 1}</td>
+                    <td className="py-2.5 px-4 font-semibold text-gray-900">{std.rollNo}</td>
+                    <td className="py-2.5 px-4 font-semibold text-indigo-600">{std.admNo}</td>
+                    <td className="py-2.5 px-4">{std.srNo}</td>
+                    <td className="py-2.5 px-4 font-semibold text-gray-800">{std.name}</td>
+                    <td className="py-2.5 px-4">{std.className}</td>
+                    <td className="py-2.5 px-4 text-gray-600">{std.fatherName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -325,63 +300,76 @@ export function IdCardGeneratorPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-4 py-1.5 bg-indigo-600 text-white rounded text-xs font-semibold flex items-center gap-1.5"
+                  className="px-4 py-1.5 bg-indigo-600 text-white rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
                   <Printer className="w-4 h-4" /> Print Cards
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowPrintPreview(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            {/* Generated ID Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Grid of Preview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {students
                 .filter((s) => s.selected)
                 .map((std) => (
                   <div
                     key={std.id}
-                    className="border-2 border-indigo-600 rounded-xl overflow-hidden bg-white shadow-md flex flex-col p-4 relative"
-                    style={{ minHeight: cardType === 'Vertical' ? '380px' : '220px' }}
+                    className="border-2 border-indigo-600 rounded-xl overflow-hidden bg-white shadow-md flex flex-col"
+                    style={{ width: '100%', minHeight: cardType === 'Vertical' ? '380px' : '230px' }}
                   >
                     {/* ID Card Header */}
-                    <div className="text-center border-b border-indigo-100 pb-2 mb-3">
-                      <h3 className="text-sm font-extrabold text-indigo-900 tracking-wider">
-                        J D INTERNATIONAL SCHOOL
-                      </h3>
-                      <p className="text-[10px] text-gray-500 font-medium">
-                        Affiliated to CBSE, New Delhi • Session 2026-2027
+                    <div className="bg-gradient-to-r from-indigo-700 via-indigo-800 to-indigo-900 text-white p-2.5 text-center">
+                      <p className="text-[12px] font-black uppercase tracking-wide leading-tight">
+                        {schoolName || 'J D INTERNATIONAL SCHOOL'}
                       </p>
+                      <p className="text-[9px] text-indigo-200">Affiliated to CBSE, New Delhi</p>
                     </div>
 
                     {/* ID Card Body */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-24 bg-indigo-50 border border-indigo-200 rounded flex items-center justify-center shrink-0">
-                        <svg className="w-16 h-16 text-gray-600" viewBox="0 0 100 100" fill="currentColor">
-                          <polygon points="50,15 85,28 50,40 15,28" fill="#1e293b" />
-                          <circle cx="50" cy="45" r="16" fill="#fbcfe8" />
-                          <path d="M25,88 C25,65 38,62 50,62 C62,62 75,65 75,88 Z" fill="#1e293b" />
-                        </svg>
+                    <div className="p-3 flex-1 flex flex-col justify-between text-xs">
+                      <div className="flex gap-3">
+                        <div className="w-16 h-20 bg-gray-100 border border-gray-200 rounded flex items-center justify-center shrink-0">
+                          {std.photoUrl ? (
+                            <img src={std.photoUrl} alt="Photo" className="w-full h-full object-cover rounded" />
+                          ) : (
+                            <span className="text-[10px] text-gray-400 font-bold">PHOTO</span>
+                          )}
+                        </div>
+                        <div className="space-y-0.5 text-[11px]">
+                          <p className="font-bold text-gray-900 text-xs truncate max-w-[150px]">{std.name}</p>
+                          <p className="text-gray-600">
+                            <strong>Class:</strong> {std.className}
+                          </p>
+                          <p className="text-gray-600">
+                            <strong>Roll No:</strong> {std.rollNo}
+                          </p>
+                          <p className="text-gray-600">
+                            <strong>Adm No:</strong> #{std.admNo}
+                          </p>
+                          <p className="text-gray-600">
+                            <strong>Father:</strong> {std.fatherName}
+                          </p>
+                          <p className="text-gray-600">
+                            <strong>Contact:</strong> {std.mobile}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="text-xs space-y-1 text-gray-700">
-                        <p className="font-extrabold text-gray-900 text-sm">{std.name}</p>
-                        <p><span className="font-semibold text-gray-500">Class:</span> {std.className} &nbsp;|&nbsp; <span className="font-semibold text-gray-500">Roll:</span> {std.rollNo}</p>
-                        <p><span className="font-semibold text-gray-500">Adm No:</span> {std.admNo} &nbsp;|&nbsp; <span className="font-semibold text-gray-500">DOB:</span> {std.dob}</p>
-                        <p><span className="font-semibold text-gray-500">Father:</span> {std.fatherName}</p>
-                        <p><span className="font-semibold text-gray-500">Phone:</span> {std.mobile}</p>
+                      {/* Footer Signature Bar */}
+                      <div className="mt-3 pt-2 border-t border-gray-100 flex justify-between items-end text-[9px] text-gray-500 font-semibold">
+                        <span>Card Valid: 2026-2027</span>
+                        <div className="text-center">
+                          <div className="w-16 border-b border-gray-400 mb-0.5"></div>
+                          <span>Principal</span>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* ID Card Footer */}
-                    <div className="mt-auto pt-3 border-t border-indigo-100 flex justify-between items-center text-[10px] text-gray-400">
-                      <span>Card No: JDIS-{std.admNo}</span>
-                      <span className="font-bold text-gray-600">Principal Signature</span>
                     </div>
                   </div>
                 ))}

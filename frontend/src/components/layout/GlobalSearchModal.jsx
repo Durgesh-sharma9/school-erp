@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Search,
   X,
@@ -75,21 +77,8 @@ const TEACHERS_INDEX = [
   { id: 't_12', name: 'Priti Verma', subject: 'Head Administrator', department: 'Front Office & Operations', phone: '9079909813', path: '/school-info', keywords: ['priti', 'admin', 'administrator'] }
 ];
 
-// Students Database
-const STUDENTS_INDEX = [
-  { id: 'std_1', name: 'Aaditya Singh Choudhary', className: 'I', section: 'A', rollNo: '1', admNo: '1621', fatherName: 'Narendra Singh', phone: '9829012345', path: '/profile', keywords: ['aaditya', 'singh', 'choudhary', '1621', 'class 1', '1a'] },
-  { id: 'std_2', name: 'Advik Rao', className: 'I', section: 'A', rollNo: '2', admNo: 'A135', fatherName: 'Pradeep Rao', phone: '9414023456', path: '/profile', keywords: ['advik', 'rao', 'a135', 'class 1', '1a'] },
-  { id: 'std_3', name: 'Ananya Sharma', className: 'I', section: 'A', rollNo: '3', admNo: '1625', fatherName: 'Manish Sharma', phone: '9829033445', path: '/profile', keywords: ['ananya', 'sharma', '1625', 'class 1'] },
-  { id: 'std_4', name: 'Rohan Meena', className: 'X', section: 'A', rollNo: '14', admNo: '1402', fatherName: 'Suresh Meena', phone: '9829044556', path: '/profile', keywords: ['rohan', 'meena', '1402', 'class 10', '10a'] },
-  { id: 'std_5', name: 'Priya Shekhawat', className: 'X', section: 'A', rollNo: '22', admNo: '1408', fatherName: 'Rajendra Singh', phone: '9829055667', path: '/profile', keywords: ['priya', 'shekhawat', '1408', 'class 10'] },
-  { id: 'std_6', name: 'Dhruv Agarwal', className: 'X', section: 'A', rollNo: '31', admNo: '1415', fatherName: 'Alok Agarwal', phone: '9829066778', path: '/profile', keywords: ['dhruv', 'agarwal', '1415', 'class 10'] },
-  { id: 'std_7', name: 'Aryan Joshi', className: 'X', section: 'B', rollNo: '8', admNo: '1420', fatherName: 'Hemant Joshi', phone: '9829077889', path: '/profile', keywords: ['aryan', 'joshi', '1420', 'class 10b'] },
-  { id: 'std_8', name: 'Tanya Verma', className: 'X', section: 'B', rollNo: '19', admNo: '1424', fatherName: 'Kamal Verma', phone: '9829088990', path: '/profile', keywords: ['tanya', 'verma', '1424', 'class 10b'] },
-  { id: 'std_9', name: 'Sameer Khan', className: 'XII', section: 'A (Sci)', rollNo: '5', admNo: '1205', fatherName: 'Imran Khan', phone: '9829099001', path: '/profile', keywords: ['sameer', 'khan', '1205', 'class 12'] },
-  { id: 'std_10', name: 'Divya Rathore', className: 'XII', section: 'A (Sci)', rollNo: '18', admNo: '1218', fatherName: 'Mahendra Singh', phone: '9829011223', path: '/profile', keywords: ['divya', 'rathore', '1218', 'class 12'] },
-  { id: 'std_11', name: 'Kartik Somani', className: 'IX', section: 'A', rollNo: '12', admNo: '1501', fatherName: 'Rajesh Somani', phone: '9829022334', path: '/profile', keywords: ['kartik', 'somani', '1501', 'class 9'] },
-  { id: 'std_12', name: 'Bhavya Patel', className: 'VIII', section: 'B', rollNo: '9', admNo: '1540', fatherName: 'Nitin Patel', phone: '9829033445', path: '/profile', keywords: ['bhavya', 'patel', '1540', 'class 8'] }
-];
+// Students Database (Clean: Dynamically sourced from active school tenant)
+const STUDENTS_INDEX = [];
 
 // Quick Instant Actions
 const QUICK_ACTIONS = [
@@ -151,15 +140,28 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
     t.keywords.some(k => k.includes(q))
   );
 
-  const matchedStudents = STUDENTS_INDEX.filter(s =>
+  const { schoolId } = useAuth();
+
+  const tenantStudents = (tenantStore.getStudents(schoolId) || []).map((s) => ({
+    id: s.id || s.admNo,
+    name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || 'Student',
+    className: s.className || s.class_id || 'I',
+    section: s.section || s.division_id || 'A',
+    rollNo: s.rollNo || '-',
+    admNo: s.admNo || '',
+    fatherName: s.fatherName || s.fathers_name || '',
+    phone: s.contactNo || s.fatherMobile || '',
+    path: '/student-portfolio'
+  }));
+
+  const matchedStudents = tenantStudents.filter(s =>
     !q ||
     s.name.toLowerCase().includes(q) ||
     s.admNo.toLowerCase().includes(q) ||
     s.rollNo === q ||
     s.className.toLowerCase() === q ||
     s.fatherName.toLowerCase().includes(q) ||
-    s.phone.includes(q) ||
-    s.keywords.some(k => k.includes(q))
+    s.phone.includes(q)
   );
 
   const matchedActions = QUICK_ACTIONS.filter(a =>

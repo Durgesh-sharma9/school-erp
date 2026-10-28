@@ -4,8 +4,8 @@ import { MOCK_STUDENTS } from '../students/reports/studentReportsData';
 
 export function CertificateGeneratorPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('student'); // 'student' | 'staff'
-  const [selectedStudent, setSelectedStudent] = useState(MOCK_STUDENTS[0]);
-  const [searchQuery, setSearchQuery] = useState(MOCK_STUDENTS[0].name);
+  const [selectedStudent, setSelectedStudent] = useState(MOCK_STUDENTS[0] || null);
+  const [searchQuery, setSearchQuery] = useState(MOCK_STUDENTS[0]?.name || '');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [reportType, setReportType] = useState('Bonafide Certificate');
   const [withOption, setWithOption] = useState("Father's Name");

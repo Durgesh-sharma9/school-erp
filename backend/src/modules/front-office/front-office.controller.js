@@ -1,12 +1,6 @@
-// In-memory multi-tenant store for Front Office Module
+// In-memory multi-tenant store for Front Office Module (Clean fresh state)
 
-let appUsers = [
-  { id: '1', srNo: '1621', name: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', fatherName: 'RAMESH CHOUDHARY', userId: '8947919195', password: 'password123', appLoginPerm: true, notification: true },
-  { id: '2', srNo: '2059', name: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', fatherName: 'RAMESH CHOUDHARY', userId: '6377281034', password: 'password123', appLoginPerm: true, notification: true },
-  { id: '3', srNo: '2060', name: 'ROHAN SHARMA', className: 'Class X-A', fatherName: 'MUKESH SHARMA', userId: '9829012345', password: 'password123', appLoginPerm: true, notification: false },
-  { id: '4', srNo: '2061', name: 'PRIYA MEENA', className: 'Class IX-A', fatherName: 'RAJESH MEENA', userId: '9829011111', password: 'password123', appLoginPerm: false, notification: true },
-  { id: '5', srNo: '2062', name: 'ANSHUMAN JOSHI', className: 'Class VI-A', fatherName: 'SUNIL JOSHI', userId: '9414022222', password: 'password123', appLoginPerm: true, notification: true }
-];
+let appUsers = [];
 
 let reminders = [
   { id: '1', fromDate: '2026-10-15', toDate: '2026-10-20', description: 'Quarterly Parent-Teacher Meeting announcement and report card review', status: 'Active' },
@@ -14,42 +8,7 @@ let reminders = [
   { id: '3', fromDate: '2026-09-01', toDate: '2026-09-05', description: 'Teachers Day felicitation and award preparation', status: 'Expired' }
 ];
 
-let studentGatePasses = [
-  {
-    id: '1',
-    passNo: 'GP-2026-001',
-    visitorName: 'Ramesh Choudhary',
-    contactNo: '9829012345',
-    date: '2026-10-15',
-    timeIn: '10:30 AM',
-    timeOut: '11:15 AM',
-    studentName: 'AADITYA SINGH CHOUDHARY',
-    admNo: '1621',
-    className: 'Class I-A',
-    relation: 'Father',
-    reason: 'Family Emergency / Doctor Appointment',
-    remark: 'Verified and authorized by class teacher Mrs. Sunita Kumari',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    passNo: 'GP-2026-002',
-    visitorName: 'Mukesh Sharma',
-    contactNo: '9414023456',
-    date: '2026-10-14',
-    timeIn: '01:00 PM',
-    timeOut: '01:45 PM',
-    studentName: 'ROHAN SHARMA',
-    admNo: '2060',
-    className: 'Class X-A',
-    relation: 'Father',
-    reason: 'Passport Document Verification Appointment',
-    remark: 'Principal sanction granted',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80'
-  }
-];
+let studentGatePasses = [];
 
 let visitorEnquiries = [
   {
@@ -236,32 +195,7 @@ let visitStaffMeetings = [
   }
 ];
 
-let studentComplaints = [
-  {
-    id: '1',
-    date: '2026-10-14',
-    studentName: 'ROHAN SHARMA',
-    admNo: '2060',
-    className: 'Class X-A',
-    complaintType: 'Discipline',
-    complaintText: 'Continuous disturbance during Physics laboratory class and refusal to follow safety rules.',
-    category: 'against-student',
-    status: 'Pending Review',
-    actionTaken: 'Parent notified via phone. Scheduled counselling session.'
-  },
-  {
-    id: '2',
-    date: '2026-10-12',
-    studentName: 'AADITYA SINGH CHOUDHARY',
-    admNo: '1621',
-    className: 'Class I-A',
-    complaintType: 'Bullying / Conflict',
-    complaintText: 'Complained that another student snatched notebook during lunch break.',
-    category: 'by-student',
-    status: 'Resolved',
-    actionTaken: 'Class teacher investigated and amicably resolved the matter. Notebook returned.'
-  }
-];
+let studentComplaints = [];
 
 let staffComplaints = [
   {

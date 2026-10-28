@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   ArrowUpDown,
   Check,
@@ -56,10 +58,12 @@ export function AssignRollNumberPage({ onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState('all'); // 'all' | 'assigned' | 'unassigned'
 
+  const { schoolId } = useAuth();
+
   // Fetch students on class/division change
   useEffect(() => {
     fetchStudents();
-  }, [selectedClass, selectedDivision]);
+  }, [schoolId, selectedClass, selectedDivision]);
 
   const fetchStudents = async () => {
     try {
@@ -67,67 +71,41 @@ export function AssignRollNumberPage({ onNavigate }) {
       const res = await fetch(
         `/api/students?className=${encodeURIComponent(
           selectedClass
-        )}&section=${encodeURIComponent(selectedDivision)}`
+        )}&section=${encodeURIComponent(selectedDivision)}`,
+        {
+          headers: {
+            'x-school-id': schoolId || 'sch_jd_intl'
+          }
+        }
       );
       if (res.ok) {
         const json = await res.json();
-        setStudents(json.data || []);
-      } else {
-        throw new Error('Failed');
+        if (json.data && json.data.length > 0) {
+          setStudents(json.data);
+          return;
+        }
       }
+      
+      // Fallback strictly to tenantStore for this school
+      const localList = (tenantStore.getStudents(schoolId) || []).filter((s) => {
+        const cls = (s.className || s.class_id || '').toLowerCase().trim();
+        const sec = (s.section || s.division_id || 'A').toLowerCase().trim();
+        return (
+          cls === selectedClass.toLowerCase().trim() &&
+          sec === selectedDivision.toLowerCase().trim()
+        );
+      });
+      setStudents(localList);
     } catch {
-      // Fallback local students matching class
-      if (selectedClass === 'Nursery - PP3+' && selectedDivision === 'A') {
-        setStudents([
-          {
-            id: 'std_jd_3',
-            rollNo: '14',
-            enrollNo: 'ENR-JD-003',
-            srNo: '2059',
-            admNo: '2059',
-            firstName: 'AADHYA',
-            lastName: 'CHOUDHARY',
-            fatherName: 'RAMESH CHOUDHARY',
-            gender: 'Girl'
-          }
-        ]);
-      } else {
-        setStudents([
-          {
-            id: 'std_1',
-            rollNo: '1',
-            enrollNo: 'ENR-JD-001',
-            srNo: '1621',
-            admNo: '1621',
-            firstName: 'AADITYA SINGH',
-            lastName: 'CHOUDHARY',
-            fatherName: 'NARENDRA SINGH CHOUDHARY',
-            gender: 'Male'
-          },
-          {
-            id: 'std_2',
-            rollNo: '2',
-            enrollNo: 'ENR-JD-002',
-            srNo: '0',
-            admNo: 'A135',
-            firstName: 'ADVIK',
-            lastName: 'RAO',
-            fatherName: 'PRADEEP RAO',
-            gender: 'Male'
-          },
-          {
-            id: 'std_3',
-            rollNo: '',
-            enrollNo: 'ENR-JD-004',
-            srNo: '0',
-            admNo: 'A160',
-            firstName: 'ANANYA RAJESH',
-            lastName: 'KUMAR YADAV',
-            fatherName: 'RAJESH KUMAR YADAV',
-            gender: 'Female'
-          }
-        ]);
-      }
+      const localList = (tenantStore.getStudents(schoolId) || []).filter((s) => {
+        const cls = (s.className || s.class_id || '').toLowerCase().trim();
+        const sec = (s.section || s.division_id || 'A').toLowerCase().trim();
+        return (
+          cls === selectedClass.toLowerCase().trim() &&
+          sec === selectedDivision.toLowerCase().trim()
+        );
+      });
+      setStudents(localList);
     } finally {
       setLoading(false);
     }
