@@ -12,14 +12,7 @@ import {
   Square
 } from 'lucide-react';
 
-const INITIAL_SALARY_ROSTER = [
-  { id: '1', code: '101', name: 'ABHILASHA BHATT', desig: 'Principal', accNo: 'SBI-489211029', bs: 65000, da: 6500, hra: 9750, conv: 1500, med: 1000, spl: 2000, gross: 85750, epf: 7800, esi: 643, pt: 200, lic: 0, adv: 0, net: 77107, workingDays: 30, payableDays: 30, isSelected: true },
-  { id: '2', code: '102', name: 'PRITI VERMA', desig: 'Administrator', accNo: 'HDFC-88291039', bs: 42000, da: 4200, hra: 6300, conv: 1500, med: 1000, spl: 2000, gross: 57000, epf: 5040, esi: 427, pt: 200, lic: 0, adv: 0, net: 51333, workingDays: 30, payableDays: 30, isSelected: true },
-  { id: '3', code: '201', name: 'MONIKA RANI VERMA', desig: 'Teacher', accNo: 'PNB-338291093', bs: 35000, da: 3500, hra: 5250, conv: 1500, med: 1000, spl: 2000, gross: 48250, epf: 4200, esi: 362, pt: 200, lic: 0, adv: 0, net: 43488, workingDays: 30, payableDays: 30, isSelected: true },
-  { id: '4', code: '202', name: 'SUNITA KUMARI', desig: 'Teacher', accNo: 'BOB-992019283', bs: 32000, da: 3200, hra: 4800, conv: 1500, med: 1000, spl: 2000, gross: 44500, epf: 3840, esi: 334, pt: 200, lic: 0, adv: 2500, net: 37626, workingDays: 30, payableDays: 29, isSelected: true },
-  { id: '5', code: '501', name: 'BHARAT JANGID', desig: 'Driver', accNo: 'CBI-102938475', bs: 22000, da: 2200, hra: 3300, conv: 1500, med: 1000, spl: 1500, gross: 31500, epf: 2640, esi: 236, pt: 200, lic: 0, adv: 3333, net: 25091, workingDays: 30, payableDays: 30, isSelected: true },
-  { id: '6', code: '502', name: 'HANSRAJ JAT', desig: 'Driver', accNo: 'SBI-772910283', bs: 24000, da: 2400, hra: 3600, conv: 1500, med: 1000, spl: 1500, gross: 34000, epf: 2880, esi: 255, pt: 200, lic: 0, adv: 0, net: 30665, workingDays: 30, payableDays: 30, isSelected: true }
-];
+const INITIAL_SALARY_ROSTER = [];
 
 export function GenerateSalaryPage({ onNavigate }) {
   const [month, setMonth] = useState('2026-10');

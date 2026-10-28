@@ -11,10 +11,7 @@ import {
   Clock
 } from 'lucide-react';
 
-const INITIAL_SHIFTS = [
-  { id: '1', shiftName: 'Shift 1st', shiftCode: '100', shiftIn: '08:00', shiftOut: '14:00', hourAllow: '0.00', overTime: '0.00' },
-  { id: '2', shiftName: 'Shift 2nd', shiftCode: '101', shiftIn: '14:00', shiftOut: '20:00', hourAllow: '0.00', overTime: '0.00' }
-];
+const INITIAL_SHIFTS = [];
 
 export function ShiftMasterPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_SHIFTS);

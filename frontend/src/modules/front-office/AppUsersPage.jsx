@@ -17,13 +17,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_USERS = [
-  { id: '1', srNo: '1621', name: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', fatherName: 'RAMESH CHOUDHARY', userId: '8947919195', password: 'password123', appLoginPerm: true, notification: true },
-  { id: '2', srNo: '2059', name: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', fatherName: 'RAMESH CHOUDHARY', userId: '6377281034', password: 'password123', appLoginPerm: true, notification: true },
-  { id: '3', srNo: '2060', name: 'ROHAN SHARMA', className: 'Class X-A', fatherName: 'MUKESH SHARMA', userId: '9829012345', password: 'password123', appLoginPerm: true, notification: false },
-  { id: '4', srNo: '2061', name: 'PRIYA MEENA', className: 'Class IX-A', fatherName: 'RAJESH MEENA', userId: '9829011111', password: 'password123', appLoginPerm: false, notification: true },
-  { id: '5', srNo: '2062', name: 'ANSHUMAN JOSHI', className: 'Class VI-A', fatherName: 'SUNIL JOSHI', userId: '9414022222', password: 'password123', appLoginPerm: true, notification: true }
-];
+const INITIAL_USERS = [];
 
 export function AppUsersPage({ onNavigate }) {
   const [users, setUsers] = useState(INITIAL_USERS);

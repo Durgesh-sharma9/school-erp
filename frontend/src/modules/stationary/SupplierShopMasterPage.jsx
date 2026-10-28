@@ -15,11 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_SUPPLIERS = [
-  { id: '1', shopName: 'J D Uniform', supplierName: 'Maheshwari Garments', mobileNo: '9414055667', city: 'Jaipur', state: 'Rajasthan', gstNo: '08CCCCC3333C3Z3', aadharNo: '456789123456', panNo: 'ABCDE1234F', pincode: '302001', address: 'Plot 45, Textile Market, Sanganer', remark: 'Primary uniform fabric manufacturer' },
-  { id: '2', shopName: 'J D Book', supplierName: 'Rajasthan Stationery Mart', mobileNo: '9828012345', city: 'Jaipur', state: 'Rajasthan', gstNo: '08DDDDD4444D4Z4', aadharNo: '789012345678', panNo: 'FGHIJ5678K', pincode: '302003', address: 'Shop 12, Chaura Rasta, Jaipur', remark: 'School diaries, registers, exam papers' },
-  { id: '3', shopName: 'J D Book', supplierName: 'Prabhat Paper Mills', mobileNo: '9829098765', city: 'Jaipur', state: 'Rajasthan', gstNo: '08EEEEE5555E5Z5', aadharNo: '234567890123', panNo: 'KLMNO9012P', pincode: '302013', address: 'VKIA Road No 9, Jaipur', remark: 'Notebooks and customized school stationery' }
-];
+const INITIAL_SUPPLIERS = [];
 
 export function SupplierShopMasterPage({ onNavigate }) {
   const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS);

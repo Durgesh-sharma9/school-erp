@@ -14,38 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_STAFF_PASSES = [
-  {
-    id: '1',
-    passNo: 'SGP-2026-001',
-    staffCode: '201',
-    name: 'MONIKA RANI VERMA',
-    desig: 'Teacher',
-    dept: 'TEACHING',
-    date: '2026-10-15',
-    timeIn: '08:00 AM',
-    timeOut: '12:30 PM',
-    reason: 'Bank official work & personal appointment',
-    remark: 'Sanctioned by Vice-Principal, class covered by substitute teacher',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    passNo: 'SGP-2026-002',
-    staffCode: '501',
-    name: 'BHARAT JANGID',
-    desig: 'Driver',
-    dept: 'TRANSPORT',
-    date: '2026-10-14',
-    timeIn: '06:30 AM',
-    timeOut: '11:00 AM',
-    reason: 'Bus fuel filling and RTO certificate collection',
-    remark: 'Transport Supervisor approved',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80'
-  }
-];
+const INITIAL_STAFF_PASSES = [];
 
 export function StaffGatePassPage({ onNavigate }) {
   const [passes, setPasses] = useState(INITIAL_STAFF_PASSES);

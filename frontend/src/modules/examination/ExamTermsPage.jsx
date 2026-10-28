@@ -12,25 +12,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_CLASSES_TERMS = [
-  { id: '1', className: 'Nursery - PP3+', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '2', className: 'Lower Kindergarten - PP4+', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '3', className: 'Upper Kindergarten - PP5+', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '4', className: 'I', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '5', className: 'II', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '6', className: 'III', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '7', className: 'IV', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '8', className: 'V', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '9', className: 'VI', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '10', className: 'VII', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '11', className: 'VIII', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '12', className: 'IX', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '13', className: 'X', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '14', className: 'XI- HUMANITIES', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '15', className: 'XII-HUMANITIES', terms: ['Half Yearly Examination', 'Pre- Board Examinations'] },
-  { id: '16', className: 'XI-MEDICAL', terms: ['Half Yearly Examination', 'Annual Examination'] },
-  { id: '17', className: 'XII-MEDICAL', terms: ['Half Yearly Examination', 'Annual Examination'] }
-];
+const INITIAL_CLASSES_TERMS = [];
 
 export function ExamTermsPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_CLASSES_TERMS);

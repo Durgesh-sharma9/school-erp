@@ -16,36 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_VISITORS = [
-  {
-    id: '1',
-    enquiryDate: '2026-10-15',
-    visitorName: 'Dr. Alok Nath',
-    contactNo: '9828012345',
-    purpose: 'Admission Query',
-    type: 'Prospective Parent',
-    studentName: 'Aarav Nath',
-    className: 'Nursery',
-    gender: 'Male',
-    address: 'Flat 402, Royal Palms, C-Scheme, Jaipur',
-    description: 'Looking for Nursery admission for upcoming academic session. Enquired about fee structure, sports academy, and school bus routes.',
-    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    enquiryDate: '2026-10-14',
-    visitorName: 'Sanjay Mathur',
-    contactNo: '9414088990',
-    purpose: 'Document Verification',
-    type: 'Official / Education Board',
-    studentName: 'N/A',
-    className: 'CBSE Secondary',
-    gender: 'Male',
-    address: 'CBSE Regional Office, Sector 5, Mansarovar, Jaipur',
-    description: 'Annual affiliation checklist inspection and lab infrastructure verification.',
-    photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80'
-  }
-];
+const INITIAL_VISITORS = [];
 
 export function VisitorEnquiryPage({ onNavigate }) {
   const [visitors, setVisitors] = useState(INITIAL_VISITORS);

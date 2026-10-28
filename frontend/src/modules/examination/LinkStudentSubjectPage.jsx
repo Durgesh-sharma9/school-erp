@@ -9,22 +9,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_LINKS = [
-  { id: '1', className: 'Lower Kindergarten - PP4+-A', subject: 'MATHEMATICS', totalLinked: 41 },
-  { id: '2', className: 'Lower Kindergarten - PP4+-A', subject: 'ENGLISH', totalLinked: 41 },
-  { id: '3', className: 'Lower Kindergarten - PP4+-A', subject: 'HINDI', totalLinked: 41 },
-  { id: '4', className: 'Upper Kindergarten - PP5+-A', subject: 'MATHEMATICS', totalLinked: 54 },
-  { id: '5', className: 'Upper Kindergarten - PP5+-A', subject: 'EVS', totalLinked: 54 },
-  { id: '6', className: 'Upper Kindergarten - PP5+-A', subject: 'ENGLISH', totalLinked: 54 },
-  { id: '7', className: 'Upper Kindergarten - PP5+-A', subject: 'HINDI', totalLinked: 54 },
-  { id: '8', className: 'I-A', subject: 'MATHEMATICS', totalLinked: 60 },
-  { id: '9', className: 'I-A', subject: 'EVS', totalLinked: 60 },
-  { id: '10', className: 'I-A', subject: 'ENGLISH', totalLinked: 60 },
-  { id: '11', className: 'I-A', subject: 'HINDI', totalLinked: 60 },
-  { id: '12', className: 'X-A', subject: 'MATHEMATICS', totalLinked: 38 },
-  { id: '13', className: 'X-A', subject: 'SCIENCE', totalLinked: 38 },
-  { id: '14', className: 'X-A', subject: 'SOCIAL SCIENCE', totalLinked: 38 }
-];
+const INITIAL_LINKS = [];
 
 export function LinkStudentSubjectPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_LINKS);

@@ -10,46 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_GRADES = [
-  {
-    id: '1',
-    className: 'All Classes (Nursery - XII)',
-    type: 'Marks',
-    slabs: [
-      { grade: 'A1', minMarks: 91, maxMarks: 100, point: '10.0', remark: 'Outstanding' },
-      { grade: 'A2', minMarks: 81, maxMarks: 90, point: '9.0', remark: 'Excellent' },
-      { grade: 'B1', minMarks: 71, maxMarks: 80, point: '8.0', remark: 'Very Good' },
-      { grade: 'B2', minMarks: 61, maxMarks: 70, point: '7.0', remark: 'Good' },
-      { grade: 'C1', minMarks: 51, maxMarks: 60, point: '6.0', remark: 'Average' },
-      { grade: 'C2', minMarks: 41, maxMarks: 50, point: '5.0', remark: 'Fair' },
-      { grade: 'D', minMarks: 33, maxMarks: 40, point: '4.0', remark: 'Marginal' },
-      { grade: 'E', minMarks: 0, maxMarks: 32, point: '0.0', remark: 'Needs Improvement' }
-    ]
-  },
-  {
-    id: '2',
-    className: 'All Classes (Nursery - XII)',
-    type: 'Grade',
-    slabs: [
-      { grade: 'A', minMarks: 80, maxMarks: 100, point: '5.0', remark: 'Outstanding' },
-      { grade: 'B', minMarks: 60, maxMarks: 79, point: '4.0', remark: 'Good' },
-      { grade: 'C', minMarks: 40, maxMarks: 59, point: '3.0', remark: 'Fair' },
-      { grade: 'D', minMarks: 0, maxMarks: 39, point: '2.0', remark: 'Needs Improvement' }
-    ]
-  },
-  {
-    id: '3',
-    className: 'All Classes (Nursery - XII)',
-    type: 'Percentage',
-    slabs: [
-      { grade: '1st Div (Honours)', minMarks: 75, maxMarks: 100, point: 'Distinction', remark: 'Distinction' },
-      { grade: '1st Division', minMarks: 60, maxMarks: 74.99, point: '1st Div', remark: 'First Division' },
-      { grade: '2nd Division', minMarks: 45, maxMarks: 59.99, point: '2nd Div', remark: 'Second Division' },
-      { grade: '3rd Division', minMarks: 33, maxMarks: 44.99, point: '3rd Div', remark: 'Third Division' },
-      { grade: 'Essential Repeat', minMarks: 0, maxMarks: 32.99, point: 'Fail', remark: 'Fail' }
-    ]
-  }
-];
+const INITIAL_GRADES = [];
 
 export function ExamGradeMasterPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_GRADES);

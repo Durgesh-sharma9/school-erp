@@ -15,32 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_COMPLAINTS = [
-  {
-    id: '1',
-    date: '2026-10-14',
-    studentName: 'ROHAN SHARMA',
-    admNo: '2060',
-    className: 'Class X-A',
-    complaintType: 'Discipline',
-    complaintText: 'Continuous disturbance during Physics laboratory class and refusal to follow safety rules.',
-    category: 'against-student',
-    status: 'Pending Review',
-    actionTaken: 'Parent notified via phone. Scheduled counselling session.'
-  },
-  {
-    id: '2',
-    date: '2026-10-12',
-    studentName: 'AADITYA SINGH CHOUDHARY',
-    admNo: '1621',
-    className: 'Class I-A',
-    complaintType: 'Bullying / Conflict',
-    complaintText: 'Complained that another student snatched notebook during lunch break.',
-    category: 'by-student',
-    status: 'Resolved',
-    actionTaken: 'Class teacher investigated and amicably resolved the matter. Notebook returned.'
-  }
-];
+const INITIAL_COMPLAINTS = [];
 
 export function StudentComplaintPage({ onNavigate }) {
   const [complaints, setComplaints] = useState(INITIAL_COMPLAINTS);

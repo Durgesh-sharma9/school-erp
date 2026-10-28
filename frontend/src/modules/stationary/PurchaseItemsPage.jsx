@@ -14,37 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_PURCHASES = [
-  {
-    id: '1',
-    supplierName: 'Maheshwari Garments',
-    mobileNo: '9414055667',
-    noOfItem: 2,
-    totalCost: 37500,
-    paidAmt: 35000,
-    discount: 2500,
-    purchaseDate: '2026-08-10',
-    items: [
-      { itemCode: 'BC-TSH-022', itemName: 'T Shirt- W (22)', qty: 50, rate: 300, gst: 0, total: 15000 },
-      { itemCode: 'BC-PNT-020', itemName: 'Pant ( 20 )', qty: 50, rate: 450, gst: 0, total: 22500 }
-    ]
-  },
-  {
-    id: '2',
-    supplierName: 'Rajasthan Stationery Mart',
-    mobileNo: '9828012345',
-    noOfItem: 3,
-    totalCost: 31000,
-    paidAmt: 30000,
-    discount: 1000,
-    purchaseDate: '2026-08-25',
-    items: [
-      { itemCode: 'BC-DIR-001', itemName: 'School Diary 2026-27', qty: 100, rate: 150, gst: 0, total: 15000 },
-      { itemCode: 'BC-NBK-001', itemName: '4-Line English Notebook (172 Pgs)', qty: 200, rate: 45, gst: 0, total: 9000 },
-      { itemCode: 'BC-NBK-002', itemName: '2-Line Hindi Notebook (172 Pgs)', qty: 150, rate: 45, gst: 0, total: 7000 }
-    ]
-  }
-];
+const INITIAL_PURCHASES = [];
 
 export function PurchaseItemsPage({ onNavigate }) {
   const [purchases, setPurchases] = useState(INITIAL_PURCHASES);

@@ -55,21 +55,7 @@ const CLASSES = [
 const DIVISIONS = ['A', 'B', 'C', 'D'];
 
 // Initial Mock Class Cards for Test Master Grid View
-const INITIAL_CLASS_CARDS = [
-  { id: 'cls_1', className: 'I', section: 'A', total: 32, present: 30, absent: 2, marked: true, incharge: 'Pooja Kanwar', markedBy: 'Attender', time: '08:45 AM' },
-  { id: 'cls_2', className: 'I', section: 'B', total: 30, present: 29, absent: 1, marked: true, incharge: 'Monika Verma', markedBy: 'Attender', time: '08:50 AM' },
-  { id: 'cls_3', className: 'II', section: 'A', total: 35, present: 33, absent: 2, marked: true, incharge: 'Sunita Kumari', markedBy: 'Attender', time: '08:55 AM' },
-  { id: 'cls_4', className: 'III', section: 'A', total: 28, present: 26, absent: 2, marked: true, incharge: 'Priti Verma', markedBy: 'Admin', time: '09:00 AM' },
-  { id: 'cls_5', className: 'IV', section: 'A', total: 34, present: 34, absent: 0, marked: true, incharge: 'Arun Joshi', markedBy: 'Attender', time: '09:05 AM' },
-  { id: 'cls_6', className: 'V', section: 'A', total: 36, present: 35, absent: 1, marked: true, incharge: 'Nisha Goyal', markedBy: 'Attender', time: '09:10 AM' },
-  { id: 'cls_7', className: 'VI', section: 'A', total: 40, present: 38, absent: 2, marked: true, incharge: 'Abhilasha Bhatt', markedBy: 'Admin', time: '09:15 AM' },
-  { id: 'cls_8', className: 'VII', section: 'A', total: 38, present: 36, absent: 2, marked: true, incharge: 'Bharat Jangid', markedBy: 'Attender', time: '09:20 AM' },
-  { id: 'cls_9', className: 'VIII', section: 'A', total: 42, present: 39, absent: 3, marked: true, incharge: 'Rajesh Gupta', markedBy: 'Attender', time: '09:25 AM' },
-  { id: 'cls_10', className: 'IX', section: 'A', total: 45, present: 41, absent: 4, marked: true, incharge: 'Dev Sharma', markedBy: 'Attender', time: '09:30 AM' },
-  { id: 'cls_11', className: 'X', section: 'A', total: 55, present: 52, absent: 3, marked: true, incharge: 'Ramesh Attender', markedBy: 'Attender', time: '09:35 AM' },
-  { id: 'cls_12', className: 'XI-MEDICAL', section: 'A', total: 30, present: 0, absent: 0, marked: false, incharge: 'Dr. Arun Joshi', markedBy: '-', time: '-' },
-  { id: 'cls_13', className: 'XII-HUMANITIES', section: 'A', total: 28, present: 0, absent: 0, marked: false, incharge: 'V.K. Sharma', markedBy: '-', time: '-' }
-];
+const INITIAL_CLASS_CARDS = [];
 
 export function StudentAttendancePage({ onNavigate }) {
   const { role, user } = useAuth();

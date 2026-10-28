@@ -10,14 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_DEPARTMENTS = [
-  { id: '1', department: 'ACCOUNTS', remark: 'Finance & Fee collection' },
-  { id: '2', department: 'ADMINISTRATIVE & MANAGEMENT', remark: 'Leadership & front office' },
-  { id: '3', department: 'LIBRARY', remark: 'Books and media collection' },
-  { id: '4', department: 'NON TEACHING', remark: 'Support and maintenance staff' },
-  { id: '5', department: 'TEACHING', remark: 'Academic faculty' },
-  { id: '6', department: 'TRANSPORT', remark: 'Conveyance Services' }
-];
+const INITIAL_DEPARTMENTS = [];
 
 export function PayrollDepartmentPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_DEPARTMENTS);

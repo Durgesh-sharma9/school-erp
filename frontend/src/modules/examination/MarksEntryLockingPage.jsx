@@ -10,13 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_LOCKS = [
-  { id: '1', user: 'Sunita Sharma (T-102)', className: 'I', section: 'A', subject: 'MATHEMATICS', term: 'Half Yearly Examination', isLocked: true, lockedDate: '2026-09-30' },
-  { id: '2', user: 'Sunita Sharma (T-102)', className: 'I', section: 'A', subject: 'ENGLISH', term: 'Half Yearly Examination', isLocked: true, lockedDate: '2026-09-30' },
-  { id: '3', user: 'Rakesh Verma (T-108)', className: 'X', section: 'A', subject: 'MATHEMATICS', term: 'Half Yearly Examination', isLocked: false, lockedDate: null },
-  { id: '4', user: 'Rakesh Verma (T-108)', className: 'X', section: 'A', subject: 'SCIENCE', term: 'Half Yearly Examination', isLocked: false, lockedDate: null },
-  { id: '5', user: 'Pooja Jain (T-115)', className: 'II', section: 'A', subject: 'HINDI', term: 'Half Yearly Examination', isLocked: true, lockedDate: '2026-10-02' }
-];
+const INITIAL_LOCKS = [];
 
 export function MarksEntryLockingPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_LOCKS);

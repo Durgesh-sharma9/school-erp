@@ -10,22 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_GROUPS = [
-  { id: '1', className: 'Nursery - PP3+', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 1 },
-  { id: '2', className: 'Nursery - PP3+', groupName: 'CO-SCHOLASTIC PERFORMANCE', type: 'Grade', priority: 2 },
-  { id: '3', className: 'Lower Kindergarten - PP4+', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 3 },
-  { id: '4', className: 'Lower Kindergarten - PP4+', groupName: 'CO-SCHOLASTIC PERFORMANCE', type: 'Grade', priority: 4 },
-  { id: '5', className: 'Upper Kindergarten - PP5+', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 5 },
-  { id: '6', className: 'Upper Kindergarten - PP5+', groupName: 'CO-SCHOLASTIC PERFORMANCE', type: 'Grade', priority: 6 },
-  { id: '7', className: 'I', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 7 },
-  { id: '8', className: 'I', groupName: 'B. CO-SCHOLASTIC AREAS', type: 'Grade', priority: 8 },
-  { id: '9', className: 'I', groupName: 'C. DISCIPLINE', type: 'Grade', priority: 9 },
-  { id: '10', className: 'II', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 10 },
-  { id: '11', className: 'II', groupName: 'B. CO-SCHOLASTIC AREAS', type: 'Grade', priority: 11 },
-  { id: '12', className: 'II', groupName: 'C. DISCIPLINE', type: 'Grade', priority: 12 },
-  { id: '13', className: 'X', groupName: 'A. SCHOLASTIC-AREAS', type: 'Marks', priority: 13 },
-  { id: '14', className: 'X', groupName: 'B. CO-SCHOLASTIC ACTIVITIES', type: 'Grade', priority: 14 }
-];
+const INITIAL_GROUPS = [];
 
 export function ExamGroupMasterPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_GROUPS);

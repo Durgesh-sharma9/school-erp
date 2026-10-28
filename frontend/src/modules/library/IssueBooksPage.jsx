@@ -18,78 +18,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_ISSUES = [
-  {
-    id: '1',
-    srNo: '1621',
-    memberType: 'Student',
-    memberName: 'AADITYA SINGH CHOUDHARY',
-    className: 'Class I-A',
-    bookNo: 'BK-1001',
-    bookTitle: 'Mathematics Class X Exemplar',
-    qty: 1,
-    issueDate: '2026-10-01',
-    returnDate: '2026-10-15',
-    status: 'Overdue',
-    contactNo: '8947919195'
-  },
-  {
-    id: '2',
-    srNo: '2059',
-    memberType: 'Student',
-    memberName: 'AADHYA CHOUDHARY',
-    className: 'Nursery - PP3+-A',
-    bookNo: 'BK-1003',
-    bookTitle: 'Godaan (गोदान)',
-    qty: 1,
-    issueDate: '2026-10-08',
-    returnDate: '2026-10-22',
-    status: 'Issued',
-    contactNo: '6377281034'
-  },
-  {
-    id: '3',
-    srNo: 'EMP-102',
-    memberType: 'Staff',
-    memberName: 'Sunita Kumari (Teacher)',
-    className: 'Teaching Staff',
-    bookNo: 'BK-1002',
-    bookTitle: 'Concepts of Physics Part 1',
-    qty: 1,
-    issueDate: '2026-10-05',
-    returnDate: '2026-10-25',
-    status: 'Issued',
-    contactNo: '9829014567'
-  },
-  {
-    id: '4',
-    srNo: '2060',
-    memberType: 'Student',
-    memberName: 'ROHAN SHARMA',
-    className: 'Class X-A',
-    bookNo: 'BK-1004',
-    bookTitle: 'Wings of Fire',
-    qty: 1,
-    issueDate: '2026-09-20',
-    returnDate: '2026-10-04',
-    status: 'Overdue',
-    contactNo: '9829012345'
-  },
-  {
-    id: '5',
-    srNo: '2061',
-    memberType: 'Student',
-    memberName: 'PRIYA MEENA',
-    className: 'Class IX-A',
-    bookNo: 'BK-1005',
-    bookTitle: 'Python & AI for Secondary Students',
-    qty: 1,
-    issueDate: '2026-10-10',
-    returnDate: '2026-10-24',
-    status: 'Issued',
-    contactNo: '9829011111'
-  }
-];
+const INITIAL_ISSUES = [];
 
 export function IssueBooksPage({ onNavigate }) {
   const [issues, setIssues] = useState(INITIAL_ISSUES);

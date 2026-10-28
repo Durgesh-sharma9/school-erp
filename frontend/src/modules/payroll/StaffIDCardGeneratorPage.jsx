@@ -11,14 +11,7 @@ import {
   Building
 } from 'lucide-react';
 
-const INITIAL_STAFF = [
-  { id: '1', code: '101', name: 'ABHILASHA BHATT', desig: 'Principal', dept: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9672992836', dob: '15/07/1982', bloodGroup: 'B+', isSelected: true },
-  { id: '2', code: '102', name: 'PRITI VERMA', desig: 'Administrator', dept: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9079909813', dob: '20/04/1988', bloodGroup: 'O+', isSelected: true },
-  { id: '3', code: '201', name: 'MONIKA RANI VERMA', desig: 'Teacher', dept: 'TEACHING', mobile: '9870943695', dob: '10/11/1992', bloodGroup: 'A+', isSelected: true },
-  { id: '4', code: '202', name: 'SUNITA KUMARI', desig: 'Teacher', dept: 'TEACHING', mobile: '9511719644', dob: '05/03/1990', bloodGroup: 'AB+', isSelected: true },
-  { id: '5', code: '501', name: 'BHARAT JANGID', desig: 'Driver', dept: 'TRANSPORT', mobile: '8107187618', dob: '12/08/1985', bloodGroup: 'B+', isSelected: false },
-  { id: '6', code: '502', name: 'HANSRAJ JAT', desig: 'Driver', dept: 'TRANSPORT', mobile: '9636644293', dob: '01/01/1980', bloodGroup: 'O+', isSelected: false }
-];
+const INITIAL_STAFF = [];
 
 export function StaffIDCardGeneratorPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_STAFF);

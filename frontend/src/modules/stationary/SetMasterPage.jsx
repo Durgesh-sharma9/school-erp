@@ -14,51 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_SETS = [
-  {
-    id: '1',
-    setCode: 'SET-CLS1',
-    className: 'Class I',
-    categoryName: 'Books & Note Books',
-    setName: 'Class I Complete Academic Kit',
-    noOfItems: 4,
-    totalCost: 1250,
-    items: [
-      { itemName: 'English & Math Textbooks Bundle', qty: 1, rate: 850 },
-      { itemName: 'School Diary 2026-27', qty: 1, rate: 150 },
-      { itemName: '4-Line English Notebook (172 Pgs)', qty: 4, rate: 45 },
-      { itemName: '2-Line Hindi Notebook (172 Pgs)', qty: 3, rate: 45 }
-    ]
-  },
-  {
-    id: '2',
-    setCode: 'SET-CLS5',
-    className: 'Class V',
-    categoryName: 'Books & Note Books',
-    setName: 'Class V Complete Book & Stationery Set',
-    noOfItems: 4,
-    totalCost: 1850,
-    items: [
-      { itemName: 'Class V NCERT & Reference Bundle', qty: 1, rate: 1350 },
-      { itemName: 'School Diary 2026-27', qty: 1, rate: 150 },
-      { itemName: '4-Line English Notebook (172 Pgs)', qty: 4, rate: 45 },
-      { itemName: 'Practical File / Register', qty: 2, rate: 85 }
-    ]
-  },
-  {
-    id: '3',
-    setCode: 'SET-UNIFORM-M',
-    className: 'Class I - V',
-    categoryName: 'Uniform',
-    setName: 'Junior Boy Summer Uniform Pack',
-    noOfItems: 2,
-    totalCost: 1050,
-    items: [
-      { itemName: 'T Shirt- W (22)', qty: 2, rate: 300 },
-      { itemName: 'Pant ( 20 )', qty: 1, rate: 450 }
-    ]
-  }
-];
+const INITIAL_SETS = [];
 
 export function SetMasterPage({ onNavigate }) {
   const [sets, setSets] = useState(INITIAL_SETS);

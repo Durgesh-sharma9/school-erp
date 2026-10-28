@@ -14,44 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_DAMAGED = [
-  {
-    id: '1',
-    bookNo: 'BK-1001',
-    bookTitle: 'Mathematics Class X Exemplar',
-    author: 'R.D. Sharma',
-    publication: 'Dhanpat Rai Publications',
-    damagedQty: 1,
-    currentQty: 24,
-    damageDate: '2026-09-28',
-    reason: 'Water spill during monsoon library leakage',
-    remark: 'Sent for binding restoration or scrap'
-  },
-  {
-    id: '2',
-    bookNo: 'BK-1002',
-    bookTitle: 'Concepts of Physics Part 1',
-    author: 'H.C. Verma',
-    publication: 'Bharati Bhawan',
-    damagedQty: 1,
-    currentQty: 20,
-    damageDate: '2026-10-02',
-    reason: 'Pages 120-145 torn and spine detached',
-    remark: 'Replaced with reserve stock'
-  },
-  {
-    id: '3',
-    bookNo: 'BK-1003',
-    bookTitle: 'Godaan (गोदान)',
-    author: 'Munshi Premchand',
-    publication: 'NCERT New Delhi',
-    damagedQty: 1,
-    currentQty: 16,
-    damageDate: '2026-10-06',
-    reason: 'Cover page missing & ink stains',
-    remark: 'Logged in damaged register'
-  }
-];
+const INITIAL_DAMAGED = [];
 
 const AVAILABLE_BOOKS = [
   { bookNo: 'BK-1001', title: 'Mathematics Class X Exemplar', author: 'R.D. Sharma', publication: 'Dhanpat Rai Publications', availableQty: 24 },

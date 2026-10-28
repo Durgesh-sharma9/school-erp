@@ -17,48 +17,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_PRE_ADMISSIONS = [
-  {
-    id: '1',
-    regNo: 'PRE-2026-101',
-    firstName: 'Vivaan',
-    lastName: 'Sharma',
-    gender: 'Male',
-    dob: '2022-04-12',
-    contactNo: '9829033445',
-    email: 'vivaan.parents@gmail.com',
-    className: 'Nursery - PP3+',
-    fatherName: 'Gaurav Sharma',
-    fatherOccupation: 'Chartered Accountant',
-    motherName: 'Megha Sharma',
-    motherOccupation: 'Software Engineer',
-    address: 'D-84, Hanuman Nagar, Vaishali Nagar, Jaipur',
-    prevSchool: 'Kids Care Play School, Jaipur',
-    feedback: 'Child is very active and communicative. Cleared basic interaction session.',
-    status: 'Shortlisted',
-    photo: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    regNo: 'PRE-2026-102',
-    firstName: 'Ananya',
-    lastName: 'Singhal',
-    gender: 'Female',
-    dob: '2020-09-18',
-    contactNo: '9783011223',
-    email: 'ananya.singhal@yahoo.com',
-    className: 'Class I',
-    fatherName: 'Amit Singhal',
-    fatherOccupation: 'Businessman',
-    motherName: 'Ritu Singhal',
-    motherOccupation: 'Homemaker',
-    address: 'Plot 12, Tonk Road, Jaipur',
-    prevSchool: 'Seedling Nursery, Jaipur',
-    feedback: 'Good academic readiness and polite behavior.',
-    status: 'Admitted',
-    photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80'
-  }
-];
+const INITIAL_PRE_ADMISSIONS = [];
 
 export function PreAdmissionPage({ onNavigate }) {
   const [list, setList] = useState(INITIAL_PRE_ADMISSIONS);

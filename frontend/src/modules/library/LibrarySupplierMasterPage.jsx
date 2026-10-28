@@ -15,44 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_SUPPLIERS = [
-  {
-    id: '1',
-    name: 'Goyal Book Depot',
-    mobile: '9829012345',
-    gstNo: '08AAAAA0000A1Z5',
-    aadhaarNo: '456789123456',
-    panNo: 'ABCDE1234F',
-    address: 'Shop No. 14, Chaura Rasta',
-    city: 'Jaipur',
-    pincode: '302003',
-    remark: 'Authorized NCERT and CBSE distributor'
-  },
-  {
-    id: '2',
-    name: 'National Book House',
-    mobile: '9414055667',
-    gstNo: '08BBBBB1111B2Z6',
-    aadhaarNo: '789012345678',
-    panNo: 'FGHIJ5678K',
-    address: 'Near City Plaza, Tonk Road',
-    city: 'Jaipur',
-    pincode: '302015',
-    remark: 'Specialist in reference books and olympiad material'
-  },
-  {
-    id: '3',
-    name: 'Vikas Book Store',
-    mobile: '9828033445',
-    gstNo: '08CCCCC2222C3Z7',
-    aadhaarNo: '234567890123',
-    panNo: 'KLMNO9012P',
-    address: 'Opp. Maharaja College, JLN Marg',
-    city: 'Jaipur',
-    pincode: '302004',
-    remark: 'College and senior secondary level reference supplier'
-  }
-];
+const INITIAL_SUPPLIERS = [];
 
 export function LibrarySupplierMasterPage({ onNavigate }) {
   const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS);

@@ -17,58 +17,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_PURCHASES = [
-  {
-    id: '1',
-    supplierName: 'Goyal Book Depot',
-    city: 'Jaipur',
-    mobileNo: '9829012345',
-    purchaseDate: '2026-08-15',
-    billNo: 'GBD/2026/892',
-    billDate: '2026-08-15',
-    gstRate: 5,
-    quantity: 50,
-    rate: 450,
-    total: 22500,
-    items: [
-      { bookTitle: 'Mathematics Class X Exemplar', qty: 30, rate: 450, amount: 13500 },
-      { bookTitle: 'Concepts of Physics Part 1', qty: 20, rate: 450, amount: 9000 }
-    ]
-  },
-  {
-    id: '2',
-    supplierName: 'National Book House',
-    city: 'Jaipur',
-    mobileNo: '9414055667',
-    purchaseDate: '2026-09-02',
-    billNo: 'NBH/SEP/104',
-    billDate: '2026-09-01',
-    gstRate: 0,
-    quantity: 35,
-    rate: 260,
-    total: 9100,
-    items: [
-      { bookTitle: 'Godaan (गोदान)', qty: 20, rate: 180, amount: 3600 },
-      { bookTitle: 'Wings of Fire', qty: 15, rate: 299, amount: 4485 }
-    ]
-  },
-  {
-    id: '3',
-    supplierName: 'Vikas Book Store',
-    city: 'Jaipur',
-    mobileNo: '9828033445',
-    purchaseDate: '2026-09-18',
-    billNo: 'VBS/2026/341',
-    billDate: '2026-09-18',
-    gstRate: 5,
-    quantity: 35,
-    rate: 380,
-    total: 13300,
-    items: [
-      { bookTitle: 'Python & AI for Secondary Students', qty: 35, rate: 380, amount: 13300 }
-    ]
-  }
-];
+const INITIAL_PURCHASES = [];
 
 export function PurchaseBooksPage({ onNavigate }) {
   const [purchases, setPurchases] = useState(INITIAL_PURCHASES);

@@ -11,9 +11,7 @@ import {
   Building
 } from 'lucide-react';
 
-const INITIAL_BRANCHES = [
-  { id: '1', name: 'J D INTERNATIONAL SCHOOL', type: 'Secondary', address: 'Main Campus, Jaipur', phone: '9672992836' }
-];
+const INITIAL_BRANCHES = [];
 
 export function PayrollBranchPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_BRANCHES);

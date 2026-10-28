@@ -15,52 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_RETURNS = [
-  {
-    id: '1',
-    studentName: 'ANSHUMAN JOSHI',
-    className: 'Class VI-A',
-    actualReturnDate: '2026-10-14',
-    noOfBooks: 1,
-    books: [
-      {
-        bookNo: 'BK-1001',
-        bookTitle: 'Mathematics Class X Exemplar',
-        issueDate: '2026-09-25',
-        dueDate: '2026-10-09',
-        overdueDays: 5,
-        fineAmount: 25,
-        discount: 5,
-        paidFine: 20,
-        returnStatus: 'Returned'
-      }
-    ],
-    totalFine: 25,
-    paidFine: 20
-  },
-  {
-    id: '2',
-    studentName: 'DEVENDRA SINGH',
-    className: 'Class VIII-B',
-    actualReturnDate: '2026-10-12',
-    noOfBooks: 1,
-    books: [
-      {
-        bookNo: 'BK-1004',
-        bookTitle: 'Wings of Fire',
-        issueDate: '2026-09-28',
-        dueDate: '2026-10-12',
-        overdueDays: 0,
-        fineAmount: 0,
-        discount: 0,
-        paidFine: 0,
-        returnStatus: 'Returned'
-      }
-    ],
-    totalFine: 0,
-    paidFine: 0
-  }
-];
+const INITIAL_RETURNS = [];
 
 const BORROWED_CANDIDATES = [
   {

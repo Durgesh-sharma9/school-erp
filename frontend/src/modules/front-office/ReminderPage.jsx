@@ -14,11 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_REMINDERS = [
-  { id: '1', fromDate: '2026-10-15', toDate: '2026-10-20', description: 'Quarterly Parent-Teacher Meeting announcement and report card review', status: 'Active' },
-  { id: '2', fromDate: '2026-10-22', toDate: '2026-10-25', description: 'Diwali break holiday homework dispatch and online portal updates', status: 'Upcoming' },
-  { id: '3', fromDate: '2026-09-01', toDate: '2026-09-05', description: 'Teachers Day felicitation and award preparation', status: 'Expired' }
-];
+const INITIAL_REMINDERS = [];
 
 export function ReminderPage({ onNavigate }) {
   const [reminders, setReminders] = useState(INITIAL_REMINDERS);

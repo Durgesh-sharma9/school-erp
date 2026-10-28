@@ -13,26 +13,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_VISITS = [
-  {
-    id: '1',
-    empCode: '101',
-    employeeName: 'ABHILASHA BHATT',
-    desig: 'Principal',
-    dateRange: '2026-10-12 to 2026-10-13',
-    schoolName: 'Delhi Public School, Jaipur',
-    remark: 'CBSE Sahodaya School Complex Principals Conclave on NEP 2020 curriculum implementation.'
-  },
-  {
-    id: '2',
-    empCode: '102',
-    employeeName: 'PRITI VERMA',
-    desig: 'Administrator',
-    dateRange: '2026-10-08 to 2026-10-08',
-    schoolName: 'St. Xavier’s Senior Secondary School, Jaipur',
-    remark: 'Inter-school administrative summit regarding digital fee collection and biometric access standards.'
-  }
-];
+const INITIAL_VISITS = [];
 
 export function VisitStaffMeetingPage({ onNavigate }) {
   const [visits, setVisits] = useState(INITIAL_VISITS);

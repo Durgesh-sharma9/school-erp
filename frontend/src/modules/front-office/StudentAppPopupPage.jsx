@@ -14,28 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_POPUPS = [
-  {
-    id: '1',
-    title: 'Diwali Festive Greetings & Holiday Assignment',
-    fromDate: '2026-10-25',
-    toDate: '2026-11-05',
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    description: 'Wish you and your family a very Happy and Prosperous Diwali! Complete your holiday creative projects on time.',
-    imageUrl: 'https://images.unsplash.com/photo-1512418490979-92798cec1380?w=500&auto=format&fit=crop&q=80',
-    status: 'Active'
-  },
-  {
-    id: '2',
-    title: 'Annual Sports Day Registration Open',
-    fromDate: '2026-11-01',
-    toDate: '2026-11-10',
-    videoUrl: '',
-    description: 'Select your track & field events through student portal or meet Physical Education teacher.',
-    imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&auto=format&fit=crop&q=80',
-    status: 'Scheduled'
-  }
-];
+const INITIAL_POPUPS = [];
 
 export function StudentAppPopupPage({ onNavigate }) {
   const [popups, setPopups] = useState(INITIAL_POPUPS);

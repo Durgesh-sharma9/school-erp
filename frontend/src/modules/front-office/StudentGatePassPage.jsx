@@ -16,42 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_PASSES = [
-  {
-    id: '1',
-    passNo: 'GP-2026-001',
-    visitorName: 'Ramesh Choudhary',
-    contactNo: '9829012345',
-    date: '2026-10-15',
-    timeIn: '10:30 AM',
-    timeOut: '11:15 AM',
-    studentName: 'AADITYA SINGH CHOUDHARY',
-    admNo: '1621',
-    className: 'Class I-A',
-    relation: 'Father',
-    reason: 'Doctor Appointment / Medical Checkup',
-    remark: 'Verified and authorized by class teacher Mrs. Sunita Kumari',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    passNo: 'GP-2026-002',
-    visitorName: 'Mukesh Sharma',
-    contactNo: '9414023456',
-    date: '2026-10-14',
-    timeIn: '01:00 PM',
-    timeOut: '01:45 PM',
-    studentName: 'ROHAN SHARMA',
-    admNo: '2060',
-    className: 'Class X-A',
-    relation: 'Father',
-    reason: 'Passport Document Verification Appointment',
-    remark: 'Principal sanction granted',
-    status: 'Approved',
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80'
-  }
-];
+const INITIAL_PASSES = [];
 
 export function StudentGatePassPage({ onNavigate }) {
   const [passes, setPasses] = useState(INITIAL_PASSES);

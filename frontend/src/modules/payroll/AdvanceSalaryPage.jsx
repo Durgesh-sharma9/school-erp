@@ -12,11 +12,7 @@ import {
   IndianRupee
 } from 'lucide-react';
 
-const INITIAL_ADVANCES = [
-  { id: '1', name: 'BHARAT JANGID (501)', installments: 3, payType: 'Cash', amount: 10000, paymentDate: '2026-09-15', remaining: 6667, status: 'Deducting' },
-  { id: '2', name: 'SUNITA KUMARI (202)', installments: 2, payType: 'Bank Transfer', amount: 15000, paymentDate: '2026-10-01', remaining: 7500, status: 'Deducting' },
-  { id: '3', name: 'RAMESH (510)', installments: 1, payType: 'Cash', amount: 5000, paymentDate: '2026-10-10', remaining: 5000, status: 'Pending' }
-];
+const INITIAL_ADVANCES = [];
 
 export function AdvanceSalaryPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_ADVANCES);

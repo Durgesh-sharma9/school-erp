@@ -10,13 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_LEAVE_SETUPS = [
-  { id: '1', department: 'TEACHING', employeeType: 'Permanent', gender: 'All', casualLeave: 12, earnedLeave: 15, medicalLeave: 10 },
-  { id: '2', department: 'ADMINISTRATIVE & MANAGEMENT', employeeType: 'Permanent', gender: 'All', casualLeave: 12, earnedLeave: 18, medicalLeave: 10 },
-  { id: '3', department: 'TRANSPORT', employeeType: 'Permanent', gender: 'Male', casualLeave: 10, earnedLeave: 12, medicalLeave: 8 },
-  { id: '4', department: 'ACCOUNTS', employeeType: 'Permanent', gender: 'All', casualLeave: 12, earnedLeave: 15, medicalLeave: 10 },
-  { id: '5', department: 'NON TEACHING', employeeType: 'Probation', gender: 'All', casualLeave: 8, earnedLeave: 10, medicalLeave: 6 }
-];
+const INITIAL_LEAVE_SETUPS = [];
 
 export function PayrollLeaveSetupPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('common');

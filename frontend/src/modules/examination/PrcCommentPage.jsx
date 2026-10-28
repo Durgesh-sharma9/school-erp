@@ -10,14 +10,7 @@ import {
   Edit2
 } from 'lucide-react';
 
-const INITIAL_PRC_CLASSES = [
-  { id: '1', className: 'I-A', term: 'Half Yearly Examination', openDays: 110, status: 'Active' },
-  { id: '2', className: 'I-A', term: 'Annual Examination', openDays: 120, status: 'Active' },
-  { id: '3', className: 'II-A', term: 'Half Yearly Examination', openDays: 110, status: 'Active' },
-  { id: '4', className: 'II-A', term: 'Annual Examination', openDays: 120, status: 'Active' },
-  { id: '5', className: 'X-A', term: 'Half Yearly Examination', openDays: 115, status: 'Active' },
-  { id: '6', className: 'X-A', term: 'Annual Examination', openDays: 125, status: 'Active' }
-];
+const INITIAL_PRC_CLASSES = [];
 
 export function PrcCommentPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_PRC_CLASSES);

@@ -16,10 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_SHOPS = [
-  { id: '1', shopName: 'J D Book', mobileNo: '8947919195', city: 'Jaipur', state: 'Rajasthan', gstNo: '08AAAAA1111A1Z1', pincode: '302003', address: 'Main Gate Complex, J D Campus', remark: 'Textbooks, notebooks, and reference study sets' },
-  { id: '2', shopName: 'J D Uniform', mobileNo: '9829012345', city: 'Jaipur', state: 'Rajasthan', gstNo: '08BBBBB2222B2Z2', pincode: '302015', address: 'Sports & Tailoring Wing, Block B', remark: 'Summer/Winter school uniform, sportswear, ties & badges' }
-];
+const INITIAL_SHOPS = [];
 
 export function SchoolShopInfoPage({ onNavigate }) {
   const [shops, setShops] = useState(INITIAL_SHOPS);

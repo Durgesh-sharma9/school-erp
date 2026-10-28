@@ -12,44 +12,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_DUES = [
-  {
-    id: '2',
-    billNo: 'SB-2026-002',
-    className: 'Nursery - PP3+-A',
-    name: 'AADHYA CHOUDHARY',
-    mobileNo: '6377281034',
-    shopName: 'J D Uniform',
-    totalCost: 1050,
-    paidAmt: 800,
-    due: 250,
-    issueDate: '2026-10-12'
-  },
-  {
-    id: '3',
-    billNo: 'SB-2026-003',
-    className: 'Class X-A',
-    name: 'ROHAN SHARMA',
-    mobileNo: '9829012345',
-    shopName: 'J D Book',
-    totalCost: 1850,
-    paidAmt: 1500,
-    due: 300,
-    issueDate: '2026-10-14'
-  },
-  {
-    id: '4',
-    billNo: 'SB-2026-004',
-    className: 'Class VI-A',
-    name: 'ANSHUMAN JOSHI',
-    mobileNo: '9414022222',
-    shopName: 'J D Book',
-    totalCost: 1250,
-    paidAmt: 850,
-    due: 400,
-    issueDate: '2026-10-15'
-  }
-];
+const INITIAL_DUES = [];
 
 export function DuePaymentPage({ onNavigate }) {
   const [dues, setDues] = useState(INITIAL_DUES);

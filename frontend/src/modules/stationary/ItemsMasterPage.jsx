@@ -15,18 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_ITEMS = [
-  { id: '1', shopName: 'J D Book', categoryName: 'Diary', barcode: 'BC-DIR-001', hsnCode: '4820', itemName: 'School Diary 2026-27', rate: 150, openQty: 500, reorderQty: 50, purchasedQty: 100, issuedQty: 320, availableQty: 280 },
-  { id: '2', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-022', hsnCode: '6203', itemName: 'T Shirt- W (22)', rate: 300, openQty: 120, reorderQty: 20, purchasedQty: 50, issuedQty: 95, availableQty: 75 },
-  { id: '3', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-024', hsnCode: '6203', itemName: 'T Shirt- Y (24)', rate: 300, openQty: 100, reorderQty: 20, purchasedQty: 40, issuedQty: 85, availableQty: 55 },
-  { id: '4', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-020', hsnCode: '6203', itemName: 'T-Shirt -W( 20 )', rate: 300, openQty: 80, reorderQty: 15, purchasedQty: 30, issuedQty: 60, availableQty: 50 },
-  { id: '5', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PNT-020', hsnCode: '6203', itemName: 'Pant ( 20 )', rate: 450, openQty: 40, reorderQty: 10, purchasedQty: 10, issuedQty: 43, availableQty: 7 },
-  { id: '6', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PNT-030', hsnCode: '6203', itemName: 'Pant ( 30 )', rate: 520, openQty: 30, reorderQty: 10, purchasedQty: 10, issuedQty: 35, availableQty: 5 },
-  { id: '7', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PAJ-026', hsnCode: '6203', itemName: 'Pajama ( 26 )', rate: 280, openQty: 25, reorderQty: 10, purchasedQty: 5, issuedQty: 26, availableQty: 4 },
-  { id: '8', shopName: 'J D Book', categoryName: 'Note Books', barcode: 'BC-NBK-001', hsnCode: '4820', itemName: '4-Line English Notebook (172 Pgs)', rate: 45, openQty: 600, reorderQty: 100, purchasedQty: 200, issuedQty: 457, availableQty: 343 },
-  { id: '9', shopName: 'J D Book', categoryName: 'Note Books', barcode: 'BC-NBK-002', hsnCode: '4820', itemName: '2-Line Hindi Notebook (172 Pgs)', rate: 45, openQty: 550, reorderQty: 100, purchasedQty: 150, issuedQty: 410, availableQty: 290 },
-  { id: '10', shopName: 'J D Book', categoryName: 'Register', barcode: 'BC-REG-001', hsnCode: '4820', itemName: 'Practical File / Register', rate: 85, openQty: 250, reorderQty: 40, purchasedQty: 50, issuedQty: 190, availableQty: 110 }
-];
+const INITIAL_ITEMS = [];
 
 export function ItemsMasterPage({ onNavigate }) {
   const [items, setItems] = useState(INITIAL_ITEMS);

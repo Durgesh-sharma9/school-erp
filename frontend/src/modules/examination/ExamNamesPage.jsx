@@ -10,16 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_EXAM_NAMES = [
-  { id: '1', className: 'I', term: 'Half Yearly Examination', exams: ['Unit Test 1', 'Periodic Test 1', 'Half Yearly Theory'] },
-  { id: '2', className: 'I', term: 'Annual Examination', exams: ['Unit Test 2', 'Periodic Test 2', 'Annual Theory'] },
-  { id: '3', className: 'II', term: 'Half Yearly Examination', exams: ['Unit Test 1', 'Half Yearly Exam'] },
-  { id: '4', className: 'II', term: 'Annual Examination', exams: ['Unit Test 2', 'Annual Exam'] },
-  { id: '5', className: 'X', term: 'Half Yearly Examination', exams: ['Periodic Test 1', 'Periodic Test 2', 'Half Yearly Theory', 'Practical'] },
-  { id: '6', className: 'X', term: 'Annual Examination', exams: ['Pre-Board 1', 'Pre-Board 2', 'Board Exam'] },
-  { id: '7', className: 'XII-HUMANITIES', term: 'Half Yearly Examination', exams: ['UT 1', 'Half Yearly Exam'] },
-  { id: '8', className: 'XII-HUMANITIES', term: 'Pre- Board Examinations', exams: ['Pre-Board 1', 'Pre-Board 2'] }
-];
+const INITIAL_EXAM_NAMES = [];
 
 export function ExamNamesPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_EXAM_NAMES);

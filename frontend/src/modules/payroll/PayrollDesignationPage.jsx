@@ -10,15 +10,7 @@ import {
   FileDown
 } from 'lucide-react';
 
-const INITIAL_DESIGNATIONS = [
-  { id: '1', designation: 'Accountant', department: 'ACCOUNTS', payGrade: 'Grade C' },
-  { id: '2', designation: 'Administrator', department: 'ADMINISTRATIVE & MANAGEMENT', payGrade: 'Grade A' },
-  { id: '3', designation: 'Director', department: 'ADMINISTRATIVE & MANAGEMENT', payGrade: 'Grade A' },
-  { id: '4', designation: 'Driver', department: 'TRANSPORT', payGrade: 'Grade A' },
-  { id: '5', designation: 'LIBRARIAN', department: 'LIBRARY', payGrade: 'Grade A' },
-  { id: '6', designation: 'Principal', department: 'ADMINISTRATIVE & MANAGEMENT', payGrade: 'Grade A' },
-  { id: '7', designation: 'Teacher', department: 'TEACHING', payGrade: 'Grade B' }
-];
+const INITIAL_DESIGNATIONS = [];
 
 export function PayrollDesignationPage({ onNavigate }) {
   const [data, setData] = useState(INITIAL_DESIGNATIONS);

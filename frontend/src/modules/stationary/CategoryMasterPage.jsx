@@ -13,14 +13,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_CATEGORIES = [
-  { id: '1', shopName: 'J D Uniform', categoryName: 'Uniform', percentage: 0 },
-  { id: '2', shopName: 'J D Book', categoryName: 'Books', percentage: 0 },
-  { id: '3', shopName: 'J D Book', categoryName: 'Note Books', percentage: 0 },
-  { id: '4', shopName: 'J D Book', categoryName: 'Diary', percentage: 0 },
-  { id: '5', shopName: 'J D Book', categoryName: 'Register', percentage: 0 },
-  { id: '6', shopName: 'J D Uniform', categoryName: 'Sports Wear', percentage: 5 }
-];
+const INITIAL_CATEGORIES = [];
 
 export function CategoryMasterPage({ onNavigate }) {
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);

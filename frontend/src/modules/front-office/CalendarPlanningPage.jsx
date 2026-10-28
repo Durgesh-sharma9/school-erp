@@ -15,41 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_CALENDAR_PLANS = [
-  {
-    id: '1',
-    type: 'Planning',
-    startDate: '2026-10-18',
-    endDate: '2026-10-18',
-    title: 'Inter-House Science Exhibition & Robo-Tech Expo',
-    className: 'Class VI - XII',
-    section: 'All',
-    description: 'Students will present STEM working models in the main auditorium. Chief Guest will be Prof. from MNIT Jaipur.',
-    isHoliday: false
-  },
-  {
-    id: '2',
-    type: 'Event',
-    startDate: '2026-10-31',
-    endDate: '2026-11-04',
-    title: 'Diwali & Govardhan Puja Holidays',
-    className: 'All Classes',
-    section: 'All',
-    description: 'School campus will remain closed on account of Diwali festival. Online assignments accessible on student app.',
-    isHoliday: true
-  },
-  {
-    id: '3',
-    type: 'Planning',
-    startDate: '2026-11-14',
-    endDate: '2026-11-14',
-    title: 'Children’s Day Carnival & Sports Gala',
-    className: 'Pre-Primary to Class XII',
-    section: 'All',
-    description: 'Food stalls, games, fancy dress competition and fun races organized by teaching staff for students.',
-    isHoliday: false
-  }
-];
+const INITIAL_CALENDAR_PLANS = [];
 
 export function CalendarPlanningPage({ onNavigate }) {
   const [plans, setPlans] = useState(INITIAL_CALENDAR_PLANS);

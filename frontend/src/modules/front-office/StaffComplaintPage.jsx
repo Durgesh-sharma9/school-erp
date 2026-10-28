@@ -14,26 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_STAFF_COMPLAINTS = [
-  {
-    id: '1',
-    date: '2026-10-10',
-    againstStaff: 'HANSRAJ JAT (Driver - Transport)',
-    complaintType: 'Punctuality',
-    reason: 'Bus Route No. 3 arrived 25 minutes late at Mansarovar stop without prior notification to parents.',
-    status: 'Investigated & Resolved',
-    actionTaken: 'Warning letter issued to driver; vehicle GPS recalibrated.'
-  },
-  {
-    id: '2',
-    date: '2026-10-11',
-    againstStaff: 'RAJENDRA SINGH (Security Supervisor)',
-    complaintType: 'Misbehavior',
-    reason: 'Rude behavior with visitor during gate entry verification.',
-    status: 'Under Review',
-    actionTaken: 'Explained protocol to security team; customer-service refresher conducted.'
-  }
-];
+const INITIAL_STAFF_COMPLAINTS = [];
 
 export function StaffComplaintPage({ onNavigate }) {
   const [complaints, setComplaints] = useState(INITIAL_STAFF_COMPLAINTS);
