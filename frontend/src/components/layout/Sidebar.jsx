@@ -215,32 +215,6 @@ export const menuCategories = [
     ]
   },
   {
-    id: 'master',
-    title: 'Master',
-    icon: GraduationCap, // school in UAB
-    subItems: [
-      { title: 'Class Master', path: '/class' },
-      { title: 'Group Subject Master', path: '/subject-group' },
-      { title: 'Subject Master', path: '/subject' },
-      { title: 'Subject Link', path: '/subject-link' },
-      { title: 'Stream Master', path: '/add-update-stream' },
-      { title: 'Reports', path: '/master-reports' }
-    ]
-  },
-  {
-    id: 'timetable',
-    title: 'Timetable Pro',
-    icon: CalendarDays,
-    subItems: [
-      { title: 'Dashboard', path: '/timetable-dashboard' },
-      { title: 'Time Tables', path: '/timetables' },
-      { title: 'Daily Desk', path: '/daily-desk' },
-      { title: 'Lesson Planning', path: '/lesson-planning' },
-      { title: 'Reports', path: '/timetable-reports' },
-      { title: 'Homework', path: '/timetable-homework' }
-    ]
-  },
-  {
     id: 'student',
     title: 'Student',
     icon: User, // person in UAB
@@ -257,21 +231,6 @@ export const menuCategories = [
     ]
   },
   {
-    id: 'attendance',
-    title: 'Attendance',
-    icon: CalendarCheck,
-    subItems: [
-      { title: 'Staff Attendance', path: '/staff-attendance' },
-      { title: 'Student Attendance', path: '/student-attendance' }
-    ]
-  },
-  {
-    id: 'inventory-hub',
-    title: 'Inventory Hub',
-    icon: Package,
-    path: '/inventory-hub'
-  },
-  {
     id: 'users',
     title: 'Users',
     icon: Users,
@@ -281,6 +240,47 @@ export const menuCategories = [
       { title: 'Drivers', path: '/driver-users' },
       { title: 'User Privileges', path: '/user-privilege' },
       { title: 'Reports', path: '/user-reports' }
+    ]
+  },
+  {
+    id: 'master',
+    title: 'Master',
+    icon: GraduationCap, // school in UAB
+    subItems: [
+      { title: 'Class Master', path: '/class' },
+      { title: 'Group Subject Master', path: '/subject-group' },
+      { title: 'Subject Master', path: '/subject' },
+      { title: 'Subject Link', path: '/subject-link' },
+      { title: 'Stream Master', path: '/add-update-stream' },
+      { title: 'Reports', path: '/master-reports' }
+    ]
+  },
+  {
+    id: 'attendance',
+    title: 'Attendance',
+    icon: CalendarCheck,
+    subItems: [
+      { title: 'Staff Attendance', path: '/staff-attendance' },
+      { title: 'Student Attendance', path: '/student-attendance' }
+    ]
+  },
+  {
+    id: 'fee',
+    title: 'Fee',
+    icon: IndianRupee, // currency_rupee in UAB
+    subItems: [
+      { title: 'Fee Group', path: '/fee-head-group' },
+      { title: 'Fee Head', path: '/fee-head' },
+      { title: 'Concession Category', path: '/fee-concession-type' },
+      { title: 'Fee Fine Master', path: '/fee-fine-master' },
+      { title: 'Fee Structure', path: '/fee-structure' },
+      { title: 'Fee Edit Manual', path: '/fee-edit-manual' },
+      { title: 'Fee Concession', path: '/fee-concession' },
+      { title: 'Fee Entry', path: '/fee-collection' },
+      { title: 'Sibling Fee Entry', path: '/sibling-fee-collection' },
+      { title: 'Cancel Fee', path: '/fee-refund' },
+      { title: 'Board Fee Manual Entry', path: '/board-fee-manual-collection' },
+      { title: 'Reports', path: '/fee-reports' }
     ]
   },
   {
@@ -298,6 +298,29 @@ export const menuCategories = [
       { title: 'Enquiry Banner', path: '/crm/thankyou-cms' }
     ]
   },
+  {
+    id: 'timetable',
+    title: 'Timetable Pro',
+    icon: CalendarDays,
+    subItems: [
+      { title: 'Dashboard', path: '/timetable-dashboard' },
+      { title: 'Time Tables', path: '/timetables' },
+      { title: 'Daily Desk', path: '/daily-desk' },
+      { title: 'Lesson Planning', path: '/lesson-planning' },
+      { title: 'Reports', path: '/timetable-reports' },
+      { title: 'Homework', path: '/timetable-homework' }
+    ]
+  },
+
+
+  {
+    id: 'inventory-hub',
+    title: 'Inventory Hub',
+    icon: Package,
+    path: '/inventory-hub'
+  },
+
+
   {
     id: 'certificates',
     title: 'Certificates',
@@ -339,25 +362,7 @@ export const menuCategories = [
       { title: 'Student Photo Management', path: '/student-photo-management' }
     ]
   },
-  {
-    id: 'fee',
-    title: 'Fee',
-    icon: IndianRupee, // currency_rupee in UAB
-    subItems: [
-      { title: 'Fee Group', path: '/fee-head-group' },
-      { title: 'Fee Head', path: '/fee-head' },
-      { title: 'Concession Category', path: '/fee-concession-type' },
-      { title: 'Fee Fine Master', path: '/fee-fine-master' },
-      { title: 'Fee Structure', path: '/fee-structure' },
-      { title: 'Fee Edit Manual', path: '/fee-edit-manual' },
-      { title: 'Fee Concession', path: '/fee-concession' },
-      { title: 'Fee Entry', path: '/fee-collection' },
-      { title: 'Sibling Fee Entry', path: '/sibling-fee-collection' },
-      { title: 'Cancel Fee', path: '/fee-refund' },
-      { title: 'Board Fee Manual Entry', path: '/board-fee-manual-collection' },
-      { title: 'Reports', path: '/fee-reports' }
-    ]
-  },
+
   {
     id: 'accounts',
     title: 'Accounts & Expense',
@@ -569,10 +574,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     const rawCategories = role === 'STUDENT'
       ? studentMenuCategories
       : role === 'STAFF'
-      ? staffMenuCategories
-      : role === 'ATTENDER'
-      ? attenderMenuCategories
-      : menuCategories;
+        ? staffMenuCategories
+        : role === 'ATTENDER'
+          ? attenderMenuCategories
+          : menuCategories;
 
     return rawCategories.filter(item => {
       // SuperAdmin Analytics tab should ONLY appear when role is SUPER_ADMIN
@@ -658,7 +663,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
       {/* 1:1 Test Master Pro Sidenav */}
       <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 md:w-64 bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
-        
+
         {/* Top Header matching Test Master Pro */}
         <div className="relative flex h-16 items-center justify-between border-b border-slate-100 pl-5 pr-3 shrink-0 bg-white">
           <div className="flex items-center gap-1.5 select-none cursor-pointer" onClick={() => onNavigate && onNavigate('/dashboard')}>
@@ -668,7 +673,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           </div>
 
           <button
-            onClick={() => {}}
+            onClick={() => { }}
             className="hidden md:flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/80 rounded-lg h-7 w-7 transition-colors cursor-pointer border border-slate-200/70 shadow-2xs"
             title="Collapse sidebar"
           >
@@ -713,25 +718,22 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                       if (window.innerWidth < 768 && onClose) onClose();
                     }
                   }}
-                  className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold transition-all duration-200 group overflow-hidden whitespace-nowrap w-full text-left cursor-pointer ${
-                    isActive && !hasChildren
-                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                      : isOpen || isActive
+                  className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold transition-all duration-200 group overflow-hidden whitespace-nowrap w-full text-left cursor-pointer ${isActive && !hasChildren
+                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : isOpen || isActive
                       ? 'bg-slate-50 text-slate-900 border border-slate-100 shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50/90 hover:text-indigo-600'
-                  }`}
+                    }`}
                 >
                   {/* Icon Box with distinct soft background */}
-                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
-                    isActive && !hasChildren
-                      ? 'bg-white/20 text-white shadow-inner'
-                      : isOpen || isActive
+                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${isActive && !hasChildren
+                    ? 'bg-white/20 text-white shadow-inner'
+                    : isOpen || isActive
                       ? 'bg-white shadow-2xs text-indigo-600'
                       : colorConfig.boxBg
-                  }`}>
-                    <Icon className={`h-[15px] w-[15px] transition-transform duration-200 group-hover:scale-110 ${
-                      isActive && !hasChildren ? 'text-white' : (isOpen || isActive ? 'text-indigo-600' : colorConfig.iconColor)
-                    }`} />
+                    }`}>
+                    <Icon className={`h-[15px] w-[15px] transition-transform duration-200 group-hover:scale-110 ${isActive && !hasChildren ? 'text-white' : (isOpen || isActive ? 'text-indigo-600' : colorConfig.iconColor)
+                      }`} />
                   </div>
 
                   <span className="flex-1 truncate tracking-tight font-medium text-[13px]">
@@ -740,9 +742,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
                   {hasChildren && (
                     <ChevronDown
-                      className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-0 text-slate-700' : '-rotate-90 text-slate-400 group-hover:text-slate-600'
-                      } ${isActive && !hasChildren ? 'text-white' : ''}`}
+                      className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-0 text-slate-700' : '-rotate-90 text-slate-400 group-hover:text-slate-600'
+                        } ${isActive && !hasChildren ? 'text-white' : ''}`}
                     />
                   )}
                 </button>
@@ -764,20 +765,17 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             {/* Expandable Sub-Item (e.g. Reports) */}
                             <button
                               onClick={() => toggleSubDropdown(subId)}
-                              className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2 text-[12.5px] font-medium transition-all duration-200 group w-full text-left cursor-pointer ${
-                                isSubOpen || isAnyChildActive
-                                  ? 'text-indigo-900 bg-indigo-50/50 font-semibold'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
-                              }`}
+                              className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2 text-[12.5px] font-medium transition-all duration-200 group w-full text-left cursor-pointer ${isSubOpen || isAnyChildActive
+                                ? 'text-indigo-900 bg-indigo-50/50 font-semibold'
+                                : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
+                                }`}
                             >
-                              <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${
-                                isAnyChildActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
-                              }`} />
+                              <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isAnyChildActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
+                                }`} />
                               <span className="truncate">{sub.title}</span>
                               <ChevronDown
-                                className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${
-                                  isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
-                                }`}
+                                className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
+                                  }`}
                               />
                             </button>
 
@@ -793,11 +791,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                         if (onNavigate) onNavigate(child.path);
                                         if (window.innerWidth < 768 && onClose) onClose();
                                       }}
-                                      className={`relative flex items-center rounded-lg py-1 pl-[2rem] pr-2 text-[12px] transition-all text-left cursor-pointer ${
-                                        isChildActive
-                                          ? 'text-indigo-700 bg-indigo-50/70 font-semibold shadow-2xs'
-                                          : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-medium'
-                                      }`}
+                                      className={`relative flex items-center rounded-lg py-1 pl-[2rem] pr-2 text-[12px] transition-all text-left cursor-pointer ${isChildActive
+                                        ? 'text-indigo-700 bg-indigo-50/70 font-semibold shadow-2xs'
+                                        : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-medium'
+                                        }`}
                                     >
                                       <span className="truncate">{child.title}</span>
                                     </button>
@@ -817,16 +814,14 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2.5 text-[12.5px] font-medium transition-all duration-200 group text-left cursor-pointer ${
-                            isSubActive
-                              ? 'text-indigo-700 bg-indigo-50/80 font-semibold shadow-2xs'
-                              : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
-                          }`}
+                          className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2.5 text-[12.5px] font-medium transition-all duration-200 group text-left cursor-pointer ${isSubActive
+                            ? 'text-indigo-700 bg-indigo-50/80 font-semibold shadow-2xs'
+                            : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
+                            }`}
                         >
                           {/* Dot exactly on guide line */}
-                          <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${
-                            isSubActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
-                          }`} />
+                          <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isSubActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
+                            }`} />
                           <span className="truncate">{sub.title}</span>
                         </button>
                       );
@@ -840,7 +835,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
         {/* Student Profile or User Card at Bottom matching Test Master Pro */}
         {role === 'STUDENT' ? (
-          <div 
+          <div
             onClick={() => onNavigate && onNavigate('/profile')}
             className="p-3 mx-2 mb-2 rounded-xl border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100/80 cursor-pointer transition-all flex items-center justify-between shrink-0 shadow-2xs"
           >
