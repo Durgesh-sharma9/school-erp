@@ -182,6 +182,26 @@ class TenantDataStore {
     localStorage.setItem(key, JSON.stringify(classesList || []));
   }
 
+  // 2b. Promote students to target class and division
+  promoteStudents(schoolId, studentIds, targetClass, targetDivision) {
+    if (!schoolId || !studentIds || studentIds.length === 0) return [];
+    const students = this.getStudents(schoolId);
+    const updated = students.map(s => {
+      if (studentIds.includes(s.id) || studentIds.includes(s.admNo)) {
+        return {
+          ...s,
+          className: targetClass,
+          section: targetDivision,
+          class_id: targetClass,
+          division_id: targetDivision
+        };
+      }
+      return s;
+    });
+    localStorage.setItem(this.getStorageKey(schoolId, 'students'), JSON.stringify(updated));
+    return updated;
+  }
+
   // 3. Get school profile strictly for this school
   getSchoolProfile(schoolId) {
     if (!schoolId) {
