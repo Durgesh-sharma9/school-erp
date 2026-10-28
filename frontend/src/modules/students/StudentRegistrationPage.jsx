@@ -19,7 +19,9 @@ import {
   AlertCircle,
   Trophy,
   User,
-  Users
+  Users,
+  Copy,
+  Phone
 } from 'lucide-react';
 
 // Reusable Outline Field matching Angular Material mat-form-field appearance="outline"
@@ -34,11 +36,18 @@ function OutlineInput({
   placeholder = '',
   disabled = false,
   rightIcon = null,
+  actionButton = null,
+  topRightLink = null,
   error = null,
   className = ''
 }) {
   return (
     <div className={`relative mb-3 ${className}`}>
+      {topRightLink && (
+        <span className="absolute -top-4 right-0 text-[11px] text-emerald-600 hover:underline cursor-pointer z-20 font-medium flex items-center gap-1">
+          {topRightLink}
+        </span>
+      )}
       <label
         className={`absolute -top-2 left-2.5 px-1 text-[11px] font-medium bg-white z-10 pointer-events-none transition-all ${
           error ? 'text-red-500 font-semibold' : isOrange ? 'text-orange-500 font-semibold' : 'text-gray-500'
@@ -59,9 +68,14 @@ function OutlineInput({
             error ? 'border-red-500 ring-1 ring-red-500/20' : 'border-gray-300'
           } rounded focus:border-indigo-600 focus:outline-none transition-colors ${
             disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
-          } ${rightIcon ? 'pr-9' : ''}`}
+          } ${actionButton ? 'pr-32' : rightIcon ? 'pr-9' : ''}`}
         />
-        {rightIcon && (
+        {actionButton && (
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center z-10">
+            {actionButton}
+          </div>
+        )}
+        {rightIcon && !actionButton && (
           <div className="absolute right-2.5 flex items-center pointer-events-none text-indigo-600">
             {rightIcon}
           </div>
@@ -322,7 +336,9 @@ const INITIAL_FORM_DATA = {
   fathers_name: '',
   mothers_name: '',
   fathers_mobile_no: '',
+  fathers_whatsapp_no: '',
   mothers_mobile_no: '',
+  mothers_whatsapp_no: '',
   house: 'None',
   remark: '',
   status_type: 'Studying',
@@ -718,8 +734,12 @@ export function StudentRegistrationPage({ onNavigate }) {
         fatherName: formData.fathers_name ? formData.fathers_name.trim() : '',
         motherName: formData.mothers_name ? formData.mothers_name.trim() : '',
         fatherMobile: formData.fathers_mobile_no || '',
+        fatherWhatsapp: formData.fathers_whatsapp_no || formData.fathers_mobile_no || '',
+        fatherEmail: formData.fathers_email || '',
         motherMobile: formData.mothers_mobile_no || '',
-        contactNo: formData.contact_no_sms || formData.fathers_mobile_no || '',
+        motherWhatsapp: formData.mothers_whatsapp_no || formData.mothers_mobile_no || '',
+        motherEmail: formData.mothers_email || '',
+        contactNo: formData.fathers_whatsapp_no || formData.contact_no_sms || formData.fathers_mobile_no || '',
         className: formData.class_id || 'I',
         section: formData.division_id || 'A',
         dob: formData.dob || '',
@@ -1377,21 +1397,49 @@ export function StudentRegistrationPage({ onNavigate }) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
                     <OutlineInput
                       label="Father Name"
+                      required
                       name="fathers_name"
                       value={formData.fathers_name}
                       onChange={handleInputChange}
                     />
                     <OutlineInput
                       label="Father Mobile No."
+                      required
                       name="fathers_mobile_no"
                       value={formData.fathers_mobile_no}
                       onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father WhatsApp No."
+                      name="fathers_whatsapp_no"
+                      value={formData.fathers_whatsapp_no}
+                      onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!formData.fathers_mobile_no?.trim()) {
+                              toast.error('Please enter Father Mobile No. first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, fathers_whatsapp_no: prev.fathers_mobile_no }));
+                            toast.success('WhatsApp No. copied from Mobile No.');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Father Mobile No."
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Mobile</span>
+                        </button>
+                      }
                     />
                     <OutlineInput
                       label="Father Email"
                       name="fathers_email"
                       value={formData.fathers_email}
                       onChange={handleInputChange}
+                      placeholder="Optional"
                     />
 
                     <OutlineInput
@@ -1465,12 +1513,76 @@ export function StudentRegistrationPage({ onNavigate }) {
                       name="mothers_mobile_no"
                       value={formData.mothers_mobile_no}
                       onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!formData.fathers_mobile_no?.trim()) {
+                              toast.error('Please enter Father Mobile No. first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, mothers_mobile_no: prev.fathers_mobile_no }));
+                            toast.success('Mother Mobile copied from Father Mobile!');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Father Mobile No."
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Father</span>
+                        </button>
+                      }
+                    />
+                    <OutlineInput
+                      label="Mother WhatsApp No."
+                      name="mothers_whatsapp_no"
+                      value={formData.mothers_whatsapp_no}
+                      onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const sourceNo = formData.mothers_mobile_no?.trim() || formData.fathers_whatsapp_no?.trim() || formData.fathers_mobile_no?.trim();
+                            if (!sourceNo) {
+                              toast.error('Please enter Mother Mobile or Father Mobile first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, mothers_whatsapp_no: sourceNo }));
+                            toast.success('Mother WhatsApp No. copied!');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Mobile / Father WhatsApp No."
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Mobile</span>
+                        </button>
+                      }
                     />
                     <OutlineInput
                       label="Mother Email"
                       name="mothers_email"
                       value={formData.mothers_email}
                       onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!formData.fathers_email?.trim()) {
+                              toast.error('Please enter Father Email first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, mothers_email: prev.fathers_email }));
+                            toast.success('Mother Email copied from Father Email!');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Father Email"
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Father</span>
+                        </button>
+                      }
                     />
 
                     <OutlineInput
