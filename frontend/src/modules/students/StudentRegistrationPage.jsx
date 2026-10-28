@@ -964,27 +964,10 @@ export function StudentRegistrationPage({ onNavigate }) {
               />
               <OutlineInput
                 label="SMS/Whatsapp No."
+                required
                 name="contact_no_sms"
                 value={formData.contact_no_sms}
                 onChange={handleInputChange}
-                actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!formData.fathers_mobile_no?.trim()) {
-                        toast.error('Please enter Father Mobile first');
-                        return;
-                      }
-                      setFormData(prev => ({ ...prev, contact_no_sms: prev.fathers_mobile_no }));
-                      toast.success('Copied Father Mobile to SMS/WhatsApp No.');
-                    }}
-                    className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
-                    title="Copy Father Mobile No."
-                  >
-                    <Copy className="w-2.5 h-2.5 text-emerald-600" />
-                    <span>Same as Mobile</span>
-                  </button>
-                }
               />
               <OutlineInput
                 label="Father Name"
@@ -1006,7 +989,6 @@ export function StudentRegistrationPage({ onNavigate }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4">
               <OutlineInput
                 label="Father Mobile"
-                required
                 name="fathers_mobile_no"
                 value={formData.fathers_mobile_no}
                 onChange={handleInputChange}
@@ -1016,24 +998,6 @@ export function StudentRegistrationPage({ onNavigate }) {
                 name="mothers_mobile_no"
                 value={formData.mothers_mobile_no}
                 onChange={handleInputChange}
-                actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!formData.fathers_mobile_no?.trim()) {
-                        toast.error('Please enter Father Mobile first');
-                        return;
-                      }
-                      setFormData(prev => ({ ...prev, mothers_mobile_no: prev.fathers_mobile_no }));
-                      toast.success('Copied Father Mobile to Mother Mobile No.');
-                    }}
-                    className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
-                    title="Copy Father Mobile No."
-                  >
-                    <Copy className="w-2.5 h-2.5 text-emerald-600" />
-                    <span>Same as Father</span>
-                  </button>
-                }
               />
               <OutlineSelect
                 label="House"
