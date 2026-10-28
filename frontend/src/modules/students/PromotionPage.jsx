@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Search,
   Plus,
@@ -6,7 +8,8 @@ import {
   ChevronDown,
   ChevronsRight,
   ChevronsLeft,
-  Check
+  Check,
+  RefreshCw
 } from 'lucide-react';
 
 const CLASSES = [
@@ -35,26 +38,18 @@ const CLASSES = [
 const DIVISIONS = ['A', 'B', 'C', 'D'];
 
 export function PromotionPage({ onNavigate }) {
+  const { schoolId, schoolName } = useAuth();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Class table matching Live UAB screenshot Step 1904
-  const [classList, setClassList] = useState([
-    { id: 1, name: 'Nursery - PP3+-A', count: 26 },
-    { id: 2, name: 'Lower Kindergarten - PP4+-A', count: 49 },
-    { id: 3, name: 'Upper Kindergarten - PP5+-A', count: 71 },
-    { id: 4, name: 'I-A', count: 82 },
-    { id: 5, name: 'II-A', count: 72 },
-    { id: 6, name: 'III-A', count: 67 },
-    { id: 7, name: 'IV-A', count: 68 },
-    { id: 8, name: 'V-A', count: 84 },
-    { id: 9, name: 'VI-A', count: 75 },
-    { id: 10, name: 'VII-A', count: 63 },
-    { id: 11, name: 'VIII-A', count: 61 },
-    { id: 12, name: 'IX-A', count: 53 },
-    { id: 13, name: 'X-A', count: 55 }
-  ]);
+  // Real students loaded for this school tenant (NO SEEDED/MOCK DATA)
+  const [allStudents, setAllStudents] = useState([]);
+
+  // Dynamically computed class list from real registered students
+  const [classList, setClassList] = useState([]);
 
   // Modal State
   const [sourceSession, setSourceSession] = useState('2025-2026');
@@ -63,18 +58,99 @@ export function PromotionPage({ onNavigate }) {
   const [targetClass, setTargetClass] = useState('II');
   const [targetDivision, setTargetDivision] = useState('A');
 
-  // Source list students
-  const [sourceStudents, setSourceStudents] = useState([
-    { id: 'p1', srNo: '1621', rollNo: '1', name: 'AADITYA SINGH CHOUDHARY', fatherName: 'NARENDRA SINGH CHOUDHARY', selected: false },
-    { id: 'p2', srNo: 'A135', rollNo: '2', name: 'ADVIK RAO', fatherName: 'PRADEEP RAO', selected: false },
-    { id: 'p3', srNo: 'A160', rollNo: '3', name: 'ANANYA RAJESH KUMAR YADAV', fatherName: 'RAJESH KUMAR YADAV', selected: false },
-    { id: 'p4', srNo: '1590', rollNo: '4', name: 'ANVI VERMA', fatherName: 'DINESH VERMA', selected: false },
-    { id: 'p5', srNo: '2051', rollNo: '5', name: 'ARADIYA SAINI', fatherName: 'GANESH SAINI', selected: false },
-    { id: 'p6', srNo: '2061', rollNo: '6', name: 'ARJUN SHARMA', fatherName: 'UMAKANT SHARMA', selected: false }
-  ]);
+  // Source list students (dynamically filtered from allStudents)
+  const [sourceStudents, setSourceStudents] = useState([]);
 
-  // Target list students
+  // Target list students (transferred by user)
   const [targetStudents, setTargetStudents] = useState([]);
+
+  // Load real students dynamically from tenantStore and backend API
+  const loadStudents = async () => {
+    try {
+      setLoading(true);
+      // 1. Load from tenant store (localStorage partition)
+      let students = tenantStore.getStudents(schoolId) || [];
+
+      // 2. Transmit fetch to backend API
+      try {
+        const res = await fetch('/api/students', {
+          headers: {
+            'x-school-id': schoolId || 'sch_jd_intl'
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const backendStudents = json.data || [];
+          if (backendStudents.length > 0) {
+            students = backendStudents;
+          }
+        }
+      } catch {
+        // Fallback silently to tenantStore cache
+      }
+
+      setAllStudents(students);
+      recalculateClassList(students);
+    } catch (err) {
+      console.error('[PromotionPage] Error loading students:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const recalculateClassList = (students) => {
+    if (!students || students.length === 0) {
+      setClassList([]);
+      return;
+    }
+
+    const countMap = {};
+    students.forEach((s) => {
+      const cls = s.className || s.class_id || 'I';
+      const sec = s.section || s.division_id || 'A';
+      const key = `${cls}-${sec}`;
+      countMap[key] = (countMap[key] || 0) + 1;
+    });
+
+    const list = Object.entries(countMap).map(([name, count], idx) => ({
+      id: idx + 1,
+      name,
+      count
+    }));
+
+    setClassList(list);
+  };
+
+  useEffect(() => {
+    loadStudents();
+  }, [schoolId]);
+
+  // Synchronize sourceStudents when modal opens or source class/division changes
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const targetIds = new Set(targetStudents.map((t) => String(t.id)));
+    const matching = allStudents.filter((s) => {
+      const sId = String(s.id || s._id || s.admNo || '');
+      const cls = (s.className || s.class_id || '').trim().toLowerCase();
+      const div = (s.section || s.division_id || 'A').trim().toLowerCase();
+      const targetCls = sourceClass.trim().toLowerCase();
+      const targetDiv = sourceDivision.trim().toLowerCase();
+
+      return cls === targetCls && div === targetDiv && !targetIds.has(sId);
+    });
+
+    setSourceStudents(
+      matching.map((s) => ({
+        id: s.id || s._id || s.admNo,
+        srNo: s.srNo || s.admNo || '-',
+        rollNo: s.rollNo || '-',
+        name: s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student',
+        fatherName: s.fatherName || s.father_name || '-',
+        selected: false
+      }))
+    );
+  }, [isModalOpen, sourceClass, sourceDivision, allStudents]);
 
   // Transfer actions
   const handleTransferForward = () => {
@@ -83,7 +159,12 @@ export function PromotionPage({ onNavigate }) {
 
     setTargetStudents((prev) => [
       ...prev,
-      ...toMove.map((s) => ({ ...s, selected: false, resultStatus: 'Pass', status: 'Promoted' }))
+      ...toMove.map((s) => ({
+        ...s,
+        selected: false,
+        resultStatus: 'Pass',
+        status: 'Promoted'
+      }))
     ]);
     setSourceStudents((prev) => prev.filter((s) => !s.selected));
   };
@@ -99,15 +180,42 @@ export function PromotionPage({ onNavigate }) {
     setTargetStudents((prev) => prev.filter((s) => !s.selected));
   };
 
-  const handleSavePromotion = () => {
+  const handleSavePromotion = async () => {
     if (targetStudents.length === 0) {
       setIsModalOpen(false);
       return;
     }
 
-    setToastMessage(`Successfully promoted ${targetStudents.length} students to ${targetClass}-${targetDivision}!`);
+    const studentIds = targetStudents.map((s) => s.id);
+
+    // 1. Update localStorage via tenantStore
+    tenantStore.promoteStudents(schoolId, studentIds, targetClass, targetDivision);
+
+    // 2. Persist to backend
+    try {
+      await fetch('/api/students/promote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId || 'sch_jd_intl'
+        },
+        body: JSON.stringify({
+          studentIds,
+          targetClass,
+          targetDivision
+        })
+      });
+    } catch (err) {
+      console.warn('[Promotion] Backend sync error:', err);
+    }
+
+    // 3. Reload real students to recalculate class breakdown
+    await loadStudents();
+
+    setToastMessage(`Successfully promoted ${targetStudents.length} student(s) to ${targetClass}-${targetDivision}!`);
+    setTargetStudents([]);
     setIsModalOpen(false);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   const filtered = classList.filter((c) =>
@@ -140,14 +248,17 @@ export function PromotionPage({ onNavigate }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..."
+              placeholder="Search class..."
               className="w-full pl-9 pr-4 py-2 text-xs md:text-sm border border-gray-200 rounded-full focus:border-indigo-600 focus:outline-none bg-gray-50/50"
             />
           </div>
 
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setTargetStudents([]);
+              setIsModalOpen(true);
+            }}
             className="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-md transition-all hover:scale-105 cursor-pointer"
             title="Promote Students"
           >
@@ -174,13 +285,32 @@ export function PromotionPage({ onNavigate }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700 font-medium">
-              {filtered.map((item, idx) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="py-3 px-4">{idx + 1}</td>
-                  <td className="py-3 px-4 font-semibold text-gray-900">{item.name}</td>
-                  <td className="py-3 px-4">{item.count}</td>
+              {loading ? (
+                <tr>
+                  <td colSpan="3" className="py-8 text-center text-gray-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
+                      <span>Loading promotion statistics...</span>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="py-8 text-center text-gray-400">
+                    {searchQuery
+                      ? `No classes matching "${searchQuery}"`
+                      : 'No student records found in this school yet. Register students in Student Registration to view promotion statistics.'}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((item, idx) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-3 px-4">{idx + 1}</td>
+                    <td className="py-3 px-4 font-semibold text-gray-900">{item.name}</td>
+                    <td className="py-3 px-4">{item.count}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -192,7 +322,9 @@ export function PromotionPage({ onNavigate }) {
             <option>100</option>
             <option>50</option>
           </select>
-          <span>1 - {filtered.length} of {filtered.length}</span>
+          <span>
+            {filtered.length > 0 ? `1 - ${filtered.length} of ${filtered.length}` : '0 of 0'}
+          </span>
         </div>
       </div>
 
@@ -274,6 +406,7 @@ export function PromotionPage({ onNavigate }) {
                           <th className="p-1.5">
                             <input
                               type="checkbox"
+                              checked={sourceStudents.length > 0 && sourceStudents.every((s) => s.selected)}
                               onChange={(e) => {
                                 const chk = e.target.checked;
                                 setSourceStudents((prev) =>
@@ -292,7 +425,9 @@ export function PromotionPage({ onNavigate }) {
                         {sourceStudents.length === 0 ? (
                           <tr>
                             <td colSpan="5" className="p-4 text-center text-gray-400">
-                              All students transferred.
+                              {targetStudents.length > 0
+                                ? 'All students in this class transferred.'
+                                : `No students registered in Class ${sourceClass}-${sourceDivision}.`}
                             </td>
                           </tr>
                         ) : (
@@ -329,7 +464,7 @@ export function PromotionPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={handleTransferForward}
-                    className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105"
+                    className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
                     title="Transfer Forward"
                   >
                     <ChevronsRight className="w-5 h-5" />
@@ -337,7 +472,7 @@ export function PromotionPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={handleTransferBackward}
-                    className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105"
+                    className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
                     title="Transfer Backward"
                   >
                     <ChevronsLeft className="w-5 h-5" />
@@ -387,6 +522,7 @@ export function PromotionPage({ onNavigate }) {
                           <th className="p-1.5">
                             <input
                               type="checkbox"
+                              checked={targetStudents.length > 0 && targetStudents.every((s) => s.selected)}
                               onChange={(e) => {
                                 const chk = e.target.checked;
                                 setTargetStudents((prev) =>
@@ -447,14 +583,19 @@ export function PromotionPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs md:text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded"
+                  className="px-4 py-2 text-xs md:text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleSavePromotion}
-                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm font-semibold rounded shadow-xs"
+                  disabled={targetStudents.length === 0}
+                  className={`px-6 py-2 text-xs md:text-sm font-semibold rounded shadow-xs ${
+                    targetStudents.length === 0
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer'
+                  }`}
                 >
                   Add
                 </button>
