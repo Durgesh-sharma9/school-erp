@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { tenantStore } from '../../../services/tenantStore';
 import { ReportHeader } from './ReportHeader';
@@ -15,8 +15,41 @@ export function StudentListPage({ onNavigate }) {
   const [records, setRecords] = useState(() => tenantStore.getStudents(schoolId));
 
   useEffect(() => {
-    setRecords(tenantStore.getStudents(schoolId));
+    const load = async () => {
+      let list = tenantStore.getStudents(schoolId) || [];
+      try {
+        const res = await fetch('/api/students', { headers: { 'x-school-id': schoolId } });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+            list = json.data;
+            tenantStore.setStudents(schoolId, list);
+          }
+        }
+      } catch (e) {}
+      const mapped = list.map((s, idx) => ({
+        ...s,
+        sNo: idx + 1,
+        name: (s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student').trim(),
+        enrollNo: s.enrollNo || s.enrNo || ('ENR-' + (s.admNo || idx + 1)),
+        contactNo: s.contactNo || s.smsWhatsappNo || s.contactNoSms || s.fatherWhatsapp || s.fatherMobile || '-'
+      }));
+      setRecords(mapped);
+    };
+    load();
   }, [schoolId]);
+
+  const availableClasses = useMemo(() => {
+    const list = new Set();
+    records.forEach(r => {
+      if (r.className) list.add(r.className);
+    });
+    (tenantStore.getClasses(schoolId) || []).forEach(c => {
+      const name = typeof c === 'string' ? c : c.name;
+      if (name) list.add(name);
+    });
+    return Array.from(list);
+  }, [records, schoolId]);
 
   const handleSearch = () => {
     const rawStudents = tenantStore.getStudents(schoolId);
@@ -140,7 +173,7 @@ export function StudentListPage({ onNavigate }) {
                   className="w-full text-xs border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="All">All Classes</option>
-                  {SCHOOL_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             )}
@@ -218,7 +251,7 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4 font-mono text-[11px] text-slate-600">{r.enrollNo}</td>
                       <td className="py-3 px-4 font-semibold text-indigo-600">{r.admNo}</td>
                       <td className="py-3 px-4 text-slate-600">{r.srNo}</td>
-                      <td className="py-3 px-4 font-semibold text-slate-900">{r.name}</td>
+                      <td className="py-3 px-4 font-semibold text-slate-900">{r.name || [r.firstName, r.lastName].filter(Boolean).join(' ') || 'Student'}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">
                           {r.className} - {r.section}

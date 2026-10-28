@@ -71,8 +71,99 @@ export function StudentAttendancePage({ onNavigate }) {
   const [selectedClass, setSelectedClass] = useState('I');
   const [selectedSection, setSelectedSection] = useState('A');
 
-  // Class Grid state (Clean fresh state)
+  // Class Grid state & dynamic classes strictly from active school
   const [classCards, setClassCards] = useState(INITIAL_CLASS_CARDS);
+  const [allStudents, setAllStudents] = useState([]);
+  const [realClasses, setRealClasses] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      let apiStudents = [];
+      try {
+        const sRes = await fetch('/api/students', { headers: { 'x-school-id': schoolId } });
+        if (sRes.ok) {
+          const sJson = await sRes.json();
+          if (sJson.data && Array.isArray(sJson.data)) {
+            apiStudents = sJson.data;
+            tenantStore.setStudents(schoolId, apiStudents);
+          }
+        }
+      } catch (e) {}
+
+      const localStudents = tenantStore.getStudents(schoolId) || [];
+      const students = apiStudents.length > 0 ? apiStudents : localStudents;
+      setAllStudents(students);
+
+      // Load classes
+      let cList = [];
+      try {
+        const cRes = await fetch('/api/academics/classes', { headers: { 'x-school-id': schoolId } });
+        if (cRes.ok) {
+          const cJson = await cRes.json();
+          if (cJson.data && Array.isArray(cJson.data)) cList = cJson.data;
+        }
+      } catch (e) {}
+      const localClasses = tenantStore.getClasses(schoolId) || [];
+      const classMap = new Map();
+      cList.forEach(c => {
+        const name = typeof c === 'string' ? c : c.name;
+        if (name) classMap.set(name, typeof c === 'string' ? { id: c, name: c, sections: ['A', 'B'] } : c);
+      });
+      localClasses.forEach(c => {
+        const name = typeof c === 'string' ? c : c.name;
+        if (name && !classMap.has(name)) classMap.set(name, typeof c === 'string' ? { id: c, name: c, sections: ['A', 'B'] } : c);
+      });
+      students.forEach(s => {
+        const c = s.className || s.class_id;
+        if (c && !classMap.has(c)) {
+          classMap.set(c, { id: c, name: c, sections: ['A', 'B', 'C', 'D'] });
+        }
+      });
+      const merged = Array.from(classMap.values());
+      setRealClasses(merged);
+
+      // Generate dynamic class cards
+      const cards = [];
+      merged.forEach(cls => {
+        const cName = typeof cls === 'string' ? cls : cls.name;
+        const sections = cls.sections || ['A'];
+        sections.forEach(sec => {
+          const matching = students.filter(s => {
+            const sc = (s.className || s.class_id || '').toLowerCase().trim();
+            const ss = (s.section || s.division_id || 'A').toLowerCase().trim();
+            return sc === cName.toLowerCase().trim() && ss === sec.toLowerCase().trim();
+          });
+          if (matching.length > 0 || merged.length <= 5) {
+            cards.push({
+              id: `${cName}-${sec}`,
+              className: cName,
+              section: sec,
+              total: matching.length,
+              present: matching.length,
+              absent: 0,
+              marked: false,
+              inCharge: cls.classTeacher || 'Teacher In-Charge'
+            });
+          }
+        });
+      });
+      setClassCards(cards);
+      if (merged.length > 0) {
+        const first = typeof merged[0] === 'string' ? merged[0] : merged[0].name;
+        setSelectedClass(prev => prev || first);
+      }
+    };
+    loadData();
+  }, [schoolId]);
+
+  const availableClasses = useMemo(() => {
+    if (realClasses.length > 0) {
+      return realClasses.map(c => typeof c === 'string' ? c : c.name);
+    }
+    const set = new Set(allStudents.map(s => s.className || s.class_id).filter(Boolean));
+    if (set.size > 0) return Array.from(set);
+    return ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  }, [realClasses, allStudents]);
 
   // History state (Clean, starts empty with 0 dummy records)
   const [history, setHistory] = useState([]);
@@ -82,13 +173,14 @@ export function StudentAttendancePage({ onNavigate }) {
 
   useEffect(() => {
     if (!isModalOpen) return;
-    const realStudents = (tenantStore.getStudents(schoolId) || []).filter((s) => {
+    const studentPool = allStudents.length > 0 ? allStudents : (tenantStore.getStudents(schoolId) || []);
+    const norm = (str) => (str || '').toLowerCase().replace(/^(class|grade)\s*/i, '').trim();
+    const realStudents = studentPool.filter((s) => {
       const cls = (s.className || s.class_id || '').toLowerCase().trim();
       const sec = (s.section || s.division_id || 'A').toLowerCase().trim();
-      return (
-        cls === selectedClass.toLowerCase().trim() &&
-        sec === selectedSection.toLowerCase().trim()
-      );
+      const targetCls = selectedClass.toLowerCase().trim();
+      const targetSec = selectedSection.toLowerCase().trim();
+      return (cls === targetCls || norm(cls) === norm(targetCls)) && sec === targetSec;
     });
 
     setModalStudents(
@@ -638,7 +730,7 @@ export function StudentAttendancePage({ onNavigate }) {
                 className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-xs font-bold"
               >
                 <option value="All">All Classes</option>
-                {CLASSES.map(cls => (
+                {availableClasses.map(cls => (
                   <option key={cls} value={cls}>{cls}</option>
                 ))}
               </select>
@@ -889,7 +981,7 @@ export function StudentAttendancePage({ onNavigate }) {
                     onChange={(e) => setSelectedClass(e.target.value)}
                     className="w-full px-3 py-2 text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
-                    {CLASSES.map((c) => (
+                    {availableClasses.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>

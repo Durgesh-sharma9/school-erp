@@ -26,6 +26,8 @@ import {
   Printer
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 // Helper to determine division/wing from class name
 const getDivision = (name = '') => {
@@ -153,6 +155,8 @@ const STANDARD_PRESETS = [
 ];
 
 export function ClassMasterPage({ onNavigate }) {
+  const { activeSchool } = useAuth();
+  const schoolId = activeSchool?.id || 'sch_jd_intl';
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -175,14 +179,21 @@ export function ClassMasterPage({ onNavigate }) {
   const fetchClasses = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/academics/classes');
+      const res = await fetch('/api/academics/classes', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setClasses(data.data);
+        tenantStore.saveClasses(schoolId, data.data);
+      } else {
+        const local = tenantStore.getClasses(schoolId);
+        setClasses(local || []);
       }
     } catch (err) {
       console.error('Failed to fetch classes:', err);
-      toast.error('Failed to load classes from server');
+      const local = tenantStore.getClasses(schoolId);
+      setClasses(local || []);
     } finally {
       setLoading(false);
     }
@@ -333,11 +344,18 @@ export function ClassMasterPage({ onNavigate }) {
         // Add New
         const res = await fetch('/api/academics/classes', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-school-id': schoolId
+          },
+          body: JSON.stringify({ ...payload, schoolId })
         });
         const data = await res.json();
         if (data.success) {
+          const newClass = data.data || { id: String(Date.now()), ...payload, schoolId };
+          const updated = [...classes, newClass];
+          setClasses(updated);
+          tenantStore.saveClasses(schoolId, updated);
           toast.success('Class created successfully');
           setModalOpen(false);
           fetchClasses();
