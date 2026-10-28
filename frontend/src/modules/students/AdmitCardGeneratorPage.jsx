@@ -14,7 +14,7 @@ const TERMS = ['Term 1', 'Term 2', 'Annual Exam'];
 const EXAMS = ['None', 'Mid Term Examination 2026', 'Final Board Examination 2027'];
 
 export function AdmitCardGeneratorPage({ onNavigate }) {
-  const { schoolId: authSchoolId } = useAuth();
+  const { schoolId: authSchoolId, schoolName } = useAuth();
   const schoolId = authSchoolId || 'sch_jd_intl';
 
   const [classList, setClassList] = useState([]);
@@ -28,6 +28,31 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
     'It is allowed to appear in the [exam_term_name] commencing from [date]'
   );
   const [dateSheetType, setDateSheetType] = useState('Without Date Sheet');
+  const [dateSheetList, setDateSheetList] = useState([]);
+
+  useEffect(() => {
+    if (dateSheetType !== 'With Date Sheet' || !selectedClass) {
+      setDateSheetList([]);
+      return;
+    }
+    const fetchDateSheet = async () => {
+      try {
+        const res = await fetch(`/api/students/exam-date-sheets?className=${encodeURIComponent(selectedClass)}&examTerm=${encodeURIComponent(selectedTerm)}`, {
+          headers: { 'x-school-id': schoolId }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            const matched = json.data.find(s => s.className === selectedClass);
+            setDateSheetList(matched?.schedules || []);
+          }
+        }
+      } catch (e) {
+        setDateSheetList([]);
+      }
+    };
+    fetchDateSheet();
+  }, [dateSheetType, selectedClass, selectedTerm, schoolId]);
   const [printNo, setPrintNo] = useState('2');
 
   const [printWithoutTime, setPrintWithoutTime] = useState(false);
@@ -465,7 +490,7 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
                   >
                     <div className="text-center border-b-2 border-gray-800 pb-3 mb-4">
                       <h3 className="text-base font-bold tracking-wider">
-                        J D INTERNATIONAL SCHOOL
+                        {schoolName || "J D INTERNATIONAL SCHOOL"}
                       </h3>
                       <p className="text-xs uppercase font-sans text-gray-600">
                         Admit Card - {selectedExam} ({selectedTerm})
@@ -485,31 +510,37 @@ export function AdmitCardGeneratorPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    {/* Schedule */}
-                    <table className="w-full border border-gray-400 text-xs text-left mb-6 font-sans">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="p-2 border border-gray-400">Date</th>
-                          <th className="p-2 border border-gray-400">Subject</th>
-                          <th className="p-2 border border-gray-400">Time</th>
-                          <th className="p-2 border border-gray-400">Sign</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="p-2 border border-gray-400">02-Nov-2026</td>
-                          <td className="p-2 border border-gray-400">English</td>
-                          <td className="p-2 border border-gray-400">09:00 AM - 12:00 PM</td>
-                          <td className="p-2 border border-gray-400"></td>
-                        </tr>
-                        <tr>
-                          <td className="p-2 border border-gray-400">04-Nov-2026</td>
-                          <td className="p-2 border border-gray-400">Mathematics</td>
-                          <td className="p-2 border border-gray-400">09:00 AM - 12:00 PM</td>
-                          <td className="p-2 border border-gray-400"></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    {/* Dynamic Schedule based on Type selection */}
+                    {dateSheetType === 'With Date Sheet' ? (
+                      dateSheetList.length > 0 ? (
+                        <table className="w-full border border-gray-400 text-xs text-left mb-6 font-sans">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="p-2 border border-gray-400">Date</th>
+                              <th className="p-2 border border-gray-400">Subject</th>
+                              <th className="p-2 border border-gray-400">Time</th>
+                              <th className="p-2 border border-gray-400">Sign</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dateSheetList.map((item, idx) => (
+                              <tr key={idx}>
+                                <td className="p-2 border border-gray-400">{item.examDate || item.date || '-'}</td>
+                                <td className="p-2 border border-gray-400">{item.subjectName || item.subject || '-'}</td>
+                                <td className="p-2 border border-gray-400">
+                                  {printWithoutTime ? '-' : `${item.startTime || '09:00 AM'} - ${item.endTime || '12:00 PM'}`}
+                                </td>
+                                <td className="p-2 border border-gray-400"></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="p-3 my-4 bg-slate-50 border border-dashed border-slate-300 rounded text-center text-slate-500 text-xs font-sans mb-6">
+                          No date sheet scheduled yet for Class {selectedClass} ({selectedTerm}).
+                        </div>
+                      )
+                    ) : null}
 
                     <div className="flex justify-between items-center text-xs font-sans pt-4 border-t border-gray-300">
                       <span>Candidate Signature</span>

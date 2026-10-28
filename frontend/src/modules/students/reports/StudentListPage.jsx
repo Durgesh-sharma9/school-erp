@@ -27,7 +27,14 @@ export function StudentListPage({ onNavigate }) {
           }
         }
       } catch (e) {}
-      setRecords(list);
+      const mapped = list.map((s, idx) => ({
+        ...s,
+        sNo: idx + 1,
+        name: (s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student').trim(),
+        enrollNo: s.enrollNo || s.enrNo || ('ENR-' + (s.admNo || idx + 1)),
+        contactNo: s.contactNo || s.smsWhatsappNo || s.contactNoSms || s.fatherWhatsapp || s.fatherMobile || '-'
+      }));
+      setRecords(mapped);
     };
     load();
   }, [schoolId]);
@@ -244,7 +251,7 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4 font-mono text-[11px] text-slate-600">{r.enrollNo}</td>
                       <td className="py-3 px-4 font-semibold text-indigo-600">{r.admNo}</td>
                       <td className="py-3 px-4 text-slate-600">{r.srNo}</td>
-                      <td className="py-3 px-4 font-semibold text-slate-900">{r.name}</td>
+                      <td className="py-3 px-4 font-semibold text-slate-900">{r.name || [r.firstName, r.lastName].filter(Boolean).join(' ') || 'Student'}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">
                           {r.className} - {r.section}
