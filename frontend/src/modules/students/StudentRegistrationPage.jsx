@@ -19,7 +19,9 @@ import {
   AlertCircle,
   Trophy,
   User,
-  Users
+  Users,
+  Copy,
+  Phone
 } from 'lucide-react';
 
 // Reusable Outline Field matching Angular Material mat-form-field appearance="outline"
@@ -34,10 +36,17 @@ function OutlineInput({
   placeholder = '',
   disabled = false,
   rightIcon = null,
+  actionButton = null,
+  topRightLink = null,
   className = ''
 }) {
   return (
     <div className={`relative mb-3 ${className}`}>
+      {topRightLink && (
+        <span className="absolute -top-4 right-0 text-[11px] text-emerald-600 hover:underline cursor-pointer z-20 font-medium flex items-center gap-1">
+          {topRightLink}
+        </span>
+      )}
       <label
         className={`absolute -top-2 left-2.5 px-1 text-[11px] font-medium bg-white z-10 pointer-events-none transition-all ${
           isOrange ? 'text-orange-500 font-semibold' : 'text-gray-500'
@@ -56,9 +65,14 @@ function OutlineInput({
           placeholder={placeholder}
           className={`w-full px-3 py-2 text-xs md:text-sm text-gray-800 bg-white border border-gray-300 rounded focus:border-indigo-600 focus:outline-none transition-colors ${
             disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
-          } ${rightIcon ? 'pr-9' : ''}`}
+          } ${actionButton ? 'pr-32' : rightIcon ? 'pr-9' : ''}`}
         />
-        {rightIcon && (
+        {actionButton && (
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center z-10">
+            {actionButton}
+          </div>
+        )}
+        {rightIcon && !actionButton && (
           <div className="absolute right-2.5 flex items-center pointer-events-none text-indigo-600">
             {rightIcon}
           </div>
@@ -328,7 +342,9 @@ export function StudentRegistrationPage({ onNavigate }) {
     fathers_name: '',
     mothers_name: '',
     fathers_mobile_no: '',
+    fathers_whatsapp_no: '',
     mothers_mobile_no: '',
+    mothers_whatsapp_no: '',
     house: 'None',
     remark: '',
     status_type: 'Studying',
@@ -561,6 +577,29 @@ export function StudentRegistrationPage({ onNavigate }) {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     try {
+      // 1. Mandatory Field Validation
+      if (!formData.first_name?.trim()) {
+        setActiveTab('student_details');
+        toast.error('Student First Name is required!');
+        return;
+      }
+      if (!formData.fathers_name?.trim()) {
+        setActiveTab('parents_details');
+        toast.error("Father's Name is mandatory!");
+        return;
+      }
+      if (!formData.fathers_mobile_no?.trim()) {
+        setActiveTab('parents_details');
+        toast.error("Father's Mobile No. is mandatory!");
+        return;
+      }
+      const rawMobile = formData.fathers_mobile_no.replace(/\D/g, '');
+      if (rawMobile.length < 10) {
+        setActiveTab('parents_details');
+        toast.error("Please enter a valid 10-digit Father Mobile No.");
+        return;
+      }
+
       setSaveStatus('Saving student registration...');
       
       const fullName = `${formData.first_name || ''} ${formData.last_name || ''}`.trim() || 'New Student';
@@ -573,7 +612,11 @@ export function StudentRegistrationPage({ onNavigate }) {
         lastName: formData.last_name || '',
         fatherName: formData.fathers_name || '',
         motherName: formData.mothers_name || '',
-        contactNo: formData.contact_no_sms || formData.fathers_mobile_no || '',
+        fatherMobile: formData.fathers_mobile_no || '',
+        fatherWhatsapp: formData.fathers_whatsapp_no || formData.fathers_mobile_no || '',
+        motherMobile: formData.mothers_mobile_no || '',
+        motherWhatsapp: formData.mothers_whatsapp_no || formData.mothers_mobile_no || '',
+        contactNo: formData.fathers_whatsapp_no || formData.contact_no_sms || formData.fathers_mobile_no || '',
         className: formData.class_id || 'I',
         section: formData.division_id || 'A',
         isNew: true,
@@ -694,6 +737,9 @@ export function StudentRegistrationPage({ onNavigate }) {
                   fathers_name: '',
                   mothers_name: '',
                   fathers_mobile_no: '',
+                  fathers_whatsapp_no: '',
+                  mothers_mobile_no: '',
+                  mothers_whatsapp_no: '',
                   contact_no_sms: ''
                 }));
                 toast('Ready for next student registration');
@@ -916,10 +962,27 @@ export function StudentRegistrationPage({ onNavigate }) {
               />
               <OutlineInput
                 label="SMS/Whatsapp No."
-                required
                 name="contact_no_sms"
                 value={formData.contact_no_sms}
                 onChange={handleInputChange}
+                actionButton={
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!formData.fathers_mobile_no?.trim()) {
+                        toast.error('Please enter Father Mobile first');
+                        return;
+                      }
+                      setFormData(prev => ({ ...prev, contact_no_sms: prev.fathers_mobile_no }));
+                      toast.success('Copied Father Mobile to SMS/WhatsApp No.');
+                    }}
+                    className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                    title="Copy Father Mobile No."
+                  >
+                    <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                    <span>Same as Mobile</span>
+                  </button>
+                }
               />
               <OutlineInput
                 label="Father Name"
@@ -941,6 +1004,7 @@ export function StudentRegistrationPage({ onNavigate }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4">
               <OutlineInput
                 label="Father Mobile"
+                required
                 name="fathers_mobile_no"
                 value={formData.fathers_mobile_no}
                 onChange={handleInputChange}
@@ -1281,15 +1345,42 @@ export function StudentRegistrationPage({ onNavigate }) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
                     <OutlineInput
                       label="Father Name"
+                      required
                       name="fathers_name"
                       value={formData.fathers_name}
                       onChange={handleInputChange}
                     />
                     <OutlineInput
                       label="Father Mobile No."
+                      required
                       name="fathers_mobile_no"
                       value={formData.fathers_mobile_no}
                       onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Father WhatsApp No."
+                      name="fathers_whatsapp_no"
+                      value={formData.fathers_whatsapp_no}
+                      onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!formData.fathers_mobile_no?.trim()) {
+                              toast.error('Please enter Father Mobile No. first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, fathers_whatsapp_no: prev.fathers_mobile_no }));
+                            toast.success('WhatsApp No. copied from Mobile No.');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Father Mobile No."
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Mobile</span>
+                        </button>
+                      }
                     />
                     <OutlineInput
                       label="Father Email"
@@ -1369,6 +1460,31 @@ export function StudentRegistrationPage({ onNavigate }) {
                       name="mothers_mobile_no"
                       value={formData.mothers_mobile_no}
                       onChange={handleInputChange}
+                    />
+                    <OutlineInput
+                      label="Mother WhatsApp No."
+                      name="mothers_whatsapp_no"
+                      value={formData.mothers_whatsapp_no}
+                      onChange={handleInputChange}
+                      placeholder="Optional"
+                      actionButton={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!formData.mothers_mobile_no?.trim()) {
+                              toast.error('Please enter Mother Mobile No. first');
+                              return;
+                            }
+                            setFormData(prev => ({ ...prev, mothers_whatsapp_no: prev.mothers_mobile_no }));
+                            toast.success('WhatsApp No. copied from Mobile No.');
+                          }}
+                          className="h-6 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 rounded flex items-center gap-1 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+                          title="Copy Mother Mobile No."
+                        >
+                          <Copy className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Same as Mobile</span>
+                        </button>
+                      }
                     />
                     <OutlineInput
                       label="Mother Email"
