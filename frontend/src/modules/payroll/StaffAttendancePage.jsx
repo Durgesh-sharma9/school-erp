@@ -23,7 +23,8 @@ import {
   Building2,
   Briefcase,
   SlidersHorizontal,
-  Home
+  Home,
+  Radio
 } from 'lucide-react';
 import {
   AreaChart,
@@ -337,6 +338,14 @@ export function StaffAttendancePage({ onNavigate }) {
         description="Comprehensive daily attendance tracking, shift allocation, monthly matrix registers, and individual faculty analytics."
       >
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('/attendance-geofence')}
+            className="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+            <span>Geofence & Range</span>
+          </button>
           <button
             type="button"
             onClick={() => onNavigate && onNavigate('/dashboard')}

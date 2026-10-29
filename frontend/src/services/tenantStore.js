@@ -974,6 +974,63 @@ class TenantDataStore {
     }
   }
 
+
+  // Geofence configuration for Attendance (School coordinates and allowed radius)
+  getGeofenceConfig(schoolId) {
+    if (!schoolId) return null;
+    try {
+      const key = this.getStorageKey(schoolId, 'geofence_config');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return {
+      enabled: true,
+      mode: 'strict',
+      schoolLatitude: 26.9124,
+      schoolLongitude: 75.7873,
+      allowedRangeMeters: 200,
+      campusName: 'Main School Campus',
+      requireSelfie: false
+    };
+  }
+
+  saveGeofenceConfig(schoolId, config) {
+    if (!schoolId) return;
+    try {
+      const key = this.getStorageKey(schoolId, 'geofence_config');
+      localStorage.setItem(key, JSON.stringify(config));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getGeofencePunches(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const key = this.getStorageKey(schoolId, 'geofence_punches');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  }
+
+  addGeofencePunch(schoolId, punch) {
+    if (!schoolId) return null;
+    const current = this.getGeofencePunches(schoolId);
+    const newPunch = {
+      id: 'punch_' + Date.now(),
+      ...punch,
+      timestamp: new Date().toISOString()
+    };
+    const updated = [newPunch, ...current].slice(0, 50);
+    localStorage.setItem(this.getStorageKey(schoolId, 'geofence_punches'), JSON.stringify(updated));
+    return newPunch;
+  }
+
 }
 
 export const tenantStore = new TenantDataStore();

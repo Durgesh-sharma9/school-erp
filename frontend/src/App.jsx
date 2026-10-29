@@ -69,6 +69,7 @@ import {
   HostelReportsPage
 } from './modules/hostel';
 import { StudentAttendancePage } from './modules/attendance/StudentAttendancePage';
+import { AttendanceGeofencePage } from './modules/attendance/AttendanceGeofencePage';
 import { AttendanceHubPage } from './modules/attendance/AttendanceHubPage';
 import {
   ExamTermsPage,
@@ -653,6 +654,9 @@ function AppContent() {
                 return <PayrollRegistrationPage onNavigate={handleNavigate} />;
               case '/staff-attendance':
                 return <StaffAttendancePage onNavigate={handleNavigate} />;
+              case '/attendance-geofence':
+              case '/geofence-settings':
+                return <AttendanceGeofencePage onNavigate={handleNavigate} />;
               case '/generate-staff-salary':
                 return <GenerateSalaryPage onNavigate={handleNavigate} />;
               case '/payroll-advance-payment':

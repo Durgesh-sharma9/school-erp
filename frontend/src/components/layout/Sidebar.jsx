@@ -179,7 +179,8 @@ export const staffMenuCategories = [
     icon: CalendarCheck,
     subItems: [
       { title: 'Staff Attendance', path: '/staff-attendance' },
-      { title: 'Student Attendance', path: '/student-attendance' }
+      { title: 'Student Attendance', path: '/student-attendance' },
+      { title: 'Attendance Geofence', path: '/attendance-geofence' }
     ]
   },
   { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
@@ -266,7 +267,8 @@ export const menuCategories = [
     icon: CalendarCheck,
     subItems: [
       { title: 'Staff Attendance', path: '/staff-attendance' },
-      { title: 'Student Attendance', path: '/student-attendance' }
+      { title: 'Student Attendance', path: '/student-attendance' },
+      { title: 'Attendance Geofence', path: '/attendance-geofence' }
     ]
   },
   {
@@ -530,7 +532,7 @@ export const menuCategories = [
 
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const getInitialActiveDropdown = (path) => {
-    if (path.includes('staff-attendance') || path.includes('student-attendance') || path === '/attendance') return { attendance: true, 'staff-attendance-group': true };
+    if (path.includes('staff-attendance') || path.includes('student-attendance') || path.includes('attendance-geofence') || path === '/attendance') return { attendance: true, 'staff-attendance-group': true, 'attender-attendance-group': true };
     if (path.includes('transport')) return { transport: true };
     if (path.includes('student') || path.includes('admission') || STUDENT_REPORT_PATHS.includes(path)) return { student: true };
     if (path.includes('user')) return { users: true };
