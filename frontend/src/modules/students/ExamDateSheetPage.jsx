@@ -184,9 +184,9 @@ export function ExamDateSheetPage({ onNavigate }) {
 
   // Manual schedule rows
   const [schedules, setSchedules] = useState([
-    { id: 1, date: '2026-11-02', subject: 'English', from: '09:00 AM', to: '12:00 PM' },
-    { id: 2, date: '2026-11-04', subject: 'Mathematics', from: '09:00 AM', to: '12:00 PM' },
-    { id: 3, date: '2026-11-06', subject: 'Science', from: '09:00 AM', to: '12:00 PM' }
+    { id: 1, date: '2026-11-02', subject: 'English', from: '09:00', to: '12:00' },
+    { id: 2, date: '2026-11-04', subject: 'Mathematics', from: '09:00', to: '12:00' },
+    { id: 3, date: '2026-11-06', subject: 'Science', from: '09:00', to: '12:00' }
   ]);
 
   const addScheduleRow = () => {
@@ -196,8 +196,8 @@ export function ExamDateSheetPage({ onNavigate }) {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
         subject: 'Social Science',
-        from: '09:00 AM',
-        to: '12:00 PM'
+        from: '09:00',
+        to: '12:00'
       }
     ]);
   };
@@ -216,9 +216,9 @@ export function ExamDateSheetPage({ onNavigate }) {
     setExamNotes('');
     setUploadedFile(null);
     setSchedules([
-      { id: 1, date: '2026-11-02', subject: 'English', from: '09:00 AM', to: '12:00 PM' },
-      { id: 2, date: '2026-11-04', subject: 'Mathematics', from: '09:00 AM', to: '12:00 PM' },
-      { id: 3, date: '2026-11-06', subject: 'Science', from: '09:00 AM', to: '12:00 PM' }
+      { id: 1, date: '2026-11-02', subject: 'English', from: '09:00', to: '12:00' },
+      { id: 2, date: '2026-11-04', subject: 'Mathematics', from: '09:00', to: '12:00' },
+      { id: 3, date: '2026-11-06', subject: 'Science', from: '09:00', to: '12:00' }
     ]);
     setIsModalOpen(true);
   };
@@ -242,10 +242,16 @@ export function ExamDateSheetPage({ onNavigate }) {
     setExamNotes(item.notes || '');
 
     if (item.schedules && item.schedules.length > 0) {
-      setSchedules(item.schedules);
+      setSchedules(
+        item.schedules.map((s) => ({
+          ...s,
+          from: toTimeInputValue(s.from),
+          to: toTimeInputValue(s.to)
+        }))
+      );
     } else {
       setSchedules([
-        { id: 1, date: new Date().toISOString().split('T')[0], subject: 'English', from: '09:00 AM', to: '12:00 PM' }
+        { id: 1, date: new Date().toISOString().split('T')[0], subject: 'English', from: '09:00', to: '12:00' }
       ]);
     }
 
@@ -442,6 +448,43 @@ export function ExamDateSheetPage({ onNavigate }) {
       }
     } catch (e) {}
     return dateStr;
+  };
+
+  // Convert "09:00 AM" or "09:00" to "09:00" for <input type="time">
+  const toTimeInputValue = (timeStr) => {
+    if (!timeStr) return '09:00';
+    const str = timeStr.trim().toUpperCase();
+    if (/^\d{1,2}:\d{2}$/.test(str)) {
+      const [h, m] = str.split(':');
+      return `${h.padStart(2, '0')}:${m}`;
+    }
+    const match = str.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (match) {
+      let hours = parseInt(match[1], 10);
+      const minutes = match[2];
+      const modifier = match[3];
+      if (modifier === 'PM' && hours < 12) hours += 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+      return `${String(hours).padStart(2, '0')}:${minutes}`;
+    }
+    return timeStr;
+  };
+
+  // Convert "09:00" to "09:00 AM" for printable display
+  const formatDisplayTime = (timeStr) => {
+    if (!timeStr) return '';
+    const str = timeStr.trim();
+    if (str.toUpperCase().includes('AM') || str.toUpperCase().includes('PM')) {
+      return str;
+    }
+    if (/^\d{1,2}:\d{2}$/.test(str)) {
+      const [hStr, mStr] = str.split(':');
+      let h = parseInt(hStr, 10);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${String(h).padStart(2, '0')}:${mStr} ${ampm}`;
+    }
+    return str;
   };
 
   const filtered = dateSheets.filter((d) => {
@@ -898,10 +941,10 @@ export function ExamDateSheetPage({ onNavigate }) {
                                 ))}
                               </select>
                             </td>
-                            <td className="p-1 border-r border-gray-200 w-24">
+                            <td className="p-1 border-r border-gray-200 w-28 sm:w-32">
                               <input
-                                type="text"
-                                value={s.from}
+                                type="time"
+                                value={toTimeInputValue(s.from)}
                                 onChange={(e) => {
                                   const v = e.target.value;
                                   setSchedules((prev) =>
@@ -910,13 +953,13 @@ export function ExamDateSheetPage({ onNavigate }) {
                                     )
                                   );
                                 }}
-                                className="w-full px-1 py-1 text-xs border border-gray-200 rounded text-center"
+                                className="w-full px-1.5 py-1 text-xs border border-gray-200 rounded text-center bg-white focus:border-indigo-600 focus:outline-none cursor-pointer"
                               />
                             </td>
-                            <td className="p-1 border-r border-gray-200 w-24">
+                            <td className="p-1 border-r border-gray-200 w-28 sm:w-32">
                               <input
-                                type="text"
-                                value={s.to}
+                                type="time"
+                                value={toTimeInputValue(s.to)}
                                 onChange={(e) => {
                                   const v = e.target.value;
                                   setSchedules((prev) =>
@@ -925,7 +968,7 @@ export function ExamDateSheetPage({ onNavigate }) {
                                     )
                                   );
                                 }}
-                                className="w-full px-1 py-1 text-xs border border-gray-200 rounded text-center"
+                                className="w-full px-1.5 py-1 text-xs border border-gray-200 rounded text-center bg-white focus:border-indigo-600 focus:outline-none cursor-pointer"
                               />
                             </td>
                             <td className="p-1 text-center">
@@ -1116,7 +1159,7 @@ export function ExamDateSheetPage({ onNavigate }) {
                               {s.subject}
                             </td>
                             <td className="p-2 text-center font-semibold text-gray-800">
-                              {s.from} - {s.to}
+                              {formatDisplayTime(s.from)} - {formatDisplayTime(s.to)}
                             </td>
                           </tr>
                         ))
