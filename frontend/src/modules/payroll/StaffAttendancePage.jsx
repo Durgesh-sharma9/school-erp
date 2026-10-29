@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   Users,
   UserCheck,
