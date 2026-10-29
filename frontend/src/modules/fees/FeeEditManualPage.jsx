@@ -79,8 +79,8 @@ export function FeeEditManualPage({ onNavigate }) {
   const handleAmountChange = (index, val) => {
     setEditableHeads(prev => {
       const copy = [...prev];
-      copy[index].amount = Number(val) || 0;
-      copy[index].netPayable = copy[index].amount - (copy[index].discount || 0);
+      copy[index].amount = Math.max(0, Number(val) || 0);
+      copy[index].netPayable = Math.max(0, copy[index].amount - (copy[index].discount || 0));
       return copy;
     });
   };
@@ -88,8 +88,8 @@ export function FeeEditManualPage({ onNavigate }) {
   const handleDiscountChange = (index, val) => {
     setEditableHeads(prev => {
       const copy = [...prev];
-      copy[index].discount = Number(val) || 0;
-      copy[index].netPayable = copy[index].amount - copy[index].discount;
+      copy[index].discount = Math.max(0, Number(val) || 0);
+      copy[index].netPayable = Math.max(0, copy[index].amount - copy[index].discount);
       return copy;
     });
   };
