@@ -10,9 +10,11 @@ import {
   deleteSubjectGroup,
   getAllSubjects,
   createSubject,
+  updateSubject,
   deleteSubject,
   getAllStreams,
   createStream,
+  updateStream,
   deleteStream,
   getAllSubjectLinks,
   updateSubjectLink
@@ -35,11 +37,15 @@ router.delete('/subject-groups/:id', deleteSubjectGroup);
 // 3. Subjects
 router.get('/subjects', getAllSubjects);
 router.post('/subjects', createSubject);
+router.put('/subjects/:id', updateSubject);
+router.patch('/subjects/:id', updateSubject);
 router.delete('/subjects/:id', deleteSubject);
 
 // 4. Streams
 router.get('/streams', getAllStreams);
 router.post('/streams', createStream);
+router.put('/streams/:id', updateStream);
+router.patch('/streams/:id', updateStream);
 router.delete('/streams/:id', deleteStream);
 
 // 5. Subject Links

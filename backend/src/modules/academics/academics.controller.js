@@ -184,6 +184,27 @@ export const createSubject = async (req, res, next) => {
   }
 };
 
+export const updateSubject = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, shortName, group, code } = req.body;
+    const idx = subjectsStore.findIndex(s => s.id === id);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Subject not found' });
+    }
+    subjectsStore[idx] = {
+      ...subjectsStore[idx],
+      ...(name && { name: name.toUpperCase() }),
+      ...(shortName !== undefined && { shortName }),
+      ...(group && { group }),
+      ...(code !== undefined && { code })
+    };
+    return res.status(200).json({ success: true, message: 'Subject updated successfully', data: subjectsStore[idx] });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteSubject = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -212,6 +233,25 @@ export const createStream = async (req, res, next) => {
     const newStream = { id: String(Date.now()), stream: stream.toUpperCase() };
     streamsStore.push(newStream);
     return res.status(201).json({ success: true, message: 'Stream created', data: newStream });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateStream = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { stream } = req.body;
+    if (!stream) return res.status(400).json({ success: false, message: 'Stream name required' });
+    const idx = streamsStore.findIndex(s => s.id === id);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Stream not found' });
+    }
+    streamsStore[idx] = {
+      ...streamsStore[idx],
+      stream: stream.toUpperCase()
+    };
+    return res.status(200).json({ success: true, message: 'Stream updated successfully', data: streamsStore[idx] });
   } catch (error) {
     next(error);
   }

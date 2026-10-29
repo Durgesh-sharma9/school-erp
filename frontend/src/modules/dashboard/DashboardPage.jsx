@@ -89,6 +89,66 @@ export function DashboardPage({ onNavigate }) {
 
   const birthdays = [];
 
+  // ── Module search data ──
+  const ALL_MODULES = [
+    { label: 'Dashboard', path: '/', icon: '🏠' },
+    { label: 'Edit School', path: '/edit-school', icon: '🏫' },
+    { label: 'WhatsApp Link', path: '/whatsapp-link', icon: '💬' },
+    { label: 'Settings & Permissions', path: '/settings', icon: '⚙️' },
+    { label: 'Student Registration', path: '/student-registration', icon: '📝' },
+    { label: 'Student List', path: '/student-list', icon: '👨‍🎓' },
+    { label: 'Assign Roll/Feebook No', path: '/assign-roll', icon: '🔢' },
+    { label: 'Biometric Machine Sync', path: '/biometric-sync', icon: '🔏' },
+    { label: 'Promotion', path: '/promotion', icon: '🎓' },
+    { label: 'Student Portfolio', path: '/student-portfolio', icon: '📁' },
+    { label: 'ID Card Generator', path: '/id-card', icon: '🪪' },
+    { label: 'Admit Card Generator', path: '/admit-card', icon: '🗂️' },
+    { label: 'Exam Date Sheet', path: '/exam-date-sheet', icon: '📅' },
+    { label: 'Student Reports', path: '/student-reports', icon: '📊' },
+    { label: 'Class Master', path: '/class-master', icon: '🏛️' },
+    { label: 'Group Subject Master', path: '/group-subject-master', icon: '📚' },
+    { label: 'Subject Master', path: '/subject', icon: '📖' },
+    { label: 'Subject Link', path: '/subject-link', icon: '🔗' },
+    { label: 'Stream Master', path: '/stream-master', icon: '🌊' },
+    { label: 'Fee Collection', path: '/fee-collection', icon: '💰' },
+    { label: 'Fee Reports', path: '/fee-reports', icon: '📈' },
+    { label: 'CC/BC/TF Generator', path: '/cc-bc-tf', icon: '📜' },
+    { label: 'TC Generation', path: '/tc-generation', icon: '📋' },
+    { label: 'Timetable', path: '/timetable', icon: '📆' },
+    { label: 'Attendance', path: '/attendance', icon: '✅' },
+    { label: 'Staff Attendance', path: '/staff-attendance', icon: '👔' },
+    { label: 'Hostel Master', path: '/hostel-master', icon: '🏠' },
+    { label: 'Transport', path: '/transport', icon: '🚌' },
+    { label: 'Library', path: '/library', icon: '📚' },
+    { label: 'Stationery', path: '/stationery', icon: '🖊️' },
+    { label: 'SMS / Notifications', path: '/sms', icon: '📱' },
+    { label: 'Notice Board', path: '/notice-board', icon: '📌' },
+    { label: 'Leave Management', path: '/leave-management', icon: '🗓️' },
+    { label: 'Payroll', path: '/payroll', icon: '💵' },
+    { label: 'Front Office', path: '/front-office', icon: '🏢' },
+    { label: 'Announcements Hub', path: '/announcements', icon: '📢' },
+    { label: 'CRM Dashboard', path: '/crm', icon: '🤝' },
+    { label: 'Enquiries', path: '/enquiries', icon: '❓' },
+    { label: 'Greeting Card', path: '/greeting-card', icon: '🎴' },
+    { label: 'Bulk Editing', path: '/bulk-editing', icon: '✏️' },
+    { label: 'Lesson Planning', path: '/lesson-planning', icon: '📝' },
+    { label: 'Homework', path: '/homework', icon: '📓' },
+    { label: 'Study Material', path: '/study-material', icon: '📗' },
+    { label: 'Upload Pre Year Paper', path: '/prev-year-papers', icon: '📄' },
+    { label: 'QR Code / Links', path: '/qr-code', icon: '🔳' },
+    { label: 'Accounts & Expense', path: '/accounts', icon: '🧾' },
+    { label: 'Examination', path: '/examination', icon: '📝' },
+  ];
+
+  const [moduleSearch, setModuleSearch] = useState('');
+  const [showModuleDropdown, setShowModuleDropdown] = useState(false);
+
+  const filteredModules = moduleSearch.trim().length >= 1
+    ? ALL_MODULES.filter(m =>
+        m.label.toLowerCase().includes(moduleSearch.toLowerCase())
+      ).slice(0, 8)
+    : [];
+
   return (
     <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">
       {/* Multi-Tenant Header & Branch Switcher */}
@@ -134,6 +194,42 @@ export function DashboardPage({ onNavigate }) {
             <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
           </button>
         </div>
+      </div>
+
+      {/* ── Module Quick Search Widget ── */}
+      <div className="relative">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs px-4 py-3 flex items-center gap-3">
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="🔍  Search modules... (e.g. Fee, Attendance, Certificate)"
+            value={moduleSearch}
+            onChange={(e) => { setModuleSearch(e.target.value); setShowModuleDropdown(true); }}
+            onFocus={() => setShowModuleDropdown(true)}
+            onBlur={() => setTimeout(() => setShowModuleDropdown(false), 180)}
+            className="flex-1 text-sm text-slate-700 bg-transparent outline-none placeholder-slate-400"
+          />
+          {moduleSearch && (
+            <button onClick={() => { setModuleSearch(''); setShowModuleDropdown(false); }} className="text-slate-400 hover:text-slate-600">
+              <XCircle className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {showModuleDropdown && filteredModules.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
+            {filteredModules.map((mod, i) => (
+              <button
+                key={i}
+                onMouseDown={() => { onNavigate && onNavigate(mod.path); setModuleSearch(''); setShowModuleDropdown(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-indigo-50 transition-colors border-b border-slate-100 last:border-0"
+              >
+                <span className="text-base">{mod.icon}</span>
+                <span className="font-medium text-slate-800">{mod.label}</span>
+                <span className="ml-auto text-[11px] text-slate-400 font-mono">{mod.path}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Top 5 KPI Stats Cards (Test Master Pro Design: Compact, Tinted Backgrounds, Inside Elegance) */}
@@ -561,20 +657,35 @@ export function DashboardPage({ onNavigate }) {
           )}
         </ErpSection>
 
-        {/* Staff Birthday & Leave Request */}
-        <ErpSection title="Staff Birthdays & Leave Requests" icon={Cake} tone="indigo">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 flex flex-col items-center justify-center text-center">
-              <span className="text-2xl mb-1">🎂</span>
-              <p className="text-xs font-bold text-slate-800">Staff Birthdays</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">0 Staff birthdays today</p>
-            </div>
+        {/* Staff Birthdays — separate widget */}
+        <ErpSection title="Staff Birthdays" icon={Cake} tone="indigo"
+          action={
+            <span className="text-[11px] text-indigo-600 font-semibold bg-indigo-100/60 px-2.5 py-0.5 rounded-full border border-indigo-200/50">
+              {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+            </span>
+          }
+        >
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <span className="text-3xl mb-2">🎂</span>
+            <p className="text-xs font-bold text-slate-800">Staff Birthdays</p>
+            <p className="text-[11px] text-slate-500 mt-1">0 Staff birthdays today</p>
+          </div>
+        </ErpSection>
+      </div>
 
-            <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 flex flex-col items-center justify-center text-center">
-              <span className="text-2xl mb-1">📝</span>
-              <p className="text-xs font-bold text-slate-800">Pending Leave Requests</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">No pending leave requests</p>
-            </div>
+      {/* Row 6: Staff Leave Requests — separate widget (full width) */}
+      <div className="grid grid-cols-1 gap-3.5">
+        <ErpSection title="Pending Leave Requests" icon={Clock} tone="amber"
+          action={
+            <span className="text-[11px] text-amber-700 font-semibold bg-amber-100/60 px-2.5 py-0.5 rounded-full border border-amber-200/50">
+              Leave Management
+            </span>
+          }
+        >
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <span className="text-3xl mb-2">📝</span>
+            <p className="text-xs font-bold text-slate-800">No Pending Leave Requests</p>
+            <p className="text-[11px] text-slate-500 mt-1">All leave requests have been processed</p>
           </div>
         </ErpSection>
       </div>
