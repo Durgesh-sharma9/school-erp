@@ -66,16 +66,20 @@ export function FeeConcessionTypePage() {
 
       await fetch('/api/fees/concession-types', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
 
       if (editingType) {
-        setTypes(prev => prev.map(item => item.id === editingType.id ? { ...item, ...payload } : item));
+        const updatedTypes = types.map(item => item.id === editingType.id ? { ...item, ...payload } : item);
+        tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+        setTypes(updatedTypes);
         toast.success('Concession category updated');
       } else {
         const newCat = { id: String(Date.now()), ...payload };
-        setTypes(prev => [...prev, newCat]);
+        const updatedTypes = [...types, newCat];
+        tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+        setTypes(updatedTypes);
         toast.success('Concession category created');
       }
       setIsModalOpen(false);
@@ -89,8 +93,10 @@ export function FeeConcessionTypePage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this concession category?')) return;
     try {
-      await fetch(`/api/fees/concession-types/${id}`, { method: 'DELETE' });
-      setTypes(prev => prev.filter(t => t.id !== id));
+      await fetch(`/api/fees/concession-types/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedTypes = types.filter(t => t.id !== id);
+      tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+      setTypes(updatedTypes);
       toast.success('Concession category deleted');
     } catch {
       toast.error('Failed to delete');

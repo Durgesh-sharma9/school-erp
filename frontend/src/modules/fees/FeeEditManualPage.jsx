@@ -91,6 +91,18 @@ export function FeeEditManualPage({ onNavigate }) {
     try {
       // 1. Save locally in tenantStore
       tenantStore.saveStudentFeeLedger(schoolId, selectedStudent.admNo, editableHeads);
+      // Synchronize with Fee Collection POS heads
+      tenantStore.saveStudentFeeHeads(schoolId, selectedStudent.admNo, editableHeads.map(h => ({
+        id: h.id,
+        head: h.feeHead,
+        total: Number(h.amount) || 0,
+        discount: Number(h.discount) || 0,
+        payable: Number(h.netPayable) || 0,
+        paid: h.isPaid ? Number(h.netPayable) : 0,
+        due: h.isPaid ? 0 : Number(h.netPayable),
+        payingNow: h.isPaid ? 0 : Number(h.netPayable),
+        checked: !h.isPaid
+      })));
 
       // 2. Sync to backend API
       await fetch('/api/fees/manual-edit', {

@@ -61,17 +61,21 @@ export function FeeHeadGroupPage() {
 
       const res = await fetch('/api/fees/head-groups', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
 
       if (editingGroup) {
-        setGroups(prev => prev.map(g => g.id === editingGroup.id ? { ...g, ...payload } : g));
+        const updatedGroups = groups.map(g => g.id === editingGroup.id ? { ...g, ...payload } : g);
+        tenantStore.saveFeeHeadGroups(schoolId, updatedGroups);
+        setGroups(updatedGroups);
         toast.success('Fee Head Group updated successfully');
       } else {
         const newG = { id: String(Date.now()), ...payload, active: true };
-        setGroups(prev => [...prev, newG]);
+        const updatedGroups = [...groups, newG];
+        tenantStore.saveFeeHeadGroups(schoolId, updatedGroups);
+        setGroups(updatedGroups);
         toast.success('Fee Head Group created successfully');
       }
       setIsModalOpen(false);
@@ -85,8 +89,10 @@ export function FeeHeadGroupPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this Fee Head Group?')) return;
     try {
-      await fetch(`/api/fees/head-groups/${id}`, { method: 'DELETE' });
-      setGroups(prev => prev.filter(g => g.id !== id));
+      await fetch(`/api/fees/head-groups/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedGroups = groups.filter(g => g.id !== id);
+      tenantStore.saveFeeHeadGroups(schoolId, updatedGroups);
+      setGroups(updatedGroups);
       toast.success('Fee Head Group removed');
     } catch {
       toast.error('Failed to delete group');

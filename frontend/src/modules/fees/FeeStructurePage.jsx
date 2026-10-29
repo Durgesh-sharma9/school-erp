@@ -147,7 +147,8 @@ export function FeeStructurePage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this Fee Structure?')) return;
     try {
-      await fetch(`/api/fees/structures/${id}`, { method: 'DELETE' });
+      tenantStore.deleteFeeStructure(schoolId, id);
+      await fetch(`/api/fees/structures/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
       setStructures(prev => prev.filter(s => s.id !== id));
       toast.success('Fee structure removed');
     } catch {

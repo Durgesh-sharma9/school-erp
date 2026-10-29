@@ -82,17 +82,21 @@ export function FeeFineMasterPage() {
 
       await fetch('/api/fees/fines', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
 
       const today = new Date().toISOString().split('T')[0];
       if (editingFine) {
-        setFines(prev => prev.map(item => item.id === editingFine.id ? { ...item, ...payload, updatedAt: today } : item));
+        const updatedFines = fines.map(item => item.id === editingFine.id ? { ...item, ...payload, updatedAt: today } : item);
+        tenantStore.saveFineMasters(schoolId, updatedFines);
+        setFines(updatedFines);
         toast.success('Fine rule updated');
       } else {
         const newFine = { id: String(Date.now()), ...payload, createdAt: today, updatedAt: today, user: 'Admin' };
-        setFines(prev => [...prev, newFine]);
+        const updatedFines = [...fines, newFine];
+        tenantStore.saveFineMasters(schoolId, updatedFines);
+        setFines(updatedFines);
         toast.success('Fine rule created');
       }
       setIsModalOpen(false);
@@ -106,8 +110,10 @@ export function FeeFineMasterPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this fine rule?')) return;
     try {
-      await fetch(`/api/fees/fines/${id}`, { method: 'DELETE' });
-      setFines(prev => prev.filter(f => f.id !== id));
+      await fetch(`/api/fees/fines/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedFines = fines.filter(f => f.id !== id);
+      tenantStore.saveFineMasters(schoolId, updatedFines);
+      setFines(updatedFines);
       toast.success('Fine rule removed');
     } catch {
       toast.error('Failed to delete');

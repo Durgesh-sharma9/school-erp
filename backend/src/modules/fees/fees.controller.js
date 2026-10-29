@@ -724,6 +724,13 @@ export const collectSiblingFee = async (req, res, next) => {
       receiptType: 'SIBLING_JOINT'
     };
 
+    const student = (TENANT_STUDENTS[schoolId] || []).find(st => st.admNo === admNo);
+    if (student) {
+      student.boardFeePaid = true;
+      newReceipt.studentName = (student.name || `${student.firstName || ''} ${student.lastName || ''}`).trim() || `Student ${admNo}`;
+      newReceipt.className = `${student.className || 'X'}-${student.section || 'A'}`;
+    }
+
     if (!TENANT_RECEIPTS[schoolId]) TENANT_RECEIPTS[schoolId] = [];
     TENANT_RECEIPTS[schoolId].unshift(newReceipt);
 
@@ -748,9 +755,17 @@ export const cancelFeeReceipt = async (req, res, next) => {
     if (TENANT_RECEIPTS[schoolId]) {
       const idx = TENANT_RECEIPTS[schoolId].findIndex(r => r.receiptNo === receiptNo);
       if (idx !== -1) {
-        TENANT_RECEIPTS[schoolId][idx].status = 'CANCELLED';
-        TENANT_RECEIPTS[schoolId][idx].cancelReason = reason;
-        TENANT_RECEIPTS[schoolId][idx].cancelledAt = new Date().toISOString();
+        const cancelledRec = TENANT_RECEIPTS[schoolId][idx];
+        cancelledRec.status = 'CANCELLED';
+        cancelledRec.cancelReason = reason;
+        cancelledRec.cancelledAt = new Date().toISOString();
+
+        // Revert student dues in backend student pool
+        const student = (TENANT_STUDENTS[schoolId] || []).find(st => st.admNo === cancelledRec.admNo);
+        if (student) {
+          student.paidFees = Math.max(0, (Number(student.paidFees) || 0) - Number(cancelledRec.paidAmount || 0));
+          student.dueFees = Math.max(0, (Number(student.totalFees) || 0) - student.paidFees);
+        }
         return res.status(200).json({ success: true, message: `Receipt ${receiptNo} marked as CANCELLED.` });
       }
     }

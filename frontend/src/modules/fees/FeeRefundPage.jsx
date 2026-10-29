@@ -45,9 +45,16 @@ export function FeeRefundPage() {
 
     setIsLoading(true);
     try {
+      // 1. Cancel in client store and revert student balance
+      tenantStore.cancelReceipt(schoolId, cancellingReceipt.receiptNo, cancelReason.trim());
+
+      // 2. Sync to API
       await fetch('/api/fees/cancel-receipt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify({
           receiptNo: cancellingReceipt.receiptNo,
           reason: cancelReason.trim()
@@ -60,7 +67,7 @@ export function FeeRefundPage() {
           : r
       ));
 
-      toast.success(`Receipt ${cancellingReceipt.receiptNo} has been CANCELLED`);
+      toast.success(`Receipt ${cancellingReceipt.receiptNo} has been CANCELLED and student fee balance restored`);
       setCancellingReceipt(null);
       setCancelReason('');
     } catch {

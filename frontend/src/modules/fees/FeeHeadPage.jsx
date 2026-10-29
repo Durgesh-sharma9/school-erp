@@ -90,16 +90,20 @@ export function FeeHeadPage() {
 
       await fetch('/api/fees/heads', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
 
       if (editingHead) {
-        setHeads(prev => prev.map(h => h.id === editingHead.id ? { ...h, ...payload } : h));
+        const updatedHeads = heads.map(h => h.id === editingHead.id ? { ...h, ...payload } : h);
+        tenantStore.saveFeeHeads(schoolId, updatedHeads);
+        setHeads(updatedHeads);
         toast.success('Fee Head updated successfully');
       } else {
         const newHead = { id: String(Date.now()), ...payload };
-        setHeads(prev => [...prev, newHead]);
+        const updatedHeads = [...heads, newHead];
+        tenantStore.saveFeeHeads(schoolId, updatedHeads);
+        setHeads(updatedHeads);
         toast.success('Fee Head created successfully');
       }
       setIsModalOpen(false);
@@ -113,8 +117,10 @@ export function FeeHeadPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this Fee Head?')) return;
     try {
-      await fetch(`/api/fees/heads/${id}`, { method: 'DELETE' });
-      setHeads(prev => prev.filter(h => h.id !== id));
+      await fetch(`/api/fees/heads/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedHeads = heads.filter(h => h.id !== id);
+      tenantStore.saveFeeHeads(schoolId, updatedHeads);
+      setHeads(updatedHeads);
       toast.success('Fee Head removed');
     } catch {
       toast.error('Failed to delete fee head');

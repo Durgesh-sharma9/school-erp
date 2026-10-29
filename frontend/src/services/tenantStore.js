@@ -540,6 +540,11 @@ class TenantDataStore {
     target.cancelReason = reason;
     target.cancelledAt = new Date().toISOString();
     localStorage.setItem(this.getStorageKey(schoolId, 'receipts'), JSON.stringify(receipts));
+
+    // Revert student balance: subtract paid amount, restore due balance
+    if (target.admNo && target.paidAmount) {
+      this.updateStudentFees(schoolId, target.admNo, -Number(target.paidAmount));
+    }
     return true;
   }
 
@@ -557,17 +562,109 @@ class TenantDataStore {
     return student;
   }
 
-  // 10. Persist student custom fee heads per tenant
+  // 10. Persist student custom fee heads per tenant with dynamic structure & concession resolution
   getStudentFeeHeads(schoolId, admNo) {
-    if (!schoolId || !admNo) return null;
+    if (!schoolId || !admNo) return [];
     try {
       const key = this.getStorageKey(schoolId, `heads_${admNo}`);
       const stored = localStorage.getItem(key);
-      if (stored) return JSON.parse(stored);
+      if (stored && stored !== 'null' && stored !== '[]') return JSON.parse(stored);
     } catch (e) {
       console.error(e);
     }
-    return null;
+
+    // Fallback 1: check student fee ledger
+    const ledger = this.getStudentFeeLedger(schoolId, admNo);
+    if (ledger && ledger.length > 0) {
+      const mapped = ledger.map(h => ({
+        id: h.id || `h_${h.feeHead}`,
+        head: h.feeHead,
+        total: Number(h.amount) || 0,
+        discount: Number(h.discount) || 0,
+        payable: Number(h.netPayable) || (Number(h.amount) - (Number(h.discount) || 0)),
+        paid: h.isPaid ? (Number(h.netPayable) || Number(h.amount)) : 0,
+        due: h.isPaid ? 0 : (Number(h.netPayable) || (Number(h.amount) - (Number(h.discount) || 0))),
+        payingNow: h.isPaid ? 0 : (Number(h.netPayable) || (Number(h.amount) - (Number(h.discount) || 0))),
+        checked: !h.isPaid
+      }));
+      this.saveStudentFeeHeads(schoolId, admNo, mapped);
+      return mapped;
+    }
+
+    // Fallback 2: Check fee structure for student class
+    const students = this.getStudents(schoolId);
+    const student = students.find(s => String(s.admNo) === String(admNo));
+    if (student) {
+      const structures = this.getFeeStructures(schoolId);
+      const studentClass = String(student.className || '').toUpperCase();
+      const matchedStructure = structures.find(st => {
+        const c = String(st.className || '').toUpperCase();
+        return c === studentClass || studentClass.startsWith(c);
+      });
+
+      // Check concessions
+      const concessions = this.getStudentConcessions(schoolId);
+      const studentConc = concessions.find(c => String(c.admNo) === String(admNo));
+      const concessionAmt = studentConc ? Number(studentConc.amount) || 0 : 0;
+
+      if (matchedStructure && matchedStructure.heads && matchedStructure.heads.length > 0) {
+        const heads = matchedStructure.heads.map((h, idx) => {
+          const isTuition = String(h.feeHead || '').toLowerCase().includes('tuition');
+          const disc = isTuition ? concessionAmt : 0;
+          const payable = Math.max(0, Number(h.amount) - disc);
+          return {
+            id: `h_str_${idx + 1}`,
+            head: h.feeHead,
+            total: Number(h.amount),
+            discount: disc,
+            payable,
+            paid: 0,
+            due: payable,
+            payingNow: payable,
+            checked: true
+          };
+        });
+        this.saveStudentFeeHeads(schoolId, admNo, heads);
+        return heads;
+      }
+
+      // Default dynamic heads based on student's totalFees & paidFees
+      const total = Number(student.totalFees) || 15000;
+      const paid = Number(student.paidFees) || 0;
+      const t1 = Math.round(total * 0.5);
+      const t2 = total - t1;
+      const paidT1 = Math.min(paid, t1);
+      const paidT2 = Math.min(Math.max(0, paid - t1), t2);
+
+      const heads = [
+        {
+          id: `h_auto_1`,
+          head: 'Tuition Fee (Term 1)',
+          total: t1,
+          discount: concessionAmt,
+          payable: Math.max(0, t1 - concessionAmt),
+          paid: paidT1,
+          due: Math.max(0, Math.max(0, t1 - concessionAmt) - paidT1),
+          payingNow: Math.max(0, Math.max(0, t1 - concessionAmt) - paidT1),
+          checked: Math.max(0, Math.max(0, t1 - concessionAmt) - paidT1) > 0
+        },
+        {
+          id: `h_auto_2`,
+          head: 'Tuition Fee (Term 2)',
+          total: t2,
+          discount: 0,
+          payable: t2,
+          paid: paidT2,
+          due: Math.max(0, t2 - paidT2),
+          payingNow: paidT1 === t1 ? Math.max(0, t2 - paidT2) : 0,
+          checked: paidT1 === t1 && Math.max(0, t2 - paidT2) > 0
+        }
+      ];
+      this.saveStudentFeeHeads(schoolId, admNo, heads);
+      return heads;
+    }
+
+    return [];
   }
 
   saveStudentFeeHeads(schoolId, admNo, heads) {
@@ -575,6 +672,9 @@ class TenantDataStore {
     try {
       const key = this.getStorageKey(schoolId, `heads_${admNo}`);
       localStorage.setItem(key, JSON.stringify(heads));
+      // Also update ledger
+      const ledgerKey = this.getStorageKey(schoolId, `fee_ledger_${admNo}`);
+      localStorage.setItem(ledgerKey, JSON.stringify(heads));
     } catch (e) {
       console.error(e);
     }

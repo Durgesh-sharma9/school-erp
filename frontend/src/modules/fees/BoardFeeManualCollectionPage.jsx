@@ -64,7 +64,10 @@ export function BoardFeeManualCollectionPage() {
     try {
       const res = await fetch('/api/fees/board-collect', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify({
           admNo: selectedStudent.admNo,
           paidAmount: Number(paidAmount),
@@ -73,9 +76,25 @@ export function BoardFeeManualCollectionPage() {
         })
       });
       const data = await res.json();
+      const recNo = data.data?.receiptNo || `BRD-2026-${Date.now().toString().slice(-4)}`;
+
+      // Record receipt in tenantStore
+      tenantStore.addReceipt(schoolId, {
+        receiptNo: recNo,
+        admNo: selectedStudent.admNo,
+        studentName: selectedStudent.name,
+        className: selectedStudent.className,
+        paidAmount: Number(paidAmount),
+        payMode,
+        remarks: `Board Fee: ${remarks}`,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      // Update student record
+      tenantStore.updateStudent(schoolId, selectedStudent.admNo, { boardFeePaid: true });
 
       setStudents(prev => prev.map(s => s.admNo === selectedStudent.admNo ? { ...s, paid: true } : s));
-      toast.success(`Board Fee collected for ${selectedStudent.name}. Receipt: ${data.data?.receiptNo || 'JD-BRD-001'}`);
+      toast.success(`Board Fee collected for ${selectedStudent.name}. Receipt: ${recNo}`);
       setSelectedStudent(null);
     } catch {
       toast.error('Board fee collection failed');

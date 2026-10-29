@@ -71,10 +71,9 @@ export function FeeCollectionPage({ onNavigate }) {
   const isSchoolA = schoolId === 'sch_jd_intl';
   const isSchoolB = schoolId === 'sch_dps_branch2';
 
-  // Available students in current tenant for smart search
-  const allTenantStudents = useMemo(() => {
-    return tenantStore.getStudents(schoolId) || [];
-  }, [schoolId]);
+  // Available students in current tenant with dynamic synchronization
+  const [tenantStudents, setTenantStudents] = useState(() => tenantStore.getStudents(schoolId) || []);
+  const allTenantStudents = tenantStudents;
 
   // Filtered students for search typeahead
   const matchedStudents = useMemo(() => {
@@ -93,8 +92,8 @@ export function FeeCollectionPage({ onNavigate }) {
   // Generate initial or next receipt number
   const generateNextReceiptNo = () => {
     const receipts = tenantStore.getReceipts(schoolId);
-    const prefix = isSchoolB ? 'DPS' : isSchoolA ? 'JD' : 'REC';
-    return `${prefix}-2026-${String(receipts.length + 1).padStart(3, '0')}`;
+    const prefix = schoolProfile?.schoolCode ? schoolProfile.schoolCode.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase() : (isSchoolB ? 'DPS' : isSchoolA ? 'JD' : 'REC');
+    return `${prefix || 'REC'}-2026-${String(receipts.length + 1).padStart(3, '0')}`;
   };
 
   // Refresh receipt history for this tenant
@@ -103,54 +102,37 @@ export function FeeCollectionPage({ onNavigate }) {
     setReceiptList(list);
   };
 
-  // Initialize Default Student on tenant change
+  // Initialize Default Student and sync with backend on tenant change
   useEffect(() => {
     refreshReceipts();
     setReceiptNo(generateNextReceiptNo());
 
-    const students = tenantStore.getStudents(schoolId);
-    if (students && students.length > 0) {
-      loadStudentAccount(students[0]);
+    const localStudents = tenantStore.getStudents(schoolId) || [];
+    setTenantStudents(localStudents);
+
+    if (localStudents && localStudents.length > 0) {
+      loadStudentAccount(localStudents[0]);
     } else {
       setSelectedStudent(null);
       setFeeHeads([]);
     }
+
+    // Sync students from backend /api/students
+    fetch('/api/students', {
+      headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          tenantStore.setStudents(schoolId, res.data);
+          setTenantStudents(res.data);
+          if (!selectedStudent) {
+            loadStudentAccount(res.data[0]);
+          }
+        }
+      })
+      .catch(() => {});
   }, [schoolId]);
-
-  // Build default fee heads for a student if not already persisted
-  const buildInitialHeads = (student) => {
-    if (isSchoolB) {
-      return [
-        { id: 'h_1', head: 'Board Registration Fee', total: 3500, discount: 0, payable: 3500, paid: 3500, due: 0, payingNow: 0, checked: false },
-        { id: 'h_2', head: 'Tuition Fee (Q1)', total: 14500, discount: 0, payable: 14500, paid: 0, due: 14500, payingNow: 14500, checked: true },
-        { id: 'h_3', head: 'Science Lab & Tech Fee', total: 2500, discount: 0, payable: 2500, paid: 0, due: 2500, payingNow: 0, checked: false }
-      ];
-    }
-    if (isSchoolA) {
-      if (student.admNo === '2059') {
-        return [
-          { id: 'h_10', head: 'Admission Fee', total: 4000, discount: 0, payable: 4000, paid: 4000, due: 0, payingNow: 0, checked: false },
-          { id: 'h_11', head: 'Tuition Fee (Term 1)', total: 9500, discount: 0, payable: 9500, paid: 9500, due: 0, payingNow: 0, checked: false },
-          { id: 'h_12', head: 'Tuition Fee (Term 2)', total: 9500, discount: 0, payable: 9500, paid: 0, due: 9500, payingNow: 9500, checked: true }
-        ];
-      }
-      return [
-        { id: 'h_1', head: 'Admission Fee', total: 5000, discount: 0, payable: 5000, paid: 5000, due: 0, payingNow: 0, checked: false },
-        { id: 'h_2', head: 'Tuition Fee (Quarter 1)', total: 12000, discount: 0, payable: 12000, paid: 12000, due: 0, payingNow: 0, checked: false },
-        { id: 'h_3', head: 'Tuition Fee (Quarter 2)', total: 12000, discount: 0, payable: 12000, paid: 0, due: 12000, payingNow: 12000, checked: true },
-        { id: 'h_4', head: 'Activity & Sports Fee', total: 2000, discount: 500, payable: 1500, paid: 0, due: 1500, payingNow: 1500, checked: true }
-      ];
-    }
-
-    // Default for newly registered tenant
-    const total = Number(student.totalFees) || 15000;
-    const paid = Number(student.paidFees) || 0;
-    const due = Math.max(0, total - paid);
-    return [
-      { id: 'h_new_1', head: 'Tuition Fee (Term 1)', total: Math.round(total * 0.6), discount: 0, payable: Math.round(total * 0.6), paid: Math.min(paid, Math.round(total * 0.6)), due: Math.max(0, Math.round(total * 0.6) - Math.min(paid, Math.round(total * 0.6))), payingNow: Math.max(0, Math.round(total * 0.6) - Math.min(paid, Math.round(total * 0.6))), checked: true },
-      { id: 'h_new_2', head: 'Development & Activity Fee', total: Math.round(total * 0.4), discount: 0, payable: Math.round(total * 0.4), paid: Math.max(0, paid - Math.round(total * 0.6)), due: Math.max(0, Math.round(total * 0.4) - Math.max(0, paid - Math.round(total * 0.6))), payingNow: 0, checked: false }
-    ];
-  };
 
   // Load a student into active counter
   
@@ -167,7 +149,7 @@ export function FeeCollectionPage({ onNavigate }) {
   const loadStudentAccount = async (student) => {
     if (!student) return;
     const admNo = student.admNo;
-    const sName = student.name || `${student.firstName || ''} ${student.lastName || ''}`.trim() || `Student ${admNo}`;
+    const sName = (student.name || `${student.firstName || ''} ${student.lastName || ''}`).trim() || `Student ${admNo}`;
     const sClass = student.className ? (student.className.includes('-') ? student.className : `${student.className} - ${student.section || 'A'}`) : 'Class 1 - A';
 
     const formattedStudent = {
@@ -176,10 +158,10 @@ export function FeeCollectionPage({ onNavigate }) {
       admNo: admNo,
       name: sName,
       className: sClass,
-      fatherName: student.fatherName || 'Guardian',
+      fatherName: student.fatherName || student.fathers_name || 'Guardian',
       motherName: student.motherName || '',
       mobileNo: student.contactNo || student.fatherMobile || student.smsWhatsappNo || '',
-      address: student.address || (isSchoolB ? 'Sector 14, Dwarka, New Delhi' : isSchoolA ? 'Vidhyadhar Nagar, Jaipur' : ''),
+      address: student.address || '',
       docRemark: 'Verified',
       genRemark: 'Regular Student',
       stuType: student.isNew || student.studentType === 'New' ? 'New' : 'Old',
@@ -189,24 +171,22 @@ export function FeeCollectionPage({ onNavigate }) {
 
     setSelectedStudent(formattedStudent);
 
-    // 1. Check local persistent heads
-    const savedHeads = tenantStore.getStudentFeeHeads(schoolId, admNo);
-    if (savedHeads && savedHeads.length > 0) {
-      setFeeHeads(savedHeads);
+    // 1. Dynamic fee heads from tenantStore (with multi-tier fallback: ledger -> structure -> concession -> calculated)
+    const heads = tenantStore.getStudentFeeHeads(schoolId, admNo);
+    if (heads && heads.length > 0) {
+      setFeeHeads(heads);
     } else {
-      const initial = buildInitialHeads(student);
-      setFeeHeads(initial);
-      tenantStore.saveStudentFeeHeads(schoolId, admNo, initial);
+      setFeeHeads([]);
     }
 
     // 2. Background sync with backend
     try {
-setLoadingStudent(true);
+      setLoadingStudent(true);
       const res = await fetch(`/api/fees/student/${admNo}`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       });
       const result = await res.json();
-      if (result.success && result.data?.heads && result.data.heads.length > 0 && !savedHeads) {
+      if (result.success && result.data?.heads && result.data.heads.length > 0 && (!heads || heads.length === 0)) {
         const synced = result.data.heads.map(h => ({
           id: h.id,
           head: h.feeHead,
@@ -222,7 +202,9 @@ setLoadingStudent(true);
         tenantStore.saveStudentFeeHeads(schoolId, admNo, synced);
       }
     } catch (e) {
-      // Offline fallback already loaded from client store
+      // Handled gracefully in offline mode
+    } finally {
+      setLoadingStudent(false);
     }
   };
 
@@ -252,7 +234,7 @@ setLoadingStudent(true);
     } else {
       // Query backend directly
       setLoadingStudent(true);
-      fetch(`http://localhost:5000/api/fees/student/${term}`, {
+      fetch(`/api/fees/student/${term}`, {
         headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
       })
         .then(res => res.json())
@@ -638,7 +620,7 @@ const res = await fetch('/api/fees/collect', {
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-600" />
                 <input
                   type="text"
-                  placeholder="Search student by Name, Adm No (e.g. 1621, 2059, DPS-101), Roll No, or Mobile..."
+                  placeholder="Search student by Name, Admission No, Roll No, or Mobile Number..."
                   value={studentSearch}
                   onFocus={() => setSearchFocused(true)}
                   onChange={(e) => {

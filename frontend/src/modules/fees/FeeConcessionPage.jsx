@@ -28,10 +28,19 @@ export function FeeConcessionPage() {
     loadAvailableStudents();
   }, [schoolId]);
 
-  const loadAvailableStudents = () => {
+  const loadAvailableStudents = async () => {
     try {
       const realStudents = tenantStore.getStudents(schoolId) || [];
       setAvailableStudents(realStudents);
+
+      const res = await fetch('/api/students', {
+        headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        tenantStore.setStudents(schoolId, data.data);
+        setAvailableStudents(data.data);
+      }
     } catch (e) {
       console.error(e);
     }
