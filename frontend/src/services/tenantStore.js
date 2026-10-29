@@ -517,6 +517,65 @@ class TenantDataStore {
       console.error(e);
     }
   }
+
+  // 11. Exam Date Sheets
+  getExamDateSheets(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const key = this.getStorageKey(schoolId, 'exam_date_sheets');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  }
+
+  setExamDateSheets(schoolId, sheets) {
+    if (!schoolId) return;
+    try {
+      const key = this.getStorageKey(schoolId, 'exam_date_sheets');
+      localStorage.setItem(key, JSON.stringify(sheets || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  addExamDateSheet(schoolId, sheet) {
+    if (!schoolId || !sheet) return;
+    try {
+      const current = this.getExamDateSheets(schoolId);
+      const updated = [sheet, ...current.filter((s) => s.id !== sheet.id)];
+      this.setExamDateSheets(schoolId, updated);
+      return updated;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  deleteExamDateSheet(schoolId, sheetId) {
+    if (!schoolId || !sheetId) return;
+    try {
+      const current = this.getExamDateSheets(schoolId);
+      const updated = current.filter((s) => s.id !== sheetId);
+      this.setExamDateSheets(schoolId, updated);
+      return updated;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  updateExamDateSheet(schoolId, sheetId, updatedData) {
+    if (!schoolId || !sheetId) return;
+    try {
+      const current = this.getExamDateSheets(schoolId);
+      const updated = current.map((s) => (s.id === sheetId ? { ...s, ...updatedData } : s));
+      this.setExamDateSheets(schoolId, updated);
+      return updated;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 }
 
 export const tenantStore = new TenantDataStore();

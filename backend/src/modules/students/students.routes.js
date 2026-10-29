@@ -13,6 +13,8 @@ import {
   promoteStudents,
   getExamDateSheets,
   createExamDateSheet,
+  updateExamDateSheet,
+  deleteExamDateSheet,
   getBulkStudents,
   saveBulkStudents,
   getStudentPhotosList,
@@ -62,6 +64,8 @@ router.post('/promote', promoteStudents);
 // Exam Date Sheets
 router.get('/exam-date-sheets', getExamDateSheets);
 router.post('/exam-date-sheets', createExamDateSheet);
+router.put('/exam-date-sheets/:id', updateExamDateSheet);
+router.delete('/exam-date-sheets/:id', deleteExamDateSheet);
 
 // Student registration and queries
 router.post('/', registerStudent);

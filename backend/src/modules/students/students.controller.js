@@ -437,14 +437,17 @@ export const createExamDateSheet = async (req, res, next) => {
     const schoolId = getActiveSchoolId(req);
     const data = req.body;
     const newSheet = {
-      id: `eds_${Date.now()}`,
+      id: data.id || `eds_${Date.now()}`,
       schoolId,
+      entryMode: data.entryMode || 'manual',
       className: data.className || 'I',
       examTerm: data.examTerm || 'Term 1',
       examName: data.examName || 'Annual Exam',
       file: data.file || 'DateSheet.pdf',
+      fileData: data.fileData || '',
       notes: data.notes || '',
-      schedules: data.schedules || []
+      schedules: data.schedules || [],
+      createdAt: data.createdAt || new Date().toISOString()
     };
 
     if (!TENANT_EXAM_SHEETS[schoolId]) {
@@ -459,6 +462,57 @@ export const createExamDateSheet = async (req, res, next) => {
     });
   } catch (error) {
     console.error('[Create Exam Date Sheet Error]:', error);
+    next(error);
+  }
+};
+
+export const updateExamDateSheet = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { id } = req.params;
+    const data = req.body;
+    if (!TENANT_EXAM_SHEETS[schoolId]) {
+      TENANT_EXAM_SHEETS[schoolId] = [];
+    }
+    const index = TENANT_EXAM_SHEETS[schoolId].findIndex((s) => s.id === id);
+    if (index === -1) {
+      // If not found, add it
+      const newSheet = { ...data, id, schoolId, updatedAt: new Date().toISOString() };
+      TENANT_EXAM_SHEETS[schoolId].unshift(newSheet);
+      return res.status(200).json({ success: true, message: 'Exam date sheet updated', data: newSheet });
+    }
+    const updated = {
+      ...TENANT_EXAM_SHEETS[schoolId][index],
+      ...data,
+      id,
+      schoolId,
+      updatedAt: new Date().toISOString()
+    };
+    TENANT_EXAM_SHEETS[schoolId][index] = updated;
+    return res.status(200).json({
+      success: true,
+      message: 'Exam date sheet updated successfully',
+      data: updated
+    });
+  } catch (error) {
+    console.error('[Update Exam Date Sheet Error]:', error);
+    next(error);
+  }
+};
+
+export const deleteExamDateSheet = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { id } = req.params;
+    if (TENANT_EXAM_SHEETS[schoolId]) {
+      TENANT_EXAM_SHEETS[schoolId] = TENANT_EXAM_SHEETS[schoolId].filter((s) => s.id !== id);
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Exam date sheet deleted successfully'
+    });
+  } catch (error) {
+    console.error('[Delete Exam Date Sheet Error]:', error);
     next(error);
   }
 };
