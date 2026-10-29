@@ -34,7 +34,7 @@ export function FeeEditManualPage({ onNavigate }) {
           admNo: s.admNo,
           srNo: s.srNo || s.admNo,
           name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
-          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          className: String(s.className || 'I').includes('-') ? String(s.className) : `${s.className || 'I'} - ${s.section || 'A'}`,
           fatherName: s.fatherName || s.fathers_name || '-',
           type: s.studentType || '0',
           heads: existingLedger && existingLedger.length > 0 ? existingLedger : defaultHeads
@@ -62,7 +62,17 @@ export function FeeEditManualPage({ onNavigate }) {
 
   const handleOpenEdit = (stu) => {
     setSelectedStudent(stu);
-    setEditableHeads(JSON.parse(JSON.stringify(stu.heads || [])));
+    const sanitizedHeads = (stu.heads || []).map(h => {
+      const amt = Number(h.amount) || 0;
+      const disc = Number(h.discount) || 0;
+      return {
+        ...h,
+        amount: amt,
+        discount: disc,
+        netPayable: Math.max(0, amt - disc)
+      };
+    });
+    setEditableHeads(sanitizedHeads);
     setManualRemark(stu.manualRemark || '');
   };
 

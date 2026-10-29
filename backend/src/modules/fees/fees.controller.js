@@ -129,7 +129,7 @@ export const getStudentFeeLedger = async (req, res, next) => {
           },
           heads: [
             { id: `h_${schoolId}_1`, feeHead: 'Admission / Reg. Fee', amount: 4000, discount: 0, fine: 0, netPayable: 4000, isPaid: false },
-            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Quarter 1)', amount: 10000, discount: 0, fine: 0, netPayable: 1000, isPaid: false },
+            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Quarter 1)', amount: 10000, discount: 0, fine: 0, netPayable: 10000, isPaid: false },
             { id: `h_${schoolId}_3`, feeHead: 'Tuition Fee (Quarter 2)', amount: 10000, discount: 0, fine: 0, netPayable: 10000, isPaid: false },
             { id: `h_${schoolId}_4`, feeHead: 'Activity & Lab Fee', amount: 2500, discount: 0, fine: 0, netPayable: 2500, isPaid: false }
           ],
@@ -774,7 +774,7 @@ export const getFeeManualStudents = async (req, res, next) => {
       admNo: acc.student.admNo,
       srNo: acc.student.srNo,
       name: acc.student.name,
-      className: acc.student.className + (acc.student.section ? `-${acc.student.section}` : ''),
+      className: acc.student.className.includes('-') ? acc.student.className : (acc.student.className + (acc.student.section ? `-${acc.student.section}` : '')),
       fatherName: acc.student.fatherName,
       type: '0',
       heads: acc.heads,

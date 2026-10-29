@@ -9,7 +9,7 @@
           "name": "Dev Sharma",
           "fatherName": "Rajesh Sharma",
           "motherName": "",
-          "className": "I - A",
+          "className": "Class I - A",
           "section": "A",
           "feeType": "Day Scholar",
           "mobile": "9829012345",
@@ -33,7 +33,7 @@
             "amount": 10000,
             "discount": 0,
             "fine": 0,
-            "netPayable": 1000,
+            "netPayable": 10000,
             "isPaid": false
           },
           {
