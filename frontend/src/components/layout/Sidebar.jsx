@@ -188,6 +188,7 @@ export const staffMenuCategories = [
   { id: 'staff-datesheet', title: 'Exam Date Sheet', icon: FileSpreadsheet, path: '/exam-date-sheet' },
   { id: 'staff-portfolio', title: 'Student Portfolio', icon: Contact, path: '/student-portfolio' },
   { id: 'staff-registration', title: 'Student Registration', icon: User, path: '/student-registration' },
+  { id: 'staff-student-list', title: 'Student List', icon: Users, path: '/student-list' },
   { id: 'staff-school', title: 'School Info', icon: Home, path: '/school-info' }
 ];
 
@@ -220,6 +221,7 @@ export const menuCategories = [
     icon: User, // person in UAB
     subItems: [
       { title: 'Registration', path: '/student-registration' },
+      { title: 'Student List', path: '/student-list' },
       { title: 'Assign Roll/Feebook No.', path: '/assign-roll-number' },
       { title: 'Biometric Machine Sync', path: '/biometric-sync' },
       { title: 'Promotion', path: '/promotion' },

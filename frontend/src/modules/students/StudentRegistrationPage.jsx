@@ -20,6 +20,7 @@ import {
   Trophy,
   User,
   Users,
+  Pencil,
   Copy,
   Phone
 } from 'lucide-react';
@@ -568,8 +569,58 @@ export function StudentRegistrationPage({ onNavigate }) {
   // Form State
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [registeredStudent, setRegisteredStudent] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
 
-  // Helper to compute next available roll/sr/adm numbers
+  const populateStudentForEdit = (s) => {
+    setIsEditing(true);
+    setEditingStudent(s);
+    setFormData(prev => ({
+      ...prev,
+      adm_no: s.admNo || prev.adm_no,
+      sr_no: s.srNo || s.admNo || prev.sr_no,
+      roll_no: s.rollNo || prev.roll_no,
+      first_name: s.firstName || s.name || '',
+      last_name: s.lastName || '',
+      class_id: s.className || prev.class_id,
+      division_id: s.section || prev.division_id,
+      gender: s.gender || prev.gender,
+      dob: s.dob || prev.dob,
+      fathers_name: s.fatherName || '',
+      mothers_name: s.motherName || '',
+      fathers_mobile_no: s.fatherMobile || s.contactNo || '',
+      fathers_whatsapp_no: s.fatherWhatsapp || s.fatherMobile || '',
+      fathers_email: s.fatherEmail || '',
+      mothers_mobile_no: s.motherMobile || '',
+      mothers_whatsapp_no: s.motherWhatsapp || '',
+      mothers_email: s.motherEmail || '',
+      contact_no_sms: s.smsWhatsappNo || s.contactNo || '',
+      present_address: s.address || prev.present_address,
+      house: s.house || prev.house,
+      stream_id: s.stream || prev.stream_id,
+      fee_id: s.feeType || prev.fee_id,
+      stu_type: s.studentType || prev.stu_type,
+      status_type: s.status || prev.status_type,
+      student_photo: s.photoUrl || prev.student_photo
+    }));
+    toast(`Loaded ${s.name || s.firstName || 'Student'} (Adm: #${s.admNo}) for editing`);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingStudent(null);
+    const nums = computeNextNumbers();
+    setFormData({
+      ...INITIAL_FORM_DATA,
+      sr_no: nums.sr_no,
+      adm_no: nums.adm_no,
+      roll_no: nums.roll_no,
+      adm_date: new Date().toISOString().split('T')[0]
+    });
+    toast('Cleared edit mode. Ready for new student registration.');
+  };
+
+    // Helper to compute next available roll/sr/adm numbers
   const computeNextNumbers = () => {
     const existing = tenantStore.getStudents(schoolId) || [];
     const count = existing.length;
@@ -605,10 +656,15 @@ export function StudentRegistrationPage({ onNavigate }) {
       })
       .catch(() => {});
 
-    const pending = tenantStore.getPendingRegistration();
-    if (pending) {
-      setFormData(prev => ({ ...prev, ...pending }));
-      toast.success('Form prefilled from CRM: ' + (pending.first_name || '') + ' ' + (pending.last_name || ''));
+    const pendingEdit = tenantStore.getPendingEditStudent();
+    if (pendingEdit) {
+      populateStudentForEdit(pendingEdit);
+    } else {
+      const pending = tenantStore.getPendingRegistration();
+      if (pending) {
+        setFormData(prev => ({ ...prev, ...pending }));
+        toast.success('Form prefilled from CRM: ' + (pending.first_name || '') + ' ' + (pending.last_name || ''));
+      }
     }
   }, [schoolId]);
 
@@ -756,26 +812,52 @@ export function StudentRegistrationPage({ onNavigate }) {
         isNew: true
       };
 
-      // 1. Strictly isolate within active tenant in tenantStore
-      tenantStore.addStudent(schoolId, newStudentData);
+      if (isEditing) {
+        // 1. Update in active tenant store
+        tenantStore.updateStudent(schoolId, formData.adm_no, newStudentData);
 
-      // 2. Transmit to backend with tenant identifier
-      try {
-        await fetch('/api/students', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-school-id': schoolId || 'sch_jd_intl'
-          },
-          body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
-        });
-      } catch (netErr) {
-        // Fallback: Cached in tenant store
+        // 2. Transmit PUT to backend
+        try {
+          const res = await fetch(`/api/students/${encodeURIComponent(formData.adm_no)}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-school-id': schoolId || 'sch_jd_intl'
+            },
+            body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+          });
+          if (!res.ok) {
+            await fetch('/api/students', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId || 'sch_jd_intl' },
+              body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+            });
+          }
+        } catch (netErr) {}
+
+        setRegisteredStudent(newStudentData);
+        setSaveStatus(`Updated ${newStudentData.name} successfully! (Adm No: #${newStudentData.admNo})`);
+        toast.success(`Student ${newStudentData.name} updated successfully!`);
+      } else {
+        // 1. Strictly isolate within active tenant in tenantStore
+        tenantStore.addStudent(schoolId, newStudentData);
+
+        // 2. Transmit to backend with tenant identifier
+        try {
+          await fetch('/api/students', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-school-id': schoolId || 'sch_jd_intl'
+            },
+            body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+          });
+        } catch (netErr) {}
+
+        setRegisteredStudent(newStudentData);
+        setSaveStatus(`Registered successfully in ${schoolName}! (Adm No: #${newStudentData.admNo})`);
+        toast.success(`Student ${newStudentData.name} registered successfully!`);
       }
-
-      setRegisteredStudent(newStudentData);
-      setSaveStatus(`Registered successfully in ${schoolName}! (Adm No: #${newStudentData.admNo})`);
-      toast.success(`Student ${newStudentData.name} registered successfully!`);
     } catch (err) {
       console.error(err);
       setSaveStatus('Error saving student registration');
@@ -883,14 +965,25 @@ export function StudentRegistrationPage({ onNavigate }) {
             <span className="text-gray-600 font-medium">Student Registration</span>
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-          title="Print Registration Form"
-        >
-          <Printer className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('/student-list')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer"
+            title="View All Students List"
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Student List</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+            title="Print Registration Form"
+          >
+            <Printer className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Main Container Card */}
@@ -928,27 +1021,8 @@ export function StudentRegistrationPage({ onNavigate }) {
                   <div
                     key={s.id || s.admNo}
                     onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        adm_no: s.admNo || prev.adm_no,
-                        sr_no: s.srNo || prev.sr_no,
-                        first_name: s.firstName || s.name || '',
-                        last_name: s.lastName || '',
-                        class_id: s.className || prev.class_id,
-                        division_id: s.section || prev.division_id,
-                        gender: s.gender || prev.gender,
-                        dob: s.dob || prev.dob,
-                        fathers_name: s.fatherName || '',
-                        mothers_name: s.motherName || '',
-                        fathers_mobile_no: s.fatherMobile || s.contactNo || '',
-                        house: s.house || prev.house,
-                        stream_id: s.stream || prev.stream_id,
-                        fee_id: s.feeType || prev.fee_id,
-                        stu_type: s.studentType || prev.stu_type,
-                        status_type: s.status || prev.status_type
-                      }));
+                      populateStudentForEdit(s);
                       setSearchQuery('');
-                      toast.success(`Loaded details for ${s.name || s.firstName} (Adm: #${s.admNo})`);
                     }}
                     className="p-2.5 hover:bg-indigo-50 border-b border-gray-100 last:border-0 cursor-pointer flex items-center justify-between text-xs"
                   >
@@ -960,11 +1034,38 @@ export function StudentRegistrationPage({ onNavigate }) {
                   </div>
                 ));
               })()}
+              <div
+                onClick={() => { setSearchQuery(''); onNavigate?.('/student-list'); }}
+                className="p-2 bg-indigo-50/70 hover:bg-indigo-100 text-center text-xs font-semibold text-indigo-700 cursor-pointer border-t border-indigo-100 transition-colors"
+              >
+                View All Enrolled Students in Student Directory →
+              </div>
             </div>
           )}
         </div>
 
-        {/* Tab Navigation directly below search bar matching Live UAB */}
+        {/* Edit Mode Alert Banner */}
+        {isEditing && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-amber-900 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Edit Mode:</strong> Updating student <span className="font-bold underline">{editingStudent?.name || formData.first_name}</span> (Admission No: #{formData.adm_no})
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-2.5 py-1 text-xs bg-white border border-amber-300 text-amber-800 rounded hover:bg-amber-100 font-semibold transition cursor-pointer shadow-2xs"
+              >
+                Cancel Edit / New Student
+              </button>
+            </div>
+          </div>
+        )}
+
+                {/* Tab Navigation directly below search bar matching Live UAB */}
         <div className="flex border-b border-gray-200 overflow-x-auto no-scrollbar mb-4 gap-x-2 md:gap-x-6 text-xs md:text-sm font-medium">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -1860,7 +1961,7 @@ export function StudentRegistrationPage({ onNavigate }) {
               disabled={isSubmitting}
               className="px-6 py-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs md:text-sm font-semibold rounded shadow-xs hover:shadow transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
             >
-              {isSubmitting ? 'Saving...' : 'Save Student'}
+              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Student' : 'Save Student')}
             </button>
           </div>
         </div>

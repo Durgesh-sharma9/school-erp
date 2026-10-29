@@ -138,7 +138,17 @@ export const registerStudent = async (req, res, next) => {
     if (!TENANT_STUDENTS[schoolId]) {
       TENANT_STUDENTS[schoolId] = [];
     }
-    TENANT_STUDENTS[schoolId].unshift(newStudent);
+    const existingIdx = TENANT_STUDENTS[schoolId].findIndex(s => String(s.admNo) === String(newStudent.admNo));
+    if (existingIdx !== -1) {
+      TENANT_STUDENTS[schoolId][existingIdx] = { ...TENANT_STUDENTS[schoolId][existingIdx], ...newStudent };
+      return res.status(200).json({
+        success: true,
+        message: `Student ${newStudent.admNo} updated successfully in school ${schoolId}`,
+        data: TENANT_STUDENTS[schoolId][existingIdx]
+      });
+    } else {
+      TENANT_STUDENTS[schoolId].unshift(newStudent);
+    }
 
     return res.status(201).json({
       success: true,
@@ -466,6 +476,89 @@ export const createExamDateSheet = async (req, res, next) => {
 /**
  * Get student by Admission Number strictly scoped to active tenant
  */
+/**
+ * Update an existing student scoped to active tenant
+ */
+export const updateStudent = async (req, res, next) => {
+  try {
+    const schoolId = getActiveSchoolId(req);
+    const { admNo } = req.params;
+    const updateData = req.body || {};
+
+    if (!TENANT_STUDENTS[schoolId]) {
+      TENANT_STUDENTS[schoolId] = [];
+    }
+
+    const index = TENANT_STUDENTS[schoolId].findIndex(
+      (s) => String(s.admNo) === String(admNo) || String(s.id) === String(admNo)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: `Student with Admission No ${admNo} not found in this school`
+      });
+    }
+
+    const existing = TENANT_STUDENTS[schoolId][index];
+    const firstName = updateData.first_name || updateData.firstName || existing.firstName || '';
+    const lastName = updateData.last_name !== undefined ? updateData.last_name : (updateData.lastName !== undefined ? updateData.lastName : (existing.lastName || ''));
+    const fullName = updateData.name || `${firstName} ${lastName}`.trim();
+
+    const updated = {
+      ...existing,
+      ...updateData,
+      firstName,
+      lastName,
+      name: fullName,
+      fatherName: updateData.fathers_name !== undefined ? updateData.fathers_name : (updateData.fatherName !== undefined ? updateData.fatherName : (existing.fatherName || '')),
+      motherName: updateData.mothers_name !== undefined ? updateData.mothers_name : (updateData.motherName !== undefined ? updateData.motherName : (existing.motherName || '')),
+      fatherMobile: updateData.fathers_mobile_no || updateData.fatherMobile || existing.fatherMobile || '',
+      fatherWhatsapp: updateData.fathers_whatsapp_no || updateData.fatherWhatsapp || existing.fatherWhatsapp || '',
+      fatherEmail: updateData.fathers_email || updateData.fatherEmail || existing.fatherEmail || '',
+      motherMobile: updateData.mothers_mobile_no || updateData.motherMobile || existing.motherMobile || '',
+      contactNo: updateData.contact_no_sms || updateData.contactNo || updateData.fathers_mobile_no || existing.contactNo || '',
+      smsWhatsappNo: updateData.fathers_whatsapp_no || updateData.contact_no_sms || updateData.smsWhatsappNo || existing.smsWhatsappNo || '',
+      className: updateData.class_id || updateData.className || existing.className,
+      section: updateData.division_id || updateData.section || existing.section,
+      dob: updateData.dob || existing.dob,
+      gender: updateData.gender || existing.gender,
+      rollNo: updateData.roll_no || updateData.rollNo || existing.rollNo,
+      photoUrl: updateData.student_photo || updateData.photoUrl || existing.photoUrl,
+      address: updateData.present_address || updateData.address || existing.address,
+      updatedAt: new Date().toISOString()
+    };
+
+    TENANT_STUDENTS[schoolId][index] = updated;
+
+    try {
+      await prisma.student.updateMany({
+        where: { schoolId, admNo },
+        data: {
+          firstName: updated.firstName,
+          lastName: updated.lastName,
+          fatherName: updated.fatherName,
+          motherName: updated.motherName,
+          fatherMobile: updated.fatherMobile,
+          motherMobile: updated.motherMobile,
+          className: updated.className,
+          gender: updated.gender,
+          photoUrl: updated.photoUrl
+        }
+      });
+    } catch (e) {}
+
+    return res.status(200).json({
+      success: true,
+      message: `Student ${updated.name || admNo} updated successfully`,
+      data: updated
+    });
+  } catch (error) {
+    console.error('[Update Student Error]:', error);
+    next(error);
+  }
+};
+
 export const getStudentByAdmNo = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
