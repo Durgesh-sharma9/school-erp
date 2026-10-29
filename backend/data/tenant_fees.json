@@ -73,7 +73,8 @@
             "status": "SUCCESS",
             "receiptType": "COUNTER"
           }
-        ]
+        ],
+        "manualRemark": "Synchronized default fee heads"
       }
     },
     "sch_dps_branch2": {}
