@@ -30,7 +30,8 @@ import {
   PartyPopper,
   CheckCircle2,
   XCircle,
-  HelpCircle
+  HelpCircle,
+  Search
 } from 'lucide-react';
 import StatsCard from '../../components/StatsCard';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
