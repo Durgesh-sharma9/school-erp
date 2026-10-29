@@ -1,16 +1,40 @@
 import React, { useState } from 'react';
 import { Award, Search, Download, Printer, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function BoardFeeDueListReportPage() {
+  const { schoolId } = useAuth();
   const [selectedClass, setSelectedClass] = useState('All');
   const [studentType, setStudentType] = useState('Due Student');
 
-  const [candidates, setCandidates] = useState([
-    { sNo: 1, admNo: '2060', name: 'ROHAN SHARMA', fatherName: 'MUKESH SHARMA', mobile: '9829012345', className: 'X-A', total: 3500, paid: 0, due: 3500 },
-    { sNo: 2, admNo: '2070', name: 'KAVITA MEENA', fatherName: 'RAMESHWAR MEENA', mobile: '9414012233', className: 'XII-HUMANITIES-A', total: 3800, paid: 0, due: 3800 },
-    { sNo: 3, admNo: '2072', name: 'HARSHIT JAIN', fatherName: 'SANJAY JAIN', mobile: '9876543210', className: 'XII-SCIENCE-A', total: 3800, paid: 1000, due: 2800 }
-  ]);
+  const [candidates, setCandidates] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      const boardDue = realStudents
+        .filter(s => {
+          const cls = String(s.className || '').toUpperCase();
+          return (cls.includes('X') || cls.includes('10') || cls.includes('XII') || cls.includes('12')) && !s.boardFeePaid;
+        })
+        .map((s, idx) => ({
+          sNo: idx + 1,
+          admNo: s.admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+          fatherName: s.fatherName || s.fathers_name || '-',
+          mobile: s.fatherMobile || s.contactNo || '-',
+          className: `${s.className || 'X'}-${s.section || 'A'}`,
+          total: Number(s.boardFee || 3500),
+          paid: 0,
+          due: Number(s.boardFee || 3500)
+        }));
+      setCandidates(boardDue);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
 
   const totalDues = candidates.reduce((sum, c) => sum + c.due, 0);
 

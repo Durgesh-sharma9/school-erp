@@ -1,23 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Download, Printer, Tag, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeHeadPage() {
-  const [heads, setHeads] = useState([
-    { id: '1', feeHead: 'Opening Balance', priority: 1, applyFor: 'Old', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-    { id: '2', feeHead: 'Fine', priority: 2, applyFor: 'Both', gender: 'Both', installment: 'Monthly', feeType: 'dayscholar', isBoard: false },
-    { id: '3', feeHead: 'Transport', priority: 3, applyFor: 'Both', gender: 'Both', installment: 'Monthly', feeType: 'dayscholar', isBoard: false },
-    { id: '4', feeHead: 'Hostel', priority: 4, applyFor: 'Both', gender: 'Both', installment: 'Monthly', feeType: 'dayscholar', isBoard: false },
-    { id: '5', feeHead: 'Other', priority: 5, applyFor: 'Both', gender: 'Both', installment: 'Monthly', feeType: 'dayscholar', isBoard: false },
-    { id: '6', feeHead: 'Extra Concession', priority: 6, applyFor: 'Old', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-    { id: '7', feeHead: 'Admission Fee', priority: 7, applyFor: 'New', gender: 'Both', installment: 'Only Once', feeType: 'dayscholar', isBoard: false },
-    { id: '8', feeHead: 'Tuition Fee', priority: 8, applyFor: 'Both', gender: 'Both', installment: 'Quarterly', feeType: 'dayscholar', isBoard: false },
-    { id: '9', feeHead: 'Activity Fee', priority: 9, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-    { id: '10', feeHead: 'Digital Learning fee', priority: 10, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-    { id: '11', feeHead: 'Registration fee', priority: 11, applyFor: 'New', gender: 'Both', installment: 'Only Once', feeType: 'dayscholar', isBoard: false },
-    { id: '12', feeHead: 'Examination Fee', priority: 12, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-    { id: '13', feeHead: 'School Application Fee', priority: 13, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false }
-  ]);
+  const { schoolId } = useAuth();
+  const [heads, setHeads] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,18 +24,21 @@ export function FeeHeadPage() {
 
   useEffect(() => {
     fetchHeads();
-  }, []);
+  }, [schoolId]);
 
   const fetchHeads = async () => {
     try {
-      const res = await fetch('/api/fees/heads');
+      const local = tenantStore.getFeeHeads(schoolId) || [];
+      setHeads(local);
+
+      const res = await fetch('/api/fees/heads', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setHeads(data.data);
       }
-    } catch {
-      // Retain defaults
-    }
+    } catch {}
   };
 
   const handleOpenModal = (head = null) => {

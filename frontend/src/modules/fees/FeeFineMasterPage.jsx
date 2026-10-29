@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Download, Printer, Gavel, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeFineMasterPage() {
-  const [fines, setFines] = useState([
-    { id: '1', fineName: 'Late Fee Penalty', fineType: 'Per Day', increasePeriod: 'Daily', graceDays: 10, amount: 20, createdAt: '2026-04-01', updatedAt: '2026-04-01', user: 'Admin' },
-    { id: '2', fineName: 'Quarterly Due Flat Fine', fineType: 'Fixed', increasePeriod: 'Monthly', graceDays: 15, amount: 200, createdAt: '2026-04-01', updatedAt: '2026-04-01', user: 'Admin' }
-  ]);
+  const { schoolId } = useAuth();
+  const [fines, setFines] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,18 +22,21 @@ export function FeeFineMasterPage() {
 
   useEffect(() => {
     fetchFines();
-  }, []);
+  }, [schoolId]);
 
   const fetchFines = async () => {
     try {
-      const res = await fetch('/api/fees/fines');
+      const local = tenantStore.getFineMasters(schoolId) || [];
+      setFines(local);
+
+      const res = await fetch('/api/fees/fines', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setFines(data.data);
       }
-    } catch {
-      // Keep defaults
-    }
+    } catch {}
   };
 
   const handleOpenModal = (f = null) => {

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Layers, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeStructureReportPage() {
   const [reportType, setReportType] = useState('Fees Structure');

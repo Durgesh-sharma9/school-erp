@@ -1,15 +1,37 @@
 import React, { useState } from 'react';
 import { CreditCard, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeAdvanceReportPage() {
+  const { schoolId } = useAuth();
   const [reportType, setReportType] = useState('All');
   const [selectedClass, setSelectedClass] = useState('All');
 
-  const [advances, setAdvances] = useState([
-    { sNo: 1, admNo: '1621', srNo: '1621', name: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', advanceAmount: 4000, dateReceived: '2026-04-10', payMode: 'UPI', remarks: 'Advance for Term 3 Tuition' },
-    { sNo: 2, admNo: '2059', srNo: '2059', name: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', advanceAmount: 2500, dateReceived: '2026-04-12', payMode: 'Cash', remarks: 'Annual activity advance credit' }
-  ]);
+  const [advances, setAdvances] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const receipts = tenantStore.getReceipts(schoolId) || [];
+      const withAdvance = receipts
+        .filter(r => Number(r.advanceAmount || 0) > 0)
+        .map((r, idx) => ({
+          sNo: idx + 1,
+          admNo: r.admNo,
+          srNo: r.srNo || r.admNo,
+          name: r.studentName,
+          className: r.className || 'Class I',
+          advanceAmount: Number(r.advanceAmount || 0),
+          dateReceived: r.date,
+          payMode: r.payMode,
+          remarks: r.remarks || 'Advance deposit credit'
+        }));
+      setAdvances(withAdvance);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
 
   const totalAdvance = advances.reduce((sum, a) => sum + a.advanceAmount, 0);
 

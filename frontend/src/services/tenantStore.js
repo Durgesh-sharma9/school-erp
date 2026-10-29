@@ -638,6 +638,195 @@ class TenantDataStore {
       console.error(e);
     }
   }
+  // ==========================================
+  // Dynamic Multi-Tenant Fee Management Helpers
+  // ==========================================
+
+  getFeeStructures(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'fee_structures'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  }
+
+  saveFeeStructures(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      localStorage.setItem(this.getStorageKey(schoolId, 'fee_structures'), JSON.stringify(list || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  addFeeStructure(schoolId, item) {
+    if (!schoolId || !item) return null;
+    const current = this.getFeeStructures(schoolId);
+    const newItem = { id: item.id || `str_${Date.now()}`, ...item };
+    const updated = [newItem, ...current.filter(s => s.id !== newItem.id)];
+    this.saveFeeStructures(schoolId, updated);
+    return newItem;
+  }
+
+  deleteFeeStructure(schoolId, id) {
+    if (!schoolId || !id) return;
+    const current = this.getFeeStructures(schoolId);
+    const updated = current.filter(s => s.id !== String(id));
+    this.saveFeeStructures(schoolId, updated);
+    return updated;
+  }
+
+  getFeeHeadGroups(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'fee_head_groups'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: '1', headGroup: 'Admission Fee', priority: 1, active: true },
+      { id: '2', headGroup: 'Tuition Fee', priority: 2, active: true },
+      { id: '3', headGroup: 'Activity Fee', priority: 3, active: true },
+      { id: '4', headGroup: 'Examination Fee', priority: 4, active: true },
+      { id: '5', headGroup: 'Digital Learning Fee', priority: 5, active: true }
+    ];
+  }
+
+  saveFeeHeadGroups(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      localStorage.setItem(this.getStorageKey(schoolId, 'fee_head_groups'), JSON.stringify(list || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getFeeHeads(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'fee_heads'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: '1', feeHead: 'Admission Fee', priority: 1, applyFor: 'New', gender: 'Both', installment: 'Only Once', feeType: 'dayscholar', isBoard: false },
+      { id: '2', feeHead: 'Tuition Fee', priority: 2, applyFor: 'Both', gender: 'Both', installment: 'Quarterly', feeType: 'dayscholar', isBoard: false },
+      { id: '3', feeHead: 'Activity Fee', priority: 3, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
+      { id: '4', feeHead: 'Examination Fee', priority: 4, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false }
+    ];
+  }
+
+  saveFeeHeads(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      localStorage.setItem(this.getStorageKey(schoolId, 'fee_heads'), JSON.stringify(list || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getConcessionTypes(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'concession_types'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: '1', concessionType: 'Staff Ward', description: 'Institutional staff discount', defaultPercent: 50 },
+      { id: '2', concessionType: 'Scholarship / Merit', description: 'Merit based scholarship', defaultPercent: 25 },
+      { id: '3', concessionType: 'Sibling Discount', description: 'Family sibling concession', defaultPercent: 20 },
+      { id: '4', concessionType: 'EWS / Need Based', description: 'Economic weaker section grant', defaultPercent: 100 }
+    ];
+  }
+
+  saveConcessionTypes(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      localStorage.setItem(this.getStorageKey(schoolId, 'concession_types'), JSON.stringify(list || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getFineMasters(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'fine_masters'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: '1', fineName: 'Late Fee Penalty', fineType: 'Per Day', increasePeriod: 'Daily', graceDays: 10, amount: 20, createdAt: new Date().toISOString().split('T')[0], updatedAt: new Date().toISOString().split('T')[0], user: 'Admin' }
+    ];
+  }
+
+  saveFineMasters(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      localStorage.setItem(this.getStorageKey(schoolId, 'fine_masters'), JSON.stringify(list || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getStudentConcessions(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const stored = localStorage.getItem(this.getStorageKey(schoolId, 'student_concessions'));
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  }
+
+  saveStudentConcession(schoolId, concession) {
+    if (!schoolId || !concession) return;
+    const current = this.getStudentConcessions(schoolId);
+    const newRecord = { id: concession.id || `conc_${Date.now()}`, ...concession };
+    const updated = [newRecord, ...current.filter(c => c.id !== newRecord.id)];
+    localStorage.setItem(this.getStorageKey(schoolId, 'student_concessions'), JSON.stringify(updated));
+    return newRecord;
+  }
+
+  deleteStudentConcession(schoolId, id) {
+    if (!schoolId || !id) return;
+    const current = this.getStudentConcessions(schoolId);
+    const updated = current.filter(c => c.id !== String(id));
+    localStorage.setItem(this.getStorageKey(schoolId, 'student_concessions'), JSON.stringify(updated));
+    return updated;
+  }
+
+  getStudentFeeLedger(schoolId, admNo) {
+    if (!schoolId || !admNo) return null;
+    try {
+      const key = this.getStorageKey(schoolId, `fee_ledger_${admNo}`);
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  }
+
+  saveStudentFeeLedger(schoolId, admNo, heads) {
+    if (!schoolId || !admNo) return;
+    try {
+      const key = this.getStorageKey(schoolId, `fee_ledger_${admNo}`);
+      localStorage.setItem(key, JSON.stringify(heads || []));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
 }
 
 export const tenantStore = new TenantDataStore();

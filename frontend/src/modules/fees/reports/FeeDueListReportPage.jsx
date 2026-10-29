@@ -1,52 +1,44 @@
 import React, { useState } from 'react';
 import { IndianRupee, Search, Download, Printer, Filter, Calendar, MessageSquare, Send, CreditCard } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import { tenantStore } from '../../../services/tenantStore';
 import toast from 'react-hot-toast';
 
 export function FeeDueListReportPage({ onNavigate }) {
+  const { schoolId } = useAuth();
   const [reportType, setReportType] = useState('Month Wise');
   const [selectedClass, setSelectedClass] = useState('All');
   const [studentType, setStudentType] = useState('Due Student');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [students, setStudents] = useState([
-    {
-      sNo: 1,
-      enrollNo: 'ENR-2023-01',
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'Class I-A',
-      mobile: '9829012345',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      months: { apr: 0, may: 0, jun: 0, jul: 4000, aug: 4000, sep: 4000, oct: 1500 },
-      due: 13500
-    },
-    {
-      sNo: 2,
-      enrollNo: 'ENR-2023-02',
-      admNo: '2059',
-      srNo: '2059',
-      name: 'AADHYA CHOUDHARY',
-      className: 'Nursery - PP3+-A',
-      mobile: '6377281034',
-      fatherName: 'RAMESH CHOUDHARY',
-      months: { apr: 0, may: 0, jun: 0, jul: 3000, aug: 3000, sep: 3500, oct: 0 },
-      due: 9500
-    },
-    {
-      sNo: 3,
-      enrollNo: 'ENR-2023-03',
-      admNo: '2060',
-      srNo: '2060',
-      name: 'ROHAN SHARMA',
-      className: 'Class X-A',
-      mobile: '9829012345',
-      fatherName: 'MUKESH SHARMA',
-      months: { apr: 0, may: 5000, jun: 5000, jul: 5000, aug: 0, sep: 0, oct: 3500 },
-      due: 18500
+  const [students, setStudents] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      const mapped = realStudents.map((s, idx) => {
+        const ledger = tenantStore.getStudentFeeLedger(schoolId, s.admNo);
+        const dueAmt = ledger
+          ? ledger.filter(h => !h.isPaid).reduce((sum, h) => sum + (h.netPayable || h.amount), 0)
+          : Number(s.totalFees || 15000);
+        return {
+          sNo: idx + 1,
+          enrollNo: s.enrollNo || `ENR-${s.admNo}`,
+          admNo: s.admNo,
+          srNo: s.srNo || s.admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          mobile: s.fatherMobile || s.contactNo || '-',
+          fatherName: s.fatherName || s.fathers_name || '-',
+          months: { apr: 0, may: 0, jun: 0, jul: Math.round(dueAmt * 0.3), aug: Math.round(dueAmt * 0.3), sep: Math.round(dueAmt * 0.4), oct: 0 },
+          due: dueAmt
+        };
+      });
+      setStudents(mapped);
+    } catch (e) {
+      console.error(e);
     }
-  ]);
+  }, [schoolId]);
 
   const totalDues = students.reduce((sum, s) => sum + s.due, 0);
 

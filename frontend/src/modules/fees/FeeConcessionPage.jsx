@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, Download, Printer, Percent, X, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
+import { Plus, Search, Trash2, Download, Printer, Percent, X, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function FeeConcessionPage() {
-  const [concessions, setConcessions] = useState([
-    { id: '1', admNo: '2049', srNo: '2049', studentName: 'BHAVYA', className: 'III-A', fatherName: 'NAVEEN YADAV', concessionType: 'Staff', concessionBy: 'Principal', amount: 5000, percentage: 50, status: 'APPROVED' },
-    { id: '2', admNo: '2050', srNo: '2050', studentName: 'PRIYANSHU JOYA', className: 'V-A', fatherName: 'NARPAT LAL JOYA', concessionType: 'Poor Student', concessionBy: 'Management', amount: 8000, percentage: 100, status: 'APPROVED' }
-  ]);
-
+  const { schoolId } = useAuth();
+  const [concessions, setConcessions] = useState([]);
+  const [availableStudents, setAvailableStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     admNo: '',
     srNo: '',
     studentName: '',
-    className: 'Class I-A',
+    className: '',
     fatherName: '',
-    concessionType: 'Staff',
+    concessionType: 'Staff Ward',
     concessionBy: 'Principal',
     amount: '5000',
     percentage: '50'
@@ -25,28 +25,62 @@ export function FeeConcessionPage() {
 
   useEffect(() => {
     fetchConcessions();
-  }, []);
+    loadAvailableStudents();
+  }, [schoolId]);
+
+  const loadAvailableStudents = () => {
+    try {
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      setAvailableStudents(realStudents);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchConcessions = async () => {
     try {
-      const res = await fetch('/api/fees/concessions');
+      // 1. Load from tenantStore
+      const local = tenantStore.getStudentConcessions(schoolId) || [];
+      setConcessions(local);
+
+      // 2. Sync from backend API
+      const res = await fetch('/api/fees/concessions', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data)) {
         setConcessions(data.data);
       }
     } catch {
-      // Keep defaults
+      // local tenantStore remains active
+    }
+  };
+
+  const handleStudentSelect = (admNo) => {
+    const s = availableStudents.find(stu => String(stu.admNo) === String(admNo));
+    if (s) {
+      setFormData(prev => ({
+        ...prev,
+        admNo: s.admNo,
+        srNo: s.srNo || s.admNo,
+        studentName: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+        className: `${s.className || 'I'}-${s.section || 'A'}`,
+        fatherName: s.fatherName || s.fathers_name || ''
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, admNo }));
     }
   };
 
   const handleOpenModal = () => {
+    const firstStudent = availableStudents[0];
     setFormData({
-      admNo: '',
-      srNo: '',
-      studentName: '',
-      className: 'Class I-A',
-      fatherName: '',
-      concessionType: 'Staff',
+      admNo: firstStudent ? firstStudent.admNo : '',
+      srNo: firstStudent ? (firstStudent.srNo || firstStudent.admNo) : '',
+      studentName: firstStudent ? ((firstStudent.name || `${firstStudent.firstName || ''} ${firstStudent.lastName || ''}`).trim()) : '',
+      className: firstStudent ? `${firstStudent.className || 'I'}-${firstStudent.section || 'A'}` : '',
+      fatherName: firstStudent ? (firstStudent.fatherName || firstStudent.fathers_name || '') : '',
+      concessionType: 'Staff Ward',
       concessionBy: 'Principal',
       amount: '5000',
       percentage: '50'
@@ -57,7 +91,7 @@ export function FeeConcessionPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.admNo.trim() || !formData.studentName.trim()) {
-      toast.error('Enter Admission Number and Student Name');
+      toast.error('Select a student and specify concession');
       return;
     }
 
@@ -72,17 +106,24 @@ export function FeeConcessionPage() {
         concessionType: formData.concessionType,
         concessionBy: formData.concessionBy,
         amount: Number(formData.amount) || 0,
-        percentage: Number(formData.percentage) || 0
+        percentage: Number(formData.percentage) || 0,
+        status: 'APPROVED'
       };
 
+      // 1. Save locally in tenantStore
+      const saved = tenantStore.saveStudentConcession(schoolId, payload);
+
+      // 2. Sync to API
       await fetch('/api/fees/concessions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify(payload)
       });
 
-      const newRecord = { id: String(Date.now()), ...payload, status: 'APPROVED' };
-      setConcessions(prev => [newRecord, ...prev]);
+      setConcessions(prev => [saved, ...prev.filter(c => c.id !== saved.id)]);
       toast.success('Fee concession assigned successfully');
       setIsModalOpen(false);
     } catch {
@@ -95,7 +136,15 @@ export function FeeConcessionPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this concession assignment?')) return;
     try {
-      await fetch(`/api/fees/concessions/${id}`, { method: 'DELETE' });
+      // 1. Delete locally from tenantStore
+      tenantStore.deleteStudentConcession(schoolId, id);
+
+      // 2. Sync to API
+      await fetch(`/api/fees/concessions/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-school-id': schoolId }
+      });
+
       setConcessions(prev => prev.filter(c => c.id !== id));
       toast.success('Concession removed');
     } catch {
@@ -119,9 +168,9 @@ export function FeeConcessionPage() {
   };
 
   const filtered = concessions.filter(c =>
-    c.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.admNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.concessionType.toLowerCase().includes(searchQuery.toLowerCase())
+    (c.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.admNo || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.concessionType || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -229,7 +278,8 @@ export function FeeConcessionPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan="10" className="py-12 text-center text-slate-400">
-                    No student concessions found.
+                    <p className="font-semibold text-slate-600 text-sm">No student concessions assigned</p>
+                    <p className="text-xs text-slate-400 mt-1">Click "+ Add Fee Concession" above to grant a fee waiver or scholarship to a registered student.</p>
                   </td>
                 </tr>
               )}
@@ -256,6 +306,26 @@ export function FeeConcessionPage() {
             </div>
 
             <form onSubmit={handleSave} className="p-5 space-y-4">
+              {availableStudents.length > 0 && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Select From Registered Students:
+                  </label>
+                  <select
+                    value={formData.admNo}
+                    onChange={(e) => handleStudentSelect(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-indigo-50/50 border border-indigo-200 rounded-xl text-xs font-semibold text-indigo-900 focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <option value="">-- Choose Student --</option>
+                    {availableStudents.map(s => (
+                      <option key={s.admNo} value={s.admNo}>
+                        {s.admNo} - {(s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim()} (Class {s.className}-{s.section})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -264,7 +334,7 @@ export function FeeConcessionPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 2059"
+                    placeholder="e.g. 1001"
                     value={formData.admNo}
                     onChange={(e) => setFormData(prev => ({ ...prev, admNo: e.target.value }))}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20"
@@ -278,7 +348,7 @@ export function FeeConcessionPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Aadhya Choudhary"
+                    placeholder="Enter student name"
                     value={formData.studentName}
                     onChange={(e) => setFormData(prev => ({ ...prev, studentName: e.target.value }))}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20"
@@ -291,7 +361,7 @@ export function FeeConcessionPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Nursery - PP3+-A"
+                    placeholder="e.g. Class I-A"
                     value={formData.className}
                     onChange={(e) => setFormData(prev => ({ ...prev, className: e.target.value }))}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20"
@@ -304,7 +374,7 @@ export function FeeConcessionPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Ramesh Choudhary"
+                    placeholder="Father Name"
                     value={formData.fatherName}
                     onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20"
@@ -320,12 +390,12 @@ export function FeeConcessionPage() {
                     onChange={(e) => setFormData(prev => ({ ...prev, concessionType: e.target.value }))}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20"
                   >
-                    <option value="Staff">Staff</option>
+                    <option value="Staff Ward">Staff Ward</option>
                     <option value="Poor Student">Poor Student (EWS)</option>
                     <option value="Handicap">Handicap</option>
                     <option value="Principal">Principal Discretionary</option>
                     <option value="Management">Management Quota</option>
-                    <option value="3rd Child">3rd Child</option>
+                    <option value="Sibling Discount">Sibling Discount</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -397,3 +467,5 @@ export function FeeConcessionPage() {
     </div>
   );
 }
+
+export default FeeConcessionPage;

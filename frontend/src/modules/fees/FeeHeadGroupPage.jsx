@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, CheckCircle, X, Download, Printer, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeHeadGroupPage() {
-  const [groups, setGroups] = useState([
-    { id: '1', headGroup: 'OFTHO', priority: 1, active: true },
-    { id: '2', headGroup: 'Admission Fee', priority: 2, active: true },
-    { id: '3', headGroup: 'Tution Fee', priority: 3, active: true },
-    { id: '4', headGroup: 'Activity Fee', priority: 4, active: true },
-    { id: '5', headGroup: 'Digital Learning Fee', priority: 5, active: true },
-    { id: '6', headGroup: 'Admission Form', priority: 6, active: true },
-    { id: '7', headGroup: 'Registration Fee', priority: 7, active: true },
-    { id: '8', headGroup: 'Examination Fee', priority: 8, active: true },
-    { id: '9', headGroup: 'School Application Fee', priority: 10, active: true }
-  ]);
+  const { schoolId } = useAuth();
+  const [groups, setGroups] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,18 +16,21 @@ export function FeeHeadGroupPage() {
 
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [schoolId]);
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch('/api/fees/head-groups');
+      const local = tenantStore.getFeeHeadGroups(schoolId) || [];
+      setGroups(local);
+
+      const res = await fetch('/api/fees/head-groups', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setGroups(data.data);
       }
-    } catch {
-      // Keep resilient defaults
-    }
+    } catch {}
   };
 
   const handleOpenModal = (group = null) => {

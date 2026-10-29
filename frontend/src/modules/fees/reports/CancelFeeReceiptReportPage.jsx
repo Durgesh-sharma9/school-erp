@@ -1,45 +1,43 @@
 import React, { useState } from 'react';
 import { XCircle, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function CancelFeeReceiptReportPage() {
+  const { schoolId } = useAuth();
   const [fromDate, setFromDate] = useState('2026-04-01');
   const [toDate, setToDate] = useState('2026-10-15');
   const [reportType, setReportType] = useState('All');
   const [selectedClass, setSelectedClass] = useState('All');
 
-  const [cancelledReceipts] = useState([
-    {
-      sNo: 1,
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'Nursery - PP3+-A',
-      recNo: 'REC-2026-009',
-      recDate: '2026-04-12',
-      cancelDate: '2026-04-13',
-      remark: 'Wrong head selection by cashier',
-      amount: 4500,
-      paid: 4500,
-      cancelBy: 'ADMINISTRATOR',
-      user: 'Cashier-01'
-    },
-    {
-      sNo: 2,
-      admNo: '1245',
-      srNo: '1245',
-      name: 'BHAVYA VERMA',
-      className: 'Class II-B',
-      recNo: 'REC-2026-034',
-      recDate: '2026-05-02',
-      cancelDate: '2026-05-03',
-      remark: 'Cheque bounced / cancelled before clearance',
-      amount: 6000,
-      paid: 6000,
-      cancelBy: 'PRINCIPAL',
-      user: 'Accountant-Main'
+  const [cancelledReceipts, setCancelledReceipts] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const allReceipts = tenantStore.getReceipts(schoolId) || [];
+      const cancelled = allReceipts
+        .filter(r => r.status === 'CANCELLED')
+        .map((r, idx) => ({
+          sNo: idx + 1,
+          admNo: r.admNo,
+          srNo: r.srNo || r.admNo,
+          name: r.studentName,
+          className: r.className || 'Class I',
+          recNo: r.receiptNo,
+          recDate: r.date,
+          cancelDate: r.cancelledAt ? r.cancelledAt.split('T')[0] : r.date,
+          remark: r.cancelReason || 'Cancelled upon request',
+          amount: Number(r.paidAmount || 0),
+          paid: Number(r.paidAmount || 0),
+          cancelBy: 'ADMINISTRATOR',
+          user: 'Cashier'
+        }));
+      setCancelledReceipts(cancelled);
+    } catch (e) {
+      console.error(e);
     }
-  ]);
+  }, [schoolId]);
 
   const totalCancelledAmount = cancelledReceipts.reduce((sum, r) => sum + r.amount, 0);
 

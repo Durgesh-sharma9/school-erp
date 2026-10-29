@@ -533,7 +533,7 @@ export const getFeeManualStudents = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    const studentsList = Object.values(accounts).map((acc, idx) => ({
+    let studentsList = Object.values(accounts).map((acc, idx) => ({
       sNo: idx + 1,
       admNo: acc.student.admNo,
       srNo: acc.student.srNo,
@@ -544,6 +544,27 @@ export const getFeeManualStudents = async (req, res, next) => {
       heads: acc.heads,
       receipts: acc.receipts
     }));
+
+    if (studentsList.length === 0) {
+      const pool = TENANT_STUDENTS[schoolId] || [];
+      studentsList = pool.map((s, idx) => ({
+        sNo: idx + 1,
+        admNo: s.admNo,
+        srNo: s.srNo || s.admNo,
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+        className: `${s.className || 'I'}-${s.section || 'A'}`,
+        fatherName: s.fatherName || s.fathers_name || '-',
+        type: s.studentType || '0',
+        heads: [
+          { id: `h_${s.admNo}_1`, feeHead: 'Admission Fee', amount: 5000, discount: 0, fine: 0, netPayable: 5000, isPaid: false },
+          { id: `h_${s.admNo}_2`, feeHead: 'Tuition Fee (Q1)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: false },
+          { id: `h_${s.admNo}_3`, feeHead: 'Tuition Fee (Q2)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: false },
+          { id: `h_${s.admNo}_4`, feeHead: 'Activity & Sports Fee', amount: 2000, discount: 0, fine: 0, netPayable: 2000, isPaid: false }
+        ],
+        receipts: []
+      }));
+    }
+
     return res.status(200).json({ success: true, data: studentsList });
   } catch (error) {
     next(error);
@@ -554,12 +575,27 @@ export const saveFeeManualEdit = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { admNo, heads = [], remarks = '' } = req.body;
-    if (TENANT_FEE_ACCOUNTS[schoolId] && TENANT_FEE_ACCOUNTS[schoolId][admNo]) {
-      TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = heads;
-      TENANT_FEE_ACCOUNTS[schoolId][admNo].manualRemark = remarks;
-      return res.status(200).json({ success: true, message: `Fee updated manually for Student ${admNo}` });
+    if (!TENANT_FEE_ACCOUNTS[schoolId]) {
+      TENANT_FEE_ACCOUNTS[schoolId] = {};
     }
-    return res.status(404).json({ success: false, message: 'Student account not found' });
+    if (!TENANT_FEE_ACCOUNTS[schoolId][admNo]) {
+      const studentPool = TENANT_STUDENTS[schoolId] || [];
+      const s = studentPool.find(st => st.admNo === admNo) || {};
+      TENANT_FEE_ACCOUNTS[schoolId][admNo] = {
+        student: {
+          admNo,
+          srNo: s.srNo || admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${admNo}`,
+          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          fatherName: s.fatherName || '-'
+        },
+        heads: [],
+        receipts: []
+      };
+    }
+    TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = heads;
+    TENANT_FEE_ACCOUNTS[schoolId][admNo].manualRemark = remarks;
+    return res.status(200).json({ success: true, message: `Fee updated manually for Student ${admNo}` });
   } catch (error) {
     next(error);
   }
@@ -625,24 +661,28 @@ export const lookupSiblings = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { mobile = '', fatherName = '' } = req.query;
-    const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    
-    let matched = Object.values(accounts).map(acc => ({
-      admNo: acc.student.admNo,
-      srNo: acc.student.srNo,
-      name: acc.student.name,
-      fatherName: acc.student.fatherName,
-      className: acc.student.className,
-      mobile: acc.student.mobile,
-      dueAmount: acc.heads.filter(h => !h.isPaid).reduce((sum, h) => sum + (h.netPayable || h.amount), 0),
-      heads: acc.heads
-    }));
+    const pool = TENANT_STUDENTS[schoolId] || [];
+    const qMobile = String(mobile).trim();
+    const qFather = String(fatherName).trim().toLowerCase();
 
-    if (mobile.trim()) {
-      matched = matched.filter(s => s.mobile && s.mobile.includes(mobile.trim()));
-    } else if (fatherName.trim()) {
-      matched = matched.filter(s => s.fatherName && s.fatherName.toLowerCase().includes(fatherName.trim().toLowerCase()));
-    }
+    const matched = pool.filter(s => {
+      const sMob = String(s.fatherMobile || s.contactNo || s.smsWhatsappNo || '');
+      const sFat = String(s.fatherName || s.fathers_name || '').toLowerCase();
+      if (qMobile && sMob.includes(qMobile)) return true;
+      if (qFather && sFat.includes(qFather)) return true;
+      return false;
+    }).map(s => ({
+      admNo: s.admNo,
+      srNo: s.srNo || s.admNo,
+      name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+      fatherName: s.fatherName || s.fathers_name || '-',
+      className: `${s.className || 'I'}-${s.section || 'A'}`,
+      mobile: s.fatherMobile || s.contactNo || '-',
+      dueAmount: Number(s.totalFees || 10000),
+      heads: [
+        { id: `h_${s.admNo}_1`, feeHead: 'Tuition Fee (Q1)', amount: 10000, discount: 0, netPayable: 10000, isPaid: false }
+      ]
+    }));
 
     return res.status(200).json({ success: true, data: matched });
   } catch (error) {
@@ -726,17 +766,19 @@ export const cancelFeeReceipt = async (req, res, next) => {
 export const getBoardFeeStudents = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
-    const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    // Students eligible for board (Class X and XII)
-    const boardStudents = Object.values(accounts)
-      .filter(acc => acc.student.className.includes('X') || acc.student.className.includes('10') || acc.student.className.includes('XII') || acc.student.className.includes('12'))
-      .map(acc => ({
-        admNo: acc.student.admNo,
-        srNo: acc.student.srNo,
-        name: acc.student.name,
-        className: acc.student.className,
+    const pool = TENANT_STUDENTS[schoolId] || [];
+    const boardStudents = pool
+      .filter(s => {
+        const cls = String(s.className || '').toUpperCase();
+        return cls.includes('X') || cls.includes('10') || cls.includes('XII') || cls.includes('12');
+      })
+      .map(s => ({
+        admNo: s.admNo,
+        srNo: s.srNo || s.admNo,
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+        className: `${s.className || 'X'}-${s.section || 'A'}`,
         boardFee: 3500,
-        paid: acc.heads.find(h => h.feeHead.toLowerCase().includes('board'))?.isPaid || false
+        paid: Boolean(s.boardFeePaid)
       }));
 
     return res.status(200).json({ success: true, data: boardStudents });

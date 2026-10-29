@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Award, Search, Download, Printer, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function BoardCollectionSummaryReportPage() {
   const [fromDate, setFromDate] = useState('2026-04-01');

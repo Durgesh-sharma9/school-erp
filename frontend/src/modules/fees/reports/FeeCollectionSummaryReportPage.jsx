@@ -1,19 +1,38 @@
 import React, { useState } from 'react';
 import { Search, Download, Printer, Filter, Calendar, IndianRupee } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeCollectionSummaryReportPage() {
+  const { schoolId } = useAuth();
   const [reportType, setReportType] = useState('Date Wise');
   const [payMode, setPayMode] = useState('All');
   const [startDate, setStartDate] = useState('2026-04-01');
   const [endDate, setEndDate] = useState('2026-10-15');
   const [sortedBy, setSortedBy] = useState('Receipt No.');
 
-  const [receipts, setReceipts] = useState([
-    { sNo: 1, receiptNo: 'JD-REC-001', date: '2026-04-10', admNo: '1621', studentName: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', payMode: 'UPI', refNo: 'UPI/610291039', amount: 17000 },
-    { sNo: 2, receiptNo: 'JD-REC-002', date: '2026-04-12', admNo: '2059', studentName: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', payMode: 'Cash', refNo: 'COUNTER CASH', amount: 13500 },
-    { sNo: 3, receiptNo: 'JD-REC-003', date: '2026-05-02', admNo: '2060', studentName: 'ROHAN SHARMA', className: 'X-A', payMode: 'Bank Transfer', refNo: 'NEFT/HDFC/9921', amount: 15000 }
-  ]);
+  const [receipts, setReceipts] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realReceipts = tenantStore.getReceipts(schoolId) || [];
+      const mapped = realReceipts.map((r, idx) => ({
+        sNo: idx + 1,
+        receiptNo: r.receiptNo,
+        date: r.date,
+        admNo: r.admNo,
+        studentName: r.studentName || r.name,
+        className: r.className || 'Class I',
+        payMode: r.payMode || 'Cash',
+        refNo: r.chequeNo || r.refNo || 'COUNTER CASH',
+        amount: Number(r.paidAmount || r.amount || 0)
+      }));
+      setReceipts(mapped);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
 
   const handleSearch = () => {
     toast.success('Fee collection summary updated');

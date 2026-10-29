@@ -1,67 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit3, Download, Printer, FileEdit, X, Check } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
+import { Search, Edit3, Download, Printer, FileEdit, X, Check, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export function FeeEditManualPage() {
-  const [students, setStudents] = useState([
-    {
-      sNo: 1,
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'Class I-A',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      type: '0',
-      heads: [
-        { id: 'h_jd_1', feeHead: 'Admission Fee', amount: 5000, discount: 0, fine: 0, netPayable: 5000, isPaid: true },
-        { id: 'h_jd_2', feeHead: 'Tuition Fee (Q1)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: true },
-        { id: 'h_jd_3', feeHead: 'Tuition Fee (Q2)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: false },
-        { id: 'h_jd_4', feeHead: 'Activity & Sports Fee', amount: 2000, discount: 500, fine: 0, netPayable: 1500, isPaid: false }
-      ]
-    },
-    {
-      sNo: 2,
-      admNo: '2059',
-      srNo: '2059',
-      name: 'AADHYA CHOUDHARY',
-      className: 'Nursery - PP3+-A',
-      fatherName: 'RAMESH CHOUDHARY',
-      type: '0',
-      heads: [
-        { id: 'h_jd_10', feeHead: 'Admission Fee', amount: 4000, discount: 0, fine: 0, netPayable: 4000, isPaid: true },
-        { id: 'h_jd_11', feeHead: 'Tuition Fee (Term 1)', amount: 9500, discount: 0, fine: 0, netPayable: 9500, isPaid: true },
-        { id: 'h_jd_12', feeHead: 'Tuition Fee (Term 2)', amount: 9500, discount: 0, fine: 0, netPayable: 9500, isPaid: false }
-      ]
-    },
-    {
-      sNo: 3,
-      admNo: '2060',
-      srNo: '2060',
-      name: 'ROHAN SHARMA',
-      className: 'X-A',
-      fatherName: 'MUKESH SHARMA',
-      type: '0',
-      heads: [
-        { id: 'h_jd_20', feeHead: 'Tuition Fee (Q1)', amount: 15000, discount: 0, fine: 0, netPayable: 15000, isPaid: true },
-        { id: 'h_jd_21', feeHead: 'Tuition Fee (Q2)', amount: 15000, discount: 0, fine: 0, netPayable: 15000, isPaid: false },
-        { id: 'h_jd_22', feeHead: 'Board Exam Fee', amount: 3500, discount: 0, fine: 0, netPayable: 3500, isPaid: false }
-      ]
-    },
-    {
-      sNo: 4,
-      admNo: '2061',
-      srNo: '2061',
-      name: 'PRIYA KUMAWAT',
-      className: 'Upper Kindergarten - PP5+-A',
-      fatherName: 'DINESH KUMAWAT',
-      type: '0',
-      heads: [
-        { id: 'h_jd_30', feeHead: 'Tuition Fee', amount: 18000, discount: 0, fine: 0, netPayable: 18000, isPaid: false },
-        { id: 'h_jd_31', feeHead: 'Activity Fee', amount: 3000, discount: 0, fine: 0, netPayable: 3000, isPaid: false }
-      ]
-    }
-  ]);
-
+export function FeeEditManualPage({ onNavigate }) {
+  const { schoolId } = useAuth();
+  const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [editableHeads, setEditableHeads] = useState([]);
@@ -70,17 +15,48 @@ export function FeeEditManualPage() {
 
   useEffect(() => {
     fetchManualStudents();
-  }, []);
+  }, [schoolId]);
 
   const fetchManualStudents = async () => {
     try {
-      const res = await fetch('/api/fees/manual-students');
-      const data = await res.json();
-      if (data.success && data.data.length > 0) {
-        setStudents(data.data);
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      const mapped = realStudents.map((s, idx) => {
+        const existingLedger = tenantStore.getStudentFeeLedger(schoolId, s.admNo);
+        const defaultHeads = [
+          { id: `h_${s.admNo}_1`, feeHead: 'Admission Fee', amount: Number(s.admissionFee || 0) || 5000, discount: 0, fine: 0, netPayable: Number(s.admissionFee || 0) || 5000, isPaid: false },
+          { id: `h_${s.admNo}_2`, feeHead: 'Tuition Fee (Q1)', amount: Number(s.tuitionFee || 0) || 12000, discount: 0, fine: 0, netPayable: Number(s.tuitionFee || 0) || 12000, isPaid: false },
+          { id: `h_${s.admNo}_3`, feeHead: 'Tuition Fee (Q2)', amount: Number(s.tuitionFee || 0) || 12000, discount: 0, fine: 0, netPayable: Number(s.tuitionFee || 0) || 12000, isPaid: false },
+          { id: `h_${s.admNo}_4`, feeHead: 'Activity & Sports Fee', amount: 2000, discount: 0, fine: 0, netPayable: 2000, isPaid: false }
+        ];
+
+        return {
+          sNo: idx + 1,
+          admNo: s.admNo,
+          srNo: s.srNo || s.admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          fatherName: s.fatherName || s.fathers_name || '-',
+          type: s.studentType || '0',
+          heads: existingLedger && existingLedger.length > 0 ? existingLedger : defaultHeads
+        };
+      });
+
+      setStudents(mapped);
+
+      // Attempt to sync from backend API if available
+      try {
+        const res = await fetch('/api/fees/manual-students', {
+          headers: { 'x-school-id': schoolId }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setStudents(data.data);
+        }
+      } catch (err) {
+        // tenantStore data remains active
       }
-    } catch {
-      // Keep resilient defaults
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -113,9 +89,16 @@ export function FeeEditManualPage() {
     setIsLoading(true);
 
     try {
+      // 1. Save locally in tenantStore
+      tenantStore.saveStudentFeeLedger(schoolId, selectedStudent.admNo, editableHeads);
+
+      // 2. Sync to backend API
       await fetch('/api/fees/manual-edit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify({
           admNo: selectedStudent.admNo,
           heads: editableHeads,
@@ -152,10 +135,10 @@ export function FeeEditManualPage() {
   };
 
   const filtered = students.filter(s =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.admNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.fatherName.toLowerCase().includes(searchQuery.toLowerCase())
+    (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.admNo || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.className || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.fatherName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -205,7 +188,7 @@ export function FeeEditManualPage() {
             />
           </div>
           <div className="text-xs text-slate-500 font-medium">
-            Total Students: <span className="font-bold text-slate-800">{filtered.length}</span>
+            Total Enrolled: <span className="font-bold text-slate-800">{filtered.length}</span>
           </div>
         </div>
 
@@ -250,7 +233,16 @@ export function FeeEditManualPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
-                    No students found matching your query.
+                    <p className="font-semibold text-slate-600 text-sm">No registered students found</p>
+                    <p className="text-xs text-slate-400 mt-1">Students registered in this school will appear here automatically.</p>
+                    {onNavigate && (
+                      <button
+                        onClick={() => onNavigate('/student-registration')}
+                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs"
+                      >
+                        <UserPlus className="w-4 h-4" /> Register New Student
+                      </button>
+                    )}
                   </td>
                 </tr>
               )}
@@ -382,3 +374,5 @@ export function FeeEditManualPage() {
     </div>
   );
 }
+
+export default FeeEditManualPage;

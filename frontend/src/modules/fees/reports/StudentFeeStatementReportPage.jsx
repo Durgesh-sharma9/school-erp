@@ -1,61 +1,78 @@
 import React, { useState } from 'react';
 import { FileSpreadsheet, Search, Download, Printer, User, Phone, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function StudentFeeStatementReportPage() {
-  const [selectedClass, setSelectedClass] = useState('Nursery - PP3+');
+  const { schoolId } = useAuth();
+  const [availableStudents, setAvailableStudents] = useState([]);
+  const [selectedStudentAdm, setSelectedStudentAdm] = useState('');
+  const [selectedClass, setSelectedClass] = useState('All');
   const [selectedDivision, setSelectedDivision] = useState('A');
-  const [selectedStudent, setSelectedStudent] = useState('1621 - AADITYA SINGH CHOUDHARY');
 
-  const studentInfo = {
-    name: 'AADITYA SINGH CHOUDHARY',
-    admNo: '1621',
-    srNo: '1621',
-    className: 'Nursery - PP3+ (Section A)',
-    fatherName: 'VIKRAM SINGH CHOUDHARY',
-    mobileNo: '8947919195',
-    category: 'General',
-    transportRoute: 'City Route 2'
+  const [statementRows, setStatementRows] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      setAvailableStudents(realStudents);
+      if (realStudents.length > 0) {
+        setSelectedStudentAdm(realStudents[0].admNo);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
+
+  const currentStudent = availableStudents.find(s => String(s.admNo) === String(selectedStudentAdm)) || availableStudents[0] || null;
+
+  const studentInfo = currentStudent ? {
+    name: (currentStudent.name || `${currentStudent.firstName || ''} ${currentStudent.lastName || ''}`).trim() || `Student ${currentStudent.admNo}`,
+    admNo: currentStudent.admNo,
+    srNo: currentStudent.srNo || currentStudent.admNo,
+    className: `${currentStudent.className || 'I'} (Section ${currentStudent.section || 'A'})`,
+    fatherName: currentStudent.fatherName || currentStudent.fathers_name || '-',
+    mobileNo: currentStudent.fatherMobile || currentStudent.contactNo || '-',
+    category: currentStudent.category || 'General',
+    transportRoute: currentStudent.transportRoute || 'Self / Walker'
+  } : {
+    name: 'No student enrolled',
+    admNo: '-',
+    srNo: '-',
+    className: '-',
+    fatherName: '-',
+    mobileNo: '-',
+    category: '-',
+    transportRoute: '-'
   };
 
-  const [statementRows] = useState([
-    {
-      sNo: 1,
-      recNo: 'REC-2026-001',
-      recDate: '2026-04-10',
-      period: 'April 2026 (Quarter 1)',
-      payMode: 'Online UPI',
-      payableAmt: 15000,
-      paidAmt: 15000,
-      dueAmt: 0,
-      advAmt: 2000,
-      remarks: 'Full payment + advance credited'
-    },
-    {
-      sNo: 2,
-      recNo: 'REC-2026-089',
-      recDate: '2026-07-08',
-      period: 'July 2026 (Quarter 2)',
-      payMode: 'Cash',
-      payableAmt: 12000,
-      paidAmt: 10000,
-      dueAmt: 2000,
-      advAmt: 0,
-      remarks: 'Part payment received'
-    },
-    {
-      sNo: 3,
-      recNo: 'REC-2026-142',
-      recDate: '2026-10-05',
-      period: 'October 2026 (Quarter 3)',
-      payMode: 'Bank Cheque (HDFC-8821)',
-      payableAmt: 12000,
-      paidAmt: 12000,
-      dueAmt: 0,
-      advAmt: 0,
-      remarks: 'Cheque cleared'
+  React.useEffect(() => {
+    if (!currentStudent) {
+      setStatementRows([]);
+      return;
     }
-  ]);
+    try {
+      const receipts = tenantStore.getReceipts(schoolId) || [];
+      const studentReceipts = receipts
+        .filter(r => String(r.admNo) === String(currentStudent.admNo))
+        .map((r, idx) => ({
+          sNo: idx + 1,
+          recNo: r.receiptNo,
+          recDate: r.date,
+          period: 'Fee Receipt Payment',
+          payMode: r.payMode,
+          payableAmt: Number(r.paidAmount || 0),
+          paidAmt: Number(r.paidAmount || 0),
+          dueAmt: 0,
+          advAmt: Number(r.advanceAmount || 0),
+          remarks: r.remarks || 'Payment cleared'
+        }));
+      setStatementRows(studentReceipts);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [selectedStudentAdm, schoolId, currentStudent]);
 
   const totalPayable = statementRows.reduce((sum, r) => sum + r.payableAmt, 0);
   const totalPaid = statementRows.reduce((sum, r) => sum + r.paidAmt, 0);

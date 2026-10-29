@@ -1,35 +1,13 @@
 import React, { useState } from 'react';
 import { Users, Search, IndianRupee, CheckCircle, Printer, Download, CreditCard, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function SiblingFeeCollectionPage() {
-  const [searchMobile, setSearchMobile] = useState('9829012345');
-  const [siblings, setSiblings] = useState([
-    {
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      className: 'Class I-A',
-      mobile: '9829012345',
-      heads: [
-        { id: 'h_1', feeHead: 'Tuition Fee (Q2)', amount: 12000, discount: 0, netPayable: 12000, selected: true },
-        { id: 'h_2', feeHead: 'Activity & Sports Fee', amount: 1500, discount: 0, netPayable: 1500, selected: true }
-      ]
-    },
-    {
-      admNo: '2060',
-      srNo: '2060',
-      name: 'ROHAN SHARMA',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      className: 'Class X-A',
-      mobile: '9829012345',
-      heads: [
-        { id: 'h_3', feeHead: 'Tuition Fee (Q2)', amount: 15000, discount: 0, netPayable: 15000, selected: true },
-        { id: 'h_4', feeHead: 'Board Exam Fee', amount: 3500, discount: 0, netPayable: 3500, selected: true }
-      ]
-    }
-  ]);
+  const { schoolId } = useAuth();
+  const [searchMobile, setSearchMobile] = useState('');
+  const [siblings, setSiblings] = useState([]);
 
   const [payMode, setPayMode] = useState('UPI');
   const [remarks, setRemarks] = useState('Sibling Joint Payment for Q2');
