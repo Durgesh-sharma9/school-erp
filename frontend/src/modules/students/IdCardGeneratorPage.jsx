@@ -297,26 +297,26 @@ export function JdStudentIdCard({ student, profile, cardType = 'Horizontal', ses
         {/* Right Info Section */}
         <div className="flex-1 flex flex-col justify-between py-0 min-w-0">
           {/* Student Name in Bold Red font */}
-          <h3 className="text-[#dc2626] font-black text-[12px] tracking-wide uppercase text-center truncate leading-tight mb-0.5">
+          <h3 className="text-[#dc2626] font-black text-[12px] tracking-wide uppercase text-center truncate leading-tight mb-1">
             {student.name}
           </h3>
 
           {/* 5 Stacked Light Blue Rounded Bars */}
-          <div className="space-y-[2px]">
+          <div className="space-y-1">
             {/* Row 1: F. Name */}
-            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[1.5px] text-[#0a194f] text-[9px] leading-tight truncate">
+            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[2px] text-[#0a194f] text-[9px] leading-tight truncate">
               <span className="font-extrabold">F. Name : </span>
               <span className="font-bold">{student.fatherName || '-'}</span>
             </div>
 
             {/* Row 2: M. Name */}
-            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[1.5px] text-[#0a194f] text-[9px] leading-tight truncate">
+            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[2px] text-[#0a194f] text-[9px] leading-tight truncate">
               <span className="font-extrabold">M. Name : </span>
               <span className="font-bold">{student.motherName || '-'}</span>
             </div>
 
             {/* Row 3: D.O.B & SR. No */}
-            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[1.5px] text-[#0a194f] text-[9px] leading-tight flex justify-between items-center">
+            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[2px] text-[#0a194f] text-[9px] leading-tight flex justify-between items-center">
               <span>
                 <span className="font-extrabold">D.O.B. : </span>
                 <span className="font-bold">{formatDob(student.dob)}</span>
@@ -328,13 +328,13 @@ export function JdStudentIdCard({ student, profile, cardType = 'Horizontal', ses
             </div>
 
             {/* Row 4: Contact No */}
-            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[1.5px] text-[#0a194f] text-[9px] leading-tight truncate">
+            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[2px] text-[#0a194f] text-[9px] leading-tight truncate">
               <span className="font-extrabold">Contact No. : </span>
               <span className="font-bold">{student.mobile || '-'}</span>
             </div>
 
             {/* Row 5: Address */}
-            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[1.5px] text-[#0a194f] text-[9px] leading-tight truncate">
+            <div className="bg-[#c8f0fb] rounded-[3px] px-1.5 py-[2px] text-[#0a194f] text-[9px] leading-tight truncate">
               <span className="font-extrabold">Address : </span>
               <span className="font-bold">{student.address || '-'}</span>
             </div>
