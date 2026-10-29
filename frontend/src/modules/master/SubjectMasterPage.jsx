@@ -6,6 +6,7 @@ import {
   ListFilter,
   Plus,
   Trash2,
+  Pencil,
   X
 } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export function SubjectMasterPage() {
   const [groups, setGroups] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(null);
   const [formData, setFormData] = useState({
     group: 'COMMERCE',
     name: '',
@@ -51,29 +53,59 @@ export function SubjectMasterPage() {
     fetchGroups();
   }, []);
 
+  const handleEditSubject = (s) => {
+    setEditingSubject(s);
+    setFormData({
+      group: s.group || (groups[0]?.name || 'COMMERCE'),
+      name: s.name || '',
+      shortName: s.shortName || '',
+      code: s.code || ''
+    });
+    setAddModalOpen(true);
+  };
+
   const handleAddSubject = async (e) => {
     e.preventDefault();
     if (!formData.name) return;
 
     try {
-      const res = await fetch('/api/academics/subjects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        fetchSubjects();
-        setAddModalOpen(false);
-        setFormData({
-          group: groups[0]?.name || 'COMMERCE',
-          name: '',
-          shortName: '',
-          code: ''
+      if (editingSubject) {
+        // UPDATE existing subject
+        const res = await fetch(`/api/academics/subjects/${editingSubject.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
         });
+        const data = await res.json();
+        if (data.success) {
+          toast.success('Subject updated successfully');
+          fetchSubjects();
+          setAddModalOpen(false);
+          setEditingSubject(null);
+          setFormData({ group: groups[0]?.name || 'COMMERCE', name: '', shortName: '', code: '' });
+        } else {
+          toast.error(data.message || 'Failed to update subject');
+        }
+      } else {
+        // ADD new subject
+        const res = await fetch('/api/academics/subjects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast.success('Subject added successfully');
+          fetchSubjects();
+          setAddModalOpen(false);
+          setFormData({ group: groups[0]?.name || 'COMMERCE', name: '', shortName: '', code: '' });
+        } else {
+          toast.error(data.message || 'Failed to add subject');
+        }
       }
     } catch (err) {
-      console.error('Error adding subject:', err);
+      console.error('Error saving subject:', err);
+      toast.error('Network error');
     }
   };
 
@@ -175,13 +207,24 @@ export function SubjectMasterPage() {
                       <td className="py-3 px-4">{s.shortName || '--'}</td>
                       <td className="py-3 px-4 font-semibold text-indigo-700">{s.group}</td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSubject(s.id)}
-                          className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleEditSubject(s)}
+                            className="text-slate-400 hover:text-indigo-600 p-1 rounded transition-colors"
+                            title="Edit Subject"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSubject(s.id)}
+                            className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors"
+                            title="Delete Subject"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -213,9 +256,9 @@ export function SubjectMasterPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
-              <h3 className="font-bold text-sm text-slate-900 uppercase">SUBJECT MASTER</h3>
+              <h3 className="font-bold text-sm text-slate-900 uppercase">{editingSubject ? 'EDIT SUBJECT' : 'SUBJECT MASTER'}</h3>
               <button
-                onClick={() => setAddModalOpen(false)}
+                onClick={() => { setAddModalOpen(false); setEditingSubject(null); setFormData({ group: groups[0]?.name || 'COMMERCE', name: '', shortName: '', code: '' }); }}
                 className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
@@ -285,7 +328,7 @@ export function SubjectMasterPage() {
               <div className="pt-2 flex items-center justify-end space-x-2">
                 <button
                   type="button"
-                  onClick={() => setAddModalOpen(false)}
+                  onClick={() => { setAddModalOpen(false); setEditingSubject(null); setFormData({ group: groups[0]?.name || 'COMMERCE', name: '', shortName: '', code: '' }); }}
                   className="px-4 py-2 rounded text-slate-600 hover:bg-slate-100 font-semibold"
                 >
                   Cancel
@@ -294,7 +337,7 @@ export function SubjectMasterPage() {
                   type="submit"
                   className="px-5 py-2 rounded bg-[#5c67f6] hover:bg-indigo-700 text-white font-bold shadow-md"
                 >
-                  Add
+                  {editingSubject ? 'Update' : 'Add'}
                 </button>
               </div>
             </form>

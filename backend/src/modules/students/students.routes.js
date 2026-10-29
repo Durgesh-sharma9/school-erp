@@ -5,6 +5,7 @@ import {
   uploadStudentPhoto,
   getStudentsList,
   getStudentByAdmNo,
+  updateStudent,
   assignRollNumbers,
   getAttendance,
   saveAttendance,
@@ -71,6 +72,7 @@ router.delete('/exam-date-sheets/:id', deleteExamDateSheet);
 router.post('/', registerStudent);
 router.get('/', getStudentsList);
 router.get('/:admNo', getStudentByAdmNo);
+router.put('/:admNo', updateStudent);
 
 export default router;
 

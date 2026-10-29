@@ -12,6 +12,7 @@ export function CertificateGeneratorPage({ onNavigate }) {
   const [format, setFormat] = useState('Standard');
   const [border, setBorder] = useState('Single Border');
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showHeader, setShowHeader] = useState(true); // true = Plain Paper (show header), false = Pre-printed Letterhead (no header)
 
   const filteredSuggestions = MOCK_STUDENTS.filter(s =>
     searchQuery && s.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -189,6 +190,34 @@ export function CertificateGeneratorPage({ onNavigate }) {
               </select>
             </div>
           </div>
+
+          {/* Header Toggle Row */}
+          <div className="flex items-center gap-4 pt-1 border-t border-slate-100">
+            <span className="text-xs font-semibold text-slate-600">Print Mode:</span>
+            <label className="flex items-center gap-2 cursor-pointer select-none group">
+              <div
+                onClick={() => setShowHeader(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${showHeader ? 'bg-indigo-50 border-indigo-400 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+              >
+                <span>🖨️</span>
+                <span>With Header (Plain Paper)</span>
+              </div>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none group">
+              <div
+                onClick={() => setShowHeader(false)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${!showHeader ? 'bg-amber-50 border-amber-400 text-amber-700 shadow-sm' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+              >
+                <span>📄</span>
+                <span>No Header (Letterhead Paper)</span>
+              </div>
+            </label>
+            {!showHeader && (
+              <span className="text-[11px] text-amber-600 font-medium bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                School header hidden • Extra top margin applied
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Live Certificate Preview Sheet */}
@@ -199,23 +228,29 @@ export function CertificateGeneratorPage({ onNavigate }) {
               border === 'Ornate Border' ? 'border-4 border-dashed border-indigo-900' :
               border === 'Single Border' ? 'border-2 border-slate-800' : ''
             }`}>
-              {/* Header */}
-              <div className="text-center space-y-1 border-b-2 border-slate-800 pb-5">
-                <div className="flex justify-center mb-2">
-                  <div className="w-14 h-14 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xl">
-                    JD
+              {/* Header — shown only when Plain Paper mode */}
+              {showHeader ? (
+                <div className="text-center space-y-1 border-b-2 border-slate-800 pb-5 print-header">
+                  <div className="flex justify-center mb-2">
+                    <div className="w-14 h-14 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xl">
+                      JD
+                    </div>
                   </div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-wider uppercase">
+                    J D INTERNATIONAL SCHOOL
+                  </h2>
+                  <p className="text-xs text-slate-600 font-medium">
+                    Affiliated to CBSE, New Delhi • Affiliation No: 1730000 • School Code: 20000
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    Main Campus, Mansarovar, Jaipur (Rajasthan) - 302020 • Phone: 0141-2780000
+                  </p>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-wider uppercase">
-                  J D INTERNATIONAL SCHOOL
-                </h2>
-                <p className="text-xs text-slate-600 font-medium">
-                  Affiliated to CBSE, New Delhi • Affiliation No: 1730000 • School Code: 20000
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  Main Campus, Mansarovar, Jaipur (Rajasthan) - 302020 • Phone: 0141-2780000
-                </p>
-              </div>
+              ) : (
+                <div className="border-b-2 border-slate-800 pb-3 mb-2" style={{ minHeight: '3.5rem' }}>
+                  <p className="text-[10px] text-slate-400 text-center italic">[ School Letterhead — Header Not Printed ]</p>
+                </div>
+              )}
 
               {/* Certificate Title Banner */}
               <div className="text-center my-6">

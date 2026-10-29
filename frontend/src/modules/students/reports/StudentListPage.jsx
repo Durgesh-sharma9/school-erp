@@ -3,7 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { tenantStore } from '../../../services/tenantStore';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES } from './studentReportsData';
-import { Search, Building2, ShieldCheck, IndianRupee, CreditCard, MessageSquare } from 'lucide-react';
+import { Search, Building2, ShieldCheck, IndianRupee, CreditCard, MessageSquare, Pencil, UserPlus } from 'lucide-react';
 
 export function StudentListPage({ onNavigate }) {
   const { schoolId, schoolName } = useAuth();
@@ -135,9 +135,19 @@ export function StudentListPage({ onNavigate }) {
               </p>
             </div>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-mono">
-            Tenant: {schoolId || 'NEW'}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onNavigate && onNavigate('/student-registration')}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>+ Register Student</span>
+            </button>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-mono">
+              Tenant: {schoolId || 'NEW'}
+            </span>
+          </div>
         </div>
 
         {/* Filter Card */}
@@ -262,6 +272,17 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4 font-mono text-slate-600">{r.contactNo}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              tenantStore.setPendingEditStudent(r);
+                              onNavigate && onNavigate('/student-registration');
+                            }}
+                            title="Edit Student Details"
+                            className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => {

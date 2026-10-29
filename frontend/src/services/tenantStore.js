@@ -179,6 +179,24 @@ class TenantDataStore {
     return newStudent;
   }
 
+  // 2a. Update an existing student in tenant store
+  updateStudent(schoolId, admNo, updatedData) {
+    if (!schoolId || !admNo) return null;
+    const students = this.getStudents(schoolId);
+    const index = students.findIndex(s => String(s.admNo) === String(admNo) || String(s.id) === String(admNo));
+    if (index === -1) {
+      return this.addStudent(schoolId, updatedData);
+    }
+
+    students[index] = {
+      ...students[index],
+      ...updatedData,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(this.getStorageKey(schoolId, 'students'), JSON.stringify(students));
+    return students[index];
+  }
+
   // Get classes strictly belonging to this school
   getClasses(schoolId) {
     if (!schoolId) return [];
@@ -365,6 +383,23 @@ class TenantDataStore {
   }
 
 // Seamless Multi-Module Cross-Linking & Navigation Flow Helpers
+  setPendingEditStudent(data) {
+    try {
+      sessionStorage.setItem('erp_pending_edit_student', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  getPendingEditStudent() {
+    try {
+      const raw = sessionStorage.getItem('erp_pending_edit_student');
+      if (raw) {
+        sessionStorage.removeItem('erp_pending_edit_student');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
   setPendingRegistration(data) {
     try {
       sessionStorage.setItem('erp_pending_registration', JSON.stringify(data));
