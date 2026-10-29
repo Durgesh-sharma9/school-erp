@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Download, Printer, Receipt, Eye, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeStructurePage() {
-  const [structures, setStructures] = useState([
-    { id: '1', className: 'Nursery - PP3+', stream: 'None', structureType: 'Quarterly', grandTotal: 38000, heads: [{ feeHead: 'Tuition Fee', amount: 32000 }, { feeHead: 'Activity Fee', amount: 3000 }, { feeHead: 'Examination Fee', amount: 3000 }] },
-    { id: '2', className: 'Lower Kindergarten - PP4+', stream: 'None', structureType: 'Quarterly', grandTotal: 40000, heads: [{ feeHead: 'Tuition Fee', amount: 34000 }, { feeHead: 'Activity Fee', amount: 3000 }, { feeHead: 'Examination Fee', amount: 3000 }] },
-    { id: '3', className: 'Upper Kindergarten - PP5+', stream: 'None', structureType: 'Quarterly', grandTotal: 42000, heads: [{ feeHead: 'Tuition Fee', amount: 36000 }, { feeHead: 'Activity Fee', amount: 3000 }, { feeHead: 'Examination Fee', amount: 3000 }] },
-    { id: '4', className: 'I', stream: 'None', structureType: 'Quarterly', grandTotal: 46000, heads: [{ feeHead: 'Tuition Fee', amount: 39000 }, { feeHead: 'Activity Fee', amount: 3500 }, { feeHead: 'Digital Learning fee', amount: 3500 }] },
-    { id: '5', className: 'II', stream: 'None', structureType: 'Quarterly', grandTotal: 46000, heads: [{ feeHead: 'Tuition Fee', amount: 39000 }, { feeHead: 'Activity Fee', amount: 3500 }, { feeHead: 'Digital Learning fee', amount: 3500 }] },
-    { id: '6', className: 'X', stream: 'None', structureType: 'Quarterly', grandTotal: 62000, heads: [{ feeHead: 'Tuition Fee', amount: 52000 }, { feeHead: 'Examination Fee', amount: 5000 }, { feeHead: 'Digital Learning fee', amount: 5000 }] },
-    { id: '7', className: 'XI- HUMANITIES', stream: 'HUMANITIES', structureType: 'Quarterly', grandTotal: 68000, heads: [{ feeHead: 'Tuition Fee', amount: 58000 }, { feeHead: 'Examination Fee', amount: 5000 }, { feeHead: 'Digital Learning fee', amount: 5000 }] },
-    { id: '8', className: 'XII-HUMANITIES', stream: 'SCIENCE', structureType: 'Quarterly', grandTotal: 72000, heads: [{ feeHead: 'Tuition Fee', amount: 60000 }, { feeHead: 'Examination Fee', amount: 6000 }, { feeHead: 'Digital Learning fee', amount: 6000 }] }
-  ]);
+  const { schoolId } = useAuth();
+  const [structures, setStructures] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,17 +26,22 @@ export function FeeStructurePage() {
 
   useEffect(() => {
     fetchStructures();
-  }, []);
+  }, [schoolId]);
 
   const fetchStructures = async () => {
     try {
-      const res = await fetch('/api/fees/structures');
+      const local = tenantStore.getFeeStructures(schoolId) || [];
+      setStructures(local);
+
+      const res = await fetch('/api/fees/structures', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data)) {
         setStructures(data.data);
       }
     } catch {
-      // Keep defaults
+      // tenantStore active
     }
   };
 
@@ -114,20 +113,29 @@ export function FeeStructurePage() {
         heads: formData.heads
       };
 
-      await fetch('/api/fees/structures', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
+      // 1. Save in tenantStore
+      let newStruct;
       if (editingStructure) {
-        setStructures(prev => prev.map(s => s.id === editingStructure.id ? { ...s, ...payload } : s));
+        const current = tenantStore.getFeeStructures(schoolId);
+        const updated = current.map(s => s.id === editingStructure.id ? { ...s, ...payload } : s);
+        tenantStore.saveFeeStructures(schoolId, updated);
+        setStructures(updated);
         toast.success('Fee structure updated');
       } else {
-        const newStruct = { id: String(Date.now()), ...payload };
-        setStructures(prev => [...prev, newStruct]);
+        newStruct = tenantStore.addFeeStructure(schoolId, payload);
+        setStructures(prev => [newStruct, ...prev.filter(s => s.id !== newStruct.id)]);
         toast.success('Fee structure created');
       }
+
+      // 2. Sync to API
+      await fetch('/api/fees/structures', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
+        body: JSON.stringify(payload)
+      });
       setIsModalOpen(false);
     } catch {
       toast.error('Failed to save fee structure');
@@ -139,7 +147,8 @@ export function FeeStructurePage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this Fee Structure?')) return;
     try {
-      await fetch(`/api/fees/structures/${id}`, { method: 'DELETE' });
+      tenantStore.deleteFeeStructure(schoolId, id);
+      await fetch(`/api/fees/structures/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
       setStructures(prev => prev.filter(s => s.id !== id));
       toast.success('Fee structure removed');
     } catch {

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Award, Search, IndianRupee, CheckCircle, Download, Printer, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function BoardFeeManualCollectionPage() {
-  const [students, setStudents] = useState([
-    { admNo: '2060', srNo: '2060', name: 'ROHAN SHARMA', className: 'X-A', boardFee: 3500, paid: false },
-    { admNo: '2055', srNo: '2055', name: 'SAURAV', className: 'X-A', boardFee: 3500, paid: true },
-    { admNo: '2070', srNo: '2070', name: 'KAVITA MEENA', className: 'XII-HUMANITIES-A', boardFee: 3800, paid: false },
-    { admNo: '2072', srNo: '2072', name: 'HARSHIT JAIN', className: 'XII-SCIENCE-A', boardFee: 3800, paid: false }
-  ]);
+  const { schoolId } = useAuth();
+  const [students, setStudents] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -19,17 +17,38 @@ export function BoardFeeManualCollectionPage() {
 
   useEffect(() => {
     fetchBoardStudents();
-  }, []);
+  }, [schoolId]);
 
   const fetchBoardStudents = async () => {
     try {
-      const res = await fetch('/api/fees/board-students');
-      const data = await res.json();
-      if (data.success && data.data.length > 0) {
-        setStudents(data.data);
-      }
-    } catch {
-      // Keep defaults
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      const boardEligible = realStudents
+        .filter(s => {
+          const cls = String(s.className || '').toUpperCase();
+          return cls.includes('X') || cls.includes('10') || cls.includes('XII') || cls.includes('12');
+        })
+        .map(s => ({
+          admNo: s.admNo,
+          srNo: s.srNo || s.admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+          className: `${s.className || 'X'}-${s.section || 'A'}`,
+          boardFee: Number(s.boardFee || 3500),
+          paid: Boolean(s.boardFeePaid)
+        }));
+
+      setStudents(boardEligible);
+
+      try {
+        const res = await fetch('/api/fees/board-students', {
+          headers: { 'x-school-id': schoolId }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setStudents(data.data);
+        }
+      } catch (err) {}
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -45,7 +64,10 @@ export function BoardFeeManualCollectionPage() {
     try {
       const res = await fetch('/api/fees/board-collect', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify({
           admNo: selectedStudent.admNo,
           paidAmount: Number(paidAmount),
@@ -54,9 +76,25 @@ export function BoardFeeManualCollectionPage() {
         })
       });
       const data = await res.json();
+      const recNo = data.data?.receiptNo || `BRD-2026-${Date.now().toString().slice(-4)}`;
+
+      // Record receipt in tenantStore
+      tenantStore.addReceipt(schoolId, {
+        receiptNo: recNo,
+        admNo: selectedStudent.admNo,
+        studentName: selectedStudent.name,
+        className: selectedStudent.className,
+        paidAmount: Number(paidAmount),
+        payMode,
+        remarks: `Board Fee: ${remarks}`,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      // Update student record
+      tenantStore.updateStudent(schoolId, selectedStudent.admNo, { boardFeePaid: true });
 
       setStudents(prev => prev.map(s => s.admNo === selectedStudent.admNo ? { ...s, paid: true } : s));
-      toast.success(`Board Fee collected for ${selectedStudent.name}. Receipt: ${data.data?.receiptNo || 'JD-BRD-001'}`);
+      toast.success(`Board Fee collected for ${selectedStudent.name}. Receipt: ${recNo}`);
       setSelectedStudent(null);
     } catch {
       toast.error('Board fee collection failed');

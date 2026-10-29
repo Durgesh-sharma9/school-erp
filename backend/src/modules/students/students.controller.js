@@ -1,10 +1,17 @@
 import { uploadToImageKit } from '../../core/utils/imagekitService.js';
 import prisma from '../../config/db.js';
+import { loadJson, saveJson, checkDbConnection, getIsDbOnline } from '../../core/utils/localStore.js';
 
-// Multi-Tenant Partitioned Student Storage: schoolId -> Student[] (Clean Fresh State)
-export const TENANT_STUDENTS = {
+checkDbConnection(prisma);
+
+// Multi-Tenant Partitioned Student Storage loaded from persistent disk
+export const TENANT_STUDENTS = loadJson('tenant_students.json', {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
+});
+
+const persistStudents = () => {
+  saveJson('tenant_students.json', TENANT_STUDENTS);
 };
 
 const TENANT_ATTENDANCE = {
@@ -66,7 +73,7 @@ export const registerStudent = async (req, res, next) => {
     );
 
     // If not found in-memory, also check Prisma DB if available
-    if (existingIdx === -1) {
+    if (existingIdx === -1 && getIsDbOnline()) {
       try {
         const dbStudent = await prisma.student.findFirst({
           where: {
@@ -142,25 +149,28 @@ export const registerStudent = async (req, res, next) => {
       };
 
       TENANT_STUDENTS[schoolId][existingIdx] = updatedStudent;
+      persistStudents();
 
-      try {
-        await prisma.student.updateMany({
-          where: { schoolId, admNo: existing.admNo },
-          data: {
-            firstName: updatedStudent.firstName,
-            lastName: updatedStudent.lastName,
-            fatherName: updatedStudent.fatherName,
-            motherName: updatedStudent.motherName,
-            fatherMobile: updatedStudent.fatherMobile,
-            motherMobile: updatedStudent.motherMobile,
-            contactNoSms: updatedStudent.smsWhatsappNo,
-            gender: updatedStudent.gender,
-            photoUrl: updatedStudent.photoUrl,
-            address: updatedStudent.address
-          }
-        });
-      } catch (dbErr) {
-        // In-memory fallback
+      if (getIsDbOnline()) {
+        try {
+          await prisma.student.updateMany({
+            where: { schoolId, admNo: existing.admNo },
+            data: {
+              firstName: updatedStudent.firstName,
+              lastName: updatedStudent.lastName,
+              fatherName: updatedStudent.fatherName,
+              motherName: updatedStudent.motherName,
+              fatherMobile: updatedStudent.fatherMobile,
+              motherMobile: updatedStudent.motherMobile,
+              contactNoSms: updatedStudent.smsWhatsappNo,
+              gender: updatedStudent.gender,
+              photoUrl: updatedStudent.photoUrl,
+              address: updatedStudent.address
+            }
+          });
+        } catch (dbErr) {
+          // In-memory fallback
+        }
       }
 
       return res.status(200).json({
@@ -216,30 +226,33 @@ export const registerStudent = async (req, res, next) => {
     };
 
     // Attempt DB persistence with strict schoolId
-    try {
-      await prisma.student.create({
-        data: {
-          id: newStudent.id,
-          schoolId: schoolId,
-          admNo: newStudent.admNo,
-          srNo: newStudent.srNo,
-          firstName: newStudent.firstName,
-          lastName: newStudent.lastName,
-          fatherName: newStudent.fatherName,
-          motherName: newStudent.motherName,
-          fatherMobile: newStudent.fatherMobile,
-          motherMobile: newStudent.motherMobile,
-          contactNoSms: newStudent.smsWhatsappNo,
-          gender: newStudent.gender,
-          photoUrl: newStudent.photoUrl,
-          address: newStudent.address
-        }
-      });
-    } catch (dbErr) {
-      // In-memory fallback
+    if (getIsDbOnline()) {
+      try {
+        await prisma.student.create({
+          data: {
+            id: newStudent.id,
+            schoolId: schoolId,
+            admNo: newStudent.admNo,
+            srNo: newStudent.srNo,
+            firstName: newStudent.firstName,
+            lastName: newStudent.lastName,
+            fatherName: newStudent.fatherName,
+            motherName: newStudent.motherName,
+            fatherMobile: newStudent.fatherMobile,
+            motherMobile: newStudent.motherMobile,
+            contactNoSms: newStudent.smsWhatsappNo,
+            gender: newStudent.gender,
+            photoUrl: newStudent.photoUrl,
+            address: newStudent.address
+          }
+        });
+      } catch (dbErr) {
+        // In-memory fallback
+      }
     }
 
     TENANT_STUDENTS[schoolId].unshift(newStudent);
+    persistStudents();
 
     return res.status(201).json({
       success: true,
@@ -263,13 +276,16 @@ export const getStudentsList = async (req, res, next) => {
 
     let students = [];
 
-    // Attempt DB query strictly filtered by schoolId
-    try {
-      students = await prisma.student.findMany({
-        where: { schoolId }
-      });
-    } catch (dbErr) {
-      // Offline fallback: isolated partition
+    // Attempt DB query only if database is online, else immediate 0ms fallback
+    if (getIsDbOnline()) {
+      try {
+        students = await prisma.student.findMany({
+          where: { schoolId }
+        });
+      } catch (dbErr) {
+        students = TENANT_STUDENTS[schoolId] || [];
+      }
+    } else {
       students = TENANT_STUDENTS[schoolId] || [];
     }
 
@@ -731,23 +747,25 @@ export const updateStudent = async (req, res, next) => {
 
     TENANT_STUDENTS[schoolId][index] = updated;
 
-    try {
-      await prisma.student.updateMany({
-        where: { schoolId, admNo: existing.admNo },
-        data: {
-          firstName: updated.firstName,
-          lastName: updated.lastName,
-          fatherName: updated.fatherName,
-          motherName: updated.motherName,
-          fatherMobile: updated.fatherMobile,
-          motherMobile: updated.motherMobile,
-          contactNoSms: updated.smsWhatsappNo,
-          gender: updated.gender,
-          photoUrl: updated.photoUrl,
-          address: updated.address
-        }
-      });
-    } catch (e) {}
+    if (getIsDbOnline()) {
+      try {
+        await prisma.student.updateMany({
+          where: { schoolId, admNo: existing.admNo },
+          data: {
+            firstName: updated.firstName,
+            lastName: updated.lastName,
+            fatherName: updated.fatherName,
+            motherName: updated.motherName,
+            fatherMobile: updated.fatherMobile,
+            motherMobile: updated.motherMobile,
+            contactNoSms: updated.smsWhatsappNo,
+            gender: updated.gender,
+            photoUrl: updated.photoUrl,
+            address: updated.address
+          }
+        });
+      } catch (e) {}
+    }
 
     return res.status(200).json({
       success: true,
@@ -768,18 +786,20 @@ export const getStudentByAdmNo = async (req, res, next) => {
     const targetAdmLower = targetAdmNo.toLowerCase();
 
     let student = null;
-    try {
-      student = await prisma.student.findFirst({
-        where: {
-          schoolId,
-          OR: [
-            { admNo: targetAdmNo },
-            { id: targetAdmNo }
-          ]
-        }
-      });
-    } catch (dbErr) {
-      // In-memory fallback
+    if (getIsDbOnline()) {
+      try {
+        student = await prisma.student.findFirst({
+          where: {
+            schoolId,
+            OR: [
+              { admNo: targetAdmNo },
+              { id: targetAdmNo }
+            ]
+          }
+        });
+      } catch (dbErr) {
+        // In-memory fallback
+      }
     }
 
     if (!student) {
@@ -816,13 +836,15 @@ export const getBulkStudents = async (req, res, next) => {
     let pool = TENANT_STUDENTS[schoolId] || [];
 
     if (!pool || pool.length === 0) {
-      try {
-        const dbStudents = await prisma.student.findMany({ where: { schoolId } });
-        if (dbStudents && dbStudents.length > 0) {
-          TENANT_STUDENTS[schoolId] = dbStudents;
-          pool = dbStudents;
-        }
-      } catch (e) {}
+      if (getIsDbOnline()) {
+        try {
+          const dbStudents = await prisma.student.findMany({ where: { schoolId } });
+          if (dbStudents && dbStudents.length > 0) {
+            TENANT_STUDENTS[schoolId] = dbStudents;
+            pool = dbStudents;
+          }
+        } catch (e) {}
+      }
     }
 
     if (className) {

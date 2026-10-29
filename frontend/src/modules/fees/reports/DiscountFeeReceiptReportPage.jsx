@@ -1,54 +1,39 @@
 import React, { useState } from 'react';
 import { Tag, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function DiscountFeeReceiptReportPage() {
+  const { schoolId } = useAuth();
   const [fromDate, setFromDate] = useState('2026-04-01');
   const [toDate, setToDate] = useState('2026-10-15');
   const [reportType, setReportType] = useState('All');
   const [selectedClass, setSelectedClass] = useState('All');
 
-  const [discounts] = useState([
-    {
-      sNo: 1,
-      admNo: '1621',
-      srNo: '1621',
-      name: 'AADITYA SINGH CHOUDHARY',
-      className: 'Nursery - PP3+-A',
-      recNo: 'REC-2026-001',
-      recDate: '2026-04-10',
-      discountType: 'Sibling Discount (10%)',
-      remark: 'Sibling enrolled in Class II',
-      discountAmount: 1500,
-      authorizedBy: 'PRINCIPAL'
-    },
-    {
-      sNo: 2,
-      admNo: '1245',
-      srNo: '1245',
-      name: 'BHAVYA VERMA',
-      className: 'Class II-B',
-      recNo: 'REC-2026-089',
-      recDate: '2026-07-08',
-      discountType: 'Staff Ward Discount (25%)',
-      remark: 'Child of Senior Teacher',
-      discountAmount: 3000,
-      authorizedBy: 'DIRECTOR'
-    },
-    {
-      sNo: 3,
-      admNo: '1310',
-      srNo: '1310',
-      name: 'CHETAN MEENA',
-      className: 'Class X-A',
-      recNo: 'REC-2026-142',
-      recDate: '2026-10-05',
-      discountType: 'Merit Scholarship',
-      remark: 'Top ranker in Class IX',
-      discountAmount: 5000,
-      authorizedBy: 'MANAGEMENT'
+  const [discounts, setDiscounts] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const concessions = tenantStore.getStudentConcessions(schoolId) || [];
+      const mapped = concessions.map((c, idx) => ({
+        sNo: idx + 1,
+        admNo: c.admNo,
+        srNo: c.srNo || c.admNo,
+        name: c.studentName,
+        className: c.className || 'Class I',
+        recNo: `DISC-${c.admNo}`,
+        recDate: new Date().toISOString().split('T')[0],
+        discountType: c.concessionType,
+        remark: `Concession approved by ${c.concessionBy}`,
+        discountAmount: Number(c.amount || 0),
+        authorizedBy: c.concessionBy || 'PRINCIPAL'
+      }));
+      setDiscounts(mapped);
+    } catch (e) {
+      console.error(e);
     }
-  ]);
+  }, [schoolId]);
 
   const totalDiscount = discounts.reduce((sum, d) => sum + d.discountAmount, 0);
 

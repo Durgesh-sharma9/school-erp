@@ -1,49 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Ban, Download, Printer, ShieldAlert, CheckCircle, X, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeRefundPage() {
-  const [receipts, setReceipts] = useState([
-    {
-      id: 'rec_1',
-      receiptNo: 'JD-REC-001',
-      admNo: '1621',
-      studentName: 'AADITYA SINGH CHOUDHARY',
-      className: 'Class I-A',
-      fatherName: 'NARENDRA SINGH CHOUDHARY',
-      paidAmount: 17000,
-      payMode: 'UPI',
-      date: '2026-04-10',
-      status: 'SUCCESS',
-      remarks: 'Quarter 1 Tuition & Admission Fee'
-    },
-    {
-      id: 'rec_2',
-      receiptNo: 'JD-REC-002',
-      admNo: '2059',
-      studentName: 'AADHYA CHOUDHARY',
-      className: 'Nursery - PP3+-A',
-      fatherName: 'RAMESH CHOUDHARY',
-      paidAmount: 13500,
-      payMode: 'Cash',
-      date: '2026-04-12',
-      status: 'SUCCESS',
-      remarks: 'Admission & Term 1 Tuition'
-    },
-    {
-      id: 'rec_3',
-      receiptNo: 'JD-REC-003',
-      admNo: '2060',
-      studentName: 'ROHAN SHARMA',
-      className: 'X-A',
-      fatherName: 'MUKESH SHARMA',
-      paidAmount: 15000,
-      payMode: 'Bank Transfer',
-      date: '2026-05-02',
-      status: 'SUCCESS',
-      remarks: 'Quarter 1 Tuition Fee'
-    }
-  ]);
+  const { schoolId } = useAuth();
+  const [receipts, setReceipts] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [cancellingReceipt, setCancellingReceipt] = useState(null);
@@ -52,17 +15,24 @@ export function FeeRefundPage() {
 
   useEffect(() => {
     fetchReceipts();
-  }, []);
+  }, [schoolId]);
 
   const fetchReceipts = async () => {
     try {
-      const res = await fetch('/api/fees/receipts');
-      const data = await res.json();
-      if (data.success && data.data.length > 0) {
-        setReceipts(data.data);
-      }
-    } catch {
-      // Keep defaults
+      const local = tenantStore.getReceipts(schoolId) || [];
+      setReceipts(local);
+
+      try {
+        const res = await fetch('/api/fees/receipts', {
+          headers: { 'x-school-id': schoolId }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setReceipts(data.data);
+        }
+      } catch (e) {}
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -75,9 +45,16 @@ export function FeeRefundPage() {
 
     setIsLoading(true);
     try {
+      // 1. Cancel in client store and revert student balance
+      tenantStore.cancelReceipt(schoolId, cancellingReceipt.receiptNo, cancelReason.trim());
+
+      // 2. Sync to API
       await fetch('/api/fees/cancel-receipt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-school-id': schoolId
+        },
         body: JSON.stringify({
           receiptNo: cancellingReceipt.receiptNo,
           reason: cancelReason.trim()
@@ -90,7 +67,7 @@ export function FeeRefundPage() {
           : r
       ));
 
-      toast.success(`Receipt ${cancellingReceipt.receiptNo} has been CANCELLED`);
+      toast.success(`Receipt ${cancellingReceipt.receiptNo} has been CANCELLED and student fee balance restored`);
       setCancellingReceipt(null);
       setCancelReason('');
     } catch {

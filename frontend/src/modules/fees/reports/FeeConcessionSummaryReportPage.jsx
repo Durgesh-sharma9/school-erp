@@ -1,15 +1,34 @@
 import React, { useState } from 'react';
 import { Percent, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeConcessionSummaryReportPage() {
+  const { schoolId } = useAuth();
   const [reportType, setReportType] = useState('All');
   const [concessionType, setConcessionType] = useState('All');
 
-  const [records, setRecords] = useState([
-    { sNo: 1, admNo: '2049', srNo: '2049', name: 'BHAVYA', className: 'III-A', total: 5000, concessionBy: 'Principal', remarks: 'Staff ward fee discount' },
-    { sNo: 2, admNo: '2050', srNo: '2050', name: 'PRIYANSHU JOYA', className: 'V-A', total: 8000, concessionBy: 'Management', remarks: 'EWS scholarship' }
-  ]);
+  const [records, setRecords] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realConcessions = tenantStore.getStudentConcessions(schoolId) || [];
+      const mapped = realConcessions.map((c, idx) => ({
+        sNo: idx + 1,
+        admNo: c.admNo,
+        srNo: c.srNo || c.admNo,
+        name: c.studentName,
+        className: c.className,
+        total: Number(c.amount || 0),
+        concessionBy: c.concessionBy || 'Principal',
+        remarks: c.concessionType
+      }));
+      setRecords(mapped);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
 
   const totalConcession = records.reduce((sum, r) => sum + r.total, 0);
 

@@ -1184,14 +1184,24 @@ export function StudentRegistrationPage({ onNavigate }) {
       })
       .catch(() => {});
 
-    // Sync student list for this tenant from backend
+    // Sync student list for this tenant from backend with bidirectional resilience
     fetch('/api/students', {
       headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
     })
       .then(res => res.json())
       .then(data => {
-        if (data?.data && Array.isArray(data.data)) {
+        if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
           tenantStore.setStudents(schoolId || 'sch_jd_intl', data.data);
+        } else {
+          // If backend has 0 students but client already has saved students, self-heal backend
+          const local = tenantStore.getStudents(schoolId || 'sch_jd_intl') || [];
+          if (local.length > 0) {
+            fetch('/api/students/bulk-save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId || 'sch_jd_intl' },
+              body: JSON.stringify({ students: local })
+            }).catch(() => {});
+          }
         }
       })
       .catch(() => {});

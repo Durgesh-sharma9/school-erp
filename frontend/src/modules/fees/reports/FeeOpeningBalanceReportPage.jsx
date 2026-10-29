@@ -1,53 +1,40 @@
 import React, { useState } from 'react';
 import { History, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeOpeningBalanceReportPage() {
+  const { schoolId } = useAuth();
   const [reportType, setReportType] = useState('All');
   const [selectedClass, setSelectedClass] = useState('All');
   const [selectedDivision, setSelectedDivision] = useState('All');
 
-  const [records] = useState([
-    {
-      sNo: 1,
-      admNo: '1204',
-      srNo: '1204',
-      name: 'AARAV SHARMA',
-      className: 'Class I-A',
-      fatherName: 'RAJESH SHARMA',
-      mobileNo: '9876543210',
-      routeName: 'Local Route 1',
-      due: 4500,
-      paid: 4500,
-      balance: 0
-    },
-    {
-      sNo: 2,
-      admNo: '1245',
-      srNo: '1245',
-      name: 'BHAVYA VERMA',
-      className: 'Class II-B',
-      fatherName: 'MANISH VERMA',
-      mobileNo: '9829012345',
-      routeName: 'City Bus 4',
-      due: 6000,
-      paid: 2000,
-      balance: 4000
-    },
-    {
-      sNo: 3,
-      admNo: '1310',
-      srNo: '1310',
-      name: 'CHETAN MEENA',
-      className: 'Class X-A',
-      fatherName: 'RAMESHWAR MEENA',
-      mobileNo: '9414054321',
-      routeName: 'Self / Walker',
-      due: 8500,
-      paid: 0,
-      balance: 8500
+  const [records, setRecords] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const realStudents = tenantStore.getStudents(schoolId) || [];
+      const mapped = realStudents
+        .filter(s => Number(s.openingBalance || 0) > 0)
+        .map((s, idx) => ({
+          sNo: idx + 1,
+          admNo: s.admNo,
+          srNo: s.srNo || s.admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim(),
+          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          fatherName: s.fatherName || s.fathers_name || '-',
+          mobileNo: s.fatherMobile || s.contactNo || '-',
+          routeName: s.transportRoute || 'Self / Walker',
+          due: Number(s.openingBalance || 0),
+          paid: 0,
+          balance: Number(s.openingBalance || 0)
+        }));
+      setRecords(mapped);
+    } catch (e) {
+      console.error(e);
     }
-  ]);
+  }, [schoolId]);
 
   const filteredRecords = records.filter(r => {
     if (selectedClass !== 'All' && !r.className.startsWith(selectedClass)) return false;

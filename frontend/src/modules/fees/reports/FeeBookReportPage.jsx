@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { BookOpen, Search, Download, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function FeeBookReportPage() {
   const [selectedClass, setSelectedClass] = useState('Nursery - PP3+');

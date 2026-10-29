@@ -1,18 +1,39 @@
 import React, { useState } from 'react';
 import { Search, Download, Printer, RefreshCw, CheckCircle, Clock, AlertTriangle, Globe } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { tenantStore } from '../../../services/tenantStore';
 
 export function OnlineCollectionSummaryReportPage() {
+  const { schoolId } = useAuth();
   const [startDate, setStartDate] = useState('2026-04-01');
   const [endDate, setEndDate] = useState('2026-10-15');
   const [statusType, setStatusType] = useState('Success');
   const [gateway, setGateway] = useState('All');
 
-  const [transactions, setTransactions] = useState([
-    { sNo: 1, txnId: 'ATOM_TXN_881920', date: '2026-04-10', admNo: '1621', studentName: 'AADITYA SINGH CHOUDHARY', className: 'Class I-A', gateway: 'Atom Gateway', status: 'SUCCESS', amount: 17000 },
-    { sNo: 2, txnId: 'RZP_TXN_992102', date: '2026-05-02', admNo: '2060', studentName: 'ROHAN SHARMA', className: 'Class X-A', gateway: 'Razorpay', status: 'SUCCESS', amount: 15000 },
-    { sNo: 3, txnId: 'EAZ_TXN_332110', date: '2026-06-14', admNo: '2059', studentName: 'AADHYA CHOUDHARY', className: 'Nursery - PP3+-A', gateway: 'Easebuzz', status: 'SUCCESS', amount: 9500 }
-  ]);
+  const [transactions, setTransactions] = useState([]);
+
+  React.useEffect(() => {
+    try {
+      const receipts = tenantStore.getReceipts(schoolId) || [];
+      const onlineTxns = receipts
+        .filter(r => ['UPI', 'Online', 'Card', 'Net Banking'].includes(r.payMode))
+        .map((r, idx) => ({
+          sNo: idx + 1,
+          txnId: r.chequeNo || `TXN_${r.receiptNo}`,
+          date: r.date,
+          admNo: r.admNo,
+          studentName: r.studentName,
+          className: r.className || 'Class I',
+          gateway: r.payMode === 'UPI' ? 'Razorpay UPI' : 'Easebuzz Payment Gateway',
+          status: 'SUCCESS',
+          amount: Number(r.paidAmount || 0)
+        }));
+      setTransactions(onlineTxns);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [schoolId]);
 
   const handleRecheck = () => {
     toast.success('Synced online gateway settlement statuses');

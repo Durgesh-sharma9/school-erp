@@ -1,45 +1,60 @@
 import prisma from '../../config/db.js';
 import { TENANT_STUDENTS } from '../students/students.controller.js';
+import { loadJson, saveJson } from '../../core/utils/localStore.js';
 
-// Multi-Tenant Partitioned Fee Accounts: schoolId -> { admNo -> account } (Clean Fresh State)
-export const TENANT_FEE_ACCOUNTS = {
+const feesDisk = loadJson('tenant_fees.json', {});
+
+export const TENANT_FEE_ACCOUNTS = feesDisk.TENANT_FEE_ACCOUNTS || {
   'sch_jd_intl': {},
   'sch_dps_branch2': {}
 };
 
-export const TENANT_RECEIPTS = {
+export const TENANT_RECEIPTS = feesDisk.TENANT_RECEIPTS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_HEAD_GROUPS = {
+export const TENANT_FEE_HEAD_GROUPS = feesDisk.TENANT_FEE_HEAD_GROUPS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_HEADS = {
+export const TENANT_FEE_HEADS = feesDisk.TENANT_FEE_HEADS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_CONCESSION_TYPES = {
+export const TENANT_CONCESSION_TYPES = feesDisk.TENANT_CONCESSION_TYPES || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FINE_MASTERS = {
+export const TENANT_FINE_MASTERS = feesDisk.TENANT_FINE_MASTERS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_STRUCTURES = {
+export const TENANT_FEE_STRUCTURES = feesDisk.TENANT_FEE_STRUCTURES || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_STUDENT_CONCESSIONS = {
+export const TENANT_STUDENT_CONCESSIONS = feesDisk.TENANT_STUDENT_CONCESSIONS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
+};
+
+export const persistFees = () => {
+  saveJson('tenant_fees.json', {
+    TENANT_FEE_ACCOUNTS,
+    TENANT_RECEIPTS,
+    TENANT_FEE_HEAD_GROUPS,
+    TENANT_FEE_HEADS,
+    TENANT_CONCESSION_TYPES,
+    TENANT_FINE_MASTERS,
+    TENANT_FEE_STRUCTURES,
+    TENANT_STUDENT_CONCESSIONS
+  });
 };
 
 const getActiveSchoolId = (req) => {
@@ -114,7 +129,7 @@ export const getStudentFeeLedger = async (req, res, next) => {
           },
           heads: [
             { id: `h_${schoolId}_1`, feeHead: 'Admission / Reg. Fee', amount: 4000, discount: 0, fine: 0, netPayable: 4000, isPaid: false },
-            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Quarter 1)', amount: 10000, discount: 0, fine: 0, netPayable: 1000, isPaid: false },
+            { id: `h_${schoolId}_2`, feeHead: 'Tuition Fee (Quarter 1)', amount: 10000, discount: 0, fine: 0, netPayable: 10000, isPaid: false },
             { id: `h_${schoolId}_3`, feeHead: 'Tuition Fee (Quarter 2)', amount: 10000, discount: 0, fine: 0, netPayable: 10000, isPaid: false },
             { id: `h_${schoolId}_4`, feeHead: 'Activity & Lab Fee', amount: 2500, discount: 0, fine: 0, netPayable: 2500, isPaid: false }
           ],
@@ -129,7 +144,8 @@ export const getStudentFeeLedger = async (req, res, next) => {
     }
 
     if (!account) {
-      return res.status(200).json({
+    persistFees();
+    return res.status(200).json({
         success: true,
         schoolId,
         data: {
@@ -224,6 +240,7 @@ export const collectFeePayment = async (req, res, next) => {
       }
     }
 
+    persistFees();
     return res.status(201).json({
       success: true,
       message: `Fee payment of ₹${paidAmount} collected successfully. Receipt No: ${receiptNo}`,
@@ -243,6 +260,7 @@ export const getFeeRecentReceipts = async (req, res, next) => {
     const schoolId = getActiveSchoolId(req);
     const receipts = TENANT_RECEIPTS[schoolId] || [];
 
+    persistFees();
     return res.status(200).json({
       success: true,
       schoolId,
@@ -261,6 +279,7 @@ export const getFeeHeadGroups = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const groups = TENANT_FEE_HEAD_GROUPS[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: groups });
   } catch (error) {
     next(error);
@@ -277,7 +296,8 @@ export const saveFeeHeadGroup = async (req, res, next) => {
       TENANT_FEE_HEAD_GROUPS[schoolId] = TENANT_FEE_HEAD_GROUPS[schoolId].map(g =>
         g.id === String(id) ? { ...g, headGroup, priority: Number(priority), active } : g
       );
-      return res.status(200).json({ success: true, message: 'Fee Head Group updated successfully' });
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee Head Group updated successfully' });
     } else {
       const newGroup = {
         id: String(Date.now()),
@@ -313,6 +333,7 @@ export const getFeeHeads = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const heads = TENANT_FEE_HEADS[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: heads });
   } catch (error) {
     next(error);
@@ -329,7 +350,8 @@ export const saveFeeHead = async (req, res, next) => {
       TENANT_FEE_HEADS[schoolId] = TENANT_FEE_HEADS[schoolId].map(h =>
         h.id === String(id) ? { ...h, feeHead, priority: Number(priority), applyFor, gender, installment, feeType, isBoard } : h
       );
-      return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
     } else {
       const newHead = {
         id: String(Date.now()),
@@ -369,6 +391,7 @@ export const getConcessionTypes = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const types = TENANT_CONCESSION_TYPES[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: types });
   } catch (error) {
     next(error);
@@ -385,7 +408,8 @@ export const saveConcessionType = async (req, res, next) => {
       TENANT_CONCESSION_TYPES[schoolId] = TENANT_CONCESSION_TYPES[schoolId].map(c =>
         c.id === String(id) ? { ...c, concessionType, description, defaultPercent: Number(defaultPercent) } : c
       );
-      return res.status(200).json({ success: true, message: 'Concession Category updated' });
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Concession Category updated' });
     } else {
       const newType = {
         id: String(Date.now()),
@@ -421,6 +445,7 @@ export const getFineMasters = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const fines = TENANT_FINE_MASTERS[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: fines });
   } catch (error) {
     next(error);
@@ -438,7 +463,8 @@ export const saveFineMaster = async (req, res, next) => {
       TENANT_FINE_MASTERS[schoolId] = TENANT_FINE_MASTERS[schoolId].map(f =>
         f.id === String(id) ? { ...f, fineName, fineType, increasePeriod, graceDays: Number(graceDays), amount: Number(amount), updatedAt: now } : f
       );
-      return res.status(200).json({ success: true, message: 'Fine rule updated' });
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fine rule updated' });
     } else {
       const newFine = {
         id: String(Date.now()),
@@ -479,6 +505,7 @@ export const getFeeStructures = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const structures = TENANT_FEE_STRUCTURES[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: structures });
   } catch (error) {
     next(error);
@@ -495,7 +522,8 @@ export const saveFeeStructure = async (req, res, next) => {
       TENANT_FEE_STRUCTURES[schoolId] = TENANT_FEE_STRUCTURES[schoolId].map(s =>
         s.id === String(id) ? { ...s, className, stream, structureType, grandTotal: Number(grandTotal), heads } : s
       );
-      return res.status(200).json({ success: true, message: 'Fee structure updated' });
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee structure updated' });
     } else {
       const newStructure = {
         id: String(Date.now()),
@@ -533,17 +561,39 @@ export const getFeeManualStudents = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    const studentsList = Object.values(accounts).map((acc, idx) => ({
+    let studentsList = Object.values(accounts).map((acc, idx) => ({
       sNo: idx + 1,
       admNo: acc.student.admNo,
       srNo: acc.student.srNo,
       name: acc.student.name,
-      className: acc.student.className + (acc.student.section ? `-${acc.student.section}` : ''),
+      className: acc.student.className.includes('-') ? acc.student.className : (acc.student.className + (acc.student.section ? `-${acc.student.section}` : '')),
       fatherName: acc.student.fatherName,
       type: '0',
       heads: acc.heads,
       receipts: acc.receipts
     }));
+
+    if (studentsList.length === 0) {
+      const pool = TENANT_STUDENTS[schoolId] || [];
+      studentsList = pool.map((s, idx) => ({
+        sNo: idx + 1,
+        admNo: s.admNo,
+        srNo: s.srNo || s.admNo,
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+        className: `${s.className || 'I'}-${s.section || 'A'}`,
+        fatherName: s.fatherName || s.fathers_name || '-',
+        type: s.studentType || '0',
+        heads: [
+          { id: `h_${s.admNo}_1`, feeHead: 'Admission Fee', amount: 5000, discount: 0, fine: 0, netPayable: 5000, isPaid: false },
+          { id: `h_${s.admNo}_2`, feeHead: 'Tuition Fee (Q1)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: false },
+          { id: `h_${s.admNo}_3`, feeHead: 'Tuition Fee (Q2)', amount: 12000, discount: 0, fine: 0, netPayable: 12000, isPaid: false },
+          { id: `h_${s.admNo}_4`, feeHead: 'Activity & Sports Fee', amount: 2000, discount: 0, fine: 0, netPayable: 2000, isPaid: false }
+        ],
+        receipts: []
+      }));
+    }
+
+    persistFees();
     return res.status(200).json({ success: true, data: studentsList });
   } catch (error) {
     next(error);
@@ -554,12 +604,28 @@ export const saveFeeManualEdit = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { admNo, heads = [], remarks = '' } = req.body;
-    if (TENANT_FEE_ACCOUNTS[schoolId] && TENANT_FEE_ACCOUNTS[schoolId][admNo]) {
-      TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = heads;
-      TENANT_FEE_ACCOUNTS[schoolId][admNo].manualRemark = remarks;
-      return res.status(200).json({ success: true, message: `Fee updated manually for Student ${admNo}` });
+    if (!TENANT_FEE_ACCOUNTS[schoolId]) {
+      TENANT_FEE_ACCOUNTS[schoolId] = {};
     }
-    return res.status(404).json({ success: false, message: 'Student account not found' });
+    if (!TENANT_FEE_ACCOUNTS[schoolId][admNo]) {
+      const studentPool = TENANT_STUDENTS[schoolId] || [];
+      const s = studentPool.find(st => st.admNo === admNo) || {};
+      TENANT_FEE_ACCOUNTS[schoolId][admNo] = {
+        student: {
+          admNo,
+          srNo: s.srNo || admNo,
+          name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${admNo}`,
+          className: `${s.className || 'I'}-${s.section || 'A'}`,
+          fatherName: s.fatherName || '-'
+        },
+        heads: [],
+        receipts: []
+      };
+    }
+    TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = heads;
+    TENANT_FEE_ACCOUNTS[schoolId][admNo].manualRemark = remarks;
+    persistFees();
+    return res.status(200).json({ success: true, message: `Fee updated manually for Student ${admNo}` });
   } catch (error) {
     next(error);
   }
@@ -572,6 +638,7 @@ export const getStudentConcessions = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const concessions = TENANT_STUDENT_CONCESSIONS[schoolId] || [];
+    persistFees();
     return res.status(200).json({ success: true, data: concessions });
   } catch (error) {
     next(error);
@@ -599,6 +666,7 @@ export const saveStudentConcession = async (req, res, next) => {
     };
 
     TENANT_STUDENT_CONCESSIONS[schoolId].unshift(newConcession);
+    persistFees();
     return res.status(201).json({ success: true, message: 'Concession assigned to student successfully', data: newConcession });
   } catch (error) {
     next(error);
@@ -612,6 +680,7 @@ export const deleteStudentConcession = async (req, res, next) => {
     if (TENANT_STUDENT_CONCESSIONS[schoolId]) {
       TENANT_STUDENT_CONCESSIONS[schoolId] = TENANT_STUDENT_CONCESSIONS[schoolId].filter(c => c.id !== String(id));
     }
+    persistFees();
     return res.status(200).json({ success: true, message: 'Concession record removed' });
   } catch (error) {
     next(error);
@@ -625,25 +694,30 @@ export const lookupSiblings = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { mobile = '', fatherName = '' } = req.query;
-    const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    
-    let matched = Object.values(accounts).map(acc => ({
-      admNo: acc.student.admNo,
-      srNo: acc.student.srNo,
-      name: acc.student.name,
-      fatherName: acc.student.fatherName,
-      className: acc.student.className,
-      mobile: acc.student.mobile,
-      dueAmount: acc.heads.filter(h => !h.isPaid).reduce((sum, h) => sum + (h.netPayable || h.amount), 0),
-      heads: acc.heads
+    const pool = TENANT_STUDENTS[schoolId] || [];
+    const qMobile = String(mobile).trim();
+    const qFather = String(fatherName).trim().toLowerCase();
+
+    const matched = pool.filter(s => {
+      const sMob = String(s.fatherMobile || s.contactNo || s.smsWhatsappNo || '');
+      const sFat = String(s.fatherName || s.fathers_name || '').toLowerCase();
+      if (qMobile && sMob.includes(qMobile)) return true;
+      if (qFather && sFat.includes(qFather)) return true;
+      return false;
+    }).map(s => ({
+      admNo: s.admNo,
+      srNo: s.srNo || s.admNo,
+      name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+      fatherName: s.fatherName || s.fathers_name || '-',
+      className: `${s.className || 'I'}-${s.section || 'A'}`,
+      mobile: s.fatherMobile || s.contactNo || '-',
+      dueAmount: Number(s.totalFees || 10000),
+      heads: [
+        { id: `h_${s.admNo}_1`, feeHead: 'Tuition Fee (Q1)', amount: 10000, discount: 0, netPayable: 10000, isPaid: false }
+      ]
     }));
 
-    if (mobile.trim()) {
-      matched = matched.filter(s => s.mobile && s.mobile.includes(mobile.trim()));
-    } else if (fatherName.trim()) {
-      matched = matched.filter(s => s.fatherName && s.fatherName.toLowerCase().includes(fatherName.trim().toLowerCase()));
-    }
-
+    persistFees();
     return res.status(200).json({ success: true, data: matched });
   } catch (error) {
     next(error);
@@ -684,9 +758,17 @@ export const collectSiblingFee = async (req, res, next) => {
       receiptType: 'SIBLING_JOINT'
     };
 
+    const student = (TENANT_STUDENTS[schoolId] || []).find(st => st.admNo === admNo);
+    if (student) {
+      student.boardFeePaid = true;
+      newReceipt.studentName = (student.name || `${student.firstName || ''} ${student.lastName || ''}`).trim() || `Student ${admNo}`;
+      newReceipt.className = `${student.className || 'X'}-${student.section || 'A'}`;
+    }
+
     if (!TENANT_RECEIPTS[schoolId]) TENANT_RECEIPTS[schoolId] = [];
     TENANT_RECEIPTS[schoolId].unshift(newReceipt);
 
+    persistFees();
     return res.status(201).json({
       success: true,
       message: `Sibling joint fee payment of ₹${totalPaid} recorded. Receipt No: ${receiptNo}`,
@@ -708,10 +790,19 @@ export const cancelFeeReceipt = async (req, res, next) => {
     if (TENANT_RECEIPTS[schoolId]) {
       const idx = TENANT_RECEIPTS[schoolId].findIndex(r => r.receiptNo === receiptNo);
       if (idx !== -1) {
-        TENANT_RECEIPTS[schoolId][idx].status = 'CANCELLED';
-        TENANT_RECEIPTS[schoolId][idx].cancelReason = reason;
-        TENANT_RECEIPTS[schoolId][idx].cancelledAt = new Date().toISOString();
-        return res.status(200).json({ success: true, message: `Receipt ${receiptNo} marked as CANCELLED.` });
+        const cancelledRec = TENANT_RECEIPTS[schoolId][idx];
+        cancelledRec.status = 'CANCELLED';
+        cancelledRec.cancelReason = reason;
+        cancelledRec.cancelledAt = new Date().toISOString();
+
+        // Revert student dues in backend student pool
+        const student = (TENANT_STUDENTS[schoolId] || []).find(st => st.admNo === cancelledRec.admNo);
+        if (student) {
+          student.paidFees = Math.max(0, (Number(student.paidFees) || 0) - Number(cancelledRec.paidAmount || 0));
+          student.dueFees = Math.max(0, (Number(student.totalFees) || 0) - student.paidFees);
+        }
+    persistFees();
+    return res.status(200).json({ success: true, message: `Receipt ${receiptNo} marked as CANCELLED.` });
       }
     }
     return res.status(404).json({ success: false, message: 'Receipt not found' });
@@ -726,19 +817,22 @@ export const cancelFeeReceipt = async (req, res, next) => {
 export const getBoardFeeStudents = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
-    const accounts = TENANT_FEE_ACCOUNTS[schoolId] || {};
-    // Students eligible for board (Class X and XII)
-    const boardStudents = Object.values(accounts)
-      .filter(acc => acc.student.className.includes('X') || acc.student.className.includes('10') || acc.student.className.includes('XII') || acc.student.className.includes('12'))
-      .map(acc => ({
-        admNo: acc.student.admNo,
-        srNo: acc.student.srNo,
-        name: acc.student.name,
-        className: acc.student.className,
+    const pool = TENANT_STUDENTS[schoolId] || [];
+    const boardStudents = pool
+      .filter(s => {
+        const cls = String(s.className || '').toUpperCase();
+        return cls.includes('X') || cls.includes('10') || cls.includes('XII') || cls.includes('12');
+      })
+      .map(s => ({
+        admNo: s.admNo,
+        srNo: s.srNo || s.admNo,
+        name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).trim() || `Student ${s.admNo}`,
+        className: `${s.className || 'X'}-${s.section || 'A'}`,
         boardFee: 3500,
-        paid: acc.heads.find(h => h.feeHead.toLowerCase().includes('board'))?.isPaid || false
+        paid: Boolean(s.boardFeePaid)
       }));
 
+    persistFees();
     return res.status(200).json({ success: true, data: boardStudents });
   } catch (error) {
     next(error);
@@ -792,6 +886,7 @@ export const collectBoardFee = async (req, res, next) => {
       }
     }
 
+    persistFees();
     return res.status(201).json({ success: true, message: `Board Fee collected successfully. Receipt: ${receiptNo}`, data: newReceipt });
   } catch (error) {
     next(error);
@@ -830,6 +925,7 @@ export const getFeeReportsData = async (req, res, next) => {
       }
     });
 
+    persistFees();
     return res.status(200).json({
       success: true,
       reportType,

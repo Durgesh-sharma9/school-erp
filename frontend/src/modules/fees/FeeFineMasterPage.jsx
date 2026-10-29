@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Download, Printer, Gavel, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeFineMasterPage() {
-  const [fines, setFines] = useState([
-    { id: '1', fineName: 'Late Fee Penalty', fineType: 'Per Day', increasePeriod: 'Daily', graceDays: 10, amount: 20, createdAt: '2026-04-01', updatedAt: '2026-04-01', user: 'Admin' },
-    { id: '2', fineName: 'Quarterly Due Flat Fine', fineType: 'Fixed', increasePeriod: 'Monthly', graceDays: 15, amount: 200, createdAt: '2026-04-01', updatedAt: '2026-04-01', user: 'Admin' }
-  ]);
+  const { schoolId } = useAuth();
+  const [fines, setFines] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,18 +22,21 @@ export function FeeFineMasterPage() {
 
   useEffect(() => {
     fetchFines();
-  }, []);
+  }, [schoolId]);
 
   const fetchFines = async () => {
     try {
-      const res = await fetch('/api/fees/fines');
+      const local = tenantStore.getFineMasters(schoolId) || [];
+      setFines(local);
+
+      const res = await fetch('/api/fees/fines', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setFines(data.data);
       }
-    } catch {
-      // Keep defaults
-    }
+    } catch {}
   };
 
   const handleOpenModal = (f = null) => {
@@ -79,17 +82,21 @@ export function FeeFineMasterPage() {
 
       await fetch('/api/fees/fines', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
 
       const today = new Date().toISOString().split('T')[0];
       if (editingFine) {
-        setFines(prev => prev.map(item => item.id === editingFine.id ? { ...item, ...payload, updatedAt: today } : item));
+        const updatedFines = fines.map(item => item.id === editingFine.id ? { ...item, ...payload, updatedAt: today } : item);
+        tenantStore.saveFineMasters(schoolId, updatedFines);
+        setFines(updatedFines);
         toast.success('Fine rule updated');
       } else {
         const newFine = { id: String(Date.now()), ...payload, createdAt: today, updatedAt: today, user: 'Admin' };
-        setFines(prev => [...prev, newFine]);
+        const updatedFines = [...fines, newFine];
+        tenantStore.saveFineMasters(schoolId, updatedFines);
+        setFines(updatedFines);
         toast.success('Fine rule created');
       }
       setIsModalOpen(false);
@@ -103,8 +110,10 @@ export function FeeFineMasterPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this fine rule?')) return;
     try {
-      await fetch(`/api/fees/fines/${id}`, { method: 'DELETE' });
-      setFines(prev => prev.filter(f => f.id !== id));
+      await fetch(`/api/fees/fines/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedFines = fines.filter(f => f.id !== id);
+      tenantStore.saveFineMasters(schoolId, updatedFines);
+      setFines(updatedFines);
       toast.success('Fine rule removed');
     } catch {
       toast.error('Failed to delete');

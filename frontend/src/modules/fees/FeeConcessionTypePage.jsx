@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Download, Printer, Percent, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 
 export function FeeConcessionTypePage() {
-  const [types, setTypes] = useState([
-    { id: '1', concessionType: 'Handicap', description: 'Special disability concession policy', defaultPercent: 50 },
-    { id: '2', concessionType: 'Poor Student', description: 'EWS scholarship support scheme', defaultPercent: 100 },
-    { id: '3', concessionType: 'Staff', description: 'Staff children institutional discount', defaultPercent: 50 },
-    { id: '4', concessionType: 'Principal', description: 'Discretionary scholarship approved by Principal', defaultPercent: 25 },
-    { id: '5', concessionType: 'Management', description: 'Trustee / Management quota concession', defaultPercent: 50 },
-    { id: '6', concessionType: 'Other', description: 'General athletic and merits concessions', defaultPercent: 20 },
-    { id: '7', concessionType: '3rd Child', description: 'Family third sibling concession', defaultPercent: 30 }
-  ]);
+  const { schoolId } = useAuth();
+  const [types, setTypes] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,18 +16,21 @@ export function FeeConcessionTypePage() {
 
   useEffect(() => {
     fetchTypes();
-  }, []);
+  }, [schoolId]);
 
   const fetchTypes = async () => {
     try {
-      const res = await fetch('/api/fees/concession-types');
+      const local = tenantStore.getConcessionTypes(schoolId) || [];
+      setTypes(local);
+
+      const res = await fetch('/api/fees/concession-types', {
+        headers: { 'x-school-id': schoolId }
+      });
       const data = await res.json();
-      if (data.success && data.data.length > 0) {
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         setTypes(data.data);
       }
-    } catch {
-      // Retain defaults
-    }
+    } catch {}
   };
 
   const handleOpenModal = (t = null) => {
@@ -68,16 +66,20 @@ export function FeeConcessionTypePage() {
 
       await fetch('/api/fees/concession-types', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId },
         body: JSON.stringify(payload)
       });
 
       if (editingType) {
-        setTypes(prev => prev.map(item => item.id === editingType.id ? { ...item, ...payload } : item));
+        const updatedTypes = types.map(item => item.id === editingType.id ? { ...item, ...payload } : item);
+        tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+        setTypes(updatedTypes);
         toast.success('Concession category updated');
       } else {
         const newCat = { id: String(Date.now()), ...payload };
-        setTypes(prev => [...prev, newCat]);
+        const updatedTypes = [...types, newCat];
+        tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+        setTypes(updatedTypes);
         toast.success('Concession category created');
       }
       setIsModalOpen(false);
@@ -91,8 +93,10 @@ export function FeeConcessionTypePage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this concession category?')) return;
     try {
-      await fetch(`/api/fees/concession-types/${id}`, { method: 'DELETE' });
-      setTypes(prev => prev.filter(t => t.id !== id));
+      await fetch(`/api/fees/concession-types/${id}`, { method: 'DELETE', headers: { 'x-school-id': schoolId } });
+      const updatedTypes = types.filter(t => t.id !== id);
+      tenantStore.saveConcessionTypes(schoolId, updatedTypes);
+      setTypes(updatedTypes);
       toast.success('Concession category deleted');
     } catch {
       toast.error('Failed to delete');
