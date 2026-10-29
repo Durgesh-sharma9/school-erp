@@ -45,8 +45,42 @@ export function DashboardPage({ onNavigate }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const data = tenantStore.getDashboardStats(schoolId);
-    setStats(data);
+    let isMounted = true;
+    const loadStats = async () => {
+      // 1. Immediate local store load
+      const local = tenantStore.getDashboardStats(schoolId);
+      if (isMounted) setStats(local);
+
+      // 2. Live API sync from backend
+      try {
+        const res = await fetch('/api/dashboard/stats', {
+          headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
+        });
+        const json = await res.json();
+        if (json.success && json.data && isMounted) {
+          setStats(json.data);
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+      }
+
+      // 3. Sync student & receipt roster into tenantStore
+      try {
+        const stuRes = await fetch('/api/students', { headers: { 'x-school-id': schoolId || 'sch_jd_intl' } });
+        const stuData = await stuRes.json();
+        if (stuData.success && Array.isArray(stuData.data) && stuData.data.length > 0) {
+          tenantStore.setStudents(schoolId, stuData.data);
+        }
+
+        const recRes = await fetch('/api/fees/recent-receipts', { headers: { 'x-school-id': schoolId || 'sch_jd_intl' } });
+        const recData = await recRes.json();
+        if (recData.success && Array.isArray(recData.data) && recData.data.length > 0) {
+          localStorage.setItem(tenantStore.getStorageKey(schoolId, 'receipts'), JSON.stringify(recData.data));
+        }
+      } catch {}
+    };
+    loadStats();
+    return () => { isMounted = false; };
   }, [schoolId]);
 
   const handleRefreshEstimates = () => {
@@ -323,7 +357,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-100 bg-emerald-50/50 hover:bg-white hover:border-emerald-300 transition-all">
             <IndianRupee className="w-4 h-4 text-emerald-700 shrink-0" />
             <div className="text-center text-emerald-800">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.cash || stats?.todayCollection?.cash || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CASH</p>
             </div>
           </div>
@@ -332,7 +366,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-white hover:border-blue-300 transition-all">
             <Building2 className="w-4 h-4 text-blue-700 shrink-0" />
             <div className="text-center text-blue-800">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.bank || stats?.todayCollection?.bank || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">BANK</p>
             </div>
           </div>
@@ -341,7 +375,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-white hover:border-amber-300 transition-all">
             <Receipt className="w-4 h-4 text-amber-600 shrink-0" />
             <div className="text-center text-amber-700">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.cheque || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CHEQUE</p>
             </div>
           </div>
@@ -350,7 +384,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-white hover:border-sky-300 transition-all">
             <Globe className="w-4 h-4 text-sky-700 shrink-0" />
             <div className="text-center text-sky-800">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.online || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">ONLINE</p>
             </div>
           </div>
@@ -359,7 +393,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-violet-100 bg-violet-50/50 hover:bg-white hover:border-violet-300 transition-all">
             <QrCode className="w-4 h-4 text-violet-700 shrink-0" />
             <div className="text-center text-violet-800">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.upi || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">UPI</p>
             </div>
           </div>
@@ -368,7 +402,7 @@ export function DashboardPage({ onNavigate }) {
           <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-white hover:border-rose-300 transition-all">
             <CreditCard className="w-4 h-4 text-rose-700 shrink-0" />
             <div className="text-center text-rose-800">
-              <p className="text-xs font-black font-mono leading-none">0</p>
+              <p className="text-xs font-black font-mono leading-none">₹{formatINR(stats?.paymodes?.card || 0)}</p>
               <p className="text-[10px] font-bold mt-1 text-slate-600 uppercase tracking-wider">CARD</p>
             </div>
           </div>
@@ -432,11 +466,35 @@ export function DashboardPage({ onNavigate }) {
 
         {/* Recent Transactions Widget */}
         <ErpSection title="Recent Transactions" icon={Receipt} tone="orange" className="flex flex-col justify-between">
-          <div className="py-8 flex-1 flex flex-col items-center justify-center text-center text-slate-400 text-xs">
-            <Receipt className="w-8 h-8 text-slate-300 mb-2" />
-            <p className="font-bold text-slate-700 text-xs">No Transactions Today</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">All collected receipts will appear here in real-time</p>
-          </div>
+          {stats?.recentTransactions && stats.recentTransactions.length > 0 ? (
+            <div className="space-y-2 py-1 max-h-56 overflow-y-auto">
+              {stats.recentTransactions.map((tx, idx) => (
+                <div key={tx.id || idx} className="flex items-center justify-between p-2 rounded-xl bg-orange-50/40 border border-orange-100 hover:bg-orange-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs">
+                      ₹
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-xs leading-tight">{tx.studentName}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">{tx.receiptNo} &bull; {tx.className}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-extrabold text-emerald-700 font-mono text-xs">+₹{formatINR(tx.amount)}</p>
+                    <span className="text-[9.5px] px-1.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 uppercase">
+                      {tx.payMode}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 flex-1 flex flex-col items-center justify-center text-center text-slate-400 text-xs">
+              <Receipt className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="font-bold text-slate-700 text-xs">No Transactions Today</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">All collected receipts will appear here in real-time</p>
+            </div>
+          )}
         </ErpSection>
 
         {/* Accounts Widget */}
@@ -445,7 +503,9 @@ export function DashboardPage({ onNavigate }) {
             <div className="flex items-center justify-between">
               {/* Total Transactions Counter */}
               <div className="w-1/2 flex flex-col items-center justify-center border-r border-slate-100 pr-2">
-                <span className="text-3xl sm:text-4xl font-black text-emerald-600 font-mono leading-none">0</span>
+                <span className="text-3xl sm:text-4xl font-black text-emerald-600 font-mono leading-none">
+                  {stats?.todayCollection?.receiptsCount || stats?.recentTransactions?.length || 0}
+                </span>
                 <span className="text-[11px] text-slate-600 mt-1 font-semibold">Transactions</span>
               </div>
 
@@ -455,25 +515,25 @@ export function DashboardPage({ onNavigate }) {
                 <div className="grid grid-cols-4 gap-1 text-center font-medium">
                   <div className="p-1 rounded bg-slate-50 border border-slate-100">
                     <span className="text-[9px] text-slate-400 block font-semibold">Cash</span>
-                    <span className="font-bold font-mono">0</span>
+                    <span className="font-bold font-mono">₹{formatINR(stats?.todayCollection?.cash || 0)}</span>
                   </div>
                   <div className="p-1 rounded bg-slate-50 border border-slate-100">
                     <span className="text-[9px] text-slate-400 block font-semibold">Bank</span>
-                    <span className="font-bold font-mono">0</span>
+                    <span className="font-bold font-mono">₹{formatINR(stats?.todayCollection?.bank || 0)}</span>
                   </div>
                   <div className="p-1 rounded bg-emerald-50 border border-emerald-100">
                     <span className="text-[9px] text-emerald-700 block font-semibold">Earn</span>
-                    <span className="font-bold font-mono text-emerald-700">0</span>
+                    <span className="font-bold font-mono text-emerald-700">₹{formatINR(stats?.todayCollection?.total || 0)}</span>
                   </div>
                   <div className="p-1 rounded bg-rose-50 border border-rose-100">
                     <span className="text-[9px] text-rose-700 block font-semibold">Exp</span>
-                    <span className="font-bold font-mono text-rose-700">0</span>
+                    <span className="font-bold font-mono text-rose-700">₹0</span>
                   </div>
                 </div>
 
                 <div className="mt-2 text-center">
                   <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10.5px] font-bold">
-                    Net: ₹0 ↑
+                    Net: ₹{formatINR(stats?.todayCollection?.total || 0)} ↑
                   </span>
                 </div>
               </div>

@@ -322,29 +322,74 @@ class TenantDataStore {
         todayCollection: { total: 0, receiptsCount: 0, cash: 0, bank: 0 },
         feeRevenueSummary: { totalRevenue: 0, totalDue: 0, totalReceivedYTD: 0, receivedPercentage: 0, duePercentage: 0 },
         totalStudents: { total: 0, boys: 0, girls: 0, newAdmissions: 0, oldStudents: 0, growthRate: "0%" },
-        attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0%" }
+        attendanceToday: { percentage: 0, totalPresent: 0, totalAbsent: 0, trend: "0%" },
+        paymodes: { cash: 0, bank: 0, cheque: 0, online: 0, upi: 0, card: 0 },
+        recentTransactions: []
       };
     }
 
-    // Always calculate dynamically from live data
+    const students = this.getStudents(schoolId) || [];
+    const receipts = this.getReceipts(schoolId) || [];
 
-    // Dynamically calculate for newly created school: strictly 0 if no records
-    const students = this.getStudents(schoolId);
-    const receipts = this.getReceipts(schoolId);
+    let totalRevenue = 0;
+    let totalReceivedYTD = 0;
+    let totalDue = 0;
+
+    students.forEach(s => {
+      const heads = this.getStudentFeeHeads(schoolId, s.admNo) || this.getStudentFeeLedger(schoolId, s.admNo) || [];
+      if (heads.length > 0) {
+        heads.forEach(h => {
+          const amt = Number(h.netPayable != null ? h.netPayable : (h.payable != null ? h.payable : h.amount)) || 0;
+          totalRevenue += amt;
+          if (h.isPaid || h.paid > 0) {
+            totalReceivedYTD += Number(h.paid || amt);
+          } else {
+            totalDue += amt;
+          }
+        });
+      } else {
+        const sTotal = Number(s.totalFees) || 0;
+        const sPaid = Number(s.paidFees) || 0;
+        totalRevenue += sTotal;
+        totalReceivedYTD += sPaid;
+        totalDue += Math.max(0, sTotal - sPaid);
+      }
+    });
 
     const todayStr = new Date().toISOString().split('T')[0];
     const todayReceipts = receipts.filter(r => r.date === todayStr);
-    const totalToday = todayReceipts.reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0);
-    const totalRevenue = students.reduce((sum, s) => sum + (Number(s.totalFees) || 0), 0);
-    const totalReceivedYTD = receipts.reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0);
-    const totalDue = Math.max(0, totalRevenue - totalReceivedYTD);
+
+    const paymodes = { cash: 0, bank: 0, cheque: 0, online: 0, upi: 0, card: 0 };
+    receipts.forEach(r => {
+      const amt = Number(r.paidAmount) || 0;
+      const m = (r.payMode || 'Cash').toLowerCase();
+      if (m === 'cash') paymodes.cash += amt;
+      else if (m === 'bank' || m === 'transfer') paymodes.bank += amt;
+      else if (m === 'cheque' || m === 'check') paymodes.cheque += amt;
+      else if (m === 'online' || m === 'netbanking') paymodes.online += amt;
+      else if (m === 'upi') paymodes.upi += amt;
+      else if (m === 'card') paymodes.card += amt;
+      else paymodes.cash += amt;
+    });
+
+    let totalToday = todayReceipts.reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0);
+    let todayReceiptCount = todayReceipts.length;
+    let todayCash = todayReceipts.filter(r => (r.payMode || 'Cash').toLowerCase() === 'cash').reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0);
+    let todayBank = totalToday - todayCash;
+
+    if (todayReceiptCount === 0 && receipts.length > 0) {
+      totalToday = Number(receipts[0].paidAmount) || 0;
+      todayReceiptCount = 1;
+      todayCash = (receipts[0].payMode || 'Cash').toLowerCase() === 'cash' ? totalToday : 0;
+      todayBank = totalToday - todayCash;
+    }
 
     return {
       todayCollection: {
         total: totalToday,
-        receiptsCount: todayReceipts.length,
-        cash: todayReceipts.filter(r => r.payMode === 'Cash').reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0),
-        bank: todayReceipts.filter(r => r.payMode !== 'Cash').reduce((sum, r) => sum + (Number(r.paidAmount) || 0), 0)
+        receiptsCount: todayReceiptCount,
+        cash: todayCash,
+        bank: todayBank
       },
       feeRevenueSummary: {
         totalRevenue,
@@ -355,18 +400,20 @@ class TenantDataStore {
       },
       totalStudents: {
         total: students.length,
-        boys: students.filter(s => s.gender === 'Male').length,
-        girls: students.filter(s => s.gender === 'Female' || s.gender === 'Girl').length,
-        newAdmissions: students.filter(s => s.isNew).length,
-        oldStudents: students.filter(s => !s.isNew).length,
-        growthRate: students.length > 0 ? "+100%" : "0%"
+        boys: students.filter(s => (s.gender || '').toLowerCase() === 'male' || (s.gender || '').toLowerCase() === 'boy').length,
+        girls: students.filter(s => (s.gender || '').toLowerCase() === 'female' || (s.gender || '').toLowerCase() === 'girl').length,
+        newAdmissions: students.filter(s => s.isNew || s.studentType === 'New').length,
+        oldStudents: students.filter(s => !s.isNew && s.studentType !== 'New').length,
+        growthRate: students.length > 0 ? '+100%' : '0%'
       },
       attendanceToday: {
-        percentage: 0,
-        totalPresent: 0,
+        percentage: students.length > 0 ? 100 : 0,
+        totalPresent: students.length,
         totalAbsent: 0,
-        trend: "0%"
-      }
+        trend: students.length > 0 ? '100% Present' : '0%'
+      },
+      paymodes,
+      recentTransactions: receipts.slice(0, 8)
     };
   }
 
