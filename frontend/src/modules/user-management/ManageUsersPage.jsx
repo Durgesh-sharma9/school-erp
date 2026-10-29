@@ -195,17 +195,24 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleTab, setRoleTab] = useState(
-    currentPath.includes('driver')
-      ? 'Driver'
-      : currentPath.includes('staff')
-      ? 'Staff'
-      : currentPath.includes('privilege')
-      ? 'PRIVILEGE'
-      : 'ALL'
-  );
+  const [roleTab, setRoleTab] = useState(() => {
+    if (currentPath.includes('driver')) return 'Driver';
+    if (currentPath.includes('teacher') || currentPath.includes('staff-users')) return 'Teacher';
+    if (currentPath.includes('office')) return 'Staff';
+    if (currentPath.includes('attender')) return 'Attender';
+    if (currentPath.includes('admin')) return 'Admin';
+    if (currentPath.includes('privilege')) return 'PRIVILEGE';
+    return 'ALL';
+  });
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE'
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Check if current route is the main "All Users" page
+  const isAllUsersPage =
+    !currentPath ||
+    currentPath === '/users' ||
+    currentPath === '/manage-users' ||
+    currentPath === '/';
 
   // Role Privileges Matrix State & Persistence
   const [privileges, setPrivileges] = useState(() => {
@@ -472,7 +479,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
 
   useEffect(() => {
     if (currentPath.includes('driver')) setRoleTab('Driver');
-    else if (currentPath.includes('staff')) setRoleTab('Staff');
+    else if (currentPath.includes('teacher') || currentPath.includes('staff-users')) setRoleTab('Teacher');
+    else if (currentPath.includes('office')) setRoleTab('Staff');
+    else if (currentPath.includes('attender')) setRoleTab('Attender');
+    else if (currentPath.includes('admin')) setRoleTab('Admin');
     else if (currentPath.includes('privilege')) setRoleTab('PRIVILEGE');
     else setRoleTab('ALL');
   }, [currentPath]);
@@ -789,7 +799,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
             onClick={() => handleOpenAdd(roleTab !== 'ALL' && roleTab !== 'PRIVILEGE' ? roleTab : 'Teacher')}
             className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
           >
-            <UserPlus className="w-3.5 h-3.5" /> + Add Staff
+            <UserPlus className="w-3.5 h-3.5" /> + Add User
           </button>
           <button
             onClick={handleExportCSV}
@@ -802,59 +812,88 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
 
       {/* 2. Modern Navigation Tabs & Toolbar */}
       <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-3.5">
-        {/* Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            {[
-              { id: 'ALL', label: 'All Staff', count: totalCount, icon: Users },
-              { id: 'Teacher', label: 'Teachers', count: teachersCount, icon: GraduationCap },
-              { id: 'Staff', label: 'Office Staff', count: staffCount, icon: Briefcase },
-              { id: 'Attender', label: 'Attenders', count: attendersCount, icon: UserCheck },
-              { id: 'Driver', label: 'Drivers & Transport', count: driversCount, icon: Bus },
-              { id: 'Admin', label: 'Admins', count: adminCount, icon: Shield },
-              { id: 'PRIVILEGE', label: 'User Privileges', count: null, icon: ShieldCheck }
-            ].map(tab => {
-              const Icon = tab.icon;
-              const isSelected = roleTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setRoleTab(tab.id)}
-                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
-                    isSelected
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'bg-slate-50 text-slate-600 border border-slate-200/90 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
-                  <span>{tab.label}</span>
-                  {tab.count !== null && (
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                    }`}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        {/* Navigation & Filter Bar */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-3">
+          {/* Active Category Display */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              {roleTab === 'Teacher' ? (
+                <GraduationCap className="w-4 h-4" />
+              ) : roleTab === 'Staff' ? (
+                <Briefcase className="w-4 h-4" />
+              ) : roleTab === 'Attender' ? (
+                <UserCheck className="w-4 h-4" />
+              ) : roleTab === 'Driver' ? (
+                <Bus className="w-4 h-4" />
+              ) : roleTab === 'Admin' ? (
+                <Shield className="w-4 h-4" />
+              ) : roleTab === 'PRIVILEGE' ? (
+                <ShieldCheck className="w-4 h-4" />
+              ) : (
+                <Users className="w-4 h-4" />
+              )}
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800">
+                {roleTab === 'ALL'
+                  ? 'All Users'
+                  : roleTab === 'Teacher'
+                  ? 'Teachers'
+                  : roleTab === 'Staff'
+                  ? 'Office Staff'
+                  : roleTab === 'Attender'
+                  ? 'Attenders'
+                  : roleTab === 'Driver'
+                  ? 'Drivers & Transport'
+                  : roleTab === 'Admin'
+                  ? 'Admins'
+                  : 'User Privileges'}
+              </h2>
+              {roleTab !== 'PRIVILEGE' && (
+                <span className="text-[11px] font-semibold text-slate-500">
+                  Showing {filteredUsers.length} of {totalCount} users
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Status Filter (When in staff list views) */}
-          {roleTab !== 'PRIVILEGE' && (
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-slate-400" />
-              <select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="text-xs font-semibold px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              >
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active Only</option>
-                <option value="INACTIVE">Inactive Only</option>
-              </select>
-            </div>
-          )}
+          {/* Filter Dropdowns (Role Filter + Status Filter) */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* User Role Filter Dropdown: Only shown on "All Users" page */}
+            {isAllUsersPage && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-1.5 shadow-2xs">
+                <Users className="w-4 h-4 text-indigo-600" />
+                <select
+                  value={roleTab}
+                  onChange={e => setRoleTab(e.target.value)}
+                  className="text-xs sm:text-sm font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer pr-1"
+                >
+                  <option value="ALL">All Users ({totalCount})</option>
+                  <option value="Teacher">Teachers ({teachersCount})</option>
+                  <option value="Staff">Office Staff ({staffCount})</option>
+                  <option value="Attender">Attenders ({attendersCount})</option>
+                  <option value="Driver">Drivers & Transport ({driversCount})</option>
+                  <option value="Admin">Admins ({adminCount})</option>
+                </select>
+              </div>
+            )}
+
+            {/* Status Filter (When in staff/user list views) */}
+            {roleTab !== 'PRIVILEGE' && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-1.5 shadow-2xs">
+                <Filter className="w-4 h-4 text-slate-400" />
+                <select
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="text-xs sm:text-sm font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer pr-1"
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="ACTIVE">Active Only</option>
+                  <option value="INACTIVE">Inactive Only</option>
+                </select>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Search Input (When in staff list views) */}

@@ -238,8 +238,11 @@ export const menuCategories = [
     icon: Users,
     subItems: [
       { title: 'All Users', path: '/users' },
-      { title: 'Staff & Teachers', path: '/staff-users' },
+      { title: 'Teachers', path: '/staff-users' },
+      { title: 'Office Staff', path: '/office-staff-users' },
+      { title: 'Attenders', path: '/attender-users' },
       { title: 'Drivers', path: '/driver-users' },
+      { title: 'Admins', path: '/admin-users' },
       { title: 'User Privileges', path: '/user-privilege' },
       { title: 'Reports', path: '/user-reports' }
     ]

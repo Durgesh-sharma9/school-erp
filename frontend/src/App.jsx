@@ -901,7 +901,11 @@ function AppContent() {
               case '/users':
               case '/manage-users':
               case '/staff-users':
+              case '/teacher-users':
+              case '/office-staff-users':
+              case '/attender-users':
               case '/driver-users':
+              case '/admin-users':
               case '/user-privilege':
                 return <ManageUsersPage onNavigate={handleNavigate} currentPath={currentPath} />;
               case '/user-reports':
