@@ -22,7 +22,11 @@ import {
   Users,
   Pencil,
   Copy,
-  Phone
+  Phone,
+  X,
+  RotateCcw,
+  RefreshCw,
+  SwitchCamera
 } from 'lucide-react';
 
 // Reusable Outline Field matching Angular Material mat-form-field appearance="outline"
@@ -33,6 +37,7 @@ function OutlineInput({
   name,
   value,
   onChange,
+  onBlur,
   type = 'text',
   placeholder = '',
   disabled = false,
@@ -63,6 +68,7 @@ function OutlineInput({
           name={name}
           value={value ?? ''}
           onChange={onChange}
+          onBlur={onBlur}
           disabled={disabled}
           placeholder={placeholder}
           className={`w-full px-3 py-2 text-xs md:text-sm text-gray-800 bg-white border ${
@@ -137,10 +143,429 @@ function OutlineSelect({
   );
 }
 
+// Live Webcam Capture Modal Component
+export function WebcamCaptureModal({
+  isOpen,
+  onClose,
+  onCapture,
+  title = 'Photo',
+  isSquareCrop = true
+}) {
+  const videoRef = React.useRef(null);
+  const streamRef = React.useRef(null);
+  const isCancelledRef = React.useRef(false);
+  const [mediaStream, setMediaStream] = React.useState(null);
+  const [capturedImage, setCapturedImage] = React.useState(null);
+  const [cameraError, setCameraError] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [facingMode, setFacingMode] = React.useState('user'); // 'user' or 'environment'
+
+  // Stop all active tracks on the stream cleanly and mark as cancelled
+  const stopTracks = React.useCallback(() => {
+    isCancelledRef.current = true;
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach((track) => {
+          if (track && typeof track.stop === 'function') {
+            track.stop();
+          }
+        });
+      } catch (err) {
+        console.warn('Error stopping camera track:', err);
+      }
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      try {
+        videoRef.current.srcObject = null;
+      } catch (_) {}
+    }
+    setMediaStream(null);
+  }, []);
+
+  const handleClose = React.useCallback(() => {
+    stopTracks();
+    setCapturedImage(null);
+    setCameraError(null);
+    onClose?.();
+  }, [stopTracks, onClose]);
+
+  const startCamera = React.useCallback(async (targetFacing = facingMode) => {
+    setIsLoading(true);
+    setCameraError(null);
+    setCapturedImage(null);
+    stopTracks();
+
+    // Reset cancellation flag for this new start cycle
+    isCancelledRef.current = false;
+
+    try {
+      if (!navigator?.mediaDevices?.getUserMedia) {
+        throw new Error(
+          'Webcam access is not supported by your browser or environment. Please ensure you are using HTTPS or localhost, or use Browse to choose a photo.'
+        );
+      }
+
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: isSquareCrop ? 640 : 1280 },
+            height: { ideal: isSquareCrop ? 640 : 720 },
+            facingMode: { ideal: targetFacing }
+          },
+          audio: false
+        });
+      } catch (reqErr) {
+        // Fallback to basic video constraint if ideal facingMode is rejected (common on desktop USB webcams or devices with only one camera)
+        if (
+          reqErr.name === 'OverconstrainedError' ||
+          (targetFacing !== 'user' && (reqErr.name === 'NotFoundError' || reqErr.name === 'DevicesNotFoundError'))
+        ) {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        } else {
+          throw reqErr;
+        }
+      }
+
+      // If modal was closed or unmounted while waiting for camera access/permission, stop tracks immediately!
+      if (isCancelledRef.current) {
+        if (stream) {
+          try {
+            stream.getTracks().forEach((track) => track?.stop?.());
+          } catch (e) {}
+        }
+        return;
+      }
+
+      streamRef.current = stream;
+      setMediaStream(stream);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.muted = true;
+        videoRef.current.play?.().catch(() => {});
+      }
+    } catch (err) {
+      if (isCancelledRef.current) return;
+      console.warn('Camera access error:', err);
+      let message = 'Unable to access camera. Please check your webcam connection or use the Browse button.';
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        message = 'Camera permission was denied. Please allow camera permissions in your browser settings to take a photo.';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        message = 'No camera device found on your system. Please connect a webcam or browse files from disk.';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        message = 'Camera is already in use by another application. Please close the other application and try again.';
+      } else if (err.name === 'OverconstrainedError') {
+        message = 'The requested camera settings are not supported by your webcam. Please try another camera.';
+      } else if (err.message) {
+        message = err.message;
+      }
+      setCameraError(message);
+    } finally {
+      if (!isCancelledRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [facingMode, isSquareCrop, stopTracks]);
+
+  // Clean initialization and teardown on mount/unmount or isOpen change
+  React.useEffect(() => {
+    if (isOpen) {
+      startCamera(facingMode);
+    } else {
+      stopTracks();
+      setCapturedImage(null);
+      setCameraError(null);
+    }
+    return () => {
+      stopTracks();
+    };
+  }, [isOpen, startCamera, stopTracks, facingMode]);
+
+  // Maintain video srcObject binding
+  React.useEffect(() => {
+    if (videoRef.current && mediaStream && !capturedImage) {
+      videoRef.current.srcObject = mediaStream;
+      videoRef.current.muted = true;
+      videoRef.current.play?.().catch(() => {});
+    }
+  }, [mediaStream, capturedImage]);
+
+  // Close on Escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose]);
+
+  if (!isOpen) return null;
+
+  const toggleCamera = () => {
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+  };
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    try {
+      const vw = video.videoWidth || 640;
+      const vh = video.videoHeight || 480;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (isSquareCrop) {
+        const minDim = Math.min(vw, vh);
+        const sx = (vw - minDim) / 2;
+        const sy = (vh - minDim) / 2;
+        canvas.width = 480;
+        canvas.height = 480;
+        ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, 480, 480);
+      } else {
+        const maxDim = 1280;
+        let targetW = vw;
+        let targetH = vh;
+        if (targetW > maxDim || targetH > maxDim) {
+          if (targetW > targetH) {
+            targetH = Math.round((targetH * maxDim) / targetW);
+            targetW = maxDim;
+          } else {
+            targetW = Math.round((targetW * maxDim) / targetH);
+            targetH = maxDim;
+          }
+        }
+        canvas.width = targetW;
+        canvas.height = targetH;
+        ctx.drawImage(video, 0, 0, targetW, targetH);
+      }
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      setCapturedImage(dataUrl);
+    } catch (err) {
+      console.error('Error snapping photo:', err);
+      toast.error('Failed to capture snapshot from camera');
+    }
+  };
+
+  const handleRetake = () => {
+    setCapturedImage(null);
+  };
+
+  const handleDone = () => {
+    if (capturedImage) {
+      stopTracks();
+      const img = capturedImage;
+      setCapturedImage(null);
+      setCameraError(null);
+      onCapture?.(img);
+      onClose?.();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="webcam-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
+      <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl flex flex-col border border-gray-200">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+              <Camera className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 id="webcam-modal-title" className="text-sm font-bold text-gray-900 leading-tight">
+                Live Webcam Studio
+              </h3>
+              <p className="text-[11px] text-gray-500 font-medium">Capturing: {title}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close modal"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-5 flex flex-col items-center bg-gray-50/60">
+          {cameraError ? (
+            <div className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-center flex flex-col items-center">
+              <AlertCircle className="w-9 h-9 text-red-500 mb-2" />
+              <h4 className="text-xs font-bold text-red-800 mb-1">Camera Access Issue</h4>
+              <p className="text-xs text-red-600 mb-4">{cameraError}</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => startCamera(facingMode)}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Try Again
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center w-full">
+              {/* Media Viewport with adaptive aspect ratio */}
+              <div
+                className={`relative rounded-2xl overflow-hidden bg-black shadow-inner border-2 border-indigo-200 flex items-center justify-center transition-all ${
+                  isSquareCrop ? 'w-64 h-64 sm:w-72 sm:h-72' : 'w-full max-w-sm aspect-[4/3]'
+                }`}
+              >
+                {isLoading && !capturedImage && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white z-10 text-xs gap-2">
+                    <RefreshCw className="w-6 h-6 animate-spin text-indigo-400" />
+                    <span>Connecting to camera...</span>
+                  </div>
+                )}
+
+                {capturedImage ? (
+                  <img
+                    src={capturedImage}
+                    alt="Captured snapshot"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Live Indicator Badge */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-black/60 backdrop-blur-xs text-white px-2 py-0.5 rounded-full text-[10px] font-semibold z-20">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      LIVE
+                    </div>
+                    {/* Camera Flip / Switch Toggle */}
+                    <button
+                      type="button"
+                      onClick={toggleCamera}
+                      title={`Switch to ${facingMode === 'user' ? 'External / Back' : 'Front'} Camera`}
+                      aria-label="Switch camera"
+                      className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 hover:bg-black/80 backdrop-blur-xs text-white px-2 py-0.5 rounded-full text-[10px] font-semibold transition cursor-pointer z-20"
+                    >
+                      <SwitchCamera className="w-3 h-3" />
+                      <span>{facingMode === 'user' ? 'Front' : 'Back'}</span>
+                    </button>
+                    {/* Framing Guide Overlay */}
+                    {isSquareCrop ? (
+                      <div className="absolute inset-4 border border-dashed border-white/40 rounded-full pointer-events-none" />
+                    ) : (
+                      <div className="absolute inset-4 border border-dashed border-white/40 rounded-xl pointer-events-none" />
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Status Notice */}
+              <p className="mt-3 text-[11px] text-gray-500 text-center font-medium">
+                {capturedImage
+                  ? 'Previewing snapshot. Choose Done / Use Photo or Retake.'
+                  : isSquareCrop
+                  ? 'Center face within the guide and click Capture.'
+                  : 'Align document within the frame and click Capture.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer Controls */}
+        <div className="px-5 py-3.5 border-t border-gray-100 bg-white flex items-center justify-end gap-2.5">
+          {cameraError ? (
+            <button
+              type="button"
+              onClick={handleClose}
+              className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+          ) : !capturedImage ? (
+            <>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCapture}
+                disabled={isLoading}
+                aria-label="Capture"
+                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Capture</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleRetake}
+                aria-label="Retake"
+                className="px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Retake</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDone}
+                aria-label="Done / Use Photo"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Done / Use Photo</span>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Student / Parent Avatar Component
-function StudentAvatar({
+export function StudentAvatar({
   previewUrl,
   onFileSelect,
+  onCameraClick,
+  onRemove,
   rollNo = '',
   compNo = '',
   status = 'Studying',
@@ -149,11 +574,41 @@ function StudentAvatar({
 }) {
   const fileInputRef = React.useRef(null);
 
+  // Synchronize file input: when previewUrl is cleared (via remove, form reset, or cancel edit), reset input value
+  React.useEffect(() => {
+    if (!previewUrl && fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [previewUrl]);
+
+  const handleRemove = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    if (onRemove) {
+      onRemove();
+    }
+  };
+
   return (
     <div className="col-span-12 sm:col-span-3 flex flex-col items-center justify-center rounded-lg border border-indigo-100 bg-[#eef2ff] p-3 md:mb-0 mb-3 shadow-xs">
-      <div className="w-28 h-28 mb-2 flex items-center justify-center bg-[#e0e7ff] rounded overflow-hidden">
+      <div className="relative w-28 h-28 mb-2 flex items-center justify-center bg-[#e0e7ff] rounded overflow-hidden">
         {previewUrl ? (
-          <img src={previewUrl} alt={role} className="w-full h-full object-cover" />
+          <>
+            <img src={previewUrl} alt={role} className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={handleRemove}
+              aria-label={`Remove ${role === 'father' ? "Father's" : role === 'mother' ? "Mother's" : 'Student'} Photo`}
+              title={`Remove ${role === 'father' ? "Father's" : role === 'mother' ? "Mother's" : 'Student'} Photo`}
+              data-testid={`remove-${role}-photo`}
+              className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-md transition-colors cursor-pointer z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-red-600 after:absolute after:-inset-1.5"
+            >
+              <X className="w-3.5 h-3.5 pointer-events-none" />
+            </button>
+          </>
         ) : isStudent ? (
           <svg className="w-24 h-24 text-gray-700" viewBox="0 0 100 100" fill="currentColor">
             {/* Cap */}
@@ -183,6 +638,9 @@ function StudentAvatar({
         type="file"
         ref={fileInputRef}
         onChange={onFileSelect}
+        onClick={(e) => {
+          e.target.value = '';
+        }}
         accept="image/*"
         className="hidden"
       />
@@ -191,7 +649,10 @@ function StudentAvatar({
       <div className="flex items-center w-full max-w-[160px] text-white rounded bg-red-500 overflow-hidden shadow-xs mb-1">
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            fileInputRef.current?.click();
+          }}
           className="flex-1 bg-red-500 hover:bg-red-600 transition-colors p-1.5 flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer"
         >
           <CloudUpload className="w-3.5 h-3.5" />
@@ -199,9 +660,10 @@ function StudentAvatar({
         </button>
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={onCameraClick || (() => fileInputRef.current?.click())}
           className="bg-gray-800 hover:bg-gray-900 transition-colors px-2 py-1.5 flex items-center justify-center text-xs cursor-pointer"
           title="Take Photo"
+          aria-label={`Take photo for ${role || 'student'}`}
         >
           <Camera className="w-3.5 h-3.5" />
         </button>
@@ -228,7 +690,8 @@ function StudentAvatar({
 function DocumentCard({
   title,
   previewUrl,
-  onFileSelect
+  onFileSelect,
+  onCameraClick
 }) {
   const fileRef = React.useRef(null);
 
@@ -273,7 +736,10 @@ function DocumentCard({
         <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              if (fileRef.current) fileRef.current.value = '';
+              fileRef.current?.click();
+            }}
             className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors px-2.5 py-1 flex items-center gap-1 text-xs font-medium rounded cursor-pointer shadow-xs"
             title={`Upload ${title}`}
           >
@@ -282,9 +748,10 @@ function DocumentCard({
           </button>
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={onCameraClick || (() => fileRef.current?.click())}
             className="bg-slate-700 hover:bg-slate-800 text-white transition-colors p-1 flex items-center justify-center text-xs rounded cursor-pointer shadow-xs"
             title="Camera capture"
+            aria-label={`Camera capture for ${title}`}
           >
             <Camera className="w-3.5 h-3.5" />
           </button>
@@ -572,52 +1039,113 @@ export function StudentRegistrationPage({ onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
 
+  // Helper to revoke active blob URLs on reset, student edit switch, or unmount
+  const revokeFormBlobUrls = (data) => {
+    if (!data) return;
+    ['student_photo', 'father_photo', 'mother_photo'].forEach((key) => {
+      const val = data[key];
+      if (typeof val === 'string' && val.startsWith('blob:')) {
+        try {
+          URL?.revokeObjectURL?.(val);
+        } catch (_) {}
+      }
+    });
+  };
+
   const populateStudentForEdit = (s) => {
     setIsEditing(true);
     setEditingStudent(s);
-    setFormData(prev => ({
-      ...prev,
-      adm_no: s.admNo || prev.adm_no,
-      sr_no: s.srNo || s.admNo || prev.sr_no,
-      roll_no: s.rollNo || prev.roll_no,
-      first_name: s.firstName || s.name || '',
-      last_name: s.lastName || '',
-      class_id: s.className || prev.class_id,
-      division_id: s.section || prev.division_id,
-      gender: s.gender || prev.gender,
-      dob: s.dob || prev.dob,
-      fathers_name: s.fatherName || '',
-      mothers_name: s.motherName || '',
-      fathers_mobile_no: s.fatherMobile || s.contactNo || '',
-      fathers_whatsapp_no: s.fatherWhatsapp || s.fatherMobile || '',
-      fathers_email: s.fatherEmail || '',
-      mothers_mobile_no: s.motherMobile || '',
-      mothers_whatsapp_no: s.motherWhatsapp || '',
-      mothers_email: s.motherEmail || '',
-      contact_no_sms: s.smsWhatsappNo || s.contactNo || '',
-      present_address: s.address || prev.present_address,
-      house: s.house || prev.house,
-      stream_id: s.stream || prev.stream_id,
-      fee_id: s.feeType || prev.fee_id,
-      stu_type: s.studentType || prev.stu_type,
-      status_type: s.status || prev.status_type,
-      student_photo: s.photoUrl || prev.student_photo
-    }));
-    toast(`Loaded ${s.name || s.firstName || 'Student'} (Adm: #${s.admNo}) for editing`);
+    setFormData(prev => {
+      revokeFormBlobUrls(prev);
+      return {
+        ...prev,
+        adm_no: s.admNo || s.adm_no || prev.adm_no,
+        sr_no: s.srNo || s.sr_no || s.admNo || s.adm_no || prev.sr_no,
+        roll_no: s.rollNo !== undefined ? String(s.rollNo) : (s.roll_no !== undefined ? String(s.roll_no) : prev.roll_no),
+        first_name: s.firstName || s.first_name || s.name || '',
+        last_name: s.lastName !== undefined ? s.lastName : (s.last_name || ''),
+        class_id: s.className || s.class_id || prev.class_id,
+        division_id: s.section || s.division_id || prev.division_id,
+        gender: s.gender || prev.gender,
+        dob: s.dob || prev.dob,
+        email: s.email || s.studentEmail || s.student_email || prev.email,
+        blood_group: s.bloodGroup || s.blood_group || prev.blood_group,
+        category: s.category || prev.category,
+        religion: s.religion || prev.religion,
+        nationality: s.nationality || prev.nationality,
+        aadhaar: s.aadhaar || s.studentAadhaar || s.student_aadhaar || prev.aadhaar,
+        fathers_name: s.fatherName || s.fathers_name || '',
+        mothers_name: s.motherName || s.mothers_name || '',
+        fathers_mobile_no: s.fatherMobile || s.fathers_mobile_no || s.contactNo || '',
+        fathers_whatsapp_no: s.fatherWhatsapp || s.fathers_whatsapp_no || s.fatherMobile || s.fathers_mobile_no || '',
+        fathers_email: s.fatherEmail || s.fathers_email || '',
+        fathers_aadhaar: s.fatherAadhaar || s.fathers_aadhaar || prev.fathers_aadhaar,
+        mothers_mobile_no: s.motherMobile || s.mothers_mobile_no || '',
+        mothers_whatsapp_no: s.motherWhatsapp || s.mothers_whatsapp_no || '',
+        mothers_email: s.motherEmail || s.mothers_email || '',
+        mothers_aadhaar: s.motherAadhaar || s.mothers_aadhaar || prev.mothers_aadhaar,
+        contact_no_sms: s.smsWhatsappNo || s.contact_no_sms || s.contactNo || '',
+        present_address: s.address || s.present_address || prev.present_address,
+        house: s.house || prev.house,
+        stream_id: s.stream || s.stream_id || prev.stream_id,
+        fee_id: s.feeType || s.fee_id || prev.fee_id,
+        stu_type: s.studentType || s.stu_type || prev.stu_type,
+        status_type: s.status || s.status_type || prev.status_type,
+        student_photo: s.photoUrl || s.photo_url || s.student_photo || null,
+        father_photo: s.fatherPhoto || s.father_photo || null,
+        mother_photo: s.motherPhoto || s.mother_photo || null,
+        permanent_edu_no: s.pen || s.permanentEduNo || s.permanent_edu_no || prev.permanent_edu_no,
+        enroll_no: s.enrollNo || s.enroll_no || prev.enroll_no,
+        adm_date: s.admissionDate || s.admDate || s.adm_date || prev.adm_date
+      };
+    });
+    toast(`Loaded ${s.name || s.firstName || s.first_name || 'Student'} (Adm: #${s.admNo || s.adm_no}) for editing`);
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditingStudent(null);
+    tenantStore.clearPendingEditStudent?.();
     const nums = computeNextNumbers();
-    setFormData({
-      ...INITIAL_FORM_DATA,
-      sr_no: nums.sr_no,
-      adm_no: nums.adm_no,
-      roll_no: nums.roll_no,
-      adm_date: new Date().toISOString().split('T')[0]
+    setFormData((prev) => {
+      revokeFormBlobUrls(prev);
+      return {
+        ...INITIAL_FORM_DATA,
+        sr_no: nums.sr_no,
+        adm_no: nums.adm_no,
+        roll_no: nums.roll_no,
+        adm_date: new Date().toISOString().split('T')[0]
+      };
     });
     toast('Cleared edit mode. Ready for new student registration.');
+  };
+
+  const handleAdmNoBlur = async (e) => {
+    const val = (e?.target?.value || formData.adm_no || '').trim();
+    if (!val) return;
+    const valLower = val.toLowerCase();
+    const editingAdm = editingStudent?.admNo || editingStudent?.adm_no ? String(editingStudent.admNo || editingStudent.adm_no).trim().toLowerCase() : null;
+    if (isEditing && valLower === editingAdm) return;
+    const existing = tenantStore.getStudents(schoolId) || [];
+    const match = existing.find(
+      s => String(s.admNo).trim().toLowerCase() === valLower || String(s.id).trim() === val
+    );
+    if (match) {
+      populateStudentForEdit(match);
+      return;
+    }
+    // Remote fallback: check backend if student was registered elsewhere
+    try {
+      const res = await fetch(`/api/students/${encodeURIComponent(val)}`, {
+        headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.data) {
+          populateStudentForEdit(json.data);
+        }
+      }
+    } catch (err) {}
   };
 
     // Helper to compute next available roll/sr/adm numbers
@@ -656,6 +1184,18 @@ export function StudentRegistrationPage({ onNavigate }) {
       })
       .catch(() => {});
 
+    // Sync student list for this tenant from backend
+    fetch('/api/students', {
+      headers: { 'x-school-id': schoolId || 'sch_jd_intl' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.data && Array.isArray(data.data)) {
+          tenantStore.setStudents(schoolId || 'sch_jd_intl', data.data);
+        }
+      })
+      .catch(() => {});
+
     const pendingEdit = tenantStore.getPendingEditStudent();
     if (pendingEdit) {
       populateStudentForEdit(pendingEdit);
@@ -667,6 +1207,15 @@ export function StudentRegistrationPage({ onNavigate }) {
       }
     }
   }, [schoolId]);
+
+  // Clean up any remaining blob URLs when component unmounts
+  const formDataRef = React.useRef(formData);
+  formDataRef.current = formData;
+  useEffect(() => {
+    return () => {
+      revokeFormBlobUrls(formDataRef.current);
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -686,28 +1235,95 @@ export function StudentRegistrationPage({ onNavigate }) {
   };
 
   const handleFileUpload = (e, field) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, [field]: url }));
+      setFormData((prev) => {
+        const prevUrl = prev[field];
+        if (typeof prevUrl === 'string' && prevUrl.startsWith('blob:')) {
+          try {
+            URL?.revokeObjectURL?.(prevUrl);
+          } catch (_) {}
+        }
+        return { ...prev, [field]: url };
+      });
       toast.success(`${field.replace(/_/g, ' ')} attached successfully`);
     }
   };
 
+  // Webcam modal state and handlers
+  const [webcamModal, setWebcamModal] = useState({
+    isOpen: false,
+    field: null,
+    title: '',
+    isSquareCrop: true
+  });
+
+  const openWebcamModal = (field, title, isSquareCrop = true) => {
+    setWebcamModal({
+      isOpen: true,
+      field,
+      title,
+      isSquareCrop
+    });
+  };
+
+  const closeWebcamModal = () => {
+    setWebcamModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleWebcamCapture = (dataUrl) => {
+    if (webcamModal.field) {
+      setFormData((prev) => {
+        const prevUrl = prev[webcamModal.field];
+        if (typeof prevUrl === 'string' && prevUrl.startsWith('blob:')) {
+          try {
+            URL?.revokeObjectURL?.(prevUrl);
+          } catch (_) {}
+        }
+        return { ...prev, [webcamModal.field]: dataUrl };
+      });
+      toast.success(`${webcamModal.title || 'Photo'} captured successfully`);
+    }
+  };
+
+  const handleRemovePhoto = (field) => {
+    setFormData((prev) => {
+      const currentUrl = prev[field];
+      if (typeof currentUrl === 'string' && currentUrl.startsWith('blob:')) {
+        try {
+          URL?.revokeObjectURL?.(currentUrl);
+        } catch (_) {}
+      }
+      return { ...prev, [field]: null };
+    });
+    setWebcamModal((prev) => {
+      if (prev.field === field) {
+        return { isOpen: false, field: null, title: '', isSquareCrop: true };
+      }
+      return prev;
+    });
+  };
+
   // Reset form cleanly for next registration
   const handleResetForm = () => {
+    setIsEditing(false);
+    setEditingStudent(null);
+    tenantStore.clearPendingEditStudent?.();
     const nums = computeNextNumbers();
-    setFormData({
-      ...INITIAL_FORM_DATA,
-      sr_no: nums.sr_no,
-      adm_no: nums.adm_no,
-      roll_no: nums.roll_no,
-      adm_date: new Date().toISOString().split('T')[0]
+    setFormData((prev) => {
+      revokeFormBlobUrls(prev);
+      return {
+        ...INITIAL_FORM_DATA,
+        sr_no: nums.sr_no,
+        adm_no: nums.adm_no,
+        roll_no: nums.roll_no,
+        adm_date: new Date().toISOString().split('T')[0]
+      };
     });
     setErrors({});
     setRegisteredStudent(null);
     setSaveStatus(null);
-    toast.success('Form ready for new student registration');
   };
 
   // Form Validation: checks all mandatory fields (*)
@@ -808,39 +1424,76 @@ export function StudentRegistrationPage({ onNavigate }) {
         studentType: formData.stu_type || 'New',
         status: formData.status_type || 'Studying',
         photoUrl: formData.student_photo || '',
+        fatherPhoto: formData.father_photo || '',
+        motherPhoto: formData.mother_photo || '',
         address: formData.present_address || '',
-        isNew: true
+        email: formData.email || '',
+        aadhaar: formData.aadhaar || '',
+        religion: formData.religion || 'Hindu',
+        nationality: formData.nationality || 'Indian',
+        pen: formData.permanent_edu_no || formData.apaar_id || '',
+        enrollNo: formData.enroll_no || formData.general_no || '',
+        admissionDate: formData.adm_date || new Date().toISOString().split('T')[0],
+        fatherAadhaar: formData.fathers_aadhaar || '',
+        motherAadhaar: formData.mothers_aadhaar || ''
       };
 
-      if (isEditing) {
-        // 1. Update in active tenant store
-        tenantStore.updateStudent(schoolId, formData.adm_no, newStudentData);
+      const currentAdmNo = formData.adm_no.trim();
+      const currentAdmLower = currentAdmNo.toLowerCase();
+      const existingStudents = tenantStore.getStudents(schoolId) || [];
+      const editingId = editingStudent?.id ? String(editingStudent.id).trim() : null;
+      const editingAdm = editingStudent?.admNo || editingStudent?.adm_no ? String(editingStudent.admNo || editingStudent.adm_no).trim().toLowerCase() : null;
 
-        // 2. Transmit PUT to backend
+      const existingMatch = existingStudents.find(
+        (s) => String(s.admNo).trim().toLowerCase() === currentAdmLower || (editingId && String(s.id).trim() === editingId) || (editingAdm && String(s.admNo).trim().toLowerCase() === editingAdm)
+      );
+
+      const isUpdate = Boolean(isEditing || existingMatch);
+      const targetAdmNo = existingMatch?.admNo || editingStudent?.admNo || currentAdmNo;
+
+      if (isUpdate) {
+        // 1. Update in active tenant store in-place
+        const studentToSave = {
+          ...existingMatch,
+          ...newStudentData,
+          admNo: targetAdmNo,
+          id: existingMatch?.id || editingStudent?.id || newStudentData.id,
+          createdAt: existingMatch?.createdAt || editingStudent?.createdAt || newStudentData.createdAt,
+          isNew: false
+        };
+        tenantStore.updateStudent(schoolId, targetAdmNo, studentToSave);
+
+        // 2. Transmit PUT to backend (with POST fallback for safety)
         try {
-          const res = await fetch(`/api/students/${encodeURIComponent(formData.adm_no)}`, {
+          const res = await fetch(`/api/students/${encodeURIComponent(targetAdmNo)}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               'x-school-id': schoolId || 'sch_jd_intl'
             },
-            body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+            body: JSON.stringify({ ...formData, ...studentToSave, admNo: targetAdmNo, schoolId: schoolId || 'sch_jd_intl' })
           });
           if (!res.ok) {
             await fetch('/api/students', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'x-school-id': schoolId || 'sch_jd_intl' },
-              body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+              body: JSON.stringify({ ...formData, ...studentToSave, admNo: targetAdmNo, schoolId: schoolId || 'sch_jd_intl' })
             });
           }
         } catch (netErr) {}
 
-        setRegisteredStudent(newStudentData);
-        setSaveStatus(`Updated ${newStudentData.name} successfully! (Adm No: #${newStudentData.admNo})`);
-        toast.success(`Student ${newStudentData.name} updated successfully!`);
+        setRegisteredStudent({ ...studentToSave, isUpdate: true });
+        setSaveStatus(`Updated ${studentToSave.name} successfully! (Adm No: #${targetAdmNo})`);
+        toast.success(`Student ${studentToSave.name} updated successfully!`);
+
+        // Clear edit state upon successful save
+        setIsEditing(false);
+        setEditingStudent(null);
+        tenantStore.clearPendingEditStudent?.();
       } else {
         // 1. Strictly isolate within active tenant in tenantStore
-        tenantStore.addStudent(schoolId, newStudentData);
+        const studentToAdd = { ...newStudentData, isNew: true };
+        tenantStore.addStudent(schoolId, studentToAdd);
 
         // 2. Transmit to backend with tenant identifier
         try {
@@ -850,13 +1503,18 @@ export function StudentRegistrationPage({ onNavigate }) {
               'Content-Type': 'application/json',
               'x-school-id': schoolId || 'sch_jd_intl'
             },
-            body: JSON.stringify({ ...formData, ...newStudentData, schoolId: schoolId || 'sch_jd_intl' })
+            body: JSON.stringify({ ...formData, ...studentToAdd, schoolId: schoolId || 'sch_jd_intl' })
           });
         } catch (netErr) {}
 
-        setRegisteredStudent(newStudentData);
-        setSaveStatus(`Registered successfully in ${schoolName}! (Adm No: #${newStudentData.admNo})`);
-        toast.success(`Student ${newStudentData.name} registered successfully!`);
+        setRegisteredStudent({ ...studentToAdd, isUpdate: false });
+        setSaveStatus(`Registered successfully in ${schoolName}! (Adm No: #${studentToAdd.admNo})`);
+        toast.success(`Student ${studentToAdd.name} registered successfully!`);
+
+        // Clear edit state upon successful save
+        setIsEditing(false);
+        setEditingStudent(null);
+        tenantStore.clearPendingEditStudent?.();
       }
     } catch (err) {
       console.error(err);
@@ -888,7 +1546,7 @@ export function StudentRegistrationPage({ onNavigate }) {
             </div>
             <div>
               <h3 className="font-bold text-sm text-slate-800">
-                {registeredStudent.name} is successfully registered!
+                {registeredStudent.name} is successfully {registeredStudent.isUpdate ? 'updated' : 'registered'}!
               </h3>
               <p className="text-xs text-slate-500 font-mono">
                 Admission No: <strong>#{registeredStudent.admNo}</strong> &bull; Class: <strong>{registeredStudent.className} ({registeredStudent.section})</strong>
@@ -1099,9 +1757,12 @@ export function StudentRegistrationPage({ onNavigate }) {
               <StudentAvatar
                 previewUrl={formData.student_photo}
                 onFileSelect={(e) => handleFileUpload(e, 'student_photo')}
+                onCameraClick={() => openWebcamModal('student_photo', 'Student Photo', true)}
+                onRemove={() => handleRemovePhoto('student_photo')}
                 rollNo={formData.roll_no}
                 compNo={formData.comp_no}
                 status={formData.status_type}
+                role="student"
               />
 
               <div className="col-span-12 sm:col-span-9">
@@ -1122,6 +1783,7 @@ export function StudentRegistrationPage({ onNavigate }) {
                     name="adm_no"
                     value={formData.adm_no}
                     onChange={handleInputChange}
+                    onBlur={handleAdmNoBlur}
                     error={errors.adm_no}
                     placeholder="e.g. 1001"
                   />
@@ -1490,6 +2152,8 @@ export function StudentRegistrationPage({ onNavigate }) {
                 <StudentAvatar
                   previewUrl={formData.father_photo}
                   onFileSelect={(e) => handleFileUpload(e, 'father_photo')}
+                  onCameraClick={() => openWebcamModal('father_photo', "Father's Photo", true)}
+                  onRemove={() => handleRemovePhoto('father_photo')}
                   isStudent={false}
                   role="father"
                 />
@@ -1597,6 +2261,8 @@ export function StudentRegistrationPage({ onNavigate }) {
                 <StudentAvatar
                   previewUrl={formData.mother_photo}
                   onFileSelect={(e) => handleFileUpload(e, 'mother_photo')}
+                  onCameraClick={() => openWebcamModal('mother_photo', "Mother's Photo", true)}
+                  onRemove={() => handleRemovePhoto('mother_photo')}
                   isStudent={false}
                   role="mother"
                 />
@@ -1869,31 +2535,37 @@ export function StudentRegistrationPage({ onNavigate }) {
                 title="Student Aadhaar Card"
                 previewUrl={formData.doc_front_aadhar}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_front_aadhar')}
+                onCameraClick={() => openWebcamModal('doc_front_aadhar', 'Student Aadhaar Card', false)}
               />
               <DocumentCard
                 title="Birth Certificate"
                 previewUrl={formData.doc_birth_cert}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_birth_cert')}
+                onCameraClick={() => openWebcamModal('doc_birth_cert', 'Birth Certificate', false)}
               />
               <DocumentCard
                 title="Transfer Certificate (TC)"
                 previewUrl={formData.doc_tc}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_tc')}
+                onCameraClick={() => openWebcamModal('doc_tc', 'Transfer Certificate (TC)', false)}
               />
               <DocumentCard
                 title="Character Certificate (CC)"
                 previewUrl={formData.doc_cc}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_cc')}
+                onCameraClick={() => openWebcamModal('doc_cc', 'Character Certificate (CC)', false)}
               />
               <DocumentCard
                 title="Parent ID Proof / Aadhaar"
                 previewUrl={formData.doc_f_front_aadhar}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_f_front_aadhar')}
+                onCameraClick={() => openWebcamModal('doc_f_front_aadhar', 'Parent ID Proof / Aadhaar', false)}
               />
               <DocumentCard
                 title="Previous School Marksheet"
                 previewUrl={formData.doc_other}
                 onFileSelect={(e) => handleFileUpload(e, 'doc_other')}
+                onCameraClick={() => openWebcamModal('doc_other', 'Previous School Marksheet', false)}
               />
             </div>
           </div>
@@ -1965,7 +2637,19 @@ export function StudentRegistrationPage({ onNavigate }) {
             </button>
           </div>
         </div>
+
+        {/* Live Webcam Capture Modal */}
+        <WebcamCaptureModal
+          isOpen={webcamModal.isOpen}
+          onClose={closeWebcamModal}
+          onCapture={handleWebcamCapture}
+          title={webcamModal.title}
+          isSquareCrop={webcamModal.isSquareCrop}
+        />
       </div>
     </div>
   );
 }
+
+export default StudentRegistrationPage;
+

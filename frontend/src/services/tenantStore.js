@@ -165,12 +165,26 @@ class TenantDataStore {
   addStudent(schoolId, studentData) {
     if (!schoolId) return null;
     const students = this.getStudents(schoolId);
+
+    const targetAdm = String(studentData?.admNo || studentData?.adm_no || '').trim();
+    if (targetAdm) {
+      const targetAdmLower = targetAdm.toLowerCase();
+      const targetId = studentData.id ? String(studentData.id).trim() : null;
+      const existingIdx = students.findIndex(
+        s => String(s.admNo).trim().toLowerCase() === targetAdmLower || (targetId && String(s.id).trim() === targetId)
+      );
+      if (existingIdx !== -1) {
+        return this.updateStudent(schoolId, targetAdm, studentData);
+      }
+    }
     
     const newStudent = {
       ...studentData,
       id: studentData.id || `std_${Date.now()}`,
       schoolId: schoolId,
+      admNo: targetAdm || String(Math.floor(2000 + Math.random() * 8000)),
       sNo: students.length + 1,
+      isNew: true,
       createdAt: new Date().toISOString()
     };
 
@@ -183,7 +197,11 @@ class TenantDataStore {
   updateStudent(schoolId, admNo, updatedData) {
     if (!schoolId || !admNo) return null;
     const students = this.getStudents(schoolId);
-    const index = students.findIndex(s => String(s.admNo) === String(admNo) || String(s.id) === String(admNo));
+    const trimmedAdm = String(admNo).trim().toLowerCase();
+    const targetId = updatedData?.id ? String(updatedData.id).trim() : null;
+    const index = students.findIndex(
+      s => String(s.admNo).trim().toLowerCase() === trimmedAdm || String(s.id).trim() === trimmedAdm || (targetId && String(s.id).trim() === targetId)
+    );
     if (index === -1) {
       return this.addStudent(schoolId, updatedData);
     }
@@ -191,6 +209,9 @@ class TenantDataStore {
     students[index] = {
       ...students[index],
       ...updatedData,
+      id: students[index].id,
+      admNo: students[index].admNo,
+      isNew: false,
       updatedAt: new Date().toISOString()
     };
     localStorage.setItem(this.getStorageKey(schoolId, 'students'), JSON.stringify(students));
@@ -398,6 +419,12 @@ class TenantDataStore {
       }
     } catch (e) {}
     return null;
+  }
+
+  clearPendingEditStudent() {
+    try {
+      sessionStorage.removeItem('erp_pending_edit_student');
+    } catch (e) {}
   }
 
   setPendingRegistration(data) {

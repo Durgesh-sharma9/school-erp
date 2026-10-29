@@ -3,37 +3,7 @@ import prisma from '../../config/db.js';
 
 // Multi-Tenant Partitioned Student Storage: schoolId -> Student[] (Clean Fresh State)
 export const TENANT_STUDENTS = {
-  'sch_jd_intl': [
-    {
-      id: 'std_1001',
-      schoolId: 'sch_jd_intl',
-      admNo: '1001',
-      srNo: '1001',
-      firstName: 'dev',
-      lastName: '',
-      name: 'dev',
-      fatherName: '',
-      motherName: '',
-      fatherMobile: '',
-      fatherWhatsapp: '',
-      fatherEmail: '',
-      motherMobile: '',
-      motherWhatsapp: '',
-      motherEmail: '',
-      smsWhatsappNo: '',
-      className: 'I',
-      section: 'A',
-      dob: '2019-05-12',
-      gender: 'Male',
-      feeType: 'Day Scholar',
-      studentType: 'New',
-      status: 'Studying',
-      rollNo: '2026-101',
-      photoUrl: '',
-      createdAt: '2026-10-28T11:26:42.415Z',
-      feebookNo: ''
-    }
-  ],
+  'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
@@ -81,33 +51,167 @@ export const uploadStudentPhoto = async (req, res, next) => {
 export const registerStudent = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
-    const studentData = req.body;
+    const studentData = req.body || {};
+
+    if (!TENANT_STUDENTS[schoolId]) {
+      TENANT_STUDENTS[schoolId] = [];
+    }
+
+    const admNo = String(studentData.adm_no || studentData.admNo || '').trim() || String(Math.floor(2000 + Math.random() * 8000));
+    const admNoLower = admNo.toLowerCase();
+    const targetId = studentData.id ? String(studentData.id).trim() : null;
+
+    let existingIdx = TENANT_STUDENTS[schoolId].findIndex(
+      (s) => String(s.admNo).trim().toLowerCase() === admNoLower || (targetId && String(s.id).trim() === targetId)
+    );
+
+    // If not found in-memory, also check Prisma DB if available
+    if (existingIdx === -1) {
+      try {
+        const dbStudent = await prisma.student.findFirst({
+          where: {
+            schoolId,
+            OR: [
+              { admNo },
+              ...(targetId ? [{ id: targetId }] : [])
+            ]
+          }
+        });
+        if (dbStudent) {
+          TENANT_STUDENTS[schoolId].push(dbStudent);
+          existingIdx = TENANT_STUDENTS[schoolId].length - 1;
+        }
+      } catch (dbErr) {
+        // DB offline fallback
+      }
+    }
+
+    if (existingIdx !== -1) {
+      // In-place update for existing student matching admission number in tenant
+      const existing = TENANT_STUDENTS[schoolId][existingIdx];
+      const firstName = studentData.first_name || studentData.firstName || existing.firstName || 'Student';
+      const lastName = studentData.last_name !== undefined ? studentData.last_name : (studentData.lastName !== undefined ? studentData.lastName : (existing.lastName || ''));
+      const fullName = studentData.name || `${firstName} ${lastName}`.trim();
+
+      const updatedStudent = {
+        ...existing,
+        ...studentData,
+        id: existing.id,
+        schoolId: schoolId,
+        admNo: existing.admNo,
+        srNo: studentData.sr_no || studentData.srNo || existing.srNo || '0',
+        firstName,
+        lastName,
+        name: fullName,
+        fatherName: studentData.fathers_name !== undefined ? studentData.fathers_name : (studentData.fatherName !== undefined ? studentData.fatherName : (existing.fatherName || '')),
+        motherName: studentData.mothers_name !== undefined ? studentData.mothers_name : (studentData.motherName !== undefined ? studentData.motherName : (existing.motherName || '')),
+        fatherMobile: studentData.fathers_mobile_no || studentData.fatherMobile || existing.fatherMobile || '',
+        fatherWhatsapp: studentData.fathers_whatsapp_no || studentData.fatherWhatsapp || existing.fatherWhatsapp || '',
+        fatherEmail: studentData.fathers_email || studentData.fatherEmail || existing.fatherEmail || '',
+        fatherAadhaar: studentData.fathers_aadhaar || studentData.fatherAadhaar || existing.fatherAadhaar || '',
+        motherMobile: studentData.mothers_mobile_no || studentData.motherMobile || existing.motherMobile || '',
+        motherWhatsapp: studentData.mothers_whatsapp_no || studentData.motherWhatsapp || existing.motherWhatsapp || '',
+        motherEmail: studentData.mothers_email || studentData.motherEmail || existing.motherEmail || '',
+        motherAadhaar: studentData.mothers_aadhaar || studentData.motherAadhaar || existing.motherAadhaar || '',
+        contactNo: studentData.fathers_whatsapp_no || studentData.contact_no_sms || studentData.contactNo || studentData.fathers_mobile_no || existing.contactNo || '',
+        smsWhatsappNo: studentData.fathers_whatsapp_no || studentData.contact_no_sms || studentData.smsWhatsappNo || existing.smsWhatsappNo || '',
+        className: studentData.class_id || studentData.className || existing.className || 'I',
+        section: studentData.division_id || studentData.section || existing.section || 'A',
+        dob: studentData.dob || existing.dob || '2019-01-01',
+        gender: studentData.gender || existing.gender || 'Male',
+        bloodGroup: studentData.blood_group || studentData.bloodGroup || existing.bloodGroup || 'B+',
+        category: studentData.category || studentData.cast || existing.category || 'General',
+        religion: studentData.religion || existing.religion || 'Hindu',
+        nationality: studentData.nationality || existing.nationality || 'Indian',
+        aadhaar: studentData.aadhaar || studentData.student_aadhaar || existing.aadhaar || '',
+        email: studentData.email || studentData.student_email || existing.email || '',
+        pen: studentData.permanent_edu_no || studentData.pen || studentData.apaar_id || existing.pen || '',
+        enrollNo: studentData.enroll_no || studentData.enrollNo || studentData.general_no || existing.enrollNo || '',
+        admissionDate: studentData.adm_date || studentData.admissionDate || existing.admissionDate || '',
+        feeType: studentData.fee_id || studentData.feeType || existing.feeType || 'Day Scholar',
+        studentType: studentData.stu_type || studentData.studentType || existing.studentType || 'New',
+        status: studentData.status_type || studentData.status || existing.status || 'Studying',
+        rollNo: studentData.roll_no !== undefined ? String(studentData.roll_no) : (studentData.rollNo !== undefined ? String(studentData.rollNo) : (existing.rollNo || '0')),
+        photoUrl: studentData.student_photo || studentData.photoUrl || existing.photoUrl || '',
+        fatherPhoto: studentData.father_photo || studentData.fatherPhoto || existing.fatherPhoto || '',
+        motherPhoto: studentData.mother_photo || studentData.motherPhoto || existing.motherPhoto || '',
+        address: studentData.present_address || studentData.address || existing.address || '',
+        isNew: false,
+        createdAt: existing.createdAt,
+        updatedAt: new Date().toISOString()
+      };
+
+      TENANT_STUDENTS[schoolId][existingIdx] = updatedStudent;
+
+      try {
+        await prisma.student.updateMany({
+          where: { schoolId, admNo: existing.admNo },
+          data: {
+            firstName: updatedStudent.firstName,
+            lastName: updatedStudent.lastName,
+            fatherName: updatedStudent.fatherName,
+            motherName: updatedStudent.motherName,
+            fatherMobile: updatedStudent.fatherMobile,
+            motherMobile: updatedStudent.motherMobile,
+            contactNoSms: updatedStudent.smsWhatsappNo,
+            gender: updatedStudent.gender,
+            photoUrl: updatedStudent.photoUrl,
+            address: updatedStudent.address
+          }
+        });
+      } catch (dbErr) {
+        // In-memory fallback
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `Student ${existing.admNo} updated successfully in school ${schoolId}`,
+        data: updatedStudent
+      });
+    }
 
     const newStudent = {
-      id: `std_${Date.now()}`,
+      id: studentData.id || `std_${Date.now()}`,
       schoolId: schoolId, // Guaranteed tenant tagging
-      admNo: studentData.adm_no || studentData.admNo || String(Math.floor(2000 + Math.random() * 8000)),
+      admNo: admNo,
       srNo: studentData.sr_no || studentData.srNo || '0',
       firstName: studentData.first_name || studentData.firstName || 'Student',
       lastName: studentData.last_name || studentData.lastName || '',
+      name: studentData.name || `${studentData.first_name || studentData.firstName || 'Student'} ${studentData.last_name || studentData.lastName || ''}`.trim(),
       fatherName: studentData.fathers_name || studentData.fatherName || '',
       motherName: studentData.mothers_name || studentData.motherName || '',
       fatherMobile: studentData.fathers_mobile_no || studentData.fatherMobile || '',
       fatherWhatsapp: studentData.fathers_whatsapp_no || studentData.fatherWhatsapp || '',
       fatherEmail: studentData.fathers_email || studentData.fatherEmail || '',
+      fatherAadhaar: studentData.fathers_aadhaar || studentData.fatherAadhaar || '',
       motherMobile: studentData.mothers_mobile_no || studentData.motherMobile || '',
       motherWhatsapp: studentData.mothers_whatsapp_no || studentData.motherWhatsapp || '',
       motherEmail: studentData.mothers_email || studentData.motherEmail || '',
+      motherAadhaar: studentData.mothers_aadhaar || studentData.motherAadhaar || '',
+      contactNo: studentData.fathers_whatsapp_no || studentData.contact_no_sms || studentData.contactNo || '',
       smsWhatsappNo: studentData.fathers_whatsapp_no || studentData.contact_no_sms || studentData.smsWhatsappNo || '',
       className: studentData.class_id || studentData.className || 'I',
       section: studentData.division_id || studentData.section || 'A',
       dob: studentData.dob || '2019-01-01',
       gender: studentData.gender || 'Male',
-      feeType: studentData.fee_id || 'Day Scholar',
-      studentType: studentData.stu_type || 'New',
-      status: studentData.status_type || 'Studying',
-      rollNo: studentData.roll_no || '0',
-      photoUrl: studentData.student_photo || '',
+      bloodGroup: studentData.blood_group || studentData.bloodGroup || 'B+',
+      category: studentData.category || studentData.cast || 'General',
+      religion: studentData.religion || 'Hindu',
+      nationality: studentData.nationality || 'Indian',
+      aadhaar: studentData.aadhaar || studentData.student_aadhaar || '',
+      email: studentData.email || studentData.student_email || '',
+      pen: studentData.permanent_edu_no || studentData.pen || studentData.apaar_id || '',
+      enrollNo: studentData.enroll_no || studentData.enrollNo || studentData.general_no || '',
+      admissionDate: studentData.adm_date || studentData.admissionDate || '',
+      feeType: studentData.fee_id || studentData.feeType || 'Day Scholar',
+      studentType: studentData.stu_type || studentData.studentType || 'New',
+      status: studentData.status_type || studentData.status || 'Studying',
+      rollNo: studentData.roll_no !== undefined ? String(studentData.roll_no) : (studentData.rollNo !== undefined ? String(studentData.rollNo) : '0'),
+      photoUrl: studentData.student_photo || studentData.photoUrl || '',
+      fatherPhoto: studentData.father_photo || studentData.fatherPhoto || '',
+      motherPhoto: studentData.mother_photo || studentData.motherPhoto || '',
+      address: studentData.present_address || studentData.address || '',
+      isNew: true,
       createdAt: new Date().toISOString()
     };
 
@@ -126,29 +230,16 @@ export const registerStudent = async (req, res, next) => {
           fatherMobile: newStudent.fatherMobile,
           motherMobile: newStudent.motherMobile,
           contactNoSms: newStudent.smsWhatsappNo,
-          className: newStudent.className,
           gender: newStudent.gender,
-          photoUrl: newStudent.photoUrl
+          photoUrl: newStudent.photoUrl,
+          address: newStudent.address
         }
       });
     } catch (dbErr) {
       // In-memory fallback
     }
 
-    if (!TENANT_STUDENTS[schoolId]) {
-      TENANT_STUDENTS[schoolId] = [];
-    }
-    const existingIdx = TENANT_STUDENTS[schoolId].findIndex(s => String(s.admNo) === String(newStudent.admNo));
-    if (existingIdx !== -1) {
-      TENANT_STUDENTS[schoolId][existingIdx] = { ...TENANT_STUDENTS[schoolId][existingIdx], ...newStudent };
-      return res.status(200).json({
-        success: true,
-        message: `Student ${newStudent.admNo} updated successfully in school ${schoolId}`,
-        data: TENANT_STUDENTS[schoolId][existingIdx]
-      });
-    } else {
-      TENANT_STUDENTS[schoolId].unshift(newStudent);
-    }
+    TENANT_STUDENTS[schoolId].unshift(newStudent);
 
     return res.status(201).json({
       success: true,
@@ -188,13 +279,14 @@ export const getStudentsList = async (req, res, next) => {
 
     let filtered = [...students];
     if (search) {
-      const q = search.toLowerCase();
+      const q = search.toLowerCase().trim();
       filtered = filtered.filter(
         (s) =>
+          (s.name && s.name.toLowerCase().includes(q)) ||
           (s.firstName && s.firstName.toLowerCase().includes(q)) ||
           (s.lastName && s.lastName.toLowerCase().includes(q)) ||
-          (s.admNo && s.admNo.toLowerCase().includes(q)) ||
-          (s.srNo && s.srNo.includes(q))
+          (s.admNo && String(s.admNo).toLowerCase().includes(q)) ||
+          (s.srNo && String(s.srNo).includes(q))
       );
     }
 
@@ -232,7 +324,11 @@ export const assignRollNumbers = async (req, res, next) => {
     const pool = TENANT_STUDENTS[schoolId] || [];
 
     updates.forEach(({ id, admNo, rollNo, feebookNo }) => {
-      const std = pool.find((s) => (id && s.id === id) || (admNo && s.admNo === admNo));
+      const targetId = id ? String(id).trim() : null;
+      const targetAdm = admNo ? String(admNo).trim().toLowerCase() : null;
+      const std = pool.find(
+        (s) => (targetId && String(s.id).trim() === targetId) || (targetAdm && String(s.admNo).trim().toLowerCase() === targetAdm)
+      );
       if (std) {
         if (rollNo !== undefined) std.rollNo = String(rollNo);
         if (feebookNo !== undefined) std.feebookNo = String(feebookNo);
@@ -543,9 +639,35 @@ export const updateStudent = async (req, res, next) => {
       TENANT_STUDENTS[schoolId] = [];
     }
 
-    const index = TENANT_STUDENTS[schoolId].findIndex(
-      (s) => String(s.admNo) === String(admNo) || String(s.id) === String(admNo)
+    const targetAdmNo = String(admNo || '').trim();
+    const targetAdmLower = targetAdmNo.toLowerCase();
+    const targetId = updateData.id ? String(updateData.id).trim() : null;
+
+    let index = TENANT_STUDENTS[schoolId].findIndex(
+      (s) => String(s.admNo).trim().toLowerCase() === targetAdmLower || String(s.id).trim() === targetAdmNo || (targetId && String(s.id).trim() === targetId)
     );
+
+    // If not found in memory pool, try DB
+    if (index === -1) {
+      try {
+        const dbStudent = await prisma.student.findFirst({
+          where: {
+            schoolId,
+            OR: [
+              { admNo: targetAdmNo },
+              { id: targetAdmNo },
+              ...(targetId ? [{ id: targetId }] : [])
+            ]
+          }
+        });
+        if (dbStudent) {
+          TENANT_STUDENTS[schoolId].push(dbStudent);
+          index = TENANT_STUDENTS[schoolId].length - 1;
+        }
+      } catch (dbErr) {
+        // DB offline fallback
+      }
+    }
 
     if (index === -1) {
       return res.status(404).json({
@@ -562,6 +684,10 @@ export const updateStudent = async (req, res, next) => {
     const updated = {
       ...existing,
       ...updateData,
+      id: existing.id,
+      schoolId: schoolId,
+      admNo: existing.admNo,
+      srNo: updateData.sr_no || updateData.srNo || existing.srNo || '0',
       firstName,
       lastName,
       name: fullName,
@@ -570,16 +696,36 @@ export const updateStudent = async (req, res, next) => {
       fatherMobile: updateData.fathers_mobile_no || updateData.fatherMobile || existing.fatherMobile || '',
       fatherWhatsapp: updateData.fathers_whatsapp_no || updateData.fatherWhatsapp || existing.fatherWhatsapp || '',
       fatherEmail: updateData.fathers_email || updateData.fatherEmail || existing.fatherEmail || '',
+      fatherAadhaar: updateData.fathers_aadhaar || updateData.fatherAadhaar || existing.fatherAadhaar || '',
       motherMobile: updateData.mothers_mobile_no || updateData.motherMobile || existing.motherMobile || '',
-      contactNo: updateData.contact_no_sms || updateData.contactNo || updateData.fathers_mobile_no || existing.contactNo || '',
+      motherWhatsapp: updateData.mothers_whatsapp_no || updateData.motherWhatsapp || existing.motherWhatsapp || '',
+      motherEmail: updateData.mothers_email || updateData.motherEmail || existing.motherEmail || '',
+      motherAadhaar: updateData.mothers_aadhaar || updateData.motherAadhaar || existing.motherAadhaar || '',
+      contactNo: updateData.fathers_whatsapp_no || updateData.contact_no_sms || updateData.contactNo || updateData.fathers_mobile_no || existing.contactNo || '',
       smsWhatsappNo: updateData.fathers_whatsapp_no || updateData.contact_no_sms || updateData.smsWhatsappNo || existing.smsWhatsappNo || '',
       className: updateData.class_id || updateData.className || existing.className,
       section: updateData.division_id || updateData.section || existing.section,
       dob: updateData.dob || existing.dob,
       gender: updateData.gender || existing.gender,
-      rollNo: updateData.roll_no || updateData.rollNo || existing.rollNo,
+      bloodGroup: updateData.blood_group || updateData.bloodGroup || existing.bloodGroup || 'B+',
+      category: updateData.category || updateData.cast || existing.category || 'General',
+      religion: updateData.religion || existing.religion || 'Hindu',
+      nationality: updateData.nationality || existing.nationality || 'Indian',
+      aadhaar: updateData.aadhaar || updateData.student_aadhaar || existing.aadhaar || '',
+      email: updateData.email || updateData.student_email || existing.email || '',
+      pen: updateData.permanent_edu_no || updateData.pen || updateData.apaar_id || existing.pen || '',
+      enrollNo: updateData.enroll_no || updateData.enrollNo || updateData.general_no || existing.enrollNo || '',
+      admissionDate: updateData.adm_date || updateData.admissionDate || existing.admissionDate || '',
+      feeType: updateData.fee_id || updateData.feeType || existing.feeType || 'Day Scholar',
+      studentType: updateData.stu_type || updateData.studentType || existing.studentType || 'New',
+      status: updateData.status_type || updateData.status || existing.status || 'Studying',
+      rollNo: updateData.roll_no !== undefined ? String(updateData.roll_no) : (updateData.rollNo !== undefined ? String(updateData.rollNo) : existing.rollNo),
       photoUrl: updateData.student_photo || updateData.photoUrl || existing.photoUrl,
+      fatherPhoto: updateData.father_photo || updateData.fatherPhoto || existing.fatherPhoto || '',
+      motherPhoto: updateData.mother_photo || updateData.motherPhoto || existing.motherPhoto || '',
       address: updateData.present_address || updateData.address || existing.address,
+      isNew: false,
+      createdAt: existing.createdAt,
       updatedAt: new Date().toISOString()
     };
 
@@ -587,7 +733,7 @@ export const updateStudent = async (req, res, next) => {
 
     try {
       await prisma.student.updateMany({
-        where: { schoolId, admNo },
+        where: { schoolId, admNo: existing.admNo },
         data: {
           firstName: updated.firstName,
           lastName: updated.lastName,
@@ -595,9 +741,10 @@ export const updateStudent = async (req, res, next) => {
           motherName: updated.motherName,
           fatherMobile: updated.fatherMobile,
           motherMobile: updated.motherMobile,
-          className: updated.className,
+          contactNoSms: updated.smsWhatsappNo,
           gender: updated.gender,
-          photoUrl: updated.photoUrl
+          photoUrl: updated.photoUrl,
+          address: updated.address
         }
       });
     } catch (e) {}
@@ -617,8 +764,30 @@ export const getStudentByAdmNo = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const { admNo } = req.params;
-    const pool = TENANT_STUDENTS[schoolId] || [];
-    const student = pool.find((s) => s.admNo === admNo);
+    const targetAdmNo = String(admNo || '').trim();
+    const targetAdmLower = targetAdmNo.toLowerCase();
+
+    let student = null;
+    try {
+      student = await prisma.student.findFirst({
+        where: {
+          schoolId,
+          OR: [
+            { admNo: targetAdmNo },
+            { id: targetAdmNo }
+          ]
+        }
+      });
+    } catch (dbErr) {
+      // In-memory fallback
+    }
+
+    if (!student) {
+      const pool = TENANT_STUDENTS[schoolId] || [];
+      student = pool.find(
+        (s) => String(s.admNo).trim().toLowerCase() === targetAdmLower || String(s.id).trim() === targetAdmNo
+      );
+    }
 
     if (!student) {
       return res.status(404).json({
@@ -646,11 +815,21 @@ export const getBulkStudents = async (req, res, next) => {
     const { className, section } = req.query;
     let pool = TENANT_STUDENTS[schoolId] || [];
 
+    if (!pool || pool.length === 0) {
+      try {
+        const dbStudents = await prisma.student.findMany({ where: { schoolId } });
+        if (dbStudents && dbStudents.length > 0) {
+          TENANT_STUDENTS[schoolId] = dbStudents;
+          pool = dbStudents;
+        }
+      } catch (e) {}
+    }
+
     if (className) {
-      pool = pool.filter(s => s.className.toLowerCase() === className.toLowerCase());
+      pool = pool.filter(s => s.className?.toLowerCase() === className.toLowerCase());
     }
     if (section) {
-      pool = pool.filter(s => s.section.toLowerCase() === section.toLowerCase());
+      pool = pool.filter(s => s.section?.toLowerCase() === section.toLowerCase());
     }
 
     const bulkData = pool.map((s, idx) => ({
@@ -729,41 +908,50 @@ export const saveBulkStudents = async (req, res, next) => {
 
     // Merge or insert records
     students.forEach((s) => {
-      const existingIdx = TENANT_STUDENTS[schoolId].findIndex(x => x.admNo === s.adm_no || (s.id && x.id === s.id));
+      const rowAdm = String(s.adm_no || s.admNo || '').trim();
+      const rowAdmLower = rowAdm.toLowerCase();
+      const rowId = s.id ? String(s.id).trim() : null;
+
+      const existingIdx = TENANT_STUDENTS[schoolId].findIndex(
+        x => (rowAdm && String(x.admNo).trim().toLowerCase() === rowAdmLower) || (rowId && String(x.id).trim() === rowId)
+      );
       const mappedRecord = {
-        id: s.id || `std_${schoolId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        id: s.id || (existingIdx !== -1 ? TENANT_STUDENTS[schoolId][existingIdx].id : `std_${schoolId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`),
         schoolId,
-        srNo: s.sr_no || '0',
-        admNo: s.adm_no,
-        pen: s.permanent_edu_no,
-        enrollNo: s.enroll_no,
-        admissionDate: s.adm_date,
-        className: s.class_id,
-        section: s.division_id,
-        firstName: s.first_name,
-        lastName: s.last_name || '',
-        dob: s.dob,
-        gender: s.gender,
-        bloodGroup: s.blood_group,
-        aadhaar: s.aadhaar,
-        religion: s.religion,
-        category: s.category,
-        house: s.house,
-        fatherName: s.fathers_name,
-        fatherMobile: s.fathers_mobile_no,
-        fatherAadhaar: s.fathers_aadhaar,
-        motherName: s.mothers_name,
-        motherMobile: s.mothers_mobile_no,
-        motherAadhaar: s.mothers_aadhaar,
-        smsWhatsappNo: s.fathers_mobile_no,
-        status: 'Studying',
+        srNo: s.sr_no || s.srNo || '0',
+        admNo: rowAdm || (existingIdx !== -1 ? TENANT_STUDENTS[schoolId][existingIdx].admNo : ''),
+        pen: s.permanent_edu_no || s.pen || '',
+        enrollNo: s.enroll_no || s.enrollNo || '',
+        admissionDate: s.adm_date || s.admissionDate || '',
+        className: s.class_id || s.className || '',
+        section: s.division_id || s.section || '',
+        firstName: s.first_name || s.firstName || '',
+        lastName: s.last_name !== undefined ? s.last_name : (s.lastName || ''),
+        dob: s.dob || '',
+        gender: s.gender || 'Male',
+        bloodGroup: s.blood_group || s.bloodGroup || '',
+        aadhaar: s.aadhaar || '',
+        religion: s.religion || '',
+        category: s.category || '',
+        house: s.house || '',
+        fatherName: s.fathers_name || s.fatherName || '',
+        fatherMobile: s.fathers_mobile_no || s.fatherMobile || '',
+        fatherAadhaar: s.fathers_aadhaar || s.fatherAadhaar || '',
+        motherName: s.mothers_name || s.motherName || '',
+        motherMobile: s.mothers_mobile_no || s.motherMobile || '',
+        motherAadhaar: s.mothers_aadhaar || s.motherAadhaar || '',
+        smsWhatsappNo: s.fathers_mobile_no || s.smsWhatsappNo || '',
+        status: s.status || 'Studying',
         updatedAt: new Date().toISOString()
       };
 
       if (existingIdx !== -1) {
         TENANT_STUDENTS[schoolId][existingIdx] = {
           ...TENANT_STUDENTS[schoolId][existingIdx],
-          ...mappedRecord
+          ...mappedRecord,
+          id: TENANT_STUDENTS[schoolId][existingIdx].id,
+          admNo: TENANT_STUDENTS[schoolId][existingIdx].admNo,
+          createdAt: TENANT_STUDENTS[schoolId][existingIdx].createdAt
         };
       } else {
         TENANT_STUDENTS[schoolId].push(mappedRecord);
@@ -835,7 +1023,12 @@ export const saveSingleStudentPhoto = async (req, res, next) => {
     }
 
     const pool = TENANT_STUDENTS[schoolId] || [];
-    const student = pool.find(s => s.id === studentId || s.admNo === admNo);
+    const targetId = studentId ? String(studentId).trim() : null;
+    const targetAdm = admNo ? String(admNo).trim().toLowerCase() : null;
+
+    const student = pool.find(
+      s => (targetId && String(s.id).trim() === targetId) || (targetAdm && String(s.admNo).trim().toLowerCase() === targetAdm)
+    );
 
     if (student) {
       student.photoUrl = photoUrl;

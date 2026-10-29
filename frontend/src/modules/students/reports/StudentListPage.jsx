@@ -3,7 +3,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { tenantStore } from '../../../services/tenantStore';
 import { ReportHeader } from './ReportHeader';
 import { SCHOOL_CLASSES } from './studentReportsData';
-import { Search, Building2, ShieldCheck, IndianRupee, CreditCard, MessageSquare, Pencil, UserPlus } from 'lucide-react';
+import { Search, Building2, ShieldCheck, IndianRupee, CreditCard, MessageSquare, Pencil, UserPlus, Eye } from 'lucide-react';
+import { StudentProfileModal } from './StudentProfileModal';
 
 export function StudentListPage({ onNavigate }) {
   const { schoolId, schoolName } = useAuth();
@@ -13,6 +14,29 @@ export function StudentListPage({ onNavigate }) {
   const [selectedClass, setSelectedClass] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [records, setRecords] = useState(() => tenantStore.getStudents(schoolId));
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const mapStudentRecord = (s, idx) => {
+    const admNo = s.admNo || s.adm_no || '';
+    const srNo = s.srNo || s.sr_no || admNo || '';
+    const rollNo = s.rollNo !== undefined ? String(s.rollNo) : (s.roll_no !== undefined ? String(s.roll_no) : '');
+    const className = s.className || s.class_name || s.class_id || '';
+    const section = s.section || s.section_name || s.division_id || '';
+    return {
+      ...s,
+      sNo: idx + 1,
+      admNo,
+      srNo,
+      rollNo,
+      className,
+      section,
+      name: (s.name || [s.firstName || s.first_name, s.lastName || s.last_name].filter(Boolean).join(' ') || 'Student').trim(),
+      enrollNo: s.enrollNo || s.enrNo || s.enroll_no || ('ENR-' + (admNo || idx + 1)),
+      fatherName: s.fatherName || s.fathers_name || s.father_name || '-',
+      motherName: s.motherName || s.mothers_name || s.mother_name || '-',
+      contactNo: s.contactNo || s.smsWhatsappNo || s.contact_no_sms || s.contactNoSms || s.fatherWhatsapp || s.fathers_whatsapp_no || s.fatherMobile || s.fathers_mobile_no || '-'
+    };
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -27,14 +51,7 @@ export function StudentListPage({ onNavigate }) {
           }
         }
       } catch (e) {}
-      const mapped = list.map((s, idx) => ({
-        ...s,
-        sNo: idx + 1,
-        name: (s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student').trim(),
-        enrollNo: s.enrollNo || s.enrNo || ('ENR-' + (s.admNo || idx + 1)),
-        contactNo: s.contactNo || s.smsWhatsappNo || s.contactNoSms || s.fatherWhatsapp || s.fatherMobile || '-'
-      }));
-      setRecords(mapped);
+      setRecords(list.map(mapStudentRecord));
     };
     load();
   }, [schoolId]);
@@ -52,8 +69,8 @@ export function StudentListPage({ onNavigate }) {
   }, [records, schoolId]);
 
   const handleSearch = () => {
-    const rawStudents = tenantStore.getStudents(schoolId);
-    let result = [...rawStudents];
+    const rawStudents = tenantStore.getStudents(schoolId) || [];
+    let result = rawStudents.map(mapStudentRecord);
 
     if (reportType === 'Class Wise' && selectedClass !== 'All') {
       result = result.filter(s => s.className === selectedClass);
@@ -68,7 +85,11 @@ export function StudentListPage({ onNavigate }) {
       result = result.filter(s =>
         (s.name && s.name.toLowerCase().includes(q)) ||
         (s.firstName && s.firstName.toLowerCase().includes(q)) ||
-        (s.admNo && s.admNo.toLowerCase().includes(q)) ||
+        (s.first_name && s.first_name.toLowerCase().includes(q)) ||
+        (s.enrollNo && s.enrollNo.toLowerCase().includes(q)) ||
+        (s.admNo && String(s.admNo).toLowerCase().includes(q)) ||
+        (s.adm_no && String(s.adm_no).toLowerCase().includes(q)) ||
+        (s.rollNo && String(s.rollNo).toLowerCase().includes(q)) ||
         (s.fatherName && s.fatherName.toLowerCase().includes(q)) ||
         (s.contactNo && s.contactNo.includes(q))
       );
@@ -76,32 +97,41 @@ export function StudentListPage({ onNavigate }) {
 
     // Sort
     if (sorting === 'Name') {
-      result.sort((a, b) => (a.name || a.firstName).localeCompare(b.name || b.firstName));
+      result.sort((a, b) => (a.name || a.firstName || '').localeCompare(b.name || b.firstName || ''));
     } else if (sorting === 'Roll No.') {
-      result.sort((a, b) => parseInt(a.rollNo || '0') - parseInt(b.rollNo || '0'));
+      result.sort((a, b) => parseInt(a.rollNo || a.roll_no || '0', 10) - parseInt(b.rollNo || b.roll_no || '0', 10));
     } else if (sorting === 'Admission No.') {
-      result.sort((a, b) => String(a.admNo).localeCompare(String(b.admNo)));
+      result.sort((a, b) => String(a.admNo || a.adm_no || '').localeCompare(String(b.admNo || b.adm_no || '')));
+    } else if (sorting === 'Sr. No.') {
+      result.sort((a, b) => String(a.srNo || '').localeCompare(String(b.srNo || '')));
+    } else if (sorting === 'Enroll. No.') {
+      result.sort((a, b) => String(a.enrollNo || '').localeCompare(String(b.enrollNo || '')));
+    } else if (sorting === 'Gender') {
+      result.sort((a, b) => String(a.gender || '').localeCompare(String(b.gender || '')));
     }
 
     setRecords(result);
   };
 
   const handleExport = () => {
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      ['S.NO.,ENROLL NO.,ADM.NO. / SR.NO,SR.NO.,NAME,CLASS,FATHER\'S NAME,MOTHER\'S NAME,CONTACT SMS NO.']
-        .concat(
-          records.map(
-            (r, i) =>
-              `${i + 1},"${r.enrollNo}","${r.admNo}","${r.srNo}","${r.name}","${r.className} - ${r.section}","${r.fatherName}","${r.motherName}","${r.contactNo}"`
-          )
-        )
-        .join('\n');
-    const encoded = encodeURI(csvContent);
+    const esc = (val) => String(val ?? '').replace(/"/g, '""');
+    const rows = [
+      'S.NO.,ENROLL NO.,ADM.NO. / SR.NO,SR.NO.,NAME,CLASS,FATHER\'S NAME,MOTHER\'S NAME,CONTACT SMS NO.'
+    ].concat(
+      records.map((r, i) => {
+        const classStr = r.className && r.section ? `${r.className} - ${r.section}` : (r.className || r.section || '-');
+        return `${i + 1},"${esc(r.enrollNo)}","${esc(r.admNo)}","${esc(r.srNo)}","${esc(r.name)}","${esc(classStr)}","${esc(r.fatherName)}","${esc(r.motherName)}","${esc(r.contactNo)}"`;
+      })
+    );
+    const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = encoded;
+    link.href = url;
     link.download = 'student_list_report.csv';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -256,7 +286,7 @@ export function StudentListPage({ onNavigate }) {
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {records.length > 0 ? (
                   records.map((r, i) => (
-                    <tr key={r.sNo} className="hover:bg-slate-50 transition-colors">
+                    <tr key={r.admNo || r.id || r.sNo || `std-${i}`} className="hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4 font-medium text-slate-500">{i + 1}</td>
                       <td className="py-3 px-4 font-mono text-[11px] text-slate-600">{r.enrollNo}</td>
                       <td className="py-3 px-4 font-semibold text-indigo-600">{r.admNo}</td>
@@ -264,7 +294,7 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4 font-semibold text-slate-900">{r.name || [r.firstName, r.lastName].filter(Boolean).join(' ') || 'Student'}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">
-                          {r.className} - {r.section}
+                          {r.className && r.section ? `${r.className} - ${r.section}` : (r.className || r.section || '-')}
                         </span>
                       </td>
                       <td className="py-3 px-4">{r.fatherName}</td>
@@ -272,6 +302,15 @@ export function StudentListPage({ onNavigate }) {
                       <td className="py-3 px-4 font-mono text-slate-600">{r.contactNo}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStudent(r)}
+                            title="View Student Profile"
+                            aria-label={`View Student Profile - ${r.name || 'Student'}`}
+                            className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
@@ -364,6 +403,15 @@ export function StudentListPage({ onNavigate }) {
           </div>
         </div>
       </div>
+
+      {selectedStudent && (
+        <StudentProfileModal
+          student={selectedStudent}
+          schoolName={schoolName}
+          onClose={() => setSelectedStudent(null)}
+          onNavigate={onNavigate}
+        />
+      )}
     </div>
   );
 }
