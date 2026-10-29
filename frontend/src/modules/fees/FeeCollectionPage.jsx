@@ -63,6 +63,7 @@ export function FeeCollectionPage({ onNavigate }) {
   const [feeHeads, setFeeHeads] = useState([]);
   const [loadingStudent, setLoadingStudent] = useState(false);
   const [submittingPayment, setSubmittingPayment] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
   const [activeReceiptModal, setActiveReceiptModal] = useState(null);
   const [cancelModalReceipt, setCancelModalReceipt] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
@@ -166,6 +167,7 @@ export function FeeCollectionPage({ onNavigate }) {
 
   const loadStudentAccount = async (student) => {
     if (!student) return;
+    setSavedSuccess(false);
     const admNo = student.admNo;
     const sName = student.name || `${student.firstName || ''} ${student.lastName || ''}`.trim() || `Student ${admNo}`;
     const sClass = student.className ? (student.className.includes('-') ? student.className : `${student.className} - ${student.section || 'A'}`) : 'Class 1 - A';
@@ -458,6 +460,7 @@ const res = await fetch('/api/fees/collect', {
 
       // 7. Pop up official printable receipt modal!
       setActiveReceiptModal(newRec);
+      setSavedSuccess(true);
       toast.success(`Fee Receipt #${newRec.receiptNo} created successfully!`);
     } catch (err) {
       console.error('[Fee Collection Error]:', err);
