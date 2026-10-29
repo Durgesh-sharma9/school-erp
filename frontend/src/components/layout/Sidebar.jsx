@@ -180,7 +180,8 @@ export const staffMenuCategories = [
     subItems: [
       { title: 'Staff Attendance', path: '/staff-attendance' },
       { title: 'Student Attendance', path: '/student-attendance' },
-      { title: 'Attendance Geofence', path: '/attendance-geofence' }
+      { title: 'Attendance Geofence', path: '/attendance-geofence' },
+      { title: 'Reports', path: '/attendance-reports' }
     ]
   },
   { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
@@ -268,7 +269,8 @@ export const menuCategories = [
     subItems: [
       { title: 'Staff Attendance', path: '/staff-attendance' },
       { title: 'Student Attendance', path: '/student-attendance' },
-      { title: 'Attendance Geofence', path: '/attendance-geofence' }
+      { title: 'Attendance Geofence', path: '/attendance-geofence' },
+      { title: 'Reports', path: '/attendance-reports' }
     ]
   },
   {
