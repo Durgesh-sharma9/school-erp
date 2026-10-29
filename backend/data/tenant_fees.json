@@ -1,0 +1,127 @@
+{
+  "TENANT_FEE_ACCOUNTS": {
+    "sch_jd_intl": {
+      "1002": {
+        "student": {
+          "admNo": "1002",
+          "srNo": "1002",
+          "enrollNo": "ENR-1002",
+          "name": "Dev Sharma",
+          "fatherName": "Rajesh Sharma",
+          "motherName": "",
+          "className": "I - A",
+          "section": "A",
+          "feeType": "Day Scholar",
+          "mobile": "9829012345",
+          "address": "",
+          "stuType": "New",
+          "transportStatus": "Not Opted"
+        },
+        "heads": [
+          {
+            "id": "h_sch_jd_intl_1",
+            "feeHead": "Admission / Reg. Fee",
+            "amount": 4000,
+            "discount": 0,
+            "fine": 0,
+            "netPayable": 4000,
+            "isPaid": true
+          },
+          {
+            "id": "h_sch_jd_intl_2",
+            "feeHead": "Tuition Fee (Quarter 1)",
+            "amount": 10000,
+            "discount": 0,
+            "fine": 0,
+            "netPayable": 1000,
+            "isPaid": false
+          },
+          {
+            "id": "h_sch_jd_intl_3",
+            "feeHead": "Tuition Fee (Quarter 2)",
+            "amount": 10000,
+            "discount": 0,
+            "fine": 0,
+            "netPayable": 10000,
+            "isPaid": false
+          },
+          {
+            "id": "h_sch_jd_intl_4",
+            "feeHead": "Activity & Lab Fee",
+            "amount": 2500,
+            "discount": 0,
+            "fine": 0,
+            "netPayable": 2500,
+            "isPaid": false
+          }
+        ],
+        "receipts": [
+          {
+            "id": "rec_1793267733512",
+            "receiptNo": "JD-REC-001",
+            "admNo": "1002",
+            "studentName": "Dev Sharma",
+            "className": "Class I - A",
+            "schoolId": "sch_jd_intl",
+            "paidAmount": 5000,
+            "payMode": "Cash",
+            "chequeNo": "",
+            "bankName": "",
+            "remarks": "Admission fee collected",
+            "date": "2026-10-29",
+            "createdAt": "2026-10-29T09:55:33.512Z",
+            "status": "SUCCESS",
+            "receiptType": "COUNTER"
+          }
+        ]
+      }
+    },
+    "sch_dps_branch2": {}
+  },
+  "TENANT_RECEIPTS": {
+    "sch_jd_intl": [
+      {
+        "id": "rec_1793267733512",
+        "receiptNo": "JD-REC-001",
+        "admNo": "1002",
+        "studentName": "Dev Sharma",
+        "className": "Class I - A",
+        "schoolId": "sch_jd_intl",
+        "paidAmount": 5000,
+        "payMode": "Cash",
+        "chequeNo": "",
+        "bankName": "",
+        "remarks": "Admission fee collected",
+        "date": "2026-10-29",
+        "createdAt": "2026-10-29T09:55:33.512Z",
+        "status": "SUCCESS",
+        "receiptType": "COUNTER"
+      }
+    ],
+    "sch_dps_branch2": []
+  },
+  "TENANT_FEE_HEAD_GROUPS": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  },
+  "TENANT_FEE_HEADS": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  },
+  "TENANT_CONCESSION_TYPES": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  },
+  "TENANT_FINE_MASTERS": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  },
+  "TENANT_FEE_STRUCTURES": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  },
+  "TENANT_STUDENT_CONCESSIONS": {
+    "sch_jd_intl": [],
+    "sch_dps_branch2": []
+  }
+}

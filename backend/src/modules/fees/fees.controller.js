@@ -1,45 +1,60 @@
 import prisma from '../../config/db.js';
 import { TENANT_STUDENTS } from '../students/students.controller.js';
+import { loadJson, saveJson } from '../../core/utils/localStore.js';
 
-// Multi-Tenant Partitioned Fee Accounts: schoolId -> { admNo -> account } (Clean Fresh State)
-export const TENANT_FEE_ACCOUNTS = {
+const feesDisk = loadJson('tenant_fees.json', {});
+
+export const TENANT_FEE_ACCOUNTS = feesDisk.TENANT_FEE_ACCOUNTS || {
   'sch_jd_intl': {},
   'sch_dps_branch2': {}
 };
 
-export const TENANT_RECEIPTS = {
+export const TENANT_RECEIPTS = feesDisk.TENANT_RECEIPTS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_HEAD_GROUPS = {
+export const TENANT_FEE_HEAD_GROUPS = feesDisk.TENANT_FEE_HEAD_GROUPS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_HEADS = {
+export const TENANT_FEE_HEADS = feesDisk.TENANT_FEE_HEADS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_CONCESSION_TYPES = {
+export const TENANT_CONCESSION_TYPES = feesDisk.TENANT_CONCESSION_TYPES || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FINE_MASTERS = {
+export const TENANT_FINE_MASTERS = feesDisk.TENANT_FINE_MASTERS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_FEE_STRUCTURES = {
+export const TENANT_FEE_STRUCTURES = feesDisk.TENANT_FEE_STRUCTURES || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
 };
 
-export const TENANT_STUDENT_CONCESSIONS = {
+export const TENANT_STUDENT_CONCESSIONS = feesDisk.TENANT_STUDENT_CONCESSIONS || {
   'sch_jd_intl': [],
   'sch_dps_branch2': []
+};
+
+export const persistFees = () => {
+  saveJson('tenant_fees.json', {
+    TENANT_FEE_ACCOUNTS,
+    TENANT_RECEIPTS,
+    TENANT_FEE_HEAD_GROUPS,
+    TENANT_FEE_HEADS,
+    TENANT_CONCESSION_TYPES,
+    TENANT_FINE_MASTERS,
+    TENANT_FEE_STRUCTURES,
+    TENANT_STUDENT_CONCESSIONS
+  });
 };
 
 const getActiveSchoolId = (req) => {
@@ -129,7 +144,24 @@ export const getStudentFeeLedger = async (req, res, next) => {
     }
 
     if (!account) {
-      return res.status(200).json({
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({
         success: true,
         schoolId,
         data: {
@@ -224,6 +256,23 @@ export const collectFeePayment = async (req, res, next) => {
       }
     }
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(201).json({
       success: true,
       message: `Fee payment of ₹${paidAmount} collected successfully. Receipt No: ${receiptNo}`,
@@ -243,6 +292,23 @@ export const getFeeRecentReceipts = async (req, res, next) => {
     const schoolId = getActiveSchoolId(req);
     const receipts = TENANT_RECEIPTS[schoolId] || [];
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({
       success: true,
       schoolId,
@@ -261,6 +327,23 @@ export const getFeeHeadGroups = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const groups = TENANT_FEE_HEAD_GROUPS[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: groups });
   } catch (error) {
     next(error);
@@ -277,7 +360,24 @@ export const saveFeeHeadGroup = async (req, res, next) => {
       TENANT_FEE_HEAD_GROUPS[schoolId] = TENANT_FEE_HEAD_GROUPS[schoolId].map(g =>
         g.id === String(id) ? { ...g, headGroup, priority: Number(priority), active } : g
       );
-      return res.status(200).json({ success: true, message: 'Fee Head Group updated successfully' });
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee Head Group updated successfully' });
     } else {
       const newGroup = {
         id: String(Date.now()),
@@ -313,6 +413,23 @@ export const getFeeHeads = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const heads = TENANT_FEE_HEADS[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: heads });
   } catch (error) {
     next(error);
@@ -329,7 +446,24 @@ export const saveFeeHead = async (req, res, next) => {
       TENANT_FEE_HEADS[schoolId] = TENANT_FEE_HEADS[schoolId].map(h =>
         h.id === String(id) ? { ...h, feeHead, priority: Number(priority), applyFor, gender, installment, feeType, isBoard } : h
       );
-      return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
     } else {
       const newHead = {
         id: String(Date.now()),
@@ -369,6 +503,23 @@ export const getConcessionTypes = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const types = TENANT_CONCESSION_TYPES[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: types });
   } catch (error) {
     next(error);
@@ -385,7 +536,24 @@ export const saveConcessionType = async (req, res, next) => {
       TENANT_CONCESSION_TYPES[schoolId] = TENANT_CONCESSION_TYPES[schoolId].map(c =>
         c.id === String(id) ? { ...c, concessionType, description, defaultPercent: Number(defaultPercent) } : c
       );
-      return res.status(200).json({ success: true, message: 'Concession Category updated' });
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Concession Category updated' });
     } else {
       const newType = {
         id: String(Date.now()),
@@ -421,6 +589,23 @@ export const getFineMasters = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const fines = TENANT_FINE_MASTERS[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: fines });
   } catch (error) {
     next(error);
@@ -438,7 +623,24 @@ export const saveFineMaster = async (req, res, next) => {
       TENANT_FINE_MASTERS[schoolId] = TENANT_FINE_MASTERS[schoolId].map(f =>
         f.id === String(id) ? { ...f, fineName, fineType, increasePeriod, graceDays: Number(graceDays), amount: Number(amount), updatedAt: now } : f
       );
-      return res.status(200).json({ success: true, message: 'Fine rule updated' });
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fine rule updated' });
     } else {
       const newFine = {
         id: String(Date.now()),
@@ -479,6 +681,23 @@ export const getFeeStructures = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const structures = TENANT_FEE_STRUCTURES[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: structures });
   } catch (error) {
     next(error);
@@ -495,7 +714,24 @@ export const saveFeeStructure = async (req, res, next) => {
       TENANT_FEE_STRUCTURES[schoolId] = TENANT_FEE_STRUCTURES[schoolId].map(s =>
         s.id === String(id) ? { ...s, className, stream, structureType, grandTotal: Number(grandTotal), heads } : s
       );
-      return res.status(200).json({ success: true, message: 'Fee structure updated' });
+      persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: 'Fee structure updated' });
     } else {
       const newStructure = {
         id: String(Date.now()),
@@ -565,6 +801,23 @@ export const getFeeManualStudents = async (req, res, next) => {
       }));
     }
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: studentsList });
   } catch (error) {
     next(error);
@@ -595,6 +848,23 @@ export const saveFeeManualEdit = async (req, res, next) => {
     }
     TENANT_FEE_ACCOUNTS[schoolId][admNo].heads = heads;
     TENANT_FEE_ACCOUNTS[schoolId][admNo].manualRemark = remarks;
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, message: `Fee updated manually for Student ${admNo}` });
   } catch (error) {
     next(error);
@@ -608,6 +878,23 @@ export const getStudentConcessions = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
     const concessions = TENANT_STUDENT_CONCESSIONS[schoolId] || [];
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: concessions });
   } catch (error) {
     next(error);
@@ -635,6 +922,23 @@ export const saveStudentConcession = async (req, res, next) => {
     };
 
     TENANT_STUDENT_CONCESSIONS[schoolId].unshift(newConcession);
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(201).json({ success: true, message: 'Concession assigned to student successfully', data: newConcession });
   } catch (error) {
     next(error);
@@ -648,6 +952,23 @@ export const deleteStudentConcession = async (req, res, next) => {
     if (TENANT_STUDENT_CONCESSIONS[schoolId]) {
       TENANT_STUDENT_CONCESSIONS[schoolId] = TENANT_STUDENT_CONCESSIONS[schoolId].filter(c => c.id !== String(id));
     }
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, message: 'Concession record removed' });
   } catch (error) {
     next(error);
@@ -684,6 +1005,23 @@ export const lookupSiblings = async (req, res, next) => {
       ]
     }));
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: matched });
   } catch (error) {
     next(error);
@@ -734,6 +1072,23 @@ export const collectSiblingFee = async (req, res, next) => {
     if (!TENANT_RECEIPTS[schoolId]) TENANT_RECEIPTS[schoolId] = [];
     TENANT_RECEIPTS[schoolId].unshift(newReceipt);
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(201).json({
       success: true,
       message: `Sibling joint fee payment of ₹${totalPaid} recorded. Receipt No: ${receiptNo}`,
@@ -766,7 +1121,24 @@ export const cancelFeeReceipt = async (req, res, next) => {
           student.paidFees = Math.max(0, (Number(student.paidFees) || 0) - Number(cancelledRec.paidAmount || 0));
           student.dueFees = Math.max(0, (Number(student.totalFees) || 0) - student.paidFees);
         }
-        return res.status(200).json({ success: true, message: `Receipt ${receiptNo} marked as CANCELLED.` });
+        persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    return res.status(200).json({ success: true, message: `Receipt ${receiptNo} marked as CANCELLED.` });
       }
     }
     return res.status(404).json({ success: false, message: 'Receipt not found' });
@@ -796,6 +1168,23 @@ export const getBoardFeeStudents = async (req, res, next) => {
         paid: Boolean(s.boardFeePaid)
       }));
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({ success: true, data: boardStudents });
   } catch (error) {
     next(error);
@@ -849,6 +1238,23 @@ export const collectBoardFee = async (req, res, next) => {
       }
     }
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(201).json({ success: true, message: `Board Fee collected successfully. Receipt: ${receiptNo}`, data: newReceipt });
   } catch (error) {
     next(error);
@@ -887,6 +1293,23 @@ export const getFeeReportsData = async (req, res, next) => {
       }
     });
 
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
+    persistFees();
     return res.status(200).json({
       success: true,
       reportType,
