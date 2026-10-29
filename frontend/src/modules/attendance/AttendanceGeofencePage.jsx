@@ -46,6 +46,7 @@ export function AttendanceGeofencePage({ onNavigate }) {
     return {
       enabled: true,
       mode: 'strict', // 'strict' | 'warning' | 'disabled'
+      punchMode: 'dual_punch', // 'dual_punch' | 'single_punch'
       schoolLatitude: defaultLat,
       schoolLongitude: defaultLng,
       allowedRangeMeters: 200,
@@ -468,6 +469,99 @@ export function AttendanceGeofencePage({ onNavigate }) {
                 <option value="warning">Warning Mode (Allow punch but flag as 'Out of Range')</option>
                 <option value="disabled">Disabled (No GPS boundary check)</option>
               </select>
+            </div>
+          </div>
+
+          {/* 3. Choose Attendance System Mode: Dual Punch vs Single Punch */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Clock className="w-4 h-4 text-emerald-600" />
+              3. Attendance Punch System Mode
+            </h2>
+
+            <p className="text-xs text-slate-500 font-medium">
+              Admin decides whether staff tracks both Arrival & Departure or only Daily Arrival:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Dual Punch */}
+              <button
+                type="button"
+                onClick={() => setConfig({ ...config, punchMode: 'dual_punch' })}
+                className={`p-3.5 rounded-xl border text-left transition-all ${
+                  (config.punchMode || 'dual_punch') === 'dual_punch'
+                    ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 ring-2 ring-emerald-500/20'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-bold text-xs">Punch-In & Punch-Out</span>
+                  {(config.punchMode || 'dual_punch') === 'dual_punch' && (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Morning <strong>Punch-In</strong> & Evening <strong>Punch-Out</strong> required. Tracks working hours & early departures.
+                </p>
+              </button>
+
+              {/* Single Punch */}
+              <button
+                type="button"
+                onClick={() => setConfig({ ...config, punchMode: 'single_punch' })}
+                className={`p-3.5 rounded-xl border text-left transition-all ${
+                  config.punchMode === 'single_punch'
+                    ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 ring-2 ring-emerald-500/20'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-bold text-xs">Only Punch-In (Single Check-in)</span>
+                  {config.punchMode === 'single_punch' && (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Only 1 punch per day. Staff is marked Present for the full day without requiring an evening punch.
+                </p>
+              </button>
+            </div>
+          </div>
+
+          {/* 4. Role Permissions & Attendance Rules Guide */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Users className="w-4 h-4 text-indigo-600" />
+              4. Attendance Authority & Access Roles
+            </h2>
+
+            <div className="space-y-2.5 text-xs">
+              <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>👑 Admin Master Privilege:</span>
+                </p>
+                <p className="text-[11px] text-indigo-900 leading-relaxed">
+                  Admin can mark/edit attendance for <strong>ANY staff member or student</strong>, for <strong>ANY past or present date</strong> without range/GPS restrictions.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-950 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>👤 Teachers & Staff:</span>
+                </p>
+                <p className="text-[11px] text-amber-900 leading-relaxed">
+                  Staff can only mark attendance for <strong>TODAY's date</strong> from their portal/phone, and MUST be physically inside the <strong>{config.allowedRangeMeters}m</strong> school geofence perimeter.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>👨‍🏫 Student Attendance:</span>
+                </p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Handled separately via <strong>Student Attendance</strong> by the Class Teacher or Attender class-wise with absent SMS alerts.
+                </p>
+              </div>
             </div>
           </div>
 

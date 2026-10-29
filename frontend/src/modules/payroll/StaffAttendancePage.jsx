@@ -46,8 +46,11 @@ const INITIAL_STAFF_MASTER = [];
 const DEPARTMENTS = ['ALL', 'TEACHING', 'ADMINISTRATIVE', 'TRANSPORT', 'SUPPORT'];
 
 export function StaffAttendancePage({ onNavigate }) {
-  const { role, schoolName } = useAuth();
+  const { role, schoolId, schoolName } = useAuth();
+  const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const isAttender = role === 'ATTENDER';
+  const geofenceConfig = tenantStore.getGeofenceConfig(schoolId) || {};
+  const punchMode = geofenceConfig.punchMode || 'dual_punch';
   const todayStr = new Date().toISOString().split('T')[0];
 
   // Primary Segmented Tab State
@@ -481,9 +484,20 @@ export function StaffAttendancePage({ onNavigate }) {
                     type="date"
                     value={attendanceDate}
                     onChange={(e) => setAttendanceDate(e.target.value)}
-                    disabled={isAttender}
+                    max={isAdmin ? undefined : todayStr}
+                    disabled={!isAdmin && isAttender}
                     className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer"
                   />
+                  {isAdmin && (
+                    <span className="text-[9.5px] font-bold bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-md uppercase" title="Admin has unrestricted access to select and edit any past or current date">
+                      Admin: Any Date
+                    </span>
+                  )}
+                  {!isAdmin && (
+                    <span className="text-[9.5px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md uppercase">
+                      Today Only
+                    </span>
+                  )}
                 </div>
 
                 {/* Quick Search */}
@@ -577,7 +591,7 @@ export function StaffAttendancePage({ onNavigate }) {
                     <th className="py-2.5 px-3">Department</th>
                     <th className="py-2.5 px-3">Shift Timing</th>
                     <th className="py-2.5 px-3 text-center">In-Time</th>
-                    <th className="py-2.5 px-3 text-center">Out-Time</th>
+                    <th className="py-2.5 px-3 text-center">{punchMode === 'single_punch' ? 'Punch Mode' : 'Out-Time'}</th>
                     <th className="py-2.5 px-3 text-center">Attendance Status</th>
                     <th className="py-2.5 px-3">Remarks</th>
                   </tr>
@@ -637,16 +651,20 @@ export function StaffAttendancePage({ onNavigate }) {
 
                         {/* Out-Time Input */}
                         <td className="py-2.5 px-3 text-center">
-                          <input
-                            type="time"
-                            value={staff.outTime === '-' ? '' : staff.outTime}
-                            onChange={(e) => {
-                              const val = e.target.value || '-';
-                              setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, outTime: val } : s));
-                            }}
-                            disabled={isAbsent}
-                            className="w-20 px-1.5 py-0.5 text-center rounded border border-slate-200 bg-white text-xs font-mono disabled:bg-slate-100 disabled:text-slate-400 outline-none"
-                          />
+                          {punchMode === 'single_punch' ? (
+                            <span className="text-slate-400 font-mono text-[10.5px] italic">Single Punch</span>
+                          ) : (
+                            <input
+                              type="time"
+                              value={staff.outTime === '-' ? '' : staff.outTime}
+                              onChange={(e) => {
+                                const val = e.target.value || '-';
+                                setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, outTime: val } : s));
+                              }}
+                              disabled={isAbsent}
+                              className="w-20 px-1.5 py-0.5 text-center rounded border border-slate-200 bg-white text-xs font-mono disabled:bg-slate-100 disabled:text-slate-400 outline-none"
+                            />
+                          )}
                         </td>
 
                         {/* Status Action Buttons */}
