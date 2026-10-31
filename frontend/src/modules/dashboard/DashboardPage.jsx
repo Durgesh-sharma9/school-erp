@@ -31,7 +31,8 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  Search
+  Search,
+  CornerUpRight
 } from 'lucide-react';
 import StatsCard from '../../components/StatsCard';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
@@ -267,87 +268,185 @@ export function DashboardPage({ onNavigate }) {
         )}
       </div>
 
-      {/* Top 5 KPI Stats Cards (Test Master Pro Design: Compact, Tinted Backgrounds, Inside Elegance) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3.5">
-        <StatsCard
-          title="Today Collection"
-          value={`₹${formatINR(stats?.todayCollection?.total || 0)}`}
-          icon={IndianRupee}
-          themeIndex={0}
-          onClick={() => onNavigate && onNavigate('/fee-collection')}
-          badge={`${stats?.todayCollection?.receiptsCount || 0} Receipts`}
-          subtitle={
-            <span className="flex items-center gap-1 text-[11px] font-medium text-blue-700 truncate">
-              <span>Cash: ₹{formatINR(stats?.todayCollection?.cash || 0)}</span>
-              <span className="text-blue-300">·</span>
-              <span>Bank: ₹{formatINR(stats?.todayCollection?.bank || 0)}</span>
-            </span>
-          }
-        />
+      {/* ── UAB Top 4 KPI Cards Banner ── */}
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* 1. Today Collection */}
+          <div
+            onClick={() => onNavigate && onNavigate('/fee-collection')}
+            className="bg-[#f0f6ff]/90 hover:bg-[#ebf3ff] transition-all rounded-2xl p-4 border border-blue-100 shadow-2xs hover:shadow-xs flex flex-col justify-between cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 text-[13px]">Today Collection</span>
+              <CornerUpRight className="w-4 h-4 text-slate-700" />
+            </div>
 
-        <StatsCard
-          title="Fee Revenue"
-          value={`₹${formatINR(stats?.feeRevenueSummary?.totalRevenue || 0)}`}
-          icon={Receipt}
-          themeIndex={4}
-          onClick={() => onNavigate && onNavigate('/fee-reports')}
-          badge={`${stats?.feeRevenueSummary?.receivedPercentage || 0}% Paid`}
-          subtitle={
-            <span className="flex items-center gap-1 text-[11px] font-medium text-orange-700 truncate">
-              <span>Due: ₹{formatINR(stats?.feeRevenueSummary?.totalDue || 0)}</span>
-              <span className="text-orange-300">·</span>
-              <span className="font-bold text-rose-600">({stats?.feeRevenueSummary?.duePercentage || 0}%)</span>
-            </span>
-          }
-        />
+            <div className="my-3 flex items-baseline justify-between">
+              <span className="text-2xl font-black text-slate-900 tracking-tight font-sans">
+                {formatINR(stats?.todayCollection?.total || 0)}
+              </span>
+              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-bold text-xs px-2.5 py-0.5 rounded-full shadow-2xs">
+                Receipts: {stats?.todayCollection?.receiptsCount || 0}
+              </span>
+            </div>
 
-        <StatsCard
-          title="Total Students"
-          value={stats?.totalStudents?.total ?? 0}
-          icon={Users}
-          themeIndex={1}
-          onClick={() => onNavigate && onNavigate('/student-reports')}
-          badge={stats?.totalStudents?.growthRate || '+5.4%'}
-          subtitle={
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-violet-700">
-              <span className="font-bold">👦 {stats?.totalStudents?.boys ?? 0}</span>
-              <span className="text-violet-300">·</span>
-              <span className="font-bold">👧 {stats?.totalStudents?.girls ?? 0}</span>
-              <span className="text-violet-300">·</span>
-              <span className="text-[10px] text-violet-600 font-semibold">New: {stats?.totalStudents?.newAdmissions ?? 0}</span>
-            </span>
-          }
-        />
+            <div className="flex items-center justify-between pt-1.5 border-t border-blue-100/60">
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="text-emerald-600 font-bold font-mono text-sm">💵</span>
+                <span className="font-bold text-emerald-600 font-mono">{formatINR(stats?.todayCollection?.cash || 0)}</span>
+                <span className="text-slate-600 font-medium">Cash</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="text-blue-600 font-bold font-mono text-sm">🏛️</span>
+                <span className="font-bold text-blue-600 font-mono">{formatINR(stats?.todayCollection?.bank || 0)}</span>
+                <span className="text-slate-600 font-medium">Bank</span>
+              </div>
+            </div>
+          </div>
 
-        <StatsCard
-          title="Student Attendance"
-          value={`${stats?.attendanceToday?.percentage || 0}%`}
-          icon={UserCheck}
-          themeIndex={2}
-          onClick={() => onNavigate && onNavigate('/student-attendance')}
-          badge={stats?.attendanceToday?.trend || 'Today'}
-          subtitle={
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-800">
-              <span className="font-bold">✓ {stats?.attendanceToday?.totalPresent || 0} P</span>
-              <span className="text-emerald-300">·</span>
-              <span className="font-bold text-rose-600">✕ {stats?.attendanceToday?.totalAbsent || 0} A</span>
-            </span>
-          }
-        />
+          {/* 2. Fee Revenue Summary */}
+          <div
+            onClick={() => onNavigate && onNavigate('/fee-reports')}
+            className="bg-[#fffdf5]/95 hover:bg-[#fff9eb] transition-all rounded-2xl p-4 border border-amber-100 shadow-2xs hover:shadow-xs flex flex-col justify-between cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 text-[13px]">Fee Revenue Summary</span>
+            </div>
 
-        <StatsCard
-          title="Staff Attendance"
-          value="Daily Register"
-          icon={ShieldCheck}
-          themeIndex={3}
-          onClick={() => onNavigate && onNavigate('/staff-attendance')}
-          badge="Faculty"
-          subtitle={
-            <span className="text-amber-800 text-[11px] font-bold hover:underline">
-              Mark Staff Biometrics →
-            </span>
-          }
-        />
+            <div className="my-1.5">
+              <span className="text-xl font-black text-slate-900 tracking-tight font-sans">
+                {formatINR(stats?.feeRevenueSummary?.totalRevenue || 0)}
+              </span>
+            </div>
+
+            <div className="space-y-1.5">
+              <div>
+                <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
+                  <span>Total Due</span>
+                  <span className="font-bold text-slate-700 font-mono">
+                    {formatINR(stats?.feeRevenueSummary?.totalDue || 0)}{' '}
+                    <span className="text-rose-600 font-bold">({stats?.feeRevenueSummary?.duePercentage || '99.1'}%)</span>
+                  </span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div
+                    className="bg-rose-500 h-1 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, stats?.feeRevenueSummary?.duePercentage || 99.1)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
+                  <span>Total Received (YTD)</span>
+                  <span className="font-bold text-slate-700 font-mono">
+                    {formatINR(stats?.feeRevenueSummary?.totalReceivedYTD || 0)}{' '}
+                    <span className="text-emerald-600 font-bold">({stats?.feeRevenueSummary?.receivedPercentage || '0.9'}%)</span>
+                  </span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div
+                    className="bg-emerald-500 h-1 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, Math.max(1, stats?.feeRevenueSummary?.receivedPercentage || 0.9))}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Total Student */}
+          <div
+            onClick={() => onNavigate && onNavigate('/student-reports')}
+            className="bg-[#fffef7] hover:bg-[#fffcf0] transition-all rounded-2xl p-4 border border-amber-100/70 shadow-2xs hover:shadow-xs flex flex-col justify-between cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 text-[13px]">Total Student</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-black text-slate-900 font-sans">
+                  {stats?.totalStudents?.total ?? 0}
+                </span>
+                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/60 font-bold text-[10px] px-1.5 py-0.5 rounded-md">
+                  (18.1% ↑)
+                </span>
+              </div>
+            </div>
+
+            <div className="my-1.5 space-y-1 text-xs text-slate-700">
+              <div className="flex items-center justify-between py-0.5">
+                <span className="flex items-center gap-1.5 font-bold text-blue-600">
+                  <span className="text-blue-600 font-bold">🚹</span> Boy
+                </span>
+                <span className="font-bold text-slate-800 font-mono">
+                  {stats?.totalStudents?.boys ?? 0}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-0.5">
+                <span className="flex items-center gap-1.5 font-bold text-pink-600">
+                  <span className="text-pink-600 font-bold">🚺</span> Girl
+                </span>
+                <span className="font-bold text-slate-800 font-mono">
+                  {stats?.totalStudents?.girls ?? 0}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1.5 border-t border-amber-100/50">
+              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold px-2.5 py-0.5 rounded-md text-[11px]">
+                New : {stats?.totalStudents?.newAdmissions ?? 0}
+              </span>
+              <span className="bg-rose-50 text-rose-600 border border-rose-200/60 font-bold px-2.5 py-0.5 rounded-md text-[11px]">
+                Old : {Math.max(0, (stats?.totalStudents?.total ?? 0) - (stats?.totalStudents?.newAdmissions ?? 0))}
+              </span>
+            </div>
+          </div>
+
+          {/* 4. Student Attendance */}
+          <div
+            onClick={() => onNavigate && onNavigate('/student-attendance')}
+            className="bg-[#fff7f7]/80 hover:bg-[#fff2f2] transition-all rounded-2xl p-4 border border-rose-100/80 shadow-2xs hover:shadow-xs flex flex-col justify-between cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shadow-2xs">
+                  👆
+                </div>
+                <span className="font-bold text-slate-800 text-[13px]">Student Attendance</span>
+              </div>
+            </div>
+
+            <div className="my-2 flex items-center justify-between">
+              <div>
+                <span className="text-lg font-black text-slate-900">
+                  {stats?.attendanceToday?.percentage || 0}%
+                </span>
+                <span className="text-slate-400 font-bold text-xs ml-1">↓</span>
+              </div>
+              <div className="text-right">
+                <span className="text-xl font-black text-rose-600 font-mono block leading-none">
+                  {stats?.attendanceToday?.totalAbsent ?? 0}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500">Absent</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1.5 border-t border-rose-100/60">
+              <span className="font-medium">
+                Present: <strong className="text-emerald-700 font-bold">{stats?.attendanceToday?.totalPresent ?? 0}</strong>
+              </span>
+              <span className="font-medium text-slate-500">
+                Total: <strong className="text-slate-800">{stats?.totalStudents?.total ?? 0}</strong>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Carousel Indicator Dots matching UAB */}
+        <div className="flex items-center justify-center gap-2 pt-1 pb-1">
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+        </div>
       </div>
 
       {/* Today's Paymode Summary (ErpSection with Emerald Tone) */}
