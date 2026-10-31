@@ -718,12 +718,23 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       {/* 1:1 Test Master Pro Sidenav */}
       <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 md:w-64 bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
 
-        {/* Top Header matching Test Master Pro */}
-        <div className="relative flex h-16 items-center justify-between border-b border-slate-100 pl-5 pr-3 shrink-0 bg-white">
-          <div className="flex items-center gap-1.5 select-none cursor-pointer" onClick={() => onNavigate && onNavigate('/dashboard')}>
-            <span className="font-extrabold text-base md:text-lg tracking-tight text-slate-900">
-              SCHOOL ERP
-            </span>
+        {/* Top Header with Brand Logo & Collapse */}
+        <div className="relative flex h-16 items-center justify-between border-b border-slate-100 px-4 shrink-0 bg-white">
+          <div
+            className="flex items-center gap-2.5 select-none cursor-pointer group"
+            onClick={() => onNavigate && onNavigate('/dashboard')}
+          >
+            <div className="h-8.5 w-8.5 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-500/25 shrink-0 group-hover:scale-105 transition-transform">
+              S
+            </div>
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="font-black text-sm tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
+                SCHOOL <span className="text-indigo-600">ERP</span>
+              </span>
+              <span className="text-[9.5px] font-bold text-slate-400 tracking-wider uppercase">
+                Enterprise Suite
+              </span>
+            </div>
           </div>
 
           <button
@@ -743,8 +754,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           </button>
         </div>
 
-        {/* Menu Items List matching Test Master Pro styling */}
-        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-1 text-sm font-medium custom-scrollbar">
+        {/* Menu Items List with Clean Scroll & Padding */}
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 pb-16 space-y-1 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
@@ -802,12 +813,9 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                   )}
                 </button>
 
-                {/* Submenu Dropdown Tree with Connecting Guide Line */}
+                {/* Submenu Dropdown Tree */}
                 {hasChildren && isOpen && (
-                  <div className="relative flex flex-col space-y-0.5 mt-0.5 pb-0.5">
-                    {/* Vertical Connecting Line exactly like Test Master Pro */}
-                    <div className="absolute left-[1.125rem] top-1.5 bottom-2.5 w-px bg-slate-200" />
-
+                  <div className="relative ml-4 pl-3.5 border-l-2 border-indigo-100 flex flex-col space-y-0.5 my-1">
                     {item.subItems.map((sub) => {
                       const hasSubChildren = sub.children && sub.children.length > 0;
                       if (hasSubChildren) {
@@ -819,13 +827,11 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             {/* Expandable Sub-Item (e.g. Reports) */}
                             <button
                               onClick={() => toggleSubDropdown(subId)}
-                              className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2 text-[12.5px] font-medium transition-all duration-200 group w-full text-left cursor-pointer ${isSubOpen || isAnyChildActive
-                                ? 'text-indigo-900 bg-indigo-50/50 font-semibold'
+                              className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 group w-full text-left cursor-pointer ${isSubOpen || isAnyChildActive
+                                ? 'text-indigo-900 bg-indigo-50/70 font-bold'
                                 : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
                                 }`}
                             >
-                              <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isAnyChildActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
-                                }`} />
                               <span className="truncate">{sub.title}</span>
                               <ChevronDown
                                 className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
@@ -835,7 +841,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
 
                             {/* Nested Level 2 Children */}
                             {isSubOpen && (
-                              <div className="relative flex flex-col space-y-0.5 pl-3">
+                              <div className="ml-2 pl-2.5 border-l border-slate-200 space-y-0.5 my-0.5">
                                 {sub.children.map((child) => {
                                   const isChildActive = normCurrent === child.path;
                                   return (
@@ -845,8 +851,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                         if (onNavigate) onNavigate(child.path);
                                         if (window.innerWidth < 768 && onClose) onClose();
                                       }}
-                                      className={`relative flex items-center rounded-lg py-1 pl-[2rem] pr-2 text-[12px] transition-all text-left cursor-pointer ${isChildActive
-                                        ? 'text-indigo-700 bg-indigo-50/70 font-semibold shadow-2xs'
+                                      className={`flex items-center rounded-lg px-2 py-1 text-[11.5px] transition-all text-left cursor-pointer w-full ${isChildActive
+                                        ? 'text-indigo-700 bg-indigo-50 font-bold shadow-2xs'
                                         : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-medium'
                                         }`}
                                     >
@@ -868,15 +874,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          className={`relative flex items-center justify-between rounded-lg py-1 pl-[2.25rem] pr-2.5 text-[12.5px] font-medium transition-all duration-200 group text-left cursor-pointer ${isSubActive
-                            ? 'text-indigo-700 bg-indigo-50/80 font-semibold shadow-2xs'
+                          className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 group text-left cursor-pointer ${isSubActive
+                            ? 'text-indigo-700 bg-indigo-50/90 font-bold shadow-2xs'
                             : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
                             }`}
                         >
-                          {/* Dot exactly on guide line */}
-                          <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isSubActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
-                            }`} />
                           <span className="truncate">{sub.title}</span>
+                          {isSubActive && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
+                          )}
                         </button>
                       );
                     })}
@@ -887,7 +893,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           })}
         </div>
 
-        {/* Student Profile or User Card at Bottom matching Test Master Pro */}
+        {/* Student Profile or User Card at Bottom */}
         {role === 'STUDENT' ? (
           <div
             onClick={() => onNavigate && onNavigate('/profile')}
@@ -910,18 +916,21 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
             <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
         ) : (
-          <div className="border-t border-slate-100 bg-slate-50/50 p-3.5 transition-all shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs shadow-sm">
-                {(user?.name || (role === 'SUPER_ADMIN' ? 'SA' : 'Admin')).slice(0, 2).toUpperCase()}
+          <div className="p-3 border-t border-slate-100 bg-white shrink-0">
+            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/80 transition-all shadow-2xs">
+              <div className="relative shrink-0">
+                <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 text-white font-black text-xs shadow-xs">
+                  {(user?.name || (role === 'SUPER_ADMIN' ? 'SA' : 'AD')).slice(0, 2).toUpperCase()}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-500/20" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="truncate text-xs font-bold text-slate-800 leading-tight">
-                  {user?.name || (role === 'SUPER_ADMIN' ? 'SuperAdmin HQ' : 'School Admin')}
+              <div className="flex-1 min-w-0 leading-tight">
+                <p className="truncate text-xs font-bold text-slate-900">
+                  {user?.name ? user.name.replace(/\s*\([^)]*\)/, '').trim() : 'Admin'}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-                  ({role ? role.toLowerCase() : 'school_admin'})
-                </p>
+                <span className="inline-block mt-0.5 text-[9px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100/70 px-1.5 py-0.2 rounded-md">
+                  {role || 'ADMIN'}
+                </span>
               </div>
             </div>
           </div>
