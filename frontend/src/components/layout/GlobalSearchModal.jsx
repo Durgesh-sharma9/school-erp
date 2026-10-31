@@ -35,6 +35,26 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
+// Domain-specific color styles for categories
+const CATEGORY_STYLES = {
+  'Overview': { badge: 'bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/60 dark:text-blue-300', icon: 'bg-blue-50 text-blue-600 border-blue-200/60 dark:bg-blue-950/60' },
+  'Daily Test': { badge: 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300', icon: 'bg-amber-50 text-amber-600 border-amber-200/60 dark:bg-amber-950/60' },
+  'Performance': { badge: 'bg-violet-50 text-violet-700 border-violet-200/80 dark:bg-violet-950/60 dark:text-violet-300', icon: 'bg-violet-50 text-violet-600 border-violet-200/60 dark:bg-violet-950/60' },
+  'Fee': { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300', icon: 'bg-emerald-50 text-emerald-600 border-emerald-200/60 dark:bg-emerald-950/60' },
+  'Student': { badge: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/60 dark:text-indigo-300', icon: 'bg-indigo-50 text-indigo-600 border-indigo-200/60 dark:bg-indigo-950/60' },
+  'Attendance': { badge: 'bg-teal-50 text-teal-700 border-teal-200/80 dark:bg-teal-950/60 dark:text-teal-300', icon: 'bg-teal-50 text-teal-600 border-teal-200/60 dark:bg-teal-950/60' },
+  'Examination': { badge: 'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/60 dark:text-rose-300', icon: 'bg-rose-50 text-rose-600 border-rose-200/60 dark:bg-rose-950/60' },
+  'Communication': { badge: 'bg-purple-50 text-purple-700 border-purple-200/80 dark:bg-purple-950/60 dark:text-purple-300', icon: 'bg-purple-50 text-purple-600 border-purple-200/60 dark:bg-purple-950/60' },
+  'Accounts': { badge: 'bg-cyan-50 text-cyan-700 border-cyan-200/80 dark:bg-cyan-950/60 dark:text-cyan-300', icon: 'bg-cyan-50 text-cyan-600 border-cyan-200/60 dark:bg-cyan-950/60' },
+  'Timetable Pro': { badge: 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/60 dark:text-sky-300', icon: 'bg-sky-50 text-sky-600 border-sky-200/60 dark:bg-sky-950/60' },
+  'Master': { badge: 'bg-slate-100 text-slate-700 border-slate-200/80 dark:bg-slate-800 dark:text-slate-300', icon: 'bg-slate-100 text-slate-600 border-slate-200/60 dark:bg-slate-800' },
+  'Logistics': { badge: 'bg-orange-50 text-orange-700 border-orange-200/80 dark:bg-orange-950/60 dark:text-orange-300', icon: 'bg-orange-50 text-orange-600 border-orange-200/60 dark:bg-orange-950/60' },
+  'Library': { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300', icon: 'bg-emerald-50 text-emerald-600 border-emerald-200/60 dark:bg-emerald-950/60' },
+  'Inventory': { badge: 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300', icon: 'bg-amber-50 text-amber-600 border-amber-200/60 dark:bg-amber-950/60' },
+  'Leave': { badge: 'bg-red-50 text-red-700 border-red-200/80 dark:bg-red-950/60 dark:text-red-300', icon: 'bg-red-50 text-red-600 border-red-200/60 dark:bg-red-950/60' },
+  'HR': { badge: 'bg-green-50 text-green-700 border-green-200/80 dark:bg-green-950/60 dark:text-green-300', icon: 'bg-green-50 text-green-600 border-green-200/60 dark:bg-green-950/60' }
+};
+
 // Comprehensive search index of ERP modules
 const MODULES_INDEX = [
   // Overview / Dashboard
@@ -614,17 +634,17 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
   };
 
   return typeof document !== 'undefined' ? createPortal(
-    <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-14 sm:pt-20 p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-10 sm:pt-16 p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
       {/* Backdrop dismiss */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
       {/* Main Spotlight Container */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[82vh] before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-indigo-500/0 before:via-indigo-500 before:to-indigo-500/0">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl shadow-indigo-950/25 overflow-hidden flex flex-col max-h-[84vh] ring-1 ring-slate-900/5 before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-gradient-to-r before:from-indigo-500/10 before:via-indigo-500 before:to-violet-500/10">
         
         {/* Top Search Input Bar */}
-        <div className="flex items-center px-4 sm:px-5 py-4 border-b border-slate-200/80 dark:border-slate-800 gap-3.5 shrink-0 bg-slate-50/50 dark:bg-slate-850/50">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200/50 dark:border-indigo-800/50 shadow-2xs">
-            <Search className="w-4 h-4" />
+        <div className="flex items-center px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-slate-800/80 gap-3.5 shrink-0 bg-white dark:bg-slate-900">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500/25">
+            <Search className="w-4.5 h-4.5" />
           </div>
           <input
             ref={inputRef}
@@ -636,18 +656,18 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
             }}
             onKeyDown={handleInputKeyDown}
             placeholder="Search modules, teachers, students, fees, or instant actions..."
-            className="w-full text-sm sm:text-base font-medium bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+            className="w-full text-base sm:text-[17px] font-semibold bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none tracking-tight"
           />
           {query ? (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               title="Clear search"
             >
               <X className="w-4 h-4" />
             </button>
           ) : (
-            <div className="hidden sm:flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-800 text-slate-500 border border-slate-300/60 dark:border-slate-700">
+            <div className="hidden sm:flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200/80 dark:border-slate-700">
               <kbd>ESC</kbd>
             </div>
           )}
@@ -655,138 +675,147 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
 
         {/* Typo Correction / Did You Mean Banner */}
         {activeSuggestion && query.trim() && query.toLowerCase().trim() !== activeSuggestion.toLowerCase() && (
-          <div className="mx-3 my-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/50 dark:to-violet-950/50 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-between text-xs text-indigo-900 dark:text-indigo-200 animate-in fade-in">
+          <div className="mx-4 my-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-violet-50/80 to-purple-50/60 dark:from-indigo-950/60 dark:to-violet-950/60 border border-indigo-200/80 dark:border-indigo-800/60 flex items-center justify-between text-xs text-indigo-900 dark:text-indigo-200 animate-in fade-in">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <span>
-                Did you mean: <strong className="font-bold underline cursor-pointer hover:text-indigo-600" onClick={() => setQuery(activeSuggestion)}>{activeSuggestion}</strong>? Showing intelligent fuzzy matches.
+                Did you mean: <strong className="font-extrabold underline cursor-pointer hover:text-indigo-700" onClick={() => setQuery(activeSuggestion)}>{activeSuggestion}</strong>? Showing intelligent fuzzy matches.
               </span>
             </div>
             <button
               onClick={() => setQuery(activeSuggestion)}
-              className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 shadow-2xs transition cursor-pointer"
+              className="text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-0.5 rounded-lg shadow-2xs transition cursor-pointer"
             >
               Apply
             </button>
           </div>
         )}
 
-        {/* Filter Pills Bar */}
-        <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {[
-            { id: 'ALL', label: 'All Results', icon: Command, count: combinedResults.length },
-            { id: 'MODULES', label: 'Modules', icon: Folder, count: matchedModules.length },
-            { id: 'TEACHERS', label: 'Teachers', icon: Users, count: matchedTeachers.length },
-            { id: 'STUDENTS', label: 'Students', icon: GraduationCap, count: matchedStudents.length },
-            { id: 'ACTIONS', label: 'Quick Actions', icon: Zap, count: matchedActions.length }
-          ].map(tab => {
-            const IconComp = tab.icon;
-            const isActive = activeFilter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveFilter(tab.id);
-                  setSelectedIndex(0);
-                }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  isActive ? 'bg-indigo-700/80 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+        {/* Segmented Filter Pills Bar */}
+        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-900/60 shrink-0">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-800/80 rounded-2xl overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {[
+              { id: 'ALL', label: 'All Results', icon: Command, count: combinedResults.length },
+              { id: 'MODULES', label: 'Modules', icon: Folder, count: matchedModules.length },
+              { id: 'TEACHERS', label: 'Teachers', icon: Users, count: matchedTeachers.length },
+              { id: 'STUDENTS', label: 'Students', icon: GraduationCap, count: matchedStudents.length },
+              { id: 'ACTIONS', label: 'Quick Actions', icon: Zap, count: matchedActions.length }
+            ].map(tab => {
+              const IconComp = tab.icon;
+              const isActive = activeFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveFilter(tab.id);
+                    setSelectedIndex(0);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50'
+                  }`}
+                >
+                  <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isActive
+                      ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Search Results List */}
         <div className="overflow-y-auto flex-1 p-2 space-y-1">
           {combinedResults.length === 0 ? (
-            <div className="p-12 text-center text-slate-400">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
-                <Search className="w-6 h-6" />
+            <div className="py-14 px-4 text-center text-slate-400">
+              <div className="w-14 h-14 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3.5 shadow-inner">
+                <Search className="w-7 h-7 text-slate-400" />
               </div>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No results found for "{query}"</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No results found for "{query}"</p>
               <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
-                Try searching for a module (e.g. <em>Dashboard</em>, <em>Daily Test</em>, <em>Fee Collection</em>, <em>Attendance</em>), teacher, or student name.
+                Try searching for a module (e.g. <em>Dashboard</em>, <em>Daily Test</em>, <em>Fee Collection</em>, <em>Attendance</em>), teacher name, or student admission no.
               </p>
             </div>
           ) : (
             combinedResults.map((item, idx) => {
               const isSelected = idx === selectedIndex;
               const IconComp = item.icon || ChevronRight;
+              const catConfig = CATEGORY_STYLES[item.category] || { badge: 'bg-slate-100 text-slate-700 border-slate-200/80', icon: 'bg-indigo-50 text-indigo-600 border-indigo-200/60' };
 
               return (
                 <div
                   key={`${item.type}-${item.id || idx}`}
                   onClick={() => handleSelect(item)}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`search-result-item p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between group ${
+                  className={`search-result-item p-3 rounded-2xl cursor-pointer transition-all flex items-center justify-between group ${
                     isSelected
-                      ? 'bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 shadow-xs'
-                      : 'hover:bg-slate-50/90 dark:hover:bg-slate-800/40 border border-transparent'
+                      ? 'bg-gradient-to-r from-indigo-50/90 via-violet-50/70 to-indigo-50/40 dark:from-indigo-950/70 dark:via-violet-950/50 dark:to-indigo-950/30 border border-indigo-200/90 dark:border-indigo-800/80 shadow-xs border-l-4 border-l-indigo-600'
+                      : 'hover:bg-slate-50/90 dark:hover:bg-slate-800/50 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Item Icon */}
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Item Icon Box with contextual color */}
+                    <div className={`w-9.5 h-9.5 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs transition-transform group-hover:scale-105 ${
                       item.type === 'module'
-                        ? 'bg-indigo-50 text-indigo-600 border-indigo-200/60 dark:bg-indigo-950/60 dark:border-indigo-800/60'
+                        ? catConfig.icon
                         : item.type === 'teacher'
-                        ? 'bg-blue-50 text-blue-600 border-blue-200/60 dark:bg-blue-950/60 dark:border-blue-800/60'
+                        ? 'bg-blue-50 text-blue-600 border-blue-200/60 dark:bg-blue-950/60'
                         : item.type === 'student'
-                        ? 'bg-amber-50 text-amber-600 border-amber-200/60 dark:bg-amber-950/60 dark:border-amber-800/60'
-                        : 'bg-emerald-50 text-emerald-600 border-emerald-200/60 dark:bg-emerald-950/60 dark:border-emerald-800/60'
+                        ? 'bg-amber-50 text-amber-600 border-amber-200/60 dark:bg-amber-950/60'
+                        : 'bg-emerald-50 text-emerald-600 border-emerald-200/60 dark:bg-emerald-950/60'
                     }`}>
                       {item.type === 'teacher' ? (
-                        <Users className="w-4 h-4" />
+                        <Users className="w-4.5 h-4.5" />
                       ) : item.type === 'student' ? (
-                        <GraduationCap className="w-4 h-4" />
+                        <GraduationCap className="w-4.5 h-4.5" />
                       ) : (
-                        <IconComp className="w-4 h-4" />
+                        <IconComp className="w-4.5 h-4.5" />
                       )}
                     </div>
 
                     {/* Text Details */}
-                    <div className="min-w-0">
+                    <div className="min-w-0 leading-snug">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <h4 className={`text-xs sm:text-sm font-bold truncate transition-colors ${
+                          isSelected
+                            ? 'text-indigo-950 dark:text-white'
+                            : 'text-slate-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
+                        }`}>
                           {item.title || item.name}
                         </h4>
 
                         {/* Badges according to type */}
                         {item.type === 'module' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 ${catConfig.badge}`}>
                             {item.category}
                           </span>
                         )}
                         {item.type === 'teacher' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200/70 dark:border-blue-800">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/80 dark:bg-blue-950 dark:text-blue-300 shrink-0">
                             {item.subject}
                           </span>
                         )}
                         {item.type === 'student' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-950 dark:text-amber-300 shrink-0">
                             Class {item.className}-{item.section} • Roll: #{item.rollNo}
                           </span>
                         )}
                         {item.type === 'action' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950 dark:text-emerald-300 shrink-0 flex items-center gap-1">
                             <Zap className="w-3 h-3 text-emerald-500" /> Action
                           </span>
                         )}
                       </div>
 
                       {/* Subtitle / Description */}
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                      <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {item.type === 'module' && item.desc}
                         {item.type === 'teacher' && `${item.department} • Contact: ${item.phone}`}
                         {item.type === 'student' && `Adm No: ${item.admNo} • Father: ${item.fatherName} • Phone: ${item.phone}`}
@@ -798,8 +827,8 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
                   {/* Right side navigation indicator */}
                   <div className="flex items-center gap-2 shrink-0 pl-2">
                     {isSelected ? (
-                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100/70 dark:bg-indigo-900/60 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-700 animate-in fade-in">
-                        Open <kbd className="font-mono">↵</kbd>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-600 px-2.5 py-1 rounded-lg shadow-sm animate-in fade-in">
+                        Open <kbd className="font-mono text-[10px]">↵</kbd>
                       </span>
                     ) : (
                       <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors" />
@@ -812,15 +841,25 @@ export function GlobalSearchModal({ isOpen, onClose, onNavigate }) {
         </div>
 
         {/* Modal Bottom Helper Bar */}
-        <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
-          <div className="flex items-center gap-3">
-            <span>Navigate: <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">↑</kbd> <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">↓</kbd></span>
-            <span>Open: <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">↵</kbd></span>
-            <span>Dismiss: <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">Esc</kbd></span>
+        <div className="px-5 py-3 bg-slate-50/90 dark:bg-slate-850 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11.5px] text-slate-500 dark:text-slate-400 shrink-0">
+          <div className="flex items-center gap-3 font-medium">
+            <span className="flex items-center gap-1">
+              <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs text-[10px] font-bold">↑</kbd>
+              <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs text-[10px] font-bold">↓</kbd>
+              <span className="ml-0.5">Navigate</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs text-[10px] font-bold">↵</kbd>
+              <span className="ml-0.5">Open</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="font-mono bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs text-[10px] font-bold">Esc</kbd>
+              <span className="ml-0.5">Close</span>
+            </span>
           </div>
           <div className="flex items-center gap-1.5 text-slate-400">
             <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>AI Spotlight • <strong>School ERP Pro</strong></span>
+            <span>Spotlight 2.0 • <strong>School ERP Enterprise</strong></span>
           </div>
         </div>
       </div>

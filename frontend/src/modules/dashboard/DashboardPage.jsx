@@ -29,15 +29,12 @@ import {
   Activity,
   PartyPopper,
   CheckCircle2,
-  XCircle,
   HelpCircle,
-  Search,
   CornerUpRight
 } from 'lucide-react';
 import StatsCard from '../../components/StatsCard';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
 import { cn } from '../../utils/cn';
-import { smartSearch } from '../../utils/smartSearch';
 
 export function DashboardPage({ onNavigate }) {
   const { schoolId } = useAuth();
@@ -122,115 +119,8 @@ export function DashboardPage({ onNavigate }) {
 
   const birthdays = [];
 
-  // ── Module search data ──
-  const ALL_MODULES = [
-    { label: 'Dashboard', path: '/', icon: '🏠', keywords: ['dashboard', 'asboard', 'dashbord', 'deshboard', 'home'] },
-    { label: 'Daily Test Marks Entry', path: '/daily-test-entry', icon: '🏆', keywords: ['daily test', 'testmaster', 'daly test', 'marks', 'entry', 'dt'] },
-    { label: 'Daily Test Class Results', path: '/daily-test-ranking', icon: '📊', keywords: ['daily test results', 'matrix', 'rank', 'toppers', 'parinam'] },
-    { label: 'Student Performance', path: '/student-performance', icon: '📈', keywords: ['student performance', 'performance', 'pradarshan', 'top 3'] },
-    { label: 'Teacher Performance', path: '/teacher-performance', icon: '👩‍🏫', keywords: ['teacher performance', 'performance', 'faculty rating'] },
-    { label: 'Fee Voucher Entry', path: '/fee-voucher-entry', icon: '🧾', keywords: ['fee voucher', 'voucher', 'receipt slip', 'challan'] },
-
-    { label: 'Edit School', path: '/edit-school', icon: '🏫' },
-    { label: 'WhatsApp Link', path: '/whatsapp-link', icon: '💬' },
-    { label: 'Settings & Permissions', path: '/settings', icon: '⚙️' },
-    { label: 'Student Registration', path: '/student-registration', icon: '📝' },
-    { label: 'Student List', path: '/student-list', icon: '👨‍🎓' },
-    { label: 'Assign Roll/Feebook No', path: '/assign-roll', icon: '🔢' },
-    { label: 'Biometric Machine Sync', path: '/biometric-sync', icon: '🔏' },
-    { label: 'Promotion', path: '/promotion', icon: '🎓' },
-    { label: 'Student Portfolio', path: '/student-portfolio', icon: '📁' },
-    { label: 'ID Card Generator', path: '/id-card', icon: '🪪' },
-    { label: 'Admit Card Generator', path: '/admit-card', icon: '🗂️' },
-    { label: 'Exam Date Sheet', path: '/exam-date-sheet', icon: '📅' },
-    { label: 'Student Reports', path: '/student-reports', icon: '📊' },
-    { label: 'Class Master', path: '/class-master', icon: '🏛️' },
-    { label: 'Group Subject Master', path: '/group-subject-master', icon: '📚' },
-    { label: 'Subject Master', path: '/subject', icon: '📖' },
-    { label: 'Subject Link', path: '/subject-link', icon: '🔗' },
-    { label: 'Stream Master', path: '/stream-master', icon: '🌊' },
-    { label: 'Fee Collection', path: '/fee-collection', icon: '💰' },
-    { label: 'Fee Reports', path: '/fee-reports', icon: '📈' },
-    { label: 'CC/BC/TF Generator', path: '/cc-bc-tf', icon: '📜' },
-    { label: 'TC Generation', path: '/tc-generation', icon: '📋' },
-    { label: 'Timetable', path: '/timetable', icon: '📆' },
-    { label: 'Attendance', path: '/attendance', icon: '✅' },
-    { label: 'Staff Attendance', path: '/staff-attendance', icon: '👔' },
-    { label: 'Hostel Master', path: '/hostel-master', icon: '🏠' },
-    { label: 'Transport', path: '/transport', icon: '🚌' },
-    { label: 'Library', path: '/library', icon: '📚' },
-    { label: 'Stationery', path: '/stationery', icon: '🖊️' },
-    { label: 'SMS / Notifications', path: '/sms', icon: '📱' },
-    { label: 'Notice Board', path: '/notice-board', icon: '📌' },
-    { label: 'Leave Management', path: '/leave-management', icon: '🗓️' },
-    { label: 'Payroll', path: '/payroll', icon: '💵' },
-    { label: 'Front Office', path: '/front-office', icon: '🏢' },
-    { label: 'Announcements Hub', path: '/announcements', icon: '📢' },
-    { label: 'CRM Dashboard', path: '/crm', icon: '🤝' },
-    { label: 'Enquiries', path: '/enquiries', icon: '❓' },
-    { label: 'Greeting Card', path: '/greeting-card', icon: '🎴' },
-    { label: 'Bulk Editing', path: '/bulk-editing', icon: '✏️' },
-    { label: 'Lesson Planning', path: '/lesson-planning', icon: '📝' },
-    { label: 'Homework', path: '/homework', icon: '📓' },
-    { label: 'Study Material', path: '/study-material', icon: '📗' },
-    { label: 'Upload Pre Year Paper', path: '/prev-year-papers', icon: '📄' },
-    { label: 'QR Code / Links', path: '/qr-code', icon: '🔳' },
-    { label: 'Accounts & Expense', path: '/accounts', icon: '🧾' },
-    { label: 'Examination', path: '/examination', icon: '📝' },
-  ];
-
-  const [moduleSearch, setModuleSearch] = useState('');
-  const [showModuleDropdown, setShowModuleDropdown] = useState(false);
-
-  const searchRes = moduleSearch.trim().length >= 1
-    ? smartSearch(
-        ALL_MODULES.map(m => ({ ...m, title: m.label })),
-        moduleSearch,
-        ['title', 'label', 'keywords']
-      )
-    : { results: [], didYouMean: null };
-
-  const filteredModules = searchRes.results.slice(0, 8);
-  const moduleDidYouMean = searchRes.didYouMean;
-
   return (
     <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">
-      {/* ── Module Quick Search Widget ── */}
-      <div className="relative">
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs px-4 py-3 flex items-center gap-3">
-          <Search className="w-4 h-4 text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="🔍  Search modules... (e.g. Fee, Attendance, Certificate)"
-            value={moduleSearch}
-            onChange={(e) => { setModuleSearch(e.target.value); setShowModuleDropdown(true); }}
-            onFocus={() => setShowModuleDropdown(true)}
-            onBlur={() => setTimeout(() => setShowModuleDropdown(false), 180)}
-            className="flex-1 text-sm text-slate-700 bg-transparent outline-none placeholder-slate-400"
-          />
-          {moduleSearch && (
-            <button onClick={() => { setModuleSearch(''); setShowModuleDropdown(false); }} className="text-slate-400 hover:text-slate-600">
-              <XCircle className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-        {showModuleDropdown && filteredModules.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
-            {filteredModules.map((mod, i) => (
-              <button
-                key={i}
-                onMouseDown={() => { onNavigate && onNavigate(mod.path); setModuleSearch(''); setShowModuleDropdown(false); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-indigo-50 transition-colors border-b border-slate-100 last:border-0"
-              >
-                <span className="text-base">{mod.icon}</span>
-                <span className="font-medium text-slate-800">{mod.label}</span>
-                <span className="ml-auto text-[11px] text-slate-400 font-mono">{mod.path}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* ── UAB Top 4 KPI Cards Banner ── */}
       <div className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
