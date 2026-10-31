@@ -39,7 +39,7 @@ import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrim
 import { cn } from '../../utils/cn';
 
 export function DashboardPage({ onNavigate }) {
-  const { schoolId, schoolName, switchSchool } = useAuth();
+  const { schoolId } = useAuth();
 
   const [stats, setStats] = useState(() => tenantStore.getDashboardStats(schoolId));
   const [activeReminderTab, setActiveReminderTab] = useState('Today');
@@ -104,10 +104,6 @@ export function DashboardPage({ onNavigate }) {
     if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)} k`;
     return `₹${amount}`;
   };
-
-  const isSchoolA = schoolId === 'sch_jd_intl';
-  const isSchoolB = schoolId === 'sch_dps_branch2';
-  const isNewSchool = !isSchoolA && !isSchoolB;
 
   const expectedAmount = stats?.feeRevenueSummary?.totalRevenue || 0;
   const receivedAmount = stats?.feeRevenueSummary?.totalReceivedYTD || 0;
@@ -187,51 +183,6 @@ export function DashboardPage({ onNavigate }) {
 
   return (
     <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">
-      {/* Multi-Tenant Header & Branch Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            'w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-2xs shrink-0',
-            isNewSchool ? 'bg-amber-600' : isSchoolB ? 'bg-emerald-600' : 'bg-indigo-600'
-          )}>
-            <Building2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-tight">
-                {schoolName}
-              </h1>
-              <span className={cn(
-                'text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider',
-                isNewSchool
-                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                  : isSchoolB
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                  : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-              )}>
-                {isNewSchool ? 'Fresh Tenant' : isSchoolB ? 'Tenant B' : 'Tenant A'}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-              Multi-tenant data isolation active &bull; Academic Session 2026-2027
-            </p>
-          </div>
-        </div>
-
-        {/* 1-Tap Quick Switch Demo Tenant */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => switchSchool(isSchoolB ? 'sch_jd_intl' : 'sch_dps_branch2')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-            title="Switch demo school for instant preview"
-          >
-            <span>Switch Demo: {isSchoolB ? 'School A' : 'School B'}</span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
-          </button>
-        </div>
-      </div>
-
       {/* ── Module Quick Search Widget ── */}
       <div className="relative">
         <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs px-4 py-3 flex items-center gap-3">
