@@ -539,6 +539,7 @@ function AppContent() {
                 return <StudentPerformancePage onNavigate={handleNavigate} />;
               case '/fee-collect':
               case '/fee-collection':
+              case '/fee-voucher-entry':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;
               case '/fee-head-group':
                 return <FeeHeadGroupPage onNavigate={handleNavigate} />;

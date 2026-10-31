@@ -140,10 +140,10 @@ export function Navbar({
         {/* ================= RIGHT SECTION: Sleek Controls & User Profile ================= */}
         <div className="flex items-center gap-2 shrink-0">
           
-          {/* Quick Offline Fee Voucher Entry Portal */}
+          {/* Quick Fee Collection Entry Portal */}
           <button
-            title="Offline Fee Collection Voucher"
-            onClick={() => onNavigate && onNavigate('/fee-voucher-entry')}
+            title="Collect Student Fee"
+            onClick={() => onNavigate && onNavigate('/fee-collection')}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/90 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-2xs hover:shadow-xs"
           >
             <Receipt className="w-3.5 h-3.5 text-emerald-600" />
