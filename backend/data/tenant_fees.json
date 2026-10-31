@@ -57,6 +57,23 @@
         ],
         "receipts": [
           {
+            "id": "rec_1793422627519",
+            "receiptNo": "JD-REC-002",
+            "admNo": "1002",
+            "studentName": "Dev Sharma",
+            "className": "I - A",
+            "schoolId": "sch_jd_intl",
+            "paidAmount": 7500,
+            "payMode": "Cash",
+            "chequeNo": "",
+            "bankName": "",
+            "remarks": "njnj",
+            "date": "2026-10-31",
+            "createdAt": "2026-10-31T04:57:07.519Z",
+            "status": "SUCCESS",
+            "receiptType": "COUNTER"
+          },
+          {
             "id": "rec_1793267733512",
             "receiptNo": "JD-REC-001",
             "admNo": "1002",
@@ -82,6 +99,23 @@
   "TENANT_RECEIPTS": {
     "sch_jd_intl": [
       {
+        "id": "rec_1793422627519",
+        "receiptNo": "JD-REC-002",
+        "admNo": "1002",
+        "studentName": "Dev Sharma",
+        "className": "I - A",
+        "schoolId": "sch_jd_intl",
+        "paidAmount": 7500,
+        "payMode": "Cash",
+        "chequeNo": "",
+        "bankName": "",
+        "remarks": "njnj",
+        "date": "2026-10-31",
+        "createdAt": "2026-10-31T04:57:07.519Z",
+        "status": "SUCCESS",
+        "receiptType": "COUNTER"
+      },
+      {
         "id": "rec_1793267733512",
         "receiptNo": "JD-REC-001",
         "admNo": "1002",
@@ -102,11 +136,29 @@
     "sch_dps_branch2": []
   },
   "TENANT_FEE_HEAD_GROUPS": {
-    "sch_jd_intl": [],
+    "sch_jd_intl": [
+      {
+        "id": "1793422399033",
+        "headGroup": "ase hi fee",
+        "priority": 1,
+        "active": true
+      }
+    ],
     "sch_dps_branch2": []
   },
   "TENANT_FEE_HEADS": {
-    "sch_jd_intl": [],
+    "sch_jd_intl": [
+      {
+        "id": "1793422422928",
+        "feeHead": "ase hi",
+        "priority": 1,
+        "applyFor": "Both",
+        "gender": "Both",
+        "installment": "Quarterly",
+        "feeType": "dayscholar",
+        "isBoard": false
+      }
+    ],
     "sch_dps_branch2": []
   },
   "TENANT_CONCESSION_TYPES": {
@@ -118,7 +170,29 @@
     "sch_dps_branch2": []
   },
   "TENANT_FEE_STRUCTURES": {
-    "sch_jd_intl": [],
+    "sch_jd_intl": [
+      {
+        "id": "1793422522089",
+        "className": "III",
+        "stream": "None",
+        "structureType": "Quarterly",
+        "grandTotal": 40000,
+        "heads": [
+          {
+            "feeHead": "Tuition Fee",
+            "amount": 35000
+          },
+          {
+            "feeHead": "Activity Fee",
+            "amount": 3000
+          },
+          {
+            "feeHead": "Examination Fee",
+            "amount": 2000
+          }
+        ]
+      }
+    ],
     "sch_dps_branch2": []
   },
   "TENANT_STUDENT_CONCESSIONS": {
