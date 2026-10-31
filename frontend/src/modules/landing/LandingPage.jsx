@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { PwaDownloadButton } from '../../pwa/PwaDownloadButton';
 import {
   GraduationCap,
   ShieldCheck,
@@ -36,12 +37,16 @@ import {
   Cpu,
   FolderGit2,
   DollarSign,
-  Shield
+  Shield,
+  Menu,
+  X
 } from 'lucide-react';
 
 export function LandingPage({ onNavigate }) {
   const { login } = useAuth();
   const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMockTab, setMobileMockTab] = useState('fees');
   const [selectedDemoTenant, setSelectedDemoTenant] = useState('sch_jd_intl');
 
   const handleLaunchDemo = (tenantId = 'sch_jd_intl') => {
@@ -172,29 +177,29 @@ export function LandingPage({ onNavigate }) {
   ];
 
   return (
-    <div className="w-full bg-white text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900 scroll-smooth">
+    <div className="w-full bg-white text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900 scroll-smooth overflow-x-hidden">
       
       {/* ========================================================
-          1. TOP NAVIGATION BAR (Exact Reference Match)
+          1. TOP NAVIGATION BAR (Fully Mobile Responsive)
       ======================================================== */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           
           {/* Logo: Circular Icon + SchoolNexus Brand */}
           <div
             className="flex items-center space-x-2.5 cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="w-10 h-10 rounded-full bg-[#232688] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#232688] flex items-center justify-center text-white shadow-xs">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <span className="text-xl font-black text-[#232688] tracking-tight">
+            <span className="text-lg sm:text-xl font-black text-[#232688] tracking-tight">
               SchoolNexus
             </span>
           </div>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center space-x-10 text-sm font-semibold text-slate-600">
+          {/* Nav Links (Desktop) */}
+          <nav className="hidden md:flex items-center space-x-8 lg:space-x-10 text-sm font-semibold text-slate-600">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -206,13 +211,12 @@ export function LandingPage({ onNavigate }) {
             ))}
           </nav>
 
-          {/* Action Buttons: Sign In (Pill) + Get In Touch (Link) */}
-          {/* Action Buttons: Sign In (Pill) + Get Started (Link) */}
-          <div className="flex items-center space-x-5">
+          {/* Action Buttons: Sign In (Pill) + Get Started (Link) + Mobile Hamburger */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('/login')}
-              className="lp-btn px-6 py-2.5 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer"
+              className="lp-btn px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer"
             >
               Sign In
             </button>
@@ -220,18 +224,69 @@ export function LandingPage({ onNavigate }) {
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('/register')}
-              className="text-xs sm:text-sm font-bold text-[#232688] hover:text-indigo-950 transition-colors cursor-pointer"
+              className="hidden sm:inline-flex text-xs sm:text-sm font-bold text-[#232688] hover:text-indigo-950 transition-colors cursor-pointer"
             >
               Get Started
             </button>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-xl text-slate-700 hover:text-[#232688] hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Toggle navigation"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-100 bg-white/98 backdrop-blur-md px-4 pt-3 pb-5 space-y-3 shadow-lg">
+            <div className="flex flex-col space-y-1">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-indigo-50 hover:text-[#232688] transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex flex-col space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onNavigate) onNavigate('/register');
+                }}
+                className="w-full py-2.5 rounded-xl border border-[#232688] text-[#232688] text-xs font-bold hover:bg-indigo-50 transition-colors text-center"
+              >
+                Get Started Free
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setDemoModalOpen(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors text-center"
+              >
+                Launch Demo Sandbox
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ========================================================
-          2. HERO SECTION (100% Exact Reference Reproduction)
+          2. HERO SECTION (100% Exact Reference Reproduction - Mobile Optimized)
       ======================================================== */}
-      <section className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-28 lg:pb-36 bg-white">
+      <section className="relative overflow-hidden pt-10 pb-16 sm:pt-20 sm:pb-24 lg:pt-28 lg:pb-36 bg-white">
         
         {/* Soft Peach/Blush Diagonal Shape Covering Left Half */}
         <div
@@ -244,37 +299,37 @@ export function LandingPage({ onNavigate }) {
 
         {/* Top-Right Soft Coral Half-Circle Blob */}
         <div
-          className="absolute top-0 right-0 w-80 h-44 rounded-bl-[160px] pointer-events-none z-0"
+          className="absolute top-0 right-0 w-48 sm:w-80 h-28 sm:h-44 rounded-bl-[160px] pointer-events-none z-0"
           style={{
             background: 'linear-gradient(135deg, #fba691 0%, #fcb6a3 100%)'
           }}
         />
 
         {/* WBPRO Ambient Background Drift Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-indigo-300/20 blur-3xl pointer-events-none lp-orb-1 z-0" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full bg-rose-200/25 blur-3xl pointer-events-none lp-orb-2 z-0" />
+        <div className="absolute top-1/4 left-1/4 w-48 sm:w-80 h-48 sm:h-80 rounded-full bg-indigo-300/20 blur-3xl pointer-events-none lp-orb-1 z-0" />
+        <div className="absolute top-1/3 right-1/4 w-60 sm:w-96 h-60 sm:h-96 rounded-full bg-rose-200/25 blur-3xl pointer-events-none lp-orb-2 z-0" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-8 items-center">
             
             {/* Left Column: Headline, Subtitle, Pill Buttons */}
-            <div className="lg:col-span-5 space-y-6 text-left">
-              <h1 className="lp-hero-h1-unified text-4xl sm:text-5xl lg:text-[3.35rem] font-extrabold tracking-tight leading-[1.12]">
+            <div className="lg:col-span-5 space-y-4 sm:space-y-6 text-left">
+              <h1 className="lp-hero-h1-unified text-3xl sm:text-5xl lg:text-[3.35rem] font-extrabold tracking-tight leading-[1.14]">
                 The World's Best <br />
                 100% Next-Gen ERP
               </h1>
 
-              <p className="text-base text-slate-600 leading-relaxed max-w-md font-normal">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-md font-normal">
                 Used by more than <strong>500+ progressive schools</strong> across the country,
                 SchoolNexus is the modern cloud-native alternative to <strong>clunky legacy ERPs</strong>.
               </p>
 
               {/* Exact CTA Buttons: Sign In (Purple Pill) + Get Started (Bordered Pill) */}
-              <div className="flex items-center gap-4 pt-2">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 pt-1 sm:pt-2">
                 <button
                   type="button"
                   onClick={() => onNavigate && onNavigate('/login')}
-                  className="lp-btn px-7 py-3 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-sm shadow-md shadow-indigo-900/15 cursor-pointer"
+                  className="lp-btn flex-1 sm:flex-none px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-900/15 cursor-pointer text-center"
                 >
                   Sign In
                 </button>
@@ -282,18 +337,18 @@ export function LandingPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => onNavigate && onNavigate('/register')}
-                  className="px-7 py-3 rounded-full border-2 border-[#232688] text-[#232688] hover:bg-[#232688]/5 bg-transparent font-bold text-sm transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                  className="flex-1 sm:flex-none px-6 sm:px-7 py-2.5 sm:py-3 rounded-full border-2 border-[#232688] text-[#232688] hover:bg-[#232688]/5 bg-transparent font-bold text-xs sm:text-sm transition-all transform hover:-translate-y-0.5 cursor-pointer text-center"
                 >
                   Get Started
                 </button>
               </div>
             </div>
 
-            {/* Right Column: 3D Layered Mockup Cluster (Exact Reference Layout) */}
-            <div className="lg:col-span-7 relative flex justify-center lg:justify-end pt-12 lg:pt-10">
+            {/* Right Column: 3D Layered Mockup Cluster */}
+            <div className="lg:col-span-7 relative flex justify-center lg:justify-end pt-8 sm:pt-12 lg:pt-10 w-full">
               
-              {/* Pink/Coral Dot Matrix Grid (Tucked under bottom-left corner of screen) */}
-              <div className="absolute -left-6 bottom-4 w-32 h-28 pointer-events-none z-0">
+              {/* Pink/Coral Dot Matrix Grid (Visible on sm and up) */}
+              <div className="hidden sm:block absolute -left-6 bottom-4 w-32 h-28 pointer-events-none z-0">
                 <div className="grid grid-cols-6 gap-2.5">
                   {[...Array(30)].map((_, i) => (
                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#f87171]" />
@@ -301,16 +356,16 @@ export function LandingPage({ onNavigate }) {
                 </div>
               </div>
 
-              {/* Deep Royal Blue Card (Prominently Peeking Out from Behind the Screen) */}
-              <div className="absolute -top-7 right-20 w-80 h-44 bg-[#232688] rounded-3xl shadow-xl transform rotate-2 z-0" />
+              {/* Deep Royal Blue Card (Visible on sm and up) */}
+              <div className="hidden sm:block absolute -top-7 right-8 sm:right-20 w-64 sm:w-80 h-36 sm:h-44 bg-[#232688] rounded-3xl shadow-xl transform rotate-2 z-0" />
 
-              {/* Top-Right: Analytics Bar Chart Card (Floats Top Right with WBPRO 3D Chip Tilt) */}
-              <div className="absolute -top-10 -right-2 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 w-64 z-20 lp-chip-2">
+              {/* Top-Right: Analytics Bar Chart Card (Floats Top Right with WBPRO 3D Chip Tilt on sm and up) */}
+              <div className="hidden sm:block absolute -top-10 -right-2 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 w-64 z-20 lp-chip-2">
                 <div className="flex items-center justify-between pb-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ATTENDANCE & FEES</span>
                   <span className="text-xs font-black text-emerald-600 font-mono">96.5%</span>
                 </div>
-                {/* Vertical Bar Chart Mockup (Green, Violet, Orange alternating) */}
+                {/* Vertical Bar Chart Mockup */}
                 <div className="flex items-end justify-between space-x-1.5 h-14 pt-2">
                   <div className="w-2.5 bg-emerald-400 rounded-t h-8" />
                   <div className="w-2.5 bg-emerald-500 rounded-t h-12" />
@@ -329,72 +384,111 @@ export function LandingPage({ onNavigate }) {
                 </div>
               </div>
 
-              {/* Top-Center: Floating Avatar Card with WBPRO Chip Float */}
-              <div className="absolute -top-7 left-14 bg-white rounded-2xl shadow-xl border border-slate-100 py-3 px-4 flex items-center space-x-3 z-20 lp-chip-1">
-                <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 overflow-hidden flex items-center justify-center text-xl">
+              {/* Floating Avatar Card: Admission Confirmed */}
+              <div className="absolute -top-4 left-2 sm:-top-7 sm:left-14 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 sm:py-3 px-2.5 sm:px-4 flex items-center space-x-2 sm:space-x-3 z-20 lp-chip-1 max-w-[60%] sm:max-w-none">
+                <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-amber-100 border border-amber-200 overflow-hidden flex items-center justify-center text-sm sm:text-xl shrink-0">
                   🎓
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold text-slate-800 leading-none">Admission Confirmed</p>
-                  <p className="text-[9px] text-slate-400 leading-none">Rohan Sharma &bull; Class 10-A</p>
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <p className="text-[10px] sm:text-[11px] font-bold text-slate-800 leading-none truncate">Admission Confirmed</p>
+                  <p className="text-[8px] sm:text-[9px] text-slate-400 leading-none truncate">Rohan Sharma &bull; Class 10-A</p>
                 </div>
               </div>
 
+              {/* Mobile-Only Floating Attendance Pill */}
+              <div className="sm:hidden absolute -top-4 right-2 bg-white/95 backdrop-blur-xs rounded-full shadow-md border border-emerald-100 py-1 px-2.5 flex items-center space-x-1.5 z-20 lp-chip-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-mono font-bold text-emerald-700">96.5% Synced</span>
+              </div>
+
               {/* Main White POS Terminal with WBPRO Smooth Vertical Float */}
-              <div className="relative z-10 w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden lp-mock-float">
+              <div className="relative z-10 w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden lp-mock-float mt-1 sm:mt-0">
                 
                 {/* Mockup Header Bar */}
-                <div className="bg-white px-4 py-2.5 border-b border-slate-100 flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block" />
-                    <span className="font-bold text-slate-800">Fee Counter POS</span>
-                    <span className="text-[10px] text-slate-400">/ Aaditya Singh (Class I-A)</span>
+                <div className="bg-white px-3 sm:px-4 py-2 sm:py-2.5 border-b border-slate-100 flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block shrink-0" />
+                    <span className="font-bold text-slate-800 text-[11px] sm:text-xs truncate">Fee Counter POS</span>
+                    <span className="text-[9px] sm:text-[10px] text-slate-400 truncate hidden xs:inline">/ Aaditya Singh (Class I-A)</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full lp-pulse-emerald">
+                  <span className="text-[9px] sm:text-[10px] font-mono text-emerald-600 font-bold bg-emerald-50 px-2 sm:px-2.5 py-0.5 rounded-full lp-pulse-emerald shrink-0">
                     COUNTER ACTIVE
                   </span>
                 </div>
 
-                {/* Internal Split: Left Fee Counter & Payment Tender, Right Live School ERP Operations */}
-                <div className="grid grid-cols-12 divide-x divide-slate-100 text-xs">
+                {/* Mobile Condensed Switcher (Segmented Control - Hidden on Desktop) */}
+                <div className="md:hidden px-3 pt-2 pb-1.5 bg-slate-50 border-b border-slate-100">
+                  <div className="grid grid-cols-2 p-0.5 bg-slate-200/80 rounded-xl text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setMobileMockTab('fees')}
+                      className={`py-1.5 px-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                        mobileMockTab === 'fees'
+                          ? 'bg-white text-[#232688] shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                      <span>Fee POS</span>
+                      <span className="text-[9px] px-1 py-0.2 rounded bg-rose-100 text-rose-700 font-mono shrink-0">₹13.5k</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setMobileMockTab('desk')}
+                      className={`py-1.5 px-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                        mobileMockTab === 'desk'
+                          ? 'bg-white text-[#232688] shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <Activity className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                      <span>Campus Desk</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Internal Split: On mobile controlled by tabs, on desktop side-by-side (7/5 cols) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 md:divide-x divide-slate-100 text-xs">
                   
-                  {/* Left Column (7 cols): Student Fee Ledger Table + Payment Tender Box */}
-                  <div className="col-span-7 p-4 space-y-3">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {/* Student Fee Ledger Table + Payment Tender Box */}
+                  <div className={`md:col-span-7 p-3 sm:p-4 space-y-2.5 sm:space-y-3 ${mobileMockTab === 'fees' ? 'block' : 'hidden md:block'}`}>
+                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                       <span>STUDENT FEE LEDGER</span>
                       <span className="text-indigo-600 font-mono">ADM #1621</span>
                     </div>
 
                     {/* Clean Realistic Fee Heads Table */}
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 text-[11px]">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          <span className="font-semibold text-slate-800">Tuition Fee (Quarter 1)</span>
+                      <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 text-[10px] sm:text-[11px]">
+                        <div className="flex items-center space-x-1.5 min-w-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          <span className="font-semibold text-slate-800 truncate">Tuition Fee (Quarter 1)</span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 shrink-0">
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">PAID</span>
                           <span className="font-mono font-bold text-slate-900">₹ 12,000</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50/50 border border-rose-100 text-[11px]">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                          <span className="font-semibold text-slate-800">Tuition Fee (Quarter 2)</span>
+                      <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-rose-50/50 border border-rose-100 text-[10px] sm:text-[11px]">
+                        <div className="flex items-center space-x-1.5 min-w-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                          <span className="font-semibold text-slate-800 truncate">Tuition Fee (Quarter 2)</span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 shrink-0">
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800">DUE</span>
                           <span className="font-mono font-bold text-rose-600">₹ 12,000</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50/50 border border-amber-100 text-[11px]">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                          <span className="font-semibold text-slate-800">Activity & Sports Fee</span>
+                      <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-amber-50/50 border border-amber-100 text-[10px] sm:text-[11px]">
+                        <div className="flex items-center space-x-1.5 min-w-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                          <span className="font-semibold text-slate-800 truncate">Activity & Sports Fee</span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 shrink-0">
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">DUE</span>
                           <span className="font-mono font-bold text-rose-600">₹ 1,500</span>
                         </div>
@@ -402,30 +496,30 @@ export function LandingPage({ onNavigate }) {
                     </div>
 
                     {/* Total Tally Line */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <div className="pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-slate-400 text-[11px] block">Total Annual Structure</span>
-                        <span className="font-mono text-slate-800 font-bold">₹ 25,500</span>
+                        <span className="text-slate-400 text-[10px] sm:text-[11px] block">Total Annual Structure</span>
+                        <span className="font-mono text-slate-800 font-bold text-xs sm:text-sm">₹ 25,500</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-rose-600 text-[11px] font-bold block uppercase tracking-wider">Due to Collect</span>
-                        <span className="font-mono text-rose-600 font-black text-sm">₹ 13,500</span>
+                        <span className="text-rose-600 text-[10px] sm:text-[11px] font-bold block uppercase tracking-wider">Due to Collect</span>
+                        <span className="font-mono text-rose-600 font-black text-xs sm:text-sm">₹ 13,500</span>
                       </div>
                     </div>
 
                     {/* Payment Tender Selector & One-Click POS Collection */}
-                    <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <div className="pt-1.5 sm:pt-2 border-t border-slate-100 space-y-2">
                       <div className="grid grid-cols-4 gap-1 text-[10px] font-bold">
-                        <button type="button" className="py-1 px-1.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-700 text-center font-medium">
+                        <button type="button" className="py-1 px-1 rounded bg-indigo-50 border border-indigo-200 text-indigo-700 text-center font-medium truncate">
                           UPI / QR
                         </button>
-                        <button type="button" className="py-1 px-1.5 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium">
+                        <button type="button" className="py-1 px-1 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium truncate">
                           NetBanking
                         </button>
-                        <button type="button" className="py-1 px-1.5 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium">
+                        <button type="button" className="py-1 px-1 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium truncate">
                           Cash
                         </button>
-                        <button type="button" className="py-1 px-1.5 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium">
+                        <button type="button" className="py-1 px-1 rounded bg-slate-50 border border-slate-200 text-slate-600 text-center font-medium truncate">
                           Cheque
                         </button>
                       </div>
@@ -433,30 +527,42 @@ export function LandingPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={() => handleLaunchDemo('sch_jd_intl')}
-                        className="lp-btn w-full py-2.5 px-3 rounded-xl bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-xs shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
+                        className="lp-btn w-full py-2 sm:py-2.5 px-3 rounded-xl bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-xs shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
                       >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Collect ₹ 13,500 & Print Receipt</span>
+                        <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Collect ₹ 13,500 & Print Receipt</span>
                       </button>
+                    </div>
+
+                    {/* Mobile Quick Switcher Hint */}
+                    <div
+                      onClick={() => setMobileMockTab('desk')}
+                      className="md:hidden flex items-center justify-between p-1.5 px-2 rounded-lg bg-indigo-50/50 border border-indigo-100/70 text-[10px] text-indigo-900 cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-1.5 truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        <span className="truncate">Live Desk: 874 Present &bull; 0 Conflicts</span>
+                      </div>
+                      <span className="font-bold text-[#232688] shrink-0 ml-1">View &rarr;</span>
                     </div>
                   </div>
 
-                  {/* Right Column (5 cols): Live School ERP Operations & Widgets */}
-                  <div className="col-span-5 p-4 space-y-2.5 bg-slate-50/50">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {/* Campus Live Desk Operations */}
+                  <div className={`md:col-span-5 p-3 sm:p-4 space-y-2 sm:space-y-2.5 bg-slate-50/70 ${mobileMockTab === 'desk' ? 'block' : 'hidden md:block'}`}>
+                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                       <span>CAMPUS LIVE DESK</span>
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-1.5 sm:gap-2">
                       {/* School Widget 1: Timetable Pro */}
-                      <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-0.5 sm:space-y-1">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                            <span className="font-bold text-slate-800 text-[11px]">Timetable Pro</span>
+                          <div className="flex items-center space-x-1.5 min-w-0">
+                            <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                            <span className="font-bold text-slate-800 text-[11px] truncate">Timetable Pro</span>
                           </div>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 shrink-0">
                             0 Conflicts
                           </span>
                         </div>
@@ -466,13 +572,13 @@ export function LandingPage({ onNavigate }) {
                       </div>
 
                       {/* School Widget 2: Biometric Turnstile */}
-                      <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-0.5 sm:space-y-1">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5">
-                            <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="font-bold text-slate-800 text-[11px]">Biometric Gate</span>
+                          <div className="flex items-center space-x-1.5 min-w-0">
+                            <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span className="font-bold text-slate-800 text-[11px] truncate">Biometric Gate</span>
                           </div>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono">
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono shrink-0">
                             96.5% Synced
                           </span>
                         </div>
@@ -482,13 +588,13 @@ export function LandingPage({ onNavigate }) {
                       </div>
 
                       {/* School Widget 3: NEP 2020 Gradebook */}
-                      <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-0.5 sm:space-y-1">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5">
-                            <Award className="w-3.5 h-3.5 text-rose-600" />
-                            <span className="font-bold text-slate-800 text-[11px]">CBSE Gradebook</span>
+                          <div className="flex items-center space-x-1.5 min-w-0">
+                            <Award className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                            <span className="font-bold text-slate-800 text-[11px] truncate">CBSE Gradebook</span>
                           </div>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-800">
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 shrink-0">
                             NEP 2020
                           </span>
                         </div>
@@ -498,13 +604,13 @@ export function LandingPage({ onNavigate }) {
                       </div>
 
                       {/* School Widget 4: WhatsApp Cloud API */}
-                      <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-0.5 sm:space-y-1">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5">
-                            <Smartphone className="w-3.5 h-3.5 text-teal-600" />
-                            <span className="font-bold text-slate-800 text-[11px]">WhatsApp Alerts</span>
+                          <div className="flex items-center space-x-1.5 min-w-0">
+                            <Smartphone className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                            <span className="font-bold text-slate-800 text-[11px] truncate">WhatsApp Alerts</span>
                           </div>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-teal-50 text-teal-800">
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-teal-50 text-teal-800 shrink-0">
                             Live API
                           </span>
                         </div>
@@ -512,6 +618,15 @@ export function LandingPage({ onNavigate }) {
                           Daily Attendance & Fee Slips &bull; <strong>100% Delivered</strong>
                         </p>
                       </div>
+                    </div>
+
+                    {/* Mobile Switch Back to Fees Hint */}
+                    <div
+                      onClick={() => setMobileMockTab('fees')}
+                      className="md:hidden flex items-center justify-between p-1.5 px-2 rounded-lg bg-indigo-50/50 border border-indigo-100/70 text-[10px] text-indigo-900 cursor-pointer"
+                    >
+                      <span className="truncate">Due to Collect: <strong className="font-mono text-rose-600">₹ 13,500</strong></span>
+                      <span className="font-bold text-[#232688] shrink-0 ml-1">Fee POS &rarr;</span>
                     </div>
                   </div>
 
@@ -573,22 +688,22 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           3. CAMPUS / DIGITAL SMART CLASSROOM PANORAMA PHOTO
       ======================================================== */}
-      <section id="solutions" className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 max-h-[420px]">
+      <section id="solutions" className="py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-slate-200 min-h-[260px] sm:min-h-[360px] max-h-[420px]">
           <img
             src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1600&auto=format&fit=crop"
             alt="Modern High-Tech Campus Lab and Faculty"
-            className="w-full h-full object-cover object-center filter brightness-[0.94]"
+            className="w-full h-full object-cover object-center filter brightness-[0.94] absolute inset-0"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-6 sm:p-10">
-            <div className="text-white space-y-1">
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 backdrop-blur-md uppercase tracking-wider">
+          <div className="relative z-10 h-full bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent flex items-end p-5 sm:p-10">
+            <div className="text-white space-y-1.5 sm:space-y-2">
+              <span className="text-[10px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-full bg-white/20 backdrop-blur-md uppercase tracking-wider inline-block">
                 Digital Campus Operations
               </span>
-              <h3 className="text-xl sm:text-2xl font-black">
+              <h3 className="text-lg sm:text-2xl font-black leading-snug">
                 Transforming Daily School Life for 250,000+ Students & Teachers
               </h3>
-              <p className="text-xs sm:text-sm text-slate-200 max-w-xl">
+              <p className="text-xs sm:text-sm text-slate-200 max-w-xl leading-relaxed">
                 From morning biometric attendance to afternoon fee reconciliation and exam gradebooks, SchoolNexus streamlines all campus workflows.
               </p>
             </div>
@@ -599,12 +714,12 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           4. WBPRO CONTINUOUS DUAL-TRACK MODULE MARQUEE (wbpro.in style)
       ======================================================== */}
-      <section className="py-12 bg-slate-50/80 border-y border-slate-200/80 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 text-center space-y-2">
-          <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/70 px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+      <section className="py-8 sm:py-12 bg-slate-50/80 border-y border-slate-200/80 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 sm:mb-6 text-center space-y-1.5 sm:space-y-2">
+          <span className="text-[10px] sm:text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/70 px-3 py-1 rounded-full uppercase tracking-wider inline-block">
             Enterprise Campus Engine
           </span>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-[#232688] tracking-tight">
+          <h3 className="text-lg sm:text-2xl font-extrabold text-[#232688] tracking-tight">
             30+ Dedicated Modules Operating in Real-Time
           </h3>
         </div>
@@ -615,9 +730,9 @@ export function LandingPage({ onNavigate }) {
             {[...marqueeTrack1, ...marqueeTrack1].map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all cursor-default"
+                className="flex items-center space-x-3 bg-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all cursor-default"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color} shrink-0`}>
                   <item.icon className="w-4 h-4" />
                 </div>
                 <div className="text-left">
@@ -635,9 +750,9 @@ export function LandingPage({ onNavigate }) {
             {[...marqueeTrack2, ...marqueeTrack2].map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all cursor-default"
+                className="flex items-center space-x-3 bg-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all cursor-default"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color} shrink-0`}>
                   <item.icon className="w-4 h-4" />
                 </div>
                 <div className="text-left">
@@ -653,33 +768,33 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           5. ONE STOP SHOP FOR YOUR SCHOOL (WBPRO Interactive Grid)
       ======================================================== */}
-      <section id="modules" className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
+      <section id="modules" className="py-12 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2 sm:space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
               One Stop Shop for your School
             </h2>
-            <p className="text-sm sm:text-base text-slate-500">
+            <p className="text-xs sm:text-base text-slate-500">
               Everything your administration, accounts, academics, and parents need—seamlessly connected under one roof.
             </p>
           </div>
 
           {/* 3x3 Cards Grid with WBPRO Lift & Icon Tilt */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {schoolModules.map((m) => {
               const Icon = m.icon;
               return (
                 <div
                   key={m.title}
-                  className="lp-feature-card bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between group cursor-default"
+                  className="lp-feature-card bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between group cursor-default"
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2.5 sm:space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-[#232688] transition-colors">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#232688] transition-colors">
                         {m.title}
                       </h3>
-                      <div className={`w-9 h-9 rounded-xl border flex items-center justify-center ${m.color} lp-icon-badge`}>
-                        <Icon className="w-5 h-5" />
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center ${m.color} lp-icon-badge shrink-0`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                     </div>
 
@@ -688,7 +803,7 @@ export function LandingPage({ onNavigate }) {
                     </p>
                   </div>
 
-                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-[#232688]">
+                  <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-[#232688]">
                     <span>Explore Module Details</span>
                     <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" />
                   </div>
@@ -697,7 +812,7 @@ export function LandingPage({ onNavigate }) {
             })}
           </div>
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-2 sm:pt-4">
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('/login')}
@@ -712,40 +827,40 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           6. DEEP BLUE TESTIMONIAL BANNER (Exact ERPuppy Style)
       ======================================================== */}
-      <section id="reviews" className="py-20 bg-[#232688] text-white overflow-hidden">
+      <section id="reviews" className="py-12 sm:py-20 bg-[#232688] text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
             
             {/* Left Rating Badge */}
-            <div className="lg:col-span-4 bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/15 text-center flex flex-col items-center justify-center space-y-2">
+            <div className="lg:col-span-4 bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/15 text-center flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-indigo-200">
                 <span>EdTech Excellence Rating</span>
               </div>
 
-              <div className="text-5xl sm:text-6xl font-black font-mono tracking-tight">
+              <div className="text-4xl sm:text-6xl font-black font-mono tracking-tight">
                 4.92
               </div>
 
               <div className="flex items-center space-x-1 text-amber-400">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-amber-400" />
+                  <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400" />
                 ))}
               </div>
             </div>
 
             {/* Right Large Quotation */}
-            <div className="lg:col-span-8 space-y-5 lg:pl-6 text-left">
-              <blockquote className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-snug tracking-tight">
+            <div className="lg:col-span-8 space-y-4 sm:space-y-5 lg:pl-6 text-left">
+              <blockquote className="text-base sm:text-2xl lg:text-3xl font-bold text-white leading-snug tracking-tight">
                 "Fast setup, catering for all CBSE, ICSE, and state board needs and ready to use from day one! Our fee collection cycle dropped from 3 weeks to 4 days."
               </blockquote>
 
-              <div className="pt-2">
-                <p className="text-sm font-bold text-white">Dr. Rajeshwar Sharma</p>
-                <p className="text-xs text-indigo-200">Director of Academic Operations &bull; Delhi Public Academy Network</p>
+              <div className="pt-1 sm:pt-2">
+                <p className="text-xs sm:text-sm font-bold text-white">Dr. Rajeshwar Sharma</p>
+                <p className="text-[11px] sm:text-xs text-indigo-200">Director of Academic Operations &bull; Delhi Public Academy Network</p>
               </div>
 
               {/* Pagination Dots */}
-              <div className="flex items-center space-x-2 pt-2">
+              <div className="flex items-center space-x-2 pt-1 sm:pt-2">
                 <div className="w-6 h-2 rounded-full bg-white" />
                 <div className="w-2 h-2 rounded-full bg-white/40" />
                 <div className="w-2 h-2 rounded-full bg-white/40" />
@@ -759,22 +874,22 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           7. WORKS WITH YOUR FAVOURITE APPS (Exact 6 Cards)
       ======================================================== */}
-      <section id="integrations" className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
+      <section id="integrations" className="py-12 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2 sm:space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
               Works With Your Favourite Apps
             </h2>
-            <p className="text-sm sm:text-base text-slate-500">
+            <p className="text-xs sm:text-base text-slate-500">
               SchoolNexus has a host of built-in native integrations to help your institution take off faster.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {integrations.map((app) => (
               <div
                 key={app.name}
-                className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-3"
+                className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2">
@@ -805,16 +920,16 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           8. READY TO GET STARTED? (Peach Banner + 2 Cards)
       ======================================================== */}
-      <section id="pricing" className="py-16 sm:py-24 bg-[#fff1ee]/80 border-t border-rose-100/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <section id="pricing" className="py-12 sm:py-24 bg-[#fff1ee]/80 border-t border-rose-100/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
           
           {/* Header & Main Call to Action */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-rose-200/60">
-            <div className="space-y-2 max-w-xl">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6 pb-6 sm:pb-8 border-b border-rose-200/60">
+            <div className="space-y-2 max-w-xl text-left">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-[#232688] tracking-tight">
                 Ready to Get Started?
               </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              <p className="text-xs sm:text-base text-slate-600 leading-relaxed">
                 Start a 14 day trial to get instant access to your own dedicated SchoolNexus sandbox.
                 Get expert onboarding and world-class cloud hosting too.
               </p>
@@ -824,7 +939,7 @@ export function LandingPage({ onNavigate }) {
               <button
                 type="button"
                 onClick={() => onNavigate && onNavigate('/login')}
-                className="px-8 py-3.5 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-sm shadow-lg shadow-indigo-950/20 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                className="w-full sm:w-auto px-7 sm:px-8 py-3 sm:py-3.5 rounded-full bg-[#232688] hover:bg-[#1a1d68] text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/20 transition-all transform hover:-translate-y-0.5 cursor-pointer text-center"
               >
                 Sign In
               </button>
@@ -832,10 +947,10 @@ export function LandingPage({ onNavigate }) {
           </div>
 
           {/* 2 Benefit Cards (Support & 100% Next-Gen Cloud) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-5">
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-900">Dedicated School Support</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white p-5 sm:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4 sm:space-y-5">
+              <div className="space-y-1.5 sm:space-y-2">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900">Dedicated School Support</h3>
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                   For self-registered & enterprise schools, we assign dedicated onboarding engineers, daily hotline phone support, and WhatsApp helpdesks.
                 </p>
@@ -845,17 +960,17 @@ export function LandingPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => onNavigate && onNavigate('/register')}
-                  className="px-5 py-2 rounded-full border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 sm:px-5 py-2 rounded-full border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Get a Quote
                 </button>
-                <Headphones className="w-6 h-6 text-rose-300" />
+                <Headphones className="w-5 h-5 sm:w-6 sm:h-6 text-rose-300" />
               </div>
             </div>
 
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-5">
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-900">100% Next-Gen Cloud</h3>
+            <div className="bg-white p-5 sm:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4 sm:space-y-5">
+              <div className="space-y-1.5 sm:space-y-2">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900">100% Next-Gen Cloud</h3>
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                   Zero on-premise server maintenance. Multi-tenant database partition, daily automated encrypted backups, and ISO 27001 compliance.
                 </p>
@@ -865,11 +980,11 @@ export function LandingPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setDemoModalOpen(true)}
-                  className="px-5 py-2 rounded-full border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 sm:px-5 py-2 rounded-full border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Explore Demo
                 </button>
-                <FolderGit2 className="w-6 h-6 text-indigo-300" />
+                <FolderGit2 className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-300" />
               </div>
             </div>
           </div>
@@ -880,9 +995,9 @@ export function LandingPage({ onNavigate }) {
       {/* ========================================================
           9. FOOTER
       ======================================================== */}
-      <footer className="bg-white border-t border-slate-200 py-12 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="bg-white border-t border-slate-200 py-8 sm:py-12 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-full bg-[#232688] flex items-center justify-center text-white">
                 <GraduationCap className="w-5 h-5 text-white" />
@@ -890,7 +1005,7 @@ export function LandingPage({ onNavigate }) {
               <span className="text-base font-black text-slate-900">SchoolNexus</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6">
               <button
                 type="button"
                 onClick={() => onNavigate && onNavigate('/login')}
@@ -922,7 +1037,7 @@ export function LandingPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400">
+          <div className="pt-4 sm:pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-slate-400 text-center sm:text-left">
             <p>&copy; 2026 SchoolNexus ERP Inc. All rights reserved. The World's Best Next-Gen School ERP.</p>
             <p>99.99% Cloud Uptime &bull; Multi-Tenant Architecture &bull; CBSE / ICSE Compliant</p>
           </div>
@@ -933,8 +1048,8 @@ export function LandingPage({ onNavigate }) {
           10. INTERACTIVE 1-CLICK DEMO MODAL
       ======================================================== */}
       {demoModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 space-y-6">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#232688] flex items-center justify-center mx-auto text-xl font-bold">
                 🚀
@@ -1017,6 +1132,9 @@ export function LandingPage({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* PWA Download Floating Button (Bottom Right) */}
+      <PwaDownloadButton />
     </div>
   );
 }
