@@ -817,6 +817,9 @@ function AppContent() {
                 return <VisitStaffMeetingPage onNavigate={handleNavigate} />;
               case '/manual-complaint':
                 return <StaffComplaintPage onNavigate={handleNavigate} />;
+              case '/student-complaint':
+              case '/complaints':
+                return <StudentComplaintPage onNavigate={handleNavigate} />;
               case '/front-office-reports':
                 return <FrontOfficeReportsPage onNavigate={handleNavigate} />;
               case '/manual-complaint-reports':

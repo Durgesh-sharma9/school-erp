@@ -30,8 +30,16 @@ import {
   PartyPopper,
   CheckCircle2,
   HelpCircle,
-  CornerUpRight
+  CornerUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Send,
+  MessageSquare,
+  Check,
+  Eye
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import StatsCard from '../../components/StatsCard';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
 import { cn } from '../../utils/cn';
@@ -42,6 +50,69 @@ export function DashboardPage({ onNavigate }) {
   const [stats, setStats] = useState(() => tenantStore.getDashboardStats(schoolId));
   const [activeReminderTab, setActiveReminderTab] = useState('Today');
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Row 4 Interactive State
+  const [remindersSent, setRemindersSent] = useState({});
+  const [feeReminders] = useState([
+    { id: 'rem-1', name: 'Aarav Sharma', admNo: '2060', className: 'Class X-A', due: 12500, phone: '9876543210' },
+    { id: 'rem-2', name: 'Priya Meena', admNo: '2061', className: 'Class IX-B', due: 8200, phone: '9823456789' },
+    { id: 'rem-3', name: 'Devendra Singh', admNo: '1621', className: 'Class XII-C', due: 15400, phone: '9811223344' }
+  ]);
+  const upcomingReminders = [
+    { id: 'up-1', title: 'Term 3 Quarterly Fee Defaulters', count: '38 Students', dueDate: 'Nov 5, 2026', total: '₹4,56,000' },
+    { id: 'up-2', title: 'Bus Route 3 & 7 Transport Installment', count: '14 Students', dueDate: 'Nov 10, 2026', total: '₹84,000' }
+  ];
+
+  const [complaintsList] = useState(() => {
+    try {
+      const stored = localStorage.getItem('erp_student_complaints');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [
+      { id: 'CMP-104', studentName: 'Rohan Verma', className: 'Class VIII-A', type: 'Bus Delay', text: 'Bus #04 reached 20 mins late at Vaishali stop', status: 'In Progress', time: 'Today 08:30 AM' },
+      { id: 'CMP-102', studentName: 'Ananya Gupta', className: 'Class X-B', type: 'Library Book', text: 'Replacement for damaged science manual', status: 'Pending', time: 'Yesterday' }
+    ];
+  });
+
+  const [calendarDate, setCalendarDate] = useState(() => new Date(2026, 9, 31)); // Default Oct 2026
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(31);
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const calYear = calendarDate.getFullYear();
+  const calMonth = calendarDate.getMonth();
+  const daysInCalMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const startDayOfWeek = new Date(calYear, calMonth, 1).getDay();
+
+  const calendarEvents = {
+    '2026-9-2': { title: 'Gandhi Jayanti', type: 'Holiday', badge: 'Holiday' },
+    '2026-9-10': { title: 'Parent-Teacher Meeting (PTM)', type: 'Event', badge: 'PTM' },
+    '2026-9-15': { title: 'Mid-Term Unit Test Series', type: 'Exam', badge: 'Exams' },
+    '2026-9-24': { title: 'Diwali Festival Break', type: 'Holiday', badge: 'Break' },
+    '2026-9-31': { title: 'Quarterly Fee Due & Monthly Close', type: 'Finance', badge: 'Due' },
+  };
+
+  const handlePrevMonth = (e) => {
+    e.stopPropagation();
+    setCalendarDate(new Date(calYear, calMonth - 1, 1));
+    setSelectedCalendarDay(1);
+  };
+
+  const handleNextMonth = (e) => {
+    e.stopPropagation();
+    setCalendarDate(new Date(calYear, calMonth + 1, 1));
+    setSelectedCalendarDay(1);
+  };
+
+  const handleSendReminder = (id, name) => {
+    setRemindersSent(prev => ({ ...prev, [id]: true }));
+    toast.success(`Fee reminder dispatched to ${name}'s parents via WhatsApp & SMS!`);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -515,32 +586,137 @@ export function DashboardPage({ onNavigate }) {
           title="Fee Reminders"
           icon={Bell}
           tone="blue"
-          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors" />}
+          action={
+            <button
+              type="button"
+              onClick={() => onNavigate && onNavigate('/fee-collection')}
+              className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+              title="Open Fee Entry & Defaulters"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          }
         >
           <div>
             <div className="flex border-b border-slate-100 text-xs font-semibold mb-2">
               <button
+                type="button"
                 onClick={() => setActiveReminderTab('Today')}
                 className={cn(
-                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer',
+                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5',
                   activeReminderTab === 'Today' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-slate-400 hover:text-slate-600'
                 )}
               >
                 Today
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 font-mono font-bold">
+                  {feeReminders.length}
+                </span>
               </button>
               <button
+                type="button"
                 onClick={() => setActiveReminderTab('Upcoming')}
                 className={cn(
-                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer',
+                  'flex-1 pb-1.5 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5',
                   activeReminderTab === 'Upcoming' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-slate-400 hover:text-slate-600'
                 )}
               >
                 Upcoming
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-700 font-mono font-bold">
+                  {upcomingReminders.length}
+                </span>
               </button>
             </div>
-            <div className="py-7 text-center text-xs text-slate-400">
-              No fee reminders scheduled for {activeReminderTab.toLowerCase()}
-            </div>
+
+            {activeReminderTab === 'Today' ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-0.5 custom-scrollbar">
+                {feeReminders.map((rem) => {
+                  const isSent = remindersSent[rem.id];
+                  return (
+                    <div
+                      key={rem.id}
+                      className="p-2 rounded-xl border border-slate-100 hover:border-indigo-200 bg-slate-50/60 hover:bg-indigo-50/30 transition-all flex items-center justify-between gap-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-bold text-slate-800 truncate">{rem.name}</p>
+                          <span className="text-[10px] font-mono text-slate-400">#{rem.admNo}</span>
+                        </div>
+                        <p className="text-[10.5px] text-slate-500 truncate">
+                          {rem.className} &bull; <strong className="text-rose-600 font-mono">₹{formatINR(rem.due)}</strong> due
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleSendReminder(rem.id, rem.name)}
+                          disabled={isSent}
+                          className={cn(
+                            'px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer',
+                            isSent
+                              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                          )}
+                          title={isSent ? 'Reminder Dispatched' : 'Send WhatsApp & SMS Reminder'}
+                        >
+                          {isSent ? (
+                            <>
+                              <Check className="w-3 h-3" /> Sent
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-2.5 h-2.5" /> Remind
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate && onNavigate('/fee-collection')}
+                          className="p-1 rounded-lg text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+                          title="Collect Fee"
+                        >
+                          <IndianRupee className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="pt-1 flex items-center justify-between text-[11px] text-slate-500">
+                  <span className="font-medium">Total Due Today:</span>
+                  <span className="font-mono font-bold text-rose-600">
+                    ₹{formatINR(feeReminders.reduce((acc, r) => acc + r.due, 0))}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-0.5 custom-scrollbar">
+                {upcomingReminders.map((up) => (
+                  <div
+                    key={up.id}
+                    className="p-2.5 rounded-xl border border-slate-100 bg-amber-50/40 hover:bg-amber-50/70 transition-all space-y-1"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <p className="font-bold text-slate-800">{up.title}</p>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200/60 text-amber-900">
+                        {up.dueDate}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>{up.count}</span>
+                      <span className="font-mono font-bold text-slate-700">{up.total}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toast.success(`Batch reminders scheduled for ${up.title}!`);
+                      }}
+                      className="w-full mt-1 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold transition-colors cursor-pointer"
+                    >
+                      Dispatch Auto-Reminders
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </ErpSection>
 
@@ -549,39 +725,181 @@ export function DashboardPage({ onNavigate }) {
           title="Complaints"
           icon={AlertCircle}
           tone="yellow"
-          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-amber-600 transition-colors" />}
+          action={
+            <button
+              type="button"
+              onClick={() => onNavigate && onNavigate('/student-complaint')}
+              className="p-1 rounded-md text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
+              title="Open Complaints & Grievance Portal"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          }
         >
-          <div className="py-9 text-center text-xs text-slate-400">
-            <p className="font-bold text-slate-700">No Open Complaints</p>
-            <p className="text-[10.5px] text-slate-400 mt-0.5">Parent &amp; student grievance box clear</p>
-          </div>
+          {complaintsList.length > 0 ? (
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-0.5 custom-scrollbar">
+              {complaintsList.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => onNavigate && onNavigate('/student-complaint')}
+                  className="p-2.5 rounded-xl border border-slate-100 hover:border-amber-200 bg-slate-50/70 hover:bg-amber-50/30 transition-all cursor-pointer space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 truncate">{c.studentName}</span>
+                    <span
+                      className={cn(
+                        'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                        c.status === 'Resolved'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : c.status === 'In Progress'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-700'
+                      )}
+                    >
+                      {c.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 line-clamp-1">{c.text}</p>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                    <span>{c.type} &bull; {c.className}</span>
+                    <span>{c.time || 'Recent'}</span>
+                  </div>
+                </div>
+              ))}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate('/student-complaint')}
+                  className="w-full py-1.5 rounded-lg border border-dashed border-amber-300 text-amber-800 hover:bg-amber-50 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" /> Log New Grievance
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="py-7 text-center text-xs text-slate-400">
+              <p className="font-bold text-slate-700">No Open Complaints</p>
+              <p className="text-[10.5px] text-slate-400 mt-0.5">Parent &amp; student grievance box clear</p>
+              <button
+                type="button"
+                onClick={() => onNavigate && onNavigate('/student-complaint')}
+                className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-colors"
+              >
+                <Plus className="w-3 h-3" /> Add Grievance
+              </button>
+            </div>
+          )}
         </ErpSection>
 
         {/* Calendar */}
         <ErpSection
-          title="Calendar (October)"
+          title={`Calendar (${monthNames[calMonth]})`}
           icon={CalendarDays}
           tone="purple"
-          action={<ExternalLink className="w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-purple-600 transition-colors" />}
+          action={
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-1 rounded-md text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer"
+                title="Previous Month"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="p-1 rounded-md text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer"
+                title="Next Month"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate && onNavigate('/calendar-planning')}
+                className="p-1 rounded-md text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer"
+                title="Open Calendar Planning"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          }
         >
           <div>
-            <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1.5">
+            {/* Days of week header */}
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1">
               <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
             </div>
+
+            {/* Days Grid */}
             <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-slate-700">
-              {[...Array(31)].map((_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    'p-1 rounded-md transition-colors',
-                    i + 1 === 10
-                      ? 'bg-purple-600 text-white font-bold shadow-2xs'
-                      : 'hover:bg-slate-100 text-slate-600'
-                  )}
-                >
-                  {i + 1}
-                </span>
+              {/* Empty offset padding cells */}
+              {[...Array(startDayOfWeek)].map((_, i) => (
+                <span key={`empty-${i}`} className="p-1 text-slate-200"></span>
               ))}
+
+              {/* Day cells */}
+              {[...Array(daysInCalMonth)].map((_, i) => {
+                const dayNum = i + 1;
+                const isSelected = selectedCalendarDay === dayNum;
+                const eventKey = `${calYear}-${calMonth}-${dayNum}`;
+                const event = calendarEvents[eventKey];
+
+                return (
+                  <button
+                    key={`day-${dayNum}`}
+                    type="button"
+                    onClick={() => setSelectedCalendarDay(dayNum)}
+                    className={cn(
+                      'relative p-1 rounded-lg transition-all cursor-pointer flex flex-col items-center justify-center font-medium',
+                      isSelected
+                        ? 'bg-purple-600 text-white font-bold shadow-xs scale-105'
+                        : 'hover:bg-purple-50 hover:text-purple-700 text-slate-600'
+                    )}
+                  >
+                    <span>{dayNum}</span>
+                    {event && (
+                      <span
+                        className={cn(
+                          'w-1.5 h-1.5 rounded-full -mt-0.5',
+                          isSelected ? 'bg-amber-300 ring-1 ring-white' : 'bg-purple-600'
+                        )}
+                        title={event.title}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Day Event Summary */}
+            <div className="mt-2.5 pt-2 border-t border-slate-100">
+              {(() => {
+                const selectedKey = `${calYear}-${calMonth}-${selectedCalendarDay}`;
+                const selEvent = calendarEvents[selectedKey];
+                return selEvent ? (
+                  <div className="flex items-center justify-between text-[10.5px] p-1.5 rounded-lg bg-purple-50 text-purple-900 border border-purple-200/60">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0"></span>
+                      <span className="font-bold truncate">{selEvent.title}</span>
+                    </div>
+                    <span className="text-[9.5px] px-1.5 py-0.2 rounded font-bold uppercase bg-purple-200/60 text-purple-800 shrink-0">
+                      {selEvent.badge}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>{monthNames[calMonth]} {selectedCalendarDay}: Regular Day</span>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate && onNavigate('/calendar-planning')}
+                      className="text-purple-600 hover:text-purple-700 font-bold hover:underline cursor-pointer"
+                    >
+                      Plan &rarr;
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </ErpSection>
