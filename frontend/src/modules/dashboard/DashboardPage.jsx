@@ -37,6 +37,7 @@ import {
 import StatsCard from '../../components/StatsCard';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
 import { cn } from '../../utils/cn';
+import { smartSearch } from '../../utils/smartSearch';
 
 export function DashboardPage({ onNavigate }) {
   const { schoolId } = useAuth();
@@ -123,7 +124,13 @@ export function DashboardPage({ onNavigate }) {
 
   // ── Module search data ──
   const ALL_MODULES = [
-    { label: 'Dashboard', path: '/', icon: '🏠' },
+    { label: 'Dashboard', path: '/', icon: '🏠', keywords: ['dashboard', 'asboard', 'dashbord', 'deshboard', 'home'] },
+    { label: 'Daily Test Marks Entry', path: '/daily-test-entry', icon: '🏆', keywords: ['daily test', 'testmaster', 'daly test', 'marks', 'entry', 'dt'] },
+    { label: 'Daily Test Class Results', path: '/daily-test-ranking', icon: '📊', keywords: ['daily test results', 'matrix', 'rank', 'toppers', 'parinam'] },
+    { label: 'Student Performance', path: '/student-performance', icon: '📈', keywords: ['student performance', 'performance', 'pradarshan', 'top 3'] },
+    { label: 'Teacher Performance', path: '/teacher-performance', icon: '👩‍🏫', keywords: ['teacher performance', 'performance', 'faculty rating'] },
+    { label: 'Fee Voucher Entry', path: '/fee-voucher-entry', icon: '🧾', keywords: ['fee voucher', 'voucher', 'receipt slip', 'challan'] },
+
     { label: 'Edit School', path: '/edit-school', icon: '🏫' },
     { label: 'WhatsApp Link', path: '/whatsapp-link', icon: '💬' },
     { label: 'Settings & Permissions', path: '/settings', icon: '⚙️' },
@@ -175,11 +182,16 @@ export function DashboardPage({ onNavigate }) {
   const [moduleSearch, setModuleSearch] = useState('');
   const [showModuleDropdown, setShowModuleDropdown] = useState(false);
 
-  const filteredModules = moduleSearch.trim().length >= 1
-    ? ALL_MODULES.filter(m =>
-        m.label.toLowerCase().includes(moduleSearch.toLowerCase())
-      ).slice(0, 8)
-    : [];
+  const searchRes = moduleSearch.trim().length >= 1
+    ? smartSearch(
+        ALL_MODULES.map(m => ({ ...m, title: m.label })),
+        moduleSearch,
+        ['title', 'label', 'keywords']
+      )
+    : { results: [], didYouMean: null };
+
+  const filteredModules = searchRes.results.slice(0, 8);
+  const moduleDidYouMean = searchRes.didYouMean;
 
   return (
     <PageStack className="gap-3 sm:gap-4.5 bg-slate-50/40 min-h-screen pb-24">
