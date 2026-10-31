@@ -596,25 +596,30 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     return {};
   };
 
+  // At most 2 tabs can be open at a time; opening a 3rd closes the 1st automatically (FIFO)
   const [openDropdowns, setOpenDropdowns] = useState(() => {
-    const initial = getInitialActiveDropdown(currentPath);
+    const initial = [];
+    const fromPath = getInitialActiveDropdown(currentPath);
+    Object.keys(fromPath).forEach(k => { if (fromPath[k]) initial.push(k); });
     menuCategories.forEach(item => {
       if (item.subItems?.some(sub => sub.path === currentPath || (sub.path === '/student-reports' && STUDENT_REPORT_PATHS.includes(currentPath)) || sub.children?.some(c => c.path === currentPath))) {
-        initial[item.id] = true;
+        if (!initial.includes(item.id)) initial.push(item.id);
       }
     });
-    return initial;
+    return initial.slice(-2);
   });
   const [openSubDropdowns, setOpenSubDropdowns] = useState({});
   const sidebarNavRef = React.useRef(null);
 
   const toggleDropdown = (id) => {
     setOpenDropdowns(prev => {
-      const isCurrentlyOpen = !!prev[id];
-      return {
-        ...prev,
-        [id]: !isCurrentlyOpen
-      };
+      const isCurrentlyOpen = prev.includes(id);
+      if (isCurrentlyOpen) {
+        return prev.filter(k => k !== id);
+      }
+      // Keep max 2 open tabs: 3rd opens -> 1st closes automatically
+      const updated = [...prev, id];
+      return updated.slice(-2);
     });
   };
 
@@ -682,7 +687,10 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       }
 
       if (activeKey) {
-        setOpenDropdowns(prev => ({ ...prev, [activeKey]: true }));
+        setOpenDropdowns(prev => {
+          if (prev.includes(activeKey)) return prev;
+          return [...prev, activeKey].slice(-2);
+        });
       }
       if (activeSubKey) {
         setOpenSubDropdowns(prev => ({ ...prev, [activeSubKey]: true }));
@@ -759,7 +767,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
-            const isOpen = Boolean(openDropdowns[item.id]);
+            const isOpen = openDropdowns.includes(item.id);
             const normCurrent = currentPath === '/' ? '/dashboard' : currentPath;
             const isActive = normCurrent === item.path || (hasChildren && item.subItems.some(sub => {
               if (sub.path === normCurrent) return true;
