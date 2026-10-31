@@ -440,14 +440,7 @@ export function DashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* 4 Carousel Indicator Dots matching UAB */}
-        <div className="flex items-center justify-center gap-2 pt-1 pb-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
         </div>
-      </div>
 
       {/* Today's Paymode Summary (ErpSection with Emerald Tone) */}
       <ErpSection title="Today's Paymode Summary" icon={CreditCard} tone="green">
