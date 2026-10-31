@@ -813,9 +813,12 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                   )}
                 </button>
 
-                {/* Submenu Dropdown Tree */}
+                {/* Submenu Dropdown Tree with Connecting Guide Line & Dots */}
                 {hasChildren && isOpen && (
-                  <div className="relative ml-4 pl-3.5 border-l-2 border-indigo-100 flex flex-col space-y-0.5 my-1">
+                  <div className="relative flex flex-col space-y-0.5 mt-0.5 pb-0.5">
+                    {/* Vertical Connecting Guide Line */}
+                    <div className="absolute left-[1.125rem] top-1.5 bottom-2.5 w-px bg-slate-200" />
+
                     {item.subItems.map((sub) => {
                       const hasSubChildren = sub.children && sub.children.length > 0;
                       if (hasSubChildren) {
@@ -823,25 +826,28 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                         const isSubOpen = openSubDropdowns[subId] ?? true;
                         const isAnyChildActive = sub.children.some(c => c.path === normCurrent);
                         return (
-                          <div key={subId} className="space-y-0.5">
+                          <div key={subId} className="relative space-y-0.5">
                             {/* Expandable Sub-Item (e.g. Reports) */}
                             <button
                               onClick={() => toggleSubDropdown(subId)}
-                              className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 group w-full text-left cursor-pointer ${isSubOpen || isAnyChildActive
-                                ? 'text-indigo-900 bg-indigo-50/70 font-bold'
-                                : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
+                              className={`relative flex items-center justify-between rounded-lg py-1.5 pl-[2.25rem] pr-2 text-[12.5px] font-medium transition-all duration-200 group w-full text-left cursor-pointer ${isSubOpen || isAnyChildActive
+                                ? 'text-indigo-900 bg-indigo-50/60 font-semibold'
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
                                 }`}
                             >
+                              {/* Dot exactly on guide line */}
+                              <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isSubOpen || isAnyChildActive ? 'bg-indigo-600' : 'bg-slate-300 group-hover:bg-indigo-400'
+                                }`} />
                               <span className="truncate">{sub.title}</span>
                               <ChevronDown
-                                className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
+                                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${isSubOpen ? 'rotate-0 text-indigo-600' : '-rotate-90'
                                   }`}
                               />
                             </button>
 
                             {/* Nested Level 2 Children */}
                             {isSubOpen && (
-                              <div className="ml-2 pl-2.5 border-l border-slate-200 space-y-0.5 my-0.5">
+                              <div className="relative ml-8 pl-3 border-l border-slate-200 space-y-0.5 my-0.5">
                                 {sub.children.map((child) => {
                                   const isChildActive = normCurrent === child.path;
                                   return (
@@ -852,7 +858,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                                         if (window.innerWidth < 768 && onClose) onClose();
                                       }}
                                       className={`flex items-center rounded-lg px-2 py-1 text-[11.5px] transition-all text-left cursor-pointer w-full ${isChildActive
-                                        ? 'text-indigo-700 bg-indigo-50 font-bold shadow-2xs'
+                                        ? 'text-indigo-700 bg-indigo-50/70 font-semibold shadow-2xs'
                                         : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-medium'
                                         }`}
                                     >
@@ -874,15 +880,15 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
                             if (onNavigate) onNavigate(sub.path);
                             if (window.innerWidth < 768 && onClose) onClose();
                           }}
-                          className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 group text-left cursor-pointer ${isSubActive
-                            ? 'text-indigo-700 bg-indigo-50/90 font-bold shadow-2xs'
-                            : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
+                          className={`relative flex items-center justify-between rounded-lg py-1.5 pl-[2.25rem] pr-2.5 text-[12.5px] font-medium transition-all duration-200 group text-left cursor-pointer ${isSubActive
+                            ? 'text-indigo-700 bg-indigo-50/80 font-semibold shadow-2xs'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
                             }`}
                         >
+                          {/* Dot exactly on guide line */}
+                          <div className={`absolute left-[0.95rem] h-1.5 w-1.5 rounded-full ring-4 ring-white transition-all duration-300 z-10 ${isSubActive ? 'bg-indigo-600 ring-indigo-50' : 'bg-slate-300 group-hover:bg-indigo-400'
+                            }`} />
                           <span className="truncate">{sub.title}</span>
-                          {isSubActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
-                          )}
                         </button>
                       );
                     })}
