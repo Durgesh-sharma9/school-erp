@@ -188,41 +188,6 @@ export function Navbar({
             )}
           </div>
 
-          {/* Multi-Tenant Switcher (Wide Screens) */}
-          <div className="hidden xl:flex items-center bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 shadow-2xs shrink-0">
-            <Building2 className="w-3.5 h-3.5 text-indigo-600 mr-1.5 shrink-0" />
-            <select
-              value={schoolId || 'superadmin'}
-              onChange={(e) => handleSchoolChange(e.target.value)}
-              className="text-xs font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer max-w-[120px] truncate"
-              title="Switch School Branch"
-            >
-              {AVAILABLE_SCHOOLS && AVAILABLE_SCHOOLS.map((sch) => (
-                <option key={sch.id} value={sch.id}>
-                  {sch.name}
-                </option>
-              ))}
-              <option value="superadmin">SuperAdmin HQ</option>
-            </select>
-          </div>
-
-          {/* Quick Role Switcher (Ultra-Wide Screens) */}
-          <div className="hidden 2xl:flex items-center bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 shadow-2xs shrink-0">
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 mr-1.5 shrink-0" />
-            <select
-              value={role}
-              onChange={(e) => handleRoleChange(e.target.value)}
-              className="text-xs font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer"
-              title="Switch Role"
-            >
-              <option value="SUPER_ADMIN">SuperAdmin</option>
-              <option value="ADMIN">Admin</option>
-              <option value="STAFF">Staff</option>
-              <option value="ATTENDER">Attender</option>
-              <option value="STUDENT">Student</option>
-            </select>
-          </div>
-
           {/* Refresh Action Button */}
           <button
             title="Refresh Page"
