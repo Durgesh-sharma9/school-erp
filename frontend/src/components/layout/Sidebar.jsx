@@ -763,7 +763,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         </div>
 
         {/* Menu Items List with Clean Scroll & Padding */}
-        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 pb-16 space-y-1 text-sm font-medium custom-scrollbar">
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 pb-16 space-y-1 text-sm font-medium no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;
