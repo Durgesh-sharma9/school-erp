@@ -526,9 +526,11 @@ function AppContent() {
                 return <StudentFeedbackPage onNavigate={handleNavigate} />;
               case '/daily-test':
               case '/daily-test-ranking':
-              case '/daily-test-create':
               case '/daily-test-reports':
-                return <DailyTestRankingPage onNavigate={handleNavigate} />;
+                return <DailyTestRankingPage onNavigate={handleNavigate} initialTab="ranking" />;
+              case '/daily-test-create':
+              case '/daily-test-entry':
+                return <DailyTestRankingPage onNavigate={handleNavigate} initialTab="entry" />;
               case '/student-performance':
                 return <StudentPerformancePage onNavigate={handleNavigate} />;
               case '/teacher-performance':

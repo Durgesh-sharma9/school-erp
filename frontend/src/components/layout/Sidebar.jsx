@@ -195,7 +195,7 @@ export const staffMenuCategories = [
     icon: Trophy,
     subItems: [
       { title: 'Daily Test Ranking', path: '/daily-test' },
-      { title: 'Create Daily Test', path: '/daily-test' }
+      { title: 'Create Daily Test', path: '/daily-test-create' }
     ]
   },
   {
