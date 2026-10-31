@@ -17,6 +17,9 @@ import { IdCardGeneratorPage } from './modules/students/IdCardGeneratorPage';
 import { AdmitCardGeneratorPage } from './modules/students/AdmitCardGeneratorPage';
 import { ExamDateSheetPage } from './modules/students/ExamDateSheetPage';
 import { StudentFeedbackPage } from './modules/students/StudentFeedbackPage';
+import { DailyTestRankingPage } from './modules/examination/DailyTestRankingPage';
+import { StudentPerformancePage } from './modules/examination/StudentPerformancePage';
+import { TeacherPerformancePage } from './modules/examination/TeacherPerformancePage';
 import {
   FeeCollectionPage,
   FeeHeadGroupPage,
@@ -521,6 +524,17 @@ function AppContent() {
               case '/school-feedback':
               case '/feedback':
                 return <StudentFeedbackPage onNavigate={handleNavigate} />;
+              case '/daily-test':
+              case '/daily-test-ranking':
+              case '/daily-test-create':
+              case '/daily-test-reports':
+                return <DailyTestRankingPage onNavigate={handleNavigate} />;
+              case '/student-performance':
+                return <StudentPerformancePage onNavigate={handleNavigate} />;
+              case '/teacher-performance':
+                return <TeacherPerformancePage onNavigate={handleNavigate} />;
+              case '/performance':
+                return <StudentPerformancePage onNavigate={handleNavigate} />;
               case '/fee-collect':
               case '/fee-collection':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;

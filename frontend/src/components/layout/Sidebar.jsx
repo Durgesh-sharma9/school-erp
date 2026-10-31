@@ -31,7 +31,9 @@ import {
   Receipt,
   Bell,
   Cpu,
-  Megaphone
+  Megaphone,
+  Trophy,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { STUDENT_REPORT_PATHS } from '../../modules/students/reports/studentReportsCatalog';
@@ -46,6 +48,8 @@ const ITEM_COLORS = {
   'timetable-pro': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'student': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
   'attendance': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
+  'daily-test': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
+  'performance': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
   'staff-attendance-group': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
   'users': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' },
   'examination': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
@@ -183,6 +187,24 @@ export const staffMenuCategories = [
       { title: 'Student Attendance', path: '/student-attendance' },
       { title: 'Attendance Geofence', path: '/attendance-geofence' },
       { title: 'Reports', path: '/attendance-reports' }
+    ]
+  },
+  {
+    id: 'daily-test',
+    title: 'Daily Test',
+    icon: Trophy,
+    subItems: [
+      { title: 'Daily Test Ranking', path: '/daily-test' },
+      { title: 'Create Daily Test', path: '/daily-test' }
+    ]
+  },
+  {
+    id: 'performance',
+    title: 'Performance',
+    icon: TrendingUp,
+    subItems: [
+      { title: 'Student Performance', path: '/student-performance' },
+      { title: 'Teacher Performance', path: '/teacher-performance' }
     ]
   },
   { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
@@ -538,6 +560,8 @@ export const menuCategories = [
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const getInitialActiveDropdown = (path) => {
     if (path.includes('staff-attendance') || path.includes('student-attendance') || path.includes('attendance-geofence') || path === '/attendance') return { attendance: true, 'staff-attendance-group': true, 'attender-attendance-group': true };
+    if (path.includes('daily-test')) return { 'daily-test': true };
+    if (path.includes('performance')) return { performance: true };
     if (path.includes('transport')) return { transport: true };
     if (path.includes('student') || path.includes('admission') || STUDENT_REPORT_PATHS.includes(path)) return { student: true };
     if (path.includes('user')) return { users: true };

@@ -1183,6 +1183,59 @@ class TenantDataStore {
     return updated.find(item => item.id === id);
   }
 
+  // --- Daily Tests ---
+  getDailyTests(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const key = this.getStorageKey(schoolId, 'daily_tests');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      {
+        id: 'test_101',
+        title: 'Mathematics Unit Test - Chapter 2 Fractions',
+        className: 'Class I - A',
+        subject: 'Mathematics',
+        date: new Date().toISOString().split('T')[0],
+        maxMarks: 20,
+        passingMarks: 8,
+        status: 'Evaluated',
+        students: [
+          { admNo: '1002', name: 'Dev Sharma', rollNo: '1', marks: 19, rank: 1, attendance: 'P', remarks: 'Outstanding calculation speed' },
+          { admNo: '1621', name: 'Aaditya Singh', rollNo: '2', marks: 17, rank: 2, attendance: 'P', remarks: 'Very neat step-by-step solution' },
+          { admNo: '2060', name: 'Rohan Sharma', rollNo: '3', marks: 16, rank: 3, attendance: 'P', remarks: 'Good accuracy' },
+          { admNo: '2061', name: 'Priya Meena', rollNo: '4', marks: 14, rank: 4, attendance: 'P', remarks: 'Needs more practice in word problems' }
+        ]
+      }
+    ];
+  }
+
+  saveDailyTests(schoolId, tests) {
+    if (!schoolId) return;
+    try {
+      const key = this.getStorageKey(schoolId, 'daily_tests');
+      localStorage.setItem(key, JSON.stringify(tests));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  addDailyTest(schoolId, test) {
+    if (!schoolId || !test) return null;
+    const current = this.getDailyTests(schoolId);
+    const newTest = {
+      id: test.id || 'dt_' + Date.now(),
+      date: test.date || new Date().toISOString().split('T')[0],
+      ...test
+    };
+    const updated = [newTest, ...current];
+    this.saveDailyTests(schoolId, updated);
+    return newTest;
+  }
+
 }
 
 export const tenantStore = new TenantDataStore();
