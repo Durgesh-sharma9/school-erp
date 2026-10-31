@@ -336,17 +336,7 @@ export function Navbar({
             )}
           </div>
 
-          {/* ================= DIRECT LOGOUT BUTTON (Never Cut Off, Always Shrink-0) ================= */}
-          <button
-            onClick={handleLogout}
-            title="Sign Out"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200/90 bg-rose-50/80 hover:bg-rose-100 hover:border-rose-300 text-rose-700 text-xs font-bold shadow-2xs hover:shadow-xs transition-all cursor-pointer shrink-0 whitespace-nowrap"
-          >
-            <LogOut className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-            <span className="hidden xs:inline">Logout</span>
-          </button>
-
-        </div>
+          </div>
       </header>
 
       {/* Test Master Pro Style Announcement & Poll Modal */}
