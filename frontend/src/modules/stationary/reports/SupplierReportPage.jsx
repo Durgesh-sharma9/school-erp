@@ -10,60 +10,7 @@ import {
   MapPin
 } from 'lucide-react';
 
-const INITIAL_SUPPLIERS = [
-  {
-    id: '1',
-    name: 'GLOBAL BOOK DISTRIBUTORS',
-    mobNo: '9876543210',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    gst: '08AAAAA0000A1Z5',
-    aadharNo: '1234 5678 9012',
-    panNo: 'ABCDE1234F',
-    address: 'Shop 14, Chaura Rasta, Jaipur',
-    createdBy: 'Admin (Master)',
-    updatedBy: 'Admin (Master)'
-  },
-  {
-    id: '2',
-    name: 'NAVNEET STATIONERS PVT LTD',
-    mobNo: '9829012345',
-    city: 'Ahmedabad',
-    state: 'Gujarat',
-    gst: '24BBBBB1111B1Z2',
-    aadharNo: '2345 6789 0123',
-    panNo: 'BCDEF2345G',
-    address: 'GIDC Industrial Area, Vatva',
-    createdBy: 'Principal',
-    updatedBy: 'Principal'
-  },
-  {
-    id: '3',
-    name: 'ROYAL UNIFORMS & FABRICS',
-    mobNo: '9414056789',
-    city: 'Bhilwara',
-    state: 'Rajasthan',
-    gst: '08CCCCC2222C1Z9',
-    aadharNo: '3456 7890 1234',
-    panNo: 'CDEFG3456H',
-    address: 'Textile Market, Gandhinagar, Bhilwara',
-    createdBy: 'Store Incharge',
-    updatedBy: 'Store Incharge'
-  },
-  {
-    id: '4',
-    name: 'CLASSIC PAPER MART',
-    mobNo: '9828098765',
-    city: 'Delhi',
-    state: 'Delhi',
-    gst: '07DDDDD3333D1Z1',
-    aadharNo: '4567 8901 2345',
-    panNo: 'DEFGH4567J',
-    address: 'Nai Sarak, Chandni Chowk, New Delhi',
-    createdBy: 'Admin (Master)',
-    updatedBy: 'Admin (Master)'
-  }
-];
+const INITIAL_SUPPLIERS = [];
 
 export function SupplierReportPage({ onNavigate }) {
   const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS);
@@ -74,7 +21,7 @@ export function SupplierReportPage({ onNavigate }) {
     fetch('/api/stationary/suppliers')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const mapped = data.data.map((item, idx) => ({
             id: item.id || String(idx + 1),
             name: item.supplierName || item.name || 'Supplier',

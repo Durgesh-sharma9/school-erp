@@ -1,6 +1,16 @@
 import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import {
+  Receipt,
+  Printer,
+  IndianRupee,
+  Users,
+  Building,
+  Package,
+  Eye,
+  Save,
+  RotateCcw,
+  QrCode,
   Home,
   Sliders,
   User,
@@ -31,19 +41,137 @@ import {
   Send,
   Upload
 } from 'lucide-react';
+import { tenantStore } from '../../services/tenantStore';
 import { PageHeader, ErpSection, FormField } from '../../components/erp/PagePrimitives';
 
 export function SettingsAndPermissionsPage() {
   const [activeTab, setActiveTab] = useState('masters');
 
   const tabs = [
-    { id: 'masters', label: 'Masters', icon: Layers, count: 4 },
+    { id: 'masters', label: 'Masters', icon: Layers, count: 5 },
+    { id: 'receiptSettings', label: 'Receipt Settings', icon: Receipt },
     { id: 'smsTemplate', label: 'Add SMS Template', icon: MessageSquare },
     { id: 'transportSettings', label: 'Transport Settings', icon: Bus },
     { id: 'appSettings', label: 'Student App Settings', icon: Smartphone },
     { id: 'appModule', label: 'Student App Module', icon: Shield, count: 38 },
     { id: 'comingSoon', label: 'Coming Soon', icon: Sparkles }
   ];
+
+  // ==========================================
+  // TAB: RECEIPT SETTINGS STATE (All ERP Receipts)
+  // ==========================================
+  const activeSchoolId = typeof window !== 'undefined' ? (localStorage.getItem('active_school_id') || 'sch_jd_intl') : 'sch_jd_intl';
+  const schoolProfile = tenantStore?.getSchoolProfile ? (tenantStore.getSchoolProfile(activeSchoolId) || {}) : {};
+
+  const RECEIPT_MODULES = [
+    { id: 'fee', name: 'Student Fee Collection (Counter POS)', icon: IndianRupee, badge: 'Fee Collection', defaultPrefix: schoolProfile?.schoolCode ? 'JD' : 'FEE', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026-27', defaultStart: '001' },
+    { id: 'sibling', name: 'Sibling Joint Fee Receipt', icon: Users, badge: 'Sibling Fee', defaultPrefix: 'SIB', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026-27', defaultStart: '001' },
+    { id: 'board', name: 'Board Examination Fee Slip', icon: Award, badge: 'Board Exam', defaultPrefix: 'BRD', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026', defaultStart: '001' },
+    { id: 'voucher', name: 'Fee Voucher Entry Slip', icon: Receipt, badge: 'Vouchers', defaultPrefix: 'VCH', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026-27', defaultStart: '001' },
+    { id: 'refund', name: 'Fee Refund Voucher', icon: RotateCcw, badge: 'Refunds', defaultPrefix: 'REF', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026', defaultStart: '001' },
+    { id: 'transport', name: 'Transport Fee Receipt', icon: Bus, badge: 'Transport', defaultPrefix: 'TRN', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026-27', defaultStart: '001' },
+    { id: 'hostel', name: 'Hostel & Mess Fee Receipt', icon: Building, badge: 'Hostel', defaultPrefix: 'HST', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026-27', defaultStart: '001' },
+    { id: 'inventory', name: 'Inventory & Stationery Sale Slip', icon: Package, badge: 'Stationery', defaultPrefix: 'INV', defaultSeparator: '-', defaultHasSuffix: true, defaultSuffix: '2026', defaultStart: '001' },
+    { id: 'expense', name: 'School Expense & Cash Daybook Voucher', icon: CreditCard, badge: 'Expense', defaultPrefix: 'EXP', defaultSeparator: '-', defaultHasSuffix: false, defaultSuffix: '2026-27', defaultStart: '1001' }
+  ];
+
+  const [receiptConfigs, setReceiptConfigs] = useState(() => {
+    try {
+      const stored = localStorage.getItem('erp_receipt_settings_' + activeSchoolId);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const result = {};
+        RECEIPT_MODULES.forEach(mod => {
+          result[mod.id] = parsed[mod.id] || {
+            prefix: mod.defaultPrefix,
+            separator: mod.defaultSeparator,
+            hasSuffix: mod.defaultHasSuffix,
+            suffixText: mod.defaultSuffix,
+            startNo: mod.defaultStart
+          };
+        });
+        return result;
+      }
+    } catch {}
+
+    const initial = {};
+    RECEIPT_MODULES.forEach(mod => {
+      initial[mod.id] = {
+        prefix: mod.defaultPrefix,
+        separator: mod.defaultSeparator,
+        hasSuffix: mod.defaultHasSuffix,
+        suffixText: mod.defaultSuffix,
+        startNo: mod.defaultStart
+      };
+    });
+    return initial;
+  });
+
+  const handleReceiptFieldChange = (id, field, value) => {
+    setReceiptConfigs(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveAllReceiptSettings = (e) => {
+    if (e) e.preventDefault();
+    try {
+      localStorage.setItem('erp_receipt_settings_' + activeSchoolId, JSON.stringify(receiptConfigs));
+      if (tenantStore?.saveReceiptSettings) {
+        tenantStore.saveReceiptSettings(activeSchoolId, receiptConfigs);
+      }
+      toast.success('✅ All receipt settings saved successfully!');
+    } catch (err) {
+      toast.error('Failed to save receipt settings');
+    }
+  };
+
+  const handleApplyGlobalSessionToAll = (sessionStr = '2026-27') => {
+    setReceiptConfigs(prev => {
+      const updated = { ...prev };
+      RECEIPT_MODULES.forEach(mod => {
+        if (updated[mod.id]) {
+          updated[mod.id] = {
+            ...updated[mod.id],
+            hasSuffix: true,
+            suffixText: sessionStr
+          };
+        }
+      });
+      return updated;
+    });
+    toast.success('Applied suffix "' + sessionStr + '" to all receipts');
+  };
+
+  const handleResetAllReceiptSettings = () => {
+    const initial = {};
+    RECEIPT_MODULES.forEach(mod => {
+      initial[mod.id] = {
+        prefix: mod.defaultPrefix,
+        separator: mod.defaultSeparator,
+        hasSuffix: mod.defaultHasSuffix,
+        suffixText: mod.defaultSuffix,
+        startNo: mod.defaultStart
+      };
+    });
+    setReceiptConfigs(initial);
+    localStorage.removeItem('erp_receipt_settings_' + activeSchoolId);
+    toast.success('All receipt numbering settings reset to defaults');
+  };
+
+  const getReceiptPreview = (cfg) => {
+    if (!cfg) return '';
+    const parts = [cfg.prefix || 'REC'];
+    if (cfg.hasSuffix && cfg.suffixText) {
+      parts.push(cfg.suffixText);
+    }
+    parts.push(cfg.startNo || '001');
+    return parts.join(cfg.separator || '-');
+  };
 
   // ==========================================
   // TAB 1: MASTERS STATE
@@ -284,7 +412,7 @@ export function SettingsAndPermissionsPage() {
           tone="indigo"
           className="bg-white border-slate-200/80 shadow-sm"
         >
-          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 p-1">
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 p-1">
             {/* House Master Card */}
             <div
               onClick={() => {
@@ -407,6 +535,216 @@ export function SettingsAndPermissionsPage() {
                 <span>Manage Concessions</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
+            </div>
+
+            {/* Receipt Setting Master Card */}
+            <div
+              onClick={() => {
+                setActiveTab('receiptSettings');
+              }}
+              className="relative group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-300 overflow-hidden min-h-[140px] cursor-pointer"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-600" />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-100 shadow-sm text-indigo-600">
+                    <Receipt className="h-4 w-4" />
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    Active
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors">
+                  Receipt Setting
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  Configure fee receipt prefix, print layouts, dual copies, header &amp; signatures.
+                </p>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2 text-xs font-semibold text-indigo-600">
+                <span>Manage Receipt Settings</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+        </ErpSection>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB: Receipt Settings                                     */}
+      {/* ======================================================== */}
+      {activeTab === 'receiptSettings' && (
+        <ErpSection
+          title="Receipt Numbering & Prefix/Suffix Configuration"
+          icon={Receipt}
+          tone="indigo"
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleApplyGlobalSessionToAll('2026-27')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition cursor-pointer"
+                title="Set suffix 2026-27 on all receipts"
+              >
+                <span>Apply Suffix "2026-27" to All</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleResetAllReceiptSettings}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Defaults</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAllReceiptSettings}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition cursor-pointer"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Save All Receipt Settings</span>
+              </button>
+            </div>
+          }
+        >
+          <div className="p-4 space-y-3">
+            <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-indigo-900">
+              <div>
+                <p className="font-bold">School ERP All Receipt Numbering Rules</p>
+                <p className="text-[11px] text-indigo-700">Configure prefix code, separator, suffix inclusion, and starting sequential numbers for all ERP receipts. Format preview updates in real-time.</p>
+              </div>
+              <span className="text-[11px] font-semibold bg-white px-2.5 py-1 rounded-lg border border-indigo-200 text-indigo-800 self-start sm:self-auto shrink-0">
+                {RECEIPT_MODULES.length} Receipt Types
+              </span>
+            </div>
+
+            {/* Grid of Receipts */}
+            <div className="grid grid-cols-1 gap-3 pt-1">
+              {RECEIPT_MODULES.map((mod) => {
+                const IconComp = mod.icon || Receipt;
+                const cfg = receiptConfigs[mod.id] || {
+                  prefix: mod.defaultPrefix,
+                  separator: mod.defaultSeparator,
+                  hasSuffix: mod.defaultHasSuffix,
+                  suffixText: mod.defaultSuffix,
+                  startNo: mod.defaultStart
+                };
+                const preview = getReceiptPreview(cfg);
+
+                return (
+                  <div
+                    key={mod.id}
+                    className="bg-white border border-slate-200/90 hover:border-indigo-300 rounded-xl p-3.5 shadow-2xs transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  >
+                    {/* Left: Name and Module info */}
+                    <div className="flex items-center gap-3 min-w-[240px] lg:w-1/4">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <IconComp className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-slate-800 tracking-tight">{mod.name}</h4>
+                        </div>
+                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-500">
+                          {mod.badge}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Middle: Prefix, Separator, Suffix Toggle, Suffix Text, Starting Number */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
+                      
+                      {/* 1. Prefix */}
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Prefix Code</label>
+                        <input
+                          type="text"
+                          value={cfg.prefix}
+                          onChange={(e) => handleReceiptFieldChange(mod.id, 'prefix', e.target.value.toUpperCase())}
+                          className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg uppercase font-mono font-bold text-slate-800 focus:bg-white focus:outline-indigo-500"
+                          placeholder="e.g. JD"
+                        />
+                      </div>
+
+                      {/* 2. Separator */}
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Separator</label>
+                        <select
+                          value={cfg.separator}
+                          onChange={(e) => handleReceiptFieldChange(mod.id, 'separator', e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-indigo-500 font-mono"
+                        >
+                          <option value="-">Hyphen (-)</option>
+                          <option value="/">Slash (/)</option>
+                          <option value="_">Underscore (_)</option>
+                          <option value="">None</option>
+                        </select>
+                      </div>
+
+                      {/* 3. Suffix Hoga Ya Nahi */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Include Suffix?</label>
+                          <span className={'text-[9px] font-bold px-1 rounded ' + (cfg.hasSuffix ? 'text-emerald-700 bg-emerald-50' : 'text-slate-400 bg-slate-100')}>
+                            {cfg.hasSuffix ? 'ON' : 'OFF'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="checkbox"
+                            checked={!!cfg.hasSuffix}
+                            onChange={(e) => handleReceiptFieldChange(mod.id, 'hasSuffix', e.target.checked)}
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                            title="Enable or disable suffix"
+                          />
+                          <input
+                            type="text"
+                            value={cfg.suffixText}
+                            disabled={!cfg.hasSuffix}
+                            onChange={(e) => handleReceiptFieldChange(mod.id, 'suffixText', e.target.value)}
+                            className={'w-full px-2 py-1.5 text-xs border rounded-lg font-mono ' + (cfg.hasSuffix ? 'bg-slate-50 border-slate-300 text-slate-800 focus:bg-white' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed')}
+                            placeholder="2026-27"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 4. Starting Number */}
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Starting Number</label>
+                        <input
+                          type="text"
+                          value={cfg.startNo}
+                          onChange={(e) => handleReceiptFieldChange(mod.id, 'startNo', e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono font-semibold text-slate-800 focus:bg-white focus:outline-indigo-500"
+                          placeholder="001"
+                        />
+                      </div>
+
+                    </div>
+
+                    {/* Right: Format Live Preview */}
+                    <div className="lg:w-44 flex flex-col lg:items-end justify-center shrink-0 border-t lg:border-t-0 pt-2 lg:pt-0">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Next Receipt</span>
+                      <span className="inline-block px-3 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 font-mono font-bold text-xs text-indigo-700 shadow-2xs">
+                        {preview}
+                      </span>
+                    </div>
+
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Save Bar */}
+            <div className="flex justify-end pt-3">
+              <button
+                type="button"
+                onClick={handleSaveAllReceiptSettings}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                Save All Receipt Numbering Settings
+              </button>
             </div>
           </div>
         </ErpSection>

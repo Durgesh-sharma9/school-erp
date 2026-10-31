@@ -368,7 +368,16 @@ export const menuCategories = [
     id: 'inventory-hub',
     title: 'Inventory Hub',
     icon: Package,
-    path: '/inventory-hub'
+    subItems: [
+      { title: 'Dashboard', path: '/inventory-hub' },
+      { title: 'Category & Items Master', path: '/items-master' },
+      { title: 'Issue Items (POS)', path: '/issue-items' },
+      { title: 'Purchase Items', path: '/purchase-items' },
+      { title: 'Set Master', path: '/set-master' },
+      { title: 'Supplier Master', path: '/supplier-master' },
+      { title: 'Due Payment', path: '/due-payment' },
+      { title: 'Stock Reports', path: '/stationary-reports' }
+    ]
   },
 
 
@@ -520,23 +529,7 @@ export const menuCategories = [
       { title: 'Reports', path: '/library-reports' }
     ]
   },
-  {
-    id: 'stationary',
-    title: 'Stationary',
-    icon: Package, // inventory_2 in UAB
-    subItems: [
-      { title: 'School Inventory Hub (New)', path: '/inventory-hub' },
-      { title: 'School Shop Info', path: '/shop-info' },
-      { title: 'Supplier Shop Master', path: '/supplier-master' },
-      { title: 'Category Master', path: '/category-master' },
-      { title: 'Items Master', path: '/items-master' },
-      { title: 'Set Master', path: '/set-master' },
-      { title: 'Issue Items', path: '/issue-items' },
-      { title: 'Due Payment', path: '/due-payment' },
-      { title: 'Purchase Items', path: '/purchase-items' },
-      { title: 'Reports', path: '/stationary-reports' }
-    ]
-  },
+
   {
     id: 'sms',
     title: 'SMS',

@@ -28,7 +28,7 @@ export function SetMasterPage({ onNavigate }) {
     categoryName: 'Books & Note Books',
     setName: '',
     items: [
-      { itemName: 'School Diary 2026-27', qty: 1, rate: 150 }
+      { itemName: '', qty: 1, rate: 0 }
     ]
   });
 
@@ -36,7 +36,7 @@ export function SetMasterPage({ onNavigate }) {
     fetch('/api/stationary/sets')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) setSets(data.data);
+        if (data.success && Array.isArray(data.data)) setSets(data.data);
       })
       .catch(() => {});
   }, []);
@@ -48,7 +48,7 @@ export function SetMasterPage({ onNavigate }) {
       categoryName: 'Books & Note Books',
       setName: '',
       items: [
-        { itemName: 'School Diary 2026-27', qty: 1, rate: 150 }
+        { itemName: '', qty: 1, rate: 0 }
       ]
     });
     setIsModalOpen(true);
@@ -63,7 +63,7 @@ export function SetMasterPage({ onNavigate }) {
   const addItemRow = () => {
     setFormData({
       ...formData,
-      items: [...formData.items, { itemName: '', qty: 1, rate: 100 }]
+      items: [...formData.items, { itemName: '', qty: 1, rate: 0 }]
     });
   };
 

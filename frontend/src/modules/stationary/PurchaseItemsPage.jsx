@@ -23,12 +23,12 @@ export function PurchaseItemsPage({ onNavigate }) {
   const [viewInvoice, setViewInvoice] = useState(null);
 
   const [formData, setFormData] = useState({
-    supplierName: 'Maheshwari Garments',
-    mobileNo: '9414055667',
+    supplierName: '',
+    mobileNo: '',
     discount: 0,
-    paidAmt: 15000,
+    paidAmt: 0,
     items: [
-      { itemCode: 'BC-TSH-024', itemName: 'T Shirt- Y (24)', qty: 50, rate: 300, gst: 0, total: 15000 }
+      { itemCode: '', itemName: '', qty: 1, rate: 0, gst: 0, total: 0 }
     ]
   });
 
@@ -36,19 +36,19 @@ export function PurchaseItemsPage({ onNavigate }) {
     fetch('/api/stationary/purchases')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) setPurchases(data.data);
+        if (data.success && Array.isArray(data.data)) setPurchases(data.data);
       })
       .catch(() => {});
   }, []);
 
   const openAddModal = () => {
     setFormData({
-      supplierName: 'Maheshwari Garments',
-      mobileNo: '9414055667',
+      supplierName: '',
+      mobileNo: '',
       discount: 0,
-      paidAmt: 15000,
+      paidAmt: 0,
       items: [
-        { itemCode: 'BC-TSH-024', itemName: 'T Shirt- Y (24)', qty: 50, rate: 300, gst: 0, total: 15000 }
+        { itemCode: '', itemName: '', qty: 1, rate: 0, gst: 0, total: 0 }
       ]
     });
     setIsModalOpen(true);

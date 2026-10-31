@@ -847,11 +847,17 @@ export const getBulkStudents = async (req, res, next) => {
       }
     }
 
+    const normalizeClass = (val) => {
+      const s = String(val || '').toLowerCase().replace(/^classs*/i, '').trim();
+      const map = { '1':'i', '2':'ii', '3':'iii', '4':'iv', '5':'v', '6':'vi', '7':'vii', '8':'viii', '9':'ix', '10':'x', '11':'xi', '12':'xii' };
+      return map[s] || s;
+    };
+
     if (className) {
-      pool = pool.filter(s => s.className?.toLowerCase() === className.toLowerCase());
+      pool = pool.filter(s => normalizeClass(s.className) === normalizeClass(className));
     }
     if (section) {
-      pool = pool.filter(s => s.section?.toLowerCase() === section.toLowerCase());
+      pool = pool.filter(s => String(s.section || '').trim().toLowerCase() === String(section).trim().toLowerCase());
     }
 
     const bulkData = pool.map((s, idx) => ({

@@ -39,7 +39,7 @@ export function SchoolShopInfoPage({ onNavigate }) {
     fetch('/api/stationary/shops')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) setShops(data.data);
+        if (data.success && Array.isArray(data.data)) setShops(data.data);
       })
       .catch(() => {});
   }, []);

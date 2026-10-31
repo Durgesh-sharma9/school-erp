@@ -417,6 +417,74 @@ class TenantDataStore {
     };
   }
 
+  // Receipt Configuration & Numbering Settings
+  getReceiptSettings(schoolId) {
+    if (!schoolId) return null;
+    try {
+      const stored = localStorage.getItem('erp_receipt_settings_' + schoolId);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  }
+
+  saveReceiptSettings(schoolId, settings) {
+    if (!schoolId || !settings) return;
+    try {
+      localStorage.setItem('erp_receipt_settings_' + schoolId, JSON.stringify(settings));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  generateNextReceiptNo(schoolId, type = 'fee') {
+    const receipts = this.getReceipts(schoolId);
+    const allSettings = this.getReceiptSettings(schoolId);
+    const defaultPrefix = schoolId === 'sch_dps_branch2' ? 'DPS' : schoolId === 'sch_jd_intl' ? 'JD' : 'REC';
+    
+    const config = allSettings && allSettings[type] ? allSettings[type] : {
+      prefix: type === 'sibling' ? 'SIB' : type === 'board' ? 'BRD' : type === 'voucher' ? 'VCH' : type === 'refund' ? 'REF' : type === 'transport' ? 'TRN' : type === 'hostel' ? 'HST' : type === 'inventory' ? 'INV' : type === 'expense' ? 'EXP' : defaultPrefix,
+      separator: '-',
+      hasSuffix: true,
+      suffixText: '2026-27',
+      startNo: '001'
+    };
+
+    const startNum = parseInt(config.startNo || '1', 10) || 1;
+    const padding = (config.startNo && config.startNo.length > 1) ? config.startNo.length : 3;
+
+    // Filter receipts matching this specific type to get accurate count
+    const typeReceipts = receipts.filter(r => (
+      (r.receiptType === type) ||
+      (r.type === type) ||
+      (type === 'fee' && (!r.receiptType || r.receiptType === 'fee'))
+    ));
+
+    // Existing numbers set in this tenant to guarantee ZERO DUPLICATES
+    const existingNos = new Set(receipts.map(r => String(r.receiptNo || '').trim().toUpperCase()));
+    let currentSeq = startNum + typeReceipts.length;
+    let candidate = '';
+
+    while (true) {
+      const seqStr = String(currentSeq).padStart(padding, '0');
+      const parts = [config.prefix || 'REC'];
+      if (config.hasSuffix && config.suffixText) {
+        parts.push(config.suffixText);
+      }
+      parts.push(seqStr);
+      candidate = parts.join(config.separator != null ? config.separator : '-');
+      
+      // If candidate is not already assigned to any student, use it!
+      if (!existingNos.has(candidate.toUpperCase())) {
+        break;
+      }
+      currentSeq++;
+    }
+
+    return candidate;
+  }
+
   // 6. Get fee receipts strictly for this school
   getReceipts(schoolId) {
     if (!schoolId) return [];
@@ -435,12 +503,15 @@ class TenantDataStore {
   addReceipt(schoolId, receiptData) {
     if (!schoolId) return null;
     const receipts = this.getReceipts(schoolId);
-    const prefix = schoolId === 'sch_dps_branch2' ? 'DPS' : schoolId === 'sch_jd_intl' ? 'JD' : 'REC';
+    const rType = receiptData.receiptType || receiptData.type || 'fee';
+    const recNo = receiptData.receiptNo || this.generateNextReceiptNo(schoolId, rType);
+    
     const newReceipt = {
-      id: `rec_${Date.now()}`,
-      receiptNo: receiptData.receiptNo || `${prefix}-2026-${String(receipts.length + 1).padStart(3, '0')}`,
+      id: `rec_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      receiptNo: recNo,
+      receiptType: rType,
       ...receiptData,
-      status: 'SUCCESS',
+      status: receiptData.status || 'SUCCESS',
       schoolId: schoolId,
       date: receiptData.date || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString()

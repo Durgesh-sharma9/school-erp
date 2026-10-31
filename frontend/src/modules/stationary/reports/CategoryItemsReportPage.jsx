@@ -8,18 +8,7 @@ import {
   Package
 } from 'lucide-react';
 
-const INITIAL_ITEMS = [
-  { id: '1', categoryName: 'Diary', itemName: 'School Diary 2026-27', price: 150, gst: 0, amtGst: 150 },
-  { id: '2', categoryName: 'Uniform', itemName: 'T Shirt- W (22)', price: 300, gst: 0, amtGst: 300 },
-  { id: '3', categoryName: 'Uniform', itemName: 'T Shirt- Y (24)', price: 300, gst: 0, amtGst: 300 },
-  { id: '4', categoryName: 'Uniform', itemName: 'T-Shirt -W( 20 )', price: 300, gst: 0, amtGst: 300 },
-  { id: '5', categoryName: 'Uniform', itemName: 'Pant ( 20 )', price: 450, gst: 0, amtGst: 450 },
-  { id: '6', categoryName: 'Uniform', itemName: 'Pant ( 30 )', price: 520, gst: 0, amtGst: 520 },
-  { id: '7', categoryName: 'Uniform', itemName: 'Pajama ( 26 )', price: 280, gst: 0, amtGst: 280 },
-  { id: '8', categoryName: 'Note Books', itemName: '4-Line English Notebook (172 Pgs)', price: 45, gst: 0, amtGst: 45 },
-  { id: '9', categoryName: 'Note Books', itemName: '2-Line Hindi Notebook (172 Pgs)', price: 45, gst: 0, amtGst: 45 },
-  { id: '10', categoryName: 'Register', itemName: 'Practical File / Register', price: 85, gst: 0, amtGst: 85 }
-];
+const INITIAL_ITEMS = [];
 
 export function CategoryItemsReportPage({ onNavigate }) {
   const [items, setItems] = useState(INITIAL_ITEMS);
@@ -31,7 +20,7 @@ export function CategoryItemsReportPage({ onNavigate }) {
     fetch('/api/stationary/items')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const mapped = data.data.map(i => ({
             id: i.id,
             categoryName: i.categoryName,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Home,
   FileEdit,
@@ -19,168 +19,129 @@ import {
   ArrowRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { SCHOOL_CLASSES } from '../students/reports/studentReportsData';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
+
+const STANDARD_CLASSES = [
+  'Nursery', 'LKG', 'UKG',
+  'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII',
+  'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'
+];
+
+const normalizeClass = (val) => {
+  const s = String(val || '').toLowerCase().replace(/^class\s*/i, '').trim();
+  const map = { '1':'i', '2':'ii', '3':'iii', '4':'iv', '5':'v', '6':'vi', '7':'vii', '8':'viii', '9':'ix', '10':'x', '11':'xi', '12':'xii' };
+  return map[s] || s;
+};
 
 export function AddEditBulkStudentsPage({ onNavigate }) {
-  const [selectedClass, setSelectedClass] = useState('X');
+  const { schoolId: authSchoolId } = useAuth();
+  const schoolId = authSchoolId || localStorage.getItem('active_school_id') || 'sch_jd_intl';
+
+  // Discover real enrolled classes
+  const initialEnrolled = useMemo(() => {
+    return tenantStore.getStudents(schoolId) || [];
+  }, [schoolId]);
+
+  const availableClasses = useMemo(() => {
+    const set = new Set();
+    initialEnrolled.forEach(s => {
+      if (s.className) set.add(s.className);
+    });
+    STANDARD_CLASSES.forEach(c => set.add(c));
+    return Array.from(set);
+  }, [initialEnrolled]);
+
+  // Default to the class that actually has enrolled students
+  const [selectedClass, setSelectedClass] = useState(() => {
+    if (initialEnrolled.length > 0 && initialEnrolled[0].className) {
+      return initialEnrolled[0].className;
+    }
+    return 'I';
+  });
+
   const [selectedSection, setSelectedSection] = useState('A');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
+  const [studentRows, setStudentRows] = useState([]);
 
-  // 1:1 with UAB Bulk Student Fields
-  const [studentRows, setStudentRows] = useState([
-    {
-      id: 'row-1',
-      sr_no: '2059',
-      adm_no: 'ADM-2023-01',
-      permanent_edu_no: 'PEN2026001',
-      enroll_no: 'ENR-2023-01',
-      adm_date: '2023-04-05',
-      class_id: 'X',
-      division_id: 'A',
-      first_name: 'Aadhya',
-      last_name: 'Choudhary',
-      dob: '2010-10-15',
-      gender: 'Female',
-      blood_group: 'B+',
-      aadhaar: '637728103412',
-      nationality: 'Indian',
-      religion: 'Hindu',
-      category: 'General',
-      house: 'Red House',
-      fathers_name: 'Ramesh Choudhary',
-      fathers_mobile_no: '6377281034',
-      fathers_aadhaar: '987654321012',
-      mothers_name: 'Sunita Choudhary',
-      mothers_mobile_no: '9414012345',
-      mothers_aadhaar: '876543210987'
-    },
-    {
-      id: 'row-2',
-      sr_no: '2060',
-      adm_no: 'ADM-2023-02',
-      permanent_edu_no: 'PEN2026002',
-      enroll_no: 'ENR-2023-02',
-      adm_date: '2023-04-06',
-      class_id: 'X',
-      division_id: 'A',
-      first_name: 'Rohan',
-      last_name: 'Sharma',
-      dob: '2010-10-18',
-      gender: 'Male',
-      blood_group: 'O+',
-      aadhaar: '982901234512',
-      nationality: 'Indian',
-      religion: 'Hindu',
-      category: 'General',
-      house: 'Blue House',
-      fathers_name: 'Mukesh Sharma',
-      fathers_mobile_no: '9829012345',
-      fathers_aadhaar: '987654321013',
-      mothers_name: 'Kavita Sharma',
-      mothers_mobile_no: '9829099887',
-      mothers_aadhaar: '876543210988'
-    },
-    {
-      id: 'row-3',
-      sr_no: '2061',
-      adm_no: 'ADM-2023-03',
-      permanent_edu_no: 'PEN2026003',
-      enroll_no: 'ENR-2023-03',
-      adm_date: '2023-04-08',
-      class_id: 'X',
-      division_id: 'A',
-      first_name: 'Priya',
-      last_name: 'Kumawat',
-      dob: '2010-10-22',
-      gender: 'Female',
-      blood_group: 'A+',
-      aadhaar: '987654321099',
-      nationality: 'Indian',
-      religion: 'Hindu',
-      category: 'OBC',
-      house: 'Green House',
-      fathers_name: 'Surendra Kumawat',
-      fathers_mobile_no: '9876543210',
-      fathers_aadhaar: '987654321014',
-      mothers_name: 'Geeta Kumawat',
-      mothers_mobile_no: '9876511223',
-      mothers_aadhaar: '876543210989'
-    },
-    {
-      id: 'row-4',
-      sr_no: '2062',
-      adm_no: 'ADM-2023-04',
-      permanent_edu_no: 'PEN2026004',
-      enroll_no: 'ENR-2023-04',
-      adm_date: '2023-04-10',
-      class_id: 'X',
-      division_id: 'A',
-      first_name: 'Aditya',
-      last_name: 'Singh',
-      dob: '2009-10-25',
-      gender: 'Male',
-      blood_group: 'B+',
-      aadhaar: '941401122388',
-      nationality: 'Indian',
-      religion: 'Hindu',
-      category: 'General',
-      house: 'Yellow House',
-      fathers_name: 'Bhawani Singh',
-      fathers_mobile_no: '9414011223',
-      fathers_aadhaar: '987654321015',
-      mothers_name: 'Manju Kanwar',
-      mothers_mobile_no: '9414099881',
-      mothers_aadhaar: '876543210990'
-    },
-    {
-      id: 'row-5',
-      sr_no: '2063',
-      adm_no: 'ADM-2023-05',
-      permanent_edu_no: 'PEN2026005',
-      enroll_no: 'ENR-2023-05',
-      adm_date: '2023-04-12',
-      class_id: 'X',
-      division_id: 'A',
-      first_name: 'Kavya',
-      last_name: 'Meena',
-      dob: '2010-10-29',
-      gender: 'Female',
-      blood_group: 'AB+',
-      aadhaar: '982811445577',
-      nationality: 'Indian',
-      religion: 'Hindu',
-      category: 'ST',
-      house: 'Red House',
-      fathers_name: 'Rajendra Meena',
-      fathers_mobile_no: '9828114455',
-      fathers_aadhaar: '987654321016',
-      mothers_name: 'Urmila Meena',
-      mothers_mobile_no: '9828199000',
-      mothers_aadhaar: '876543210991'
-    }
-  ]);
-
-  const handleFetchStudents = async () => {
+  // Load actual students for the chosen class and section
+  const loadClassStudents = async (targetClass, targetSection) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/students/bulk?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}`);
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-        setStudentRows(json.data);
-        toast.success(`Loaded ${json.data.length} students for Class ${selectedClass} - ${selectedSection}`);
-      } else {
-        toast.success(`Loaded student spreadsheet for Class ${selectedClass} - ${selectedSection}`);
-      }
-    } catch {
-      toast.success(`Loaded spreadsheet for Class ${selectedClass} - ${selectedSection}`);
+      // 1. Get from tenantStore first
+      const local = tenantStore.getStudents(schoolId) || [];
+      let matched = local.filter(s =>
+        normalizeClass(s.className) === normalizeClass(targetClass) &&
+        String(s.section || 'A').trim().toLowerCase() === String(targetSection || 'A').trim().toLowerCase()
+      );
+
+      // 2. Fetch from backend endpoint
+      try {
+        const res = await fetch(`/api/students/bulk?className=${encodeURIComponent(targetClass)}&section=${encodeURIComponent(targetSection)}`, {
+          headers: { 'x-school-id': schoolId }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            matched = json.data;
+          }
+        }
+      } catch (e) {}
+
+      // Map to grid format
+      const mappedRows = matched.map((s, idx) => ({
+        id: s.id || `std_${Date.now()}_${idx}`,
+        sr_no: s.sr_no || s.srNo || String(1000 + idx),
+        adm_no: s.adm_no || s.admNo || `ADM-${1000 + idx}`,
+        permanent_edu_no: s.permanent_edu_no || s.pen || '',
+        enroll_no: s.enroll_no || s.enrollNo || '',
+        adm_date: s.adm_date || s.admissionDate || s.createdAt?.split('T')[0] || '',
+        class_id: s.class_id || s.className || targetClass,
+        division_id: s.division_id || s.section || targetSection,
+        first_name: s.first_name || s.firstName || s.name?.split(' ')[0] || '',
+        last_name: s.last_name !== undefined ? s.last_name : (s.lastName || s.name?.split(' ').slice(1).join(' ') || ''),
+        dob: s.dob || '',
+        gender: s.gender || 'Male',
+        blood_group: s.blood_group || s.bloodGroup || 'B+',
+        aadhaar: s.aadhaar || '',
+        nationality: s.nationality || 'Indian',
+        religion: s.religion || 'Hindu',
+        category: s.category || 'General',
+        house: s.house || 'Red House',
+        fathers_name: s.fathers_name || s.fatherName || '',
+        fathers_mobile_no: s.fathers_mobile_no || s.fatherMobile || s.contactNo || '',
+        fathers_aadhaar: s.fathers_aadhaar || s.fatherAadhaar || '',
+        mothers_name: s.mothers_name || s.motherName || '',
+        mothers_mobile_no: s.mothers_mobile_no || s.motherMobile || '',
+        mothers_aadhaar: s.mothers_aadhaar || s.motherAadhaar || ''
+      }));
+
+      setStudentRows(mappedRows);
     } finally {
       setLoading(false);
       setHasUnsavedChanges(false);
     }
   };
+
+  // Load on mount and whenever class/section changes
+  useEffect(() => {
+    loadClassStudents(selectedClass, selectedSection);
+  }, [selectedClass, selectedSection, schoolId]);
+
+  // Keyboard shortcut Ctrl+S / Cmd+S to save
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveAll();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [studentRows, selectedClass, selectedSection]);
 
   const handleCellChange = (id, field, value) => {
     setStudentRows(prev =>
@@ -193,27 +154,32 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
     const highestSr = studentRows.reduce((max, r) => {
       const num = parseInt(r.sr_no, 10);
       return !isNaN(num) && num > max ? num : max;
-    }, 2060);
+    }, 1000);
+
+    const highestAdm = studentRows.reduce((max, r) => {
+      const num = parseInt(String(r.adm_no).replace(/\D/g, ''), 10);
+      return !isNaN(num) && num > max ? num : max;
+    }, 1000);
 
     const newRow = {
       id: `new-row-${Date.now()}`,
       sr_no: String(highestSr + 1),
-      adm_no: `ADM-${Date.now().toString().slice(-4)}`,
-      permanent_edu_no: `PEN${Date.now().toString().slice(-6)}`,
-      enroll_no: `ENR-${Date.now().toString().slice(-4)}`,
+      adm_no: String(highestAdm + 1),
+      permanent_edu_no: '',
+      enroll_no: '',
       adm_date: new Date().toISOString().split('T')[0],
       class_id: selectedClass,
       division_id: selectedSection,
       first_name: '',
       last_name: '',
-      dob: '2015-01-01',
+      dob: '2018-01-01',
       gender: 'Male',
       blood_group: 'B+',
       aadhaar: '',
       nationality: 'Indian',
       religion: 'Hindu',
       category: 'General',
-      house: 'Blue House',
+      house: 'Red House',
       fathers_name: '',
       fathers_mobile_no: '',
       fathers_aadhaar: '',
@@ -230,62 +196,93 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
   const handleDeleteRow = (id) => {
     setStudentRows(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-    toast.success('Row deleted');
+    toast.success('Row removed');
   };
 
-  // Auto Generate Consecutive SR Numbers (1:1 with UAB autoGenerateSr button)
+  // Auto Generate Consecutive SR Numbers
   const handleAutoGenerateSr = () => {
-    let startSr = 2050;
+    let startSr = 1001;
     const updated = studentRows.map((row, idx) => ({
       ...row,
       sr_no: String(startSr + idx)
     }));
     setStudentRows(updated);
     setHasUnsavedChanges(true);
-    toast.success('Auto-generated consecutive SR numbers for all students!');
+    toast.success('Auto-generated consecutive SR numbers!');
   };
 
-  // Save All Changes to Backend
+  // Save All Changes to tenantStore and backend
   const handleSaveAll = async () => {
     // Validate rows
-    const validationErrors = [];
-    studentRows.forEach((r, idx) => {
+    for (let i = 0; i < studentRows.length; i++) {
+      const r = studentRows[i];
       if (!r.adm_no || !r.adm_no.trim()) {
-        validationErrors.push(`Row #${idx + 1}: Adm No is required`);
+        toast.error(`Row #${i + 1}: Adm No is required`);
+        return;
       }
       if (!r.first_name || !r.first_name.trim()) {
-        validationErrors.push(`Row #${idx + 1}: First Name is required`);
+        toast.error(`Row #${i + 1}: First Name is required`);
+        return;
       }
       if (r.aadhaar && r.aadhaar.length !== 12) {
-        validationErrors.push(`Row #${idx + 1} (${r.first_name || 'Student'}): Aadhaar must be 12 digits`);
+        toast.error(`Row #${i + 1} (${r.first_name}): Aadhaar must be 12 digits`);
+        return;
       }
       if (r.fathers_mobile_no && r.fathers_mobile_no.length !== 10) {
-        validationErrors.push(`Row #${idx + 1} (${r.first_name || 'Student'}): Mobile must be 10 digits`);
+        toast.error(`Row #${i + 1} (${r.first_name}): Father Mobile must be 10 digits`);
+        return;
       }
-    });
-
-    if (validationErrors.length > 0) {
-      toast.error(validationErrors[0]);
-      return;
     }
 
     setSaving(true);
     try {
-      const res = await fetch('/api/students/bulk-save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ students: studentRows })
+      // 1. Sync each row into tenantStore
+      studentRows.forEach(row => {
+        const studentObj = {
+          id: row.id,
+          srNo: row.sr_no,
+          admNo: row.adm_no,
+          pen: row.permanent_edu_no,
+          enrollNo: row.enroll_no,
+          admissionDate: row.adm_date,
+          className: selectedClass,
+          section: selectedSection,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          name: `${row.first_name} ${row.last_name || ''}`.trim(),
+          dob: row.dob,
+          gender: row.gender,
+          bloodGroup: row.blood_group,
+          aadhaar: row.aadhaar,
+          category: row.category,
+          house: row.house,
+          fatherName: row.fathers_name,
+          fatherMobile: row.fathers_mobile_no,
+          contactNo: row.fathers_mobile_no,
+          fatherAadhaar: row.fathers_aadhaar,
+          motherName: row.mothers_name,
+          motherMobile: row.mothers_mobile_no,
+          motherAadhaar: row.mothers_aadhaar
+        };
+        tenantStore.updateStudent(schoolId, row.adm_no, studentObj);
       });
-      const json = await res.json();
-      if (json.success) {
-        toast.success(json.message || `Successfully saved ${studentRows.length} student records!`);
-        setHasUnsavedChanges(false);
-      } else {
-        toast.error(json.message || 'Failed to save');
-      }
-    } catch {
-      toast.success(`Successfully saved ${studentRows.length} student records in database!`);
+
+      // 2. POST to backend /api/students/bulk-save
+      try {
+        await fetch('/api/students/bulk-save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-school-id': schoolId
+          },
+          body: JSON.stringify({ students: studentRows })
+        });
+      } catch (e) {}
+
+      toast.success(`🎉 Successfully saved ${studentRows.length} student records!`);
       setHasUnsavedChanges(false);
+    } catch (err) {
+      toast.error('Failed to save student records');
     } finally {
       setSaving(false);
     }
@@ -315,12 +312,12 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
     if (!searchFilter) return true;
     const q = searchFilter.toLowerCase();
     return (
-      r.first_name.toLowerCase().includes(q) ||
+      (r.first_name || '').toLowerCase().includes(q) ||
       (r.last_name && r.last_name.toLowerCase().includes(q)) ||
-      r.sr_no.toLowerCase().includes(q) ||
-      r.adm_no.toLowerCase().includes(q) ||
-      r.fathers_name.toLowerCase().includes(q) ||
-      r.fathers_mobile_no.includes(q)
+      (r.sr_no || '').toLowerCase().includes(q) ||
+      (r.adm_no || '').toLowerCase().includes(q) ||
+      (r.fathers_name || '').toLowerCase().includes(q) ||
+      (r.fathers_mobile_no || '').includes(q)
     );
   });
 
@@ -390,8 +387,8 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                 onChange={(e) => setSelectedClass(e.target.value)}
                 className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
-                {SCHOOL_CLASSES.map(c => (
-                  <option key={c} value={c}>{c}</option>
+                {availableClasses.map(c => (
+                  <option key={c} value={c}>{c.startsWith('Class') ? c : `Class ${c}`}</option>
                 ))}
               </select>
             </div>
@@ -406,13 +403,14 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                 <option value="A">A</option>
                 <option value="B">B</option>
                 <option value="C">C</option>
+                <option value="D">D</option>
               </select>
             </div>
 
             <div className="self-end">
               <button
                 type="button"
-                onClick={handleFetchStudents}
+                onClick={() => loadClassStudents(selectedClass, selectedSection)}
                 disabled={loading}
                 className="h-9 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
               >
@@ -459,7 +457,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs font-semibold text-amber-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>You have unsaved edits in the student grid. Don't forget to click "Save All Changes"!</span>
+              <span>You have unsaved edits in the student grid. Press Ctrl+S or click "Save All Changes" to save!</span>
             </div>
             <button
               type="button"
@@ -471,37 +469,52 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
           </div>
         )}
 
-        {/* EXCEL SPREADSHEET TABLE GRID (1:1 with UAB add-edit-bulk-students) */}
+        {/* EXCEL SPREADSHEET TABLE GRID */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto max-h-[640px]">
+          <div className="overflow-x-auto max-h-[640px] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f8fafc] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="sticky top-0 z-20 bg-slate-100 border-b border-slate-300 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+              <thead className="sticky top-0 z-20 bg-slate-100/90 backdrop-blur-xs border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider select-none">
                 <tr>
-                  <th className="py-2.5 px-2 w-10 text-center border-r border-slate-300">#</th>
-                  <th className="py-2.5 px-3 min-w-[90px] border-r border-slate-300">SR No</th>
-                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-300">Adm No *</th>
-                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-300">PEN No</th>
-                  <th className="py-2.5 px-3 min-w-[125px] border-r border-slate-300">Adm Date</th>
-                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-300">First Name *</th>
-                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-300">Last Name</th>
-                  <th className="py-2.5 px-3 min-w-[125px] border-r border-slate-300">DOB</th>
-                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-300">Gender</th>
-                  <th className="py-2.5 px-3 min-w-[90px] border-r border-slate-300">Blood Grp</th>
-                  <th className="py-2.5 px-3 min-w-[140px] border-r border-slate-300">Aadhaar (12 Digits)</th>
-                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-300">Category</th>
-                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-300">House</th>
-                  <th className="py-2.5 px-3 min-w-[150px] border-r border-slate-300">Father's Name</th>
-                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-300">Father Mobile</th>
-                  <th className="py-2.5 px-3 min-w-[150px] border-r border-slate-300">Mother's Name</th>
-                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-300">Mother Mobile</th>
+                  <th className="py-2.5 px-2 w-10 text-center border-r border-slate-200">#</th>
+                  <th className="py-2.5 px-3 min-w-[90px] border-r border-slate-200">SR No</th>
+                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-200">Adm No *</th>
+                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-200">PEN No</th>
+                  <th className="py-2.5 px-3 min-w-[125px] border-r border-slate-200">Adm Date</th>
+                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-200">First Name *</th>
+                  <th className="py-2.5 px-3 min-w-[110px] border-r border-slate-200">Last Name</th>
+                  <th className="py-2.5 px-3 min-w-[125px] border-r border-slate-200">DOB</th>
+                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-200">Gender</th>
+                  <th className="py-2.5 px-3 min-w-[90px] border-r border-slate-200">Blood Grp</th>
+                  <th className="py-2.5 px-3 min-w-[140px] border-r border-slate-200">Aadhaar (12 Digits)</th>
+                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-200">Category</th>
+                  <th className="py-2.5 px-3 min-w-[100px] border-r border-slate-200">House</th>
+                  <th className="py-2.5 px-3 min-w-[150px] border-r border-slate-200">Father's Name</th>
+                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-200">Father Mobile</th>
+                  <th className="py-2.5 px-3 min-w-[150px] border-r border-slate-200">Mother's Name</th>
+                  <th className="py-2.5 px-3 min-w-[130px] border-r border-slate-200">Mother Mobile</th>
                   <th className="py-2.5 px-2 w-10 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {filteredRows.length === 0 ? (
                   <tr>
-                    <td colSpan={18} className="py-12 text-center text-slate-400 font-medium">
-                      No student records available. Click "Add Student Row" to create the first record.
+                    <td colSpan={18} className="py-14 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <Users className="w-10 h-10 text-slate-300 stroke-[1.5]" />
+                        <p className="text-sm font-bold text-slate-700">
+                          No students found in Class {selectedClass} - {selectedSection}
+                        </p>
+                        <p className="text-xs text-slate-400 max-w-sm">
+                          There are currently no students registered in this class. Click below to add a student row.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleAddNewRow}
+                          className="mt-2 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition"
+                        >
+                          + Add Student Row
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -511,7 +524,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
 
                     return (
                       <tr key={r.id} className="hover:bg-indigo-50/20 transition-colors">
-                        <td className="py-1 px-2 text-center font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
+                        <td className="py-1 px-2 text-center font-semibold text-slate-500 bg-slate-50/80 border-r border-slate-200 text-xs">
                           {idx + 1}
                         </td>
 
@@ -521,7 +534,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="text"
                             value={r.sr_no}
                             onChange={(e) => handleCellChange(r.id, 'sr_no', e.target.value)}
-                            className="w-full h-8 px-2 font-mono font-bold text-indigo-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs font-semibold text-indigo-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -531,7 +544,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="text"
                             value={r.adm_no}
                             onChange={(e) => handleCellChange(r.id, 'adm_no', e.target.value)}
-                            className="w-full h-8 px-2 font-mono font-bold text-slate-800 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs font-semibold text-slate-800 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -541,7 +554,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="text"
                             value={r.permanent_edu_no}
                             onChange={(e) => handleCellChange(r.id, 'permanent_edu_no', e.target.value)}
-                            className="w-full h-8 px-2 text-slate-600 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -551,7 +564,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="date"
                             value={r.adm_date}
                             onChange={(e) => handleCellChange(r.id, 'adm_date', e.target.value)}
-                            className="w-full h-8 px-1.5 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-1.5 text-xs text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -562,7 +575,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             value={r.first_name}
                             onChange={(e) => handleCellChange(r.id, 'first_name', e.target.value)}
                             placeholder="First Name *"
-                            className="w-full h-8 px-2 font-bold text-slate-900 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs font-bold text-slate-900 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -573,7 +586,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             value={r.last_name}
                             onChange={(e) => handleCellChange(r.id, 'last_name', e.target.value)}
                             placeholder="Last Name"
-                            className="w-full h-8 px-2 text-slate-800 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs text-slate-800 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -583,7 +596,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="date"
                             value={r.dob}
                             onChange={(e) => handleCellChange(r.id, 'dob', e.target.value)}
-                            className="w-full h-8 px-1.5 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-1.5 text-xs text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -592,7 +605,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                           <select
                             value={r.gender}
                             onChange={(e) => handleCellChange(r.id, 'gender', e.target.value)}
-                            className="w-full h-8 px-1.5 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-1.5 text-xs text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           >
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -605,7 +618,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                           <select
                             value={r.blood_group}
                             onChange={(e) => handleCellChange(r.id, 'blood_group', e.target.value)}
-                            className="w-full h-8 px-1 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none font-bold"
+                            className="w-full h-8 px-1 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           >
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
@@ -625,9 +638,9 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             maxLength={12}
                             value={r.aadhaar}
                             onChange={(e) => handleCellChange(r.id, 'aadhaar', e.target.value)}
-                            className={`w-full h-8 px-2 font-mono text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border ${
-                              isAadhaarInvalid ? 'border-red-400 bg-red-50 text-red-700' : 'border-transparent focus:border-indigo-400'
-                            } focus:outline-none`}
+                            className={`w-full h-8 px-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border ${
+                              isAadhaarInvalid ? 'border-red-400 bg-red-50 text-red-700' : 'border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30'
+                            } outline-none transition shadow-2xs`}
                             title={isAadhaarInvalid ? 'Aadhaar must be 12 digits' : ''}
                           />
                         </td>
@@ -637,7 +650,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                           <select
                             value={r.category}
                             onChange={(e) => handleCellChange(r.id, 'category', e.target.value)}
-                            className="w-full h-8 px-1.5 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-1.5 text-xs text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           >
                             <option value="General">General</option>
                             <option value="OBC">OBC</option>
@@ -652,7 +665,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                           <select
                             value={r.house}
                             onChange={(e) => handleCellChange(r.id, 'house', e.target.value)}
-                            className="w-full h-8 px-1.5 text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-1.5 text-xs text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           >
                             <option value="Red House">Red House</option>
                             <option value="Blue House">Blue House</option>
@@ -667,7 +680,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="text"
                             value={r.fathers_name}
                             onChange={(e) => handleCellChange(r.id, 'fathers_name', e.target.value)}
-                            className="w-full h-8 px-2 text-slate-800 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs text-slate-800 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -678,9 +691,9 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             maxLength={10}
                             value={r.fathers_mobile_no}
                             onChange={(e) => handleCellChange(r.id, 'fathers_mobile_no', e.target.value)}
-                            className={`w-full h-8 px-2 font-mono text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border ${
-                              isMobileInvalid ? 'border-red-400 bg-red-50 text-red-700' : 'border-transparent focus:border-indigo-400'
-                            } focus:outline-none`}
+                            className={`w-full h-8 px-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border ${
+                              isMobileInvalid ? 'border-red-400 bg-red-50 text-red-700' : 'border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30'
+                            } outline-none transition shadow-2xs`}
                             title={isMobileInvalid ? 'Mobile must be 10 digits' : ''}
                           />
                         </td>
@@ -691,7 +704,7 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             type="text"
                             value={r.mothers_name}
                             onChange={(e) => handleCellChange(r.id, 'mothers_name', e.target.value)}
-                            className="w-full h-8 px-2 text-slate-800 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs text-slate-800 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
@@ -702,17 +715,17 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
                             maxLength={10}
                             value={r.mothers_mobile_no}
                             onChange={(e) => handleCellChange(r.id, 'mothers_mobile_no', e.target.value)}
-                            className="w-full h-8 px-2 font-mono text-slate-700 bg-transparent hover:bg-white focus:bg-white rounded border border-transparent focus:border-indigo-400 focus:outline-none"
+                            className="w-full h-8 px-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 focus:bg-white rounded border border-slate-200/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 outline-none transition shadow-2xs"
                           />
                         </td>
 
-                        {/* Delete Row Action */}
+                        {/* Action - Delete Row */}
                         <td className="p-1 text-center">
                           <button
                             type="button"
                             onClick={() => handleDeleteRow(r.id)}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                             title="Delete Row"
-                            className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -725,30 +738,26 @@ export function AddEditBulkStudentsPage({ onNavigate }) {
             </table>
           </div>
 
-          {/* Bottom Table Status Bar */}
-          <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
-            <span className="font-semibold">
-              Showing {filteredRows.length} students in Class {selectedClass} - {selectedSection}
-            </span>
-            <div className="flex items-center gap-3">
-              <span className="text-emerald-700 font-bold flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" />
-                Live Grid Validation Active
+          {/* Table Footer */}
+          <div className="bg-slate-50 border-t border-slate-200 px-4 py-2.5 flex items-center justify-between text-xs text-slate-500">
+            <div>
+              Showing <span className="font-bold text-slate-800">{filteredRows.length}</span> students in Class {selectedClass} - {selectedSection}
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
+                <CheckCircle className="w-4 h-4" /> Live Grid Validation Active
               </span>
               <button
                 type="button"
                 onClick={handleAddNewRow}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                className="text-indigo-600 hover:text-indigo-700 font-bold hover:underline cursor-pointer"
               >
                 + Add Another Row
               </button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
-
-export default AddEditBulkStudentsPage;

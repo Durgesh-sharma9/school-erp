@@ -895,7 +895,18 @@ function AppContent() {
 
               // Stationary Module Reports & Hub
               case '/inventory-hub':
-                return <SchoolInventoryHubPage onNavigate={handleNavigate} />;
+              case '/inventory-dashboard':
+                return <SchoolInventoryHubPage initialTab="overview" onNavigate={handleNavigate} />;
+              case '/inventory-bulk-issue':
+                return <SchoolInventoryHubPage initialTab="bulk_issue" onNavigate={handleNavigate} />;
+              case '/inventory-returns':
+                return <SchoolInventoryHubPage initialTab="returns" onNavigate={handleNavigate} />;
+              case '/inventory-suppliers':
+                return <SchoolInventoryHubPage initialTab="suppliers" onNavigate={handleNavigate} />;
+              case '/inventory-audit':
+                return <SchoolInventoryHubPage initialTab="audit" onNavigate={handleNavigate} />;
+              case '/inventory-rollover':
+                return <SchoolInventoryHubPage initialTab="rollover" onNavigate={handleNavigate} />;
               case '/stationary-reports':
                 return <StationaryReportsPage onNavigate={handleNavigate} />;
               case '/category-items-report':

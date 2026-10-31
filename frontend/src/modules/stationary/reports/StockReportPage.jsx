@@ -9,108 +9,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-const INITIAL_STOCK = [
-  {
-    id: '1',
-    categoryName: 'Diary',
-    itemName: 'School Diary 2026-27',
-    openQty: 100,
-    purchaseQty: 250,
-    issuedQty: 215,
-    stockQty: 135,
-    reorderLevel: 50
-  },
-  {
-    id: '2',
-    categoryName: 'Uniform',
-    itemName: 'T Shirt- W (22)',
-    openQty: 50,
-    purchaseQty: 100,
-    issuedQty: 95,
-    stockQty: 55,
-    reorderLevel: 25
-  },
-  {
-    id: '3',
-    categoryName: 'Uniform',
-    itemName: 'T Shirt- Y (24)',
-    openQty: 40,
-    purchaseQty: 100,
-    issuedQty: 110,
-    stockQty: 30,
-    reorderLevel: 30
-  },
-  {
-    id: '4',
-    categoryName: 'Uniform',
-    itemName: 'T-Shirt -W( 20 )',
-    openQty: 35,
-    purchaseQty: 80,
-    issuedQty: 100,
-    stockQty: 15,
-    reorderLevel: 20
-  },
-  {
-    id: '5',
-    categoryName: 'Uniform',
-    itemName: 'Pant ( 20 )',
-    openQty: 60,
-    purchaseQty: 100,
-    issuedQty: 120,
-    stockQty: 40,
-    reorderLevel: 20
-  },
-  {
-    id: '6',
-    categoryName: 'Uniform',
-    itemName: 'Pant ( 30 )',
-    openQty: 45,
-    purchaseQty: 80,
-    issuedQty: 105,
-    stockQty: 20,
-    reorderLevel: 25
-  },
-  {
-    id: '7',
-    categoryName: 'Uniform',
-    itemName: 'Pajama ( 26 )',
-    openQty: 30,
-    purchaseQty: 60,
-    issuedQty: 82,
-    stockQty: 8,
-    reorderLevel: 15
-  },
-  {
-    id: '8',
-    categoryName: 'Note Books',
-    itemName: '4-Line English Notebook (172 Pgs)',
-    openQty: 200,
-    purchaseQty: 500,
-    issuedQty: 480,
-    stockQty: 220,
-    reorderLevel: 100
-  },
-  {
-    id: '9',
-    categoryName: 'Note Books',
-    itemName: '2-Line Hindi Notebook (172 Pgs)',
-    openQty: 200,
-    purchaseQty: 500,
-    issuedQty: 460,
-    stockQty: 240,
-    reorderLevel: 100
-  },
-  {
-    id: '10',
-    categoryName: 'Register',
-    itemName: 'Practical File / Register',
-    openQty: 80,
-    purchaseQty: 300,
-    issuedQty: 250,
-    stockQty: 130,
-    reorderLevel: 50
-  }
-];
+const INITIAL_STOCK = [];
 
 export function StockReportPage({ onNavigate }) {
   const [stockList, setStockList] = useState(INITIAL_STOCK);
@@ -121,7 +20,7 @@ export function StockReportPage({ onNavigate }) {
     fetch('/api/stationary/items')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const mapped = data.data.map((item, idx) => {
             const open = Number(item.openQuantity) || 50;
             const purch = 100;

@@ -76,11 +76,12 @@ export function BoardFeeManualCollectionPage() {
         })
       });
       const data = await res.json();
-      const recNo = data.data?.receiptNo || `BRD-2026-${Date.now().toString().slice(-4)}`;
+      const recNo = data.data?.receiptNo || (tenantStore?.generateNextReceiptNo ? tenantStore.generateNextReceiptNo(schoolId, 'board') : `BRD-2026-${Date.now().toString().slice(-4)}`);
 
       // Record receipt in tenantStore
       tenantStore.addReceipt(schoolId, {
         receiptNo: recNo,
+        receiptType: 'board',
         admNo: selectedStudent.admNo,
         studentName: selectedStudent.name,
         className: selectedStudent.className,

@@ -1,117 +1,12 @@
-// In-memory multi-tenant store for Stationary Module
+// In-memory multi-tenant store for Stationary Module (Clean - Real Data Only)
 
-let shops = [
-  { id: '1', shopName: 'J D Book', mobileNo: '8947919195', city: 'Jaipur', state: 'Rajasthan', gstNo: '08AAAAA1111A1Z1', pincode: '302003', address: 'Main Gate Complex, J D Campus', remark: 'Textbooks, notebooks, and reference study sets' },
-  { id: '2', shopName: 'J D Uniform', mobileNo: '9829012345', city: 'Jaipur', state: 'Rajasthan', gstNo: '08BBBBB2222B2Z2', pincode: '302015', address: 'Sports & Tailoring Wing, Block B', remark: 'Summer/Winter school uniform, sportswear, ties & badges' }
-];
-
-let suppliers = [
-  { id: '1', shopName: 'J D Uniform', supplierName: 'Maheshwari Garments', mobileNo: '9414055667', city: 'Jaipur', state: 'Rajasthan', gstNo: '08CCCCC3333C3Z3', aadharNo: '456789123456', panNo: 'ABCDE1234F', pincode: '302001', address: 'Plot 45, Textile Market, Sanganer', remark: 'Primary uniform fabric manufacturer' },
-  { id: '2', shopName: 'J D Book', supplierName: 'Rajasthan Stationery Mart', mobileNo: '9828012345', city: 'Jaipur', state: 'Rajasthan', gstNo: '08DDDDD4444D4Z4', aadharNo: '789012345678', panNo: 'FGHIJ5678K', pincode: '302003', address: 'Shop 12, Chaura Rasta, Jaipur', remark: 'School diaries, registers, exam papers' },
-  { id: '3', shopName: 'J D Book', supplierName: 'Prabhat Paper Mills', mobileNo: '9829098765', city: 'Jaipur', state: 'Rajasthan', gstNo: '08EEEEE5555E5Z5', aadharNo: '234567890123', panNo: 'KLMNO9012P', pincode: '302013', address: 'VKIA Road No 9, Jaipur', remark: 'Notebooks and customized school stationery' }
-];
-
-let categories = [
-  { id: '1', shopName: 'J D Uniform', categoryName: 'Uniform', percentage: 0 },
-  { id: '2', shopName: 'J D Book', categoryName: 'Books', percentage: 0 },
-  { id: '3', shopName: 'J D Book', categoryName: 'Note Books', percentage: 0 },
-  { id: '4', shopName: 'J D Book', categoryName: 'Diary', percentage: 0 },
-  { id: '5', shopName: 'J D Book', categoryName: 'Register', percentage: 0 },
-  { id: '6', shopName: 'J D Uniform', categoryName: 'Sports Wear', percentage: 5 }
-];
-
-let items = [
-  { id: '1', shopName: 'J D Book', categoryName: 'Diary', barcode: 'BC-DIR-001', hsnCode: '4820', itemName: 'School Diary 2026-27', rate: 150, openQty: 500, reorderQty: 50, purchasedQty: 100, issuedQty: 320, availableQty: 280 },
-  { id: '2', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-022', hsnCode: '6203', itemName: 'T Shirt- W (22)', rate: 300, openQty: 120, reorderQty: 20, purchasedQty: 50, issuedQty: 95, availableQty: 75 },
-  { id: '3', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-024', hsnCode: '6203', itemName: 'T Shirt- Y (24)', rate: 300, openQty: 100, reorderQty: 20, purchasedQty: 40, issuedQty: 85, availableQty: 55 },
-  { id: '4', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-TSH-020', hsnCode: '6203', itemName: 'T-Shirt -W( 20 )', rate: 300, openQty: 80, reorderQty: 15, purchasedQty: 30, issuedQty: 60, availableQty: 50 },
-  { id: '5', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PNT-020', hsnCode: '6203', itemName: 'Pant ( 20 )', rate: 450, openQty: 40, reorderQty: 10, purchasedQty: 10, issuedQty: 43, availableQty: 7 },
-  { id: '6', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PNT-030', hsnCode: '6203', itemName: 'Pant ( 30 )', rate: 520, openQty: 30, reorderQty: 10, purchasedQty: 10, issuedQty: 35, availableQty: 5 },
-  { id: '7', shopName: 'J D Uniform', categoryName: 'Uniform', barcode: 'BC-PAJ-026', hsnCode: '6203', itemName: 'Pajama ( 26 )', rate: 280, openQty: 25, reorderQty: 10, purchasedQty: 5, issuedQty: 26, availableQty: 4 },
-  { id: '8', shopName: 'J D Book', categoryName: 'Note Books', barcode: 'BC-NBK-001', hsnCode: '4820', itemName: '4-Line English Notebook (172 Pgs)', rate: 45, openQty: 600, reorderQty: 100, purchasedQty: 200, issuedQty: 457, availableQty: 343 },
-  { id: '9', shopName: 'J D Book', categoryName: 'Note Books', barcode: 'BC-NBK-002', hsnCode: '4820', itemName: '2-Line Hindi Notebook (172 Pgs)', rate: 45, openQty: 550, reorderQty: 100, purchasedQty: 150, issuedQty: 410, availableQty: 290 },
-  { id: '10', shopName: 'J D Book', categoryName: 'Register', barcode: 'BC-REG-001', hsnCode: '4820', itemName: 'Practical File / Register', rate: 85, openQty: 250, reorderQty: 40, purchasedQty: 50, issuedQty: 190, availableQty: 110 }
-];
-
-let sets = [
-  {
-    id: '1',
-    setCode: 'SET-CLS1',
-    className: 'Class I',
-    categoryName: 'Books & Note Books',
-    setName: 'Class I Complete Academic Kit',
-    noOfItems: 4,
-    totalCost: 1250,
-    items: [
-      { itemName: 'English & Math Textbooks Bundle', qty: 1, rate: 850 },
-      { itemName: 'School Diary 2026-27', qty: 1, rate: 150 },
-      { itemName: '4-Line English Notebook (172 Pgs)', qty: 4, rate: 45 },
-      { itemName: '2-Line Hindi Notebook (172 Pgs)', qty: 3, rate: 45 }
-    ]
-  },
-  {
-    id: '2',
-    setCode: 'SET-CLS5',
-    className: 'Class V',
-    categoryName: 'Books & Note Books',
-    setName: 'Class V Complete Book & Stationery Set',
-    noOfItems: 5,
-    totalCost: 1850,
-    items: [
-      { itemName: 'Class V NCERT & Reference Bundle', qty: 1, rate: 1350 },
-      { itemName: 'School Diary 2026-27', qty: 1, rate: 150 },
-      { itemName: '4-Line English Notebook (172 Pgs)', qty: 4, rate: 45 },
-      { itemName: 'Practical File / Register', qty: 2, rate: 85 }
-    ]
-  },
-  {
-    id: '3',
-    setCode: 'SET-UNIFORM-M',
-    className: 'Class I - V',
-    categoryName: 'Uniform',
-    setName: 'Junior Boy Summer Uniform Pack',
-    noOfItems: 3,
-    totalCost: 1050,
-    items: [
-      { itemName: 'T Shirt- W (22)', qty: 2, rate: 300 },
-      { itemName: 'Pant ( 20 )', qty: 1, rate: 450 }
-    ]
-  }
-];
-
+let shops = [];
+let suppliers = [];
+let categories = [];
+let items = [];
+let sets = [];
 let sales = [];
-
-let purchases = [
-  {
-    id: '1',
-    supplierName: 'Maheshwari Garments',
-    mobileNo: '9414055667',
-    noOfItem: 2,
-    totalCost: 37500,
-    paidAmt: 35000,
-    discount: 2500,
-    purchaseDate: '2026-08-10',
-    items: [
-      { itemCode: 'BC-TSH-022', itemName: 'T Shirt- W (22)', qty: 50, rate: 300, gst: 0, total: 15000 },
-      { itemCode: 'BC-PNT-020', itemName: 'Pant ( 20 )', qty: 50, rate: 450, gst: 0, total: 22500 }
-    ]
-  },
-  {
-    id: '2',
-    supplierName: 'Rajasthan Stationery Mart',
-    mobileNo: '9828012345',
-    noOfItem: 3,
-    totalCost: 31000,
-    paidAmt: 30000,
-    discount: 1000,
-    purchaseDate: '2026-08-25',
-    items: [
-      { itemCode: 'BC-DIR-001', itemName: 'School Diary 2026-27', qty: 100, rate: 150, gst: 0, total: 15000 },
-      { itemCode: 'BC-NBK-001', itemName: '4-Line English Notebook (172 Pgs)', qty: 200, rate: 45, gst: 0, total: 9000 },
-      { itemCode: 'BC-NBK-002', itemName: '2-Line Hindi Notebook (172 Pgs)', qty: 150, rate: 45, gst: 0, total: 7000 }
-    ]
-  }
-];
+let purchases = [];
 
 // --- SHOPS ---
 export const getShops = (req, res) => res.json({ success: true, data: shops });
@@ -165,22 +60,80 @@ export const deleteSupplier = (req, res) => {
 };
 
 // --- CATEGORIES ---
-export const getCategories = (req, res) => res.json({ success: true, data: categories });
+export const getCategories = (req, res) => {
+  const categoriesWithCounts = categories.map(cat => {
+    const count = items.filter(it => (it.categoryName || '').toLowerCase() === (cat.categoryName || '').toLowerCase()).length;
+    return { ...cat, itemsCount: count };
+  });
+  res.json({ success: true, data: categoriesWithCounts });
+};
+
 export const createCategory = (req, res) => {
-  const { shopName, categoryName, percentage } = req.body;
-  if (!categoryName) return res.status(400).json({ success: false, message: 'Category Name is required' });
+  const { shopName, categoryName, categoryType, issueScope, applicableClasses, percentage, remark } = req.body;
+  if (!categoryName || !categoryName.trim()) {
+    return res.status(400).json({ success: false, message: 'Category Name is required' });
+  }
+  const cleanName = categoryName.trim();
+  const existing = categories.find(c => c.categoryName.toLowerCase() === cleanName.toLowerCase());
+  if (existing) {
+    return res.status(400).json({ success: false, message: 'Category with this name already exists' });
+  }
   const newCat = {
     id: String(Date.now()),
-    shopName: shopName || 'J D Book',
-    categoryName,
-    percentage: Number(percentage) || 0
+    shopName: shopName || 'Main Store',
+    categoryName: cleanName,
+    categoryType: categoryType || 'General',
+    issueScope: issueScope || 'ALL',
+    applicableClasses: Array.isArray(applicableClasses) ? applicableClasses : (applicableClasses ? [applicableClasses] : []),
+    percentage: Number(percentage) || 0,
+    remark: remark || ''
   };
   categories.push(newCat);
-  res.status(201).json({ success: true, data: newCat, message: 'Category created' });
+  res.status(201).json({ success: true, data: { ...newCat, itemsCount: 0 }, message: 'Category created successfully' });
 };
+
+export const updateCategory = (req, res) => {
+  const { shopName, categoryName, categoryType, issueScope, applicableClasses, percentage, remark } = req.body;
+  const cat = categories.find(c => c.id === req.params.id);
+  if (!cat) return res.status(404).json({ success: false, message: 'Category not found' });
+  
+  if (categoryName && categoryName.trim()) {
+    const cleanName = categoryName.trim();
+    const existing = categories.find(c => c.id !== req.params.id && c.categoryName.toLowerCase() === cleanName.toLowerCase());
+    if (existing) return res.status(400).json({ success: false, message: 'Another category with this name already exists' });
+    
+    // Update items under old categoryName
+    const oldName = cat.categoryName;
+    items.forEach(it => {
+      if (it.categoryName === oldName) it.categoryName = cleanName;
+    });
+    cat.categoryName = cleanName;
+  }
+  if (categoryType) cat.categoryType = categoryType;
+  if (issueScope) cat.issueScope = issueScope;
+  if (applicableClasses !== undefined) {
+    cat.applicableClasses = Array.isArray(applicableClasses) ? applicableClasses : (applicableClasses ? [applicableClasses] : []);
+  }
+  if (percentage !== undefined) cat.percentage = Number(percentage) || 0;
+  if (shopName) cat.shopName = shopName;
+  if (remark !== undefined) cat.remark = remark;
+
+  res.json({ success: true, data: cat, message: 'Category updated successfully' });
+};
+
 export const deleteCategory = (req, res) => {
+  const catToDelete = categories.find(c => c.id === req.params.id);
+  if (catToDelete) {
+    const hasItems = items.some(it => (it.categoryName || '').toLowerCase() === catToDelete.categoryName.toLowerCase());
+    if (hasItems) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete category "${catToDelete.categoryName}" because active items are assigned to it.`
+      });
+    }
+  }
   categories = categories.filter(c => c.id !== req.params.id);
-  res.json({ success: true, message: 'Category deleted' });
+  res.json({ success: true, message: 'Category deleted successfully' });
 };
 
 // --- ITEMS ---
@@ -206,6 +159,28 @@ export const createItem = (req, res) => {
   items.push(newItem);
   res.status(201).json({ success: true, data: newItem, message: 'Item registered successfully' });
 };
+export const updateItem = (req, res) => {
+  const { shopName, categoryName, barcode, hsnCode, itemName, rate, openQty, reorderQty } = req.body;
+  const item = items.find(i => i.id === req.params.id);
+  if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+
+  if (itemName) item.itemName = itemName;
+  if (categoryName) item.categoryName = categoryName;
+  if (shopName) item.shopName = shopName;
+  if (barcode !== undefined) item.barcode = barcode;
+  if (hsnCode !== undefined) item.hsnCode = hsnCode;
+  if (rate !== undefined) item.rate = Number(rate) || 0;
+  if (openQty !== undefined) {
+    const prevOpen = item.openQty || 0;
+    const diff = (Number(openQty) || 0) - prevOpen;
+    item.openQty = Number(openQty) || 0;
+    item.availableQty = Math.max(0, (item.availableQty || 0) + diff);
+  }
+  if (reorderQty !== undefined) item.reorderQty = Number(reorderQty) || 10;
+
+  res.json({ success: true, data: item, message: 'Item updated successfully' });
+};
+
 export const deleteItem = (req, res) => {
   items = items.filter(i => i.id !== req.params.id);
   res.json({ success: true, message: 'Item deleted' });
@@ -238,27 +213,42 @@ export const deleteSet = (req, res) => {
 // --- SALES / ISSUE ITEMS ---
 export const getSales = (req, res) => res.json({ success: true, data: sales });
 export const createSale = (req, res) => {
-  const { billNo, className, name, mobileNo, shopName, noOfSets, totalCost, gst, discount, paidAmt, due, cash, bank } = req.body;
+  const { billNo, className, name, mobileNo, shopName, noOfSets, totalCost, gst, discount, paidAmt, due, cash, bank, items: soldItems, payMode } = req.body;
   if (!name) return res.status(400).json({ success: false, message: 'Customer name is required' });
+
+  // Deduct stock for issued items
+  if (Array.isArray(soldItems)) {
+    soldItems.forEach(si => {
+      const it = items.find(i => i.id === si.id || (si.itemName && i.itemName.toLowerCase() === si.itemName.toLowerCase()));
+      if (it) {
+        const q = Number(si.qty) || 1;
+        it.issuedQty = (it.issuedQty || 0) + q;
+        it.availableQty = Math.max(0, (it.availableQty || 0) - q);
+      }
+    });
+  }
+
   const newSale = {
     id: String(Date.now()),
     billNo: billNo || `SB-2026-${String(sales.length + 1).padStart(3, '0')}`,
     className: className || 'N/A',
     name,
     mobileNo: mobileNo || '',
-    shopName: shopName || 'J D Book',
+    shopName: shopName || 'Main Store',
     type: 'Sale',
-    noOfSets: Number(noOfSets) || 1,
+    noOfSets: Number(noOfSets) || (Array.isArray(soldItems) ? soldItems.length : 1),
     totalCost: Number(totalCost) || 0,
     gst: Number(gst) || 0,
     finalCost: Number(totalCost) || 0,
-    cash: Number(cash) || Number(paidAmt) || 0,
-    bank: Number(bank) || 0,
+    cash: payMode === 'Cash' ? (Number(paidAmt) || 0) : (Number(cash) || 0),
+    bank: payMode !== 'Cash' ? (Number(paidAmt) || 0) : (Number(bank) || 0),
+    payMode: payMode || 'Cash',
     discount: Number(discount) || 0,
     paidAmt: Number(paidAmt) || 0,
     due: Number(due) || 0,
     issueDate: new Date().toISOString().slice(0, 10),
-    receipt: `RCP-${1000 + sales.length + 1}`
+    receipt: `RCP-${1000 + sales.length + 1}`,
+    items: Array.isArray(soldItems) ? soldItems : []
   };
   sales.push(newSale);
   res.status(201).json({ success: true, data: newSale, message: 'Sale recorded and items issued' });

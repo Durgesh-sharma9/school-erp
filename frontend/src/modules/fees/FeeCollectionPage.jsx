@@ -93,6 +93,9 @@ export function FeeCollectionPage({ onNavigate }) {
 
   // Generate initial or next receipt number
   const generateNextReceiptNo = () => {
+    if (tenantStore?.generateNextReceiptNo) {
+      return tenantStore.generateNextReceiptNo(schoolId, 'fee');
+    }
     const receipts = tenantStore.getReceipts(schoolId);
     const prefix = schoolProfile?.schoolCode ? schoolProfile.schoolCode.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase() : (isSchoolB ? 'DPS' : isSchoolA ? 'JD' : 'REC');
     return `${prefix || 'REC'}-2026-${String(receipts.length + 1).padStart(3, '0')}`;
@@ -374,6 +377,7 @@ export function FeeCollectionPage({ onNavigate }) {
       // 2. Save in client multi-tenant store
       const newRec = tenantStore.addReceipt(schoolId, {
         receiptNo: activeReceiptNo,
+        receiptType: 'fee',
         admNo: selectedStudent.admNo,
         studentName: selectedStudent.name,
         className: selectedStudent.className,

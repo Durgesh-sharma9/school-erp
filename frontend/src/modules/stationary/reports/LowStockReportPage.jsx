@@ -9,53 +9,7 @@ import {
   PackageCheck
 } from 'lucide-react';
 
-const INITIAL_LOW_STOCK = [
-  {
-    id: '1',
-    itemName: 'T-Shirt -W( 20 )',
-    categoryName: 'Uniform',
-    purchaseQty: 80,
-    issuedQty: 100,
-    stockQty: 15,
-    reorderLevel: 20
-  },
-  {
-    id: '2',
-    itemName: 'Pant ( 30 )',
-    categoryName: 'Uniform',
-    purchaseQty: 80,
-    issuedQty: 105,
-    stockQty: 20,
-    reorderLevel: 25
-  },
-  {
-    id: '3',
-    itemName: 'Pajama ( 26 )',
-    categoryName: 'Uniform',
-    purchaseQty: 60,
-    issuedQty: 82,
-    stockQty: 8,
-    reorderLevel: 15
-  },
-  {
-    id: '4',
-    itemName: 'Eraser (Pack of 20)',
-    categoryName: 'Stationery Items',
-    purchaseQty: 100,
-    issuedQty: 92,
-    stockQty: 8,
-    reorderLevel: 20
-  },
-  {
-    id: '5',
-    itemName: 'Geometry Box Deluxe',
-    categoryName: 'Stationery Items',
-    purchaseQty: 50,
-    issuedQty: 46,
-    stockQty: 4,
-    reorderLevel: 10
-  }
-];
+const INITIAL_LOW_STOCK = [];
 
 export function LowStockReportPage({ onNavigate }) {
   const [items, setItems] = useState(INITIAL_LOW_STOCK);
@@ -65,7 +19,7 @@ export function LowStockReportPage({ onNavigate }) {
     fetch('/api/stationary/items')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const lowStockList = [];
           data.data.forEach((item, idx) => {
             const open = Number(item.openQuantity) || 50;

@@ -109,11 +109,12 @@ export function SiblingFeeCollectionPage() {
       });
       const data = await res.json();
 
-      const activeRecNo = data.data?.receiptNo || `SIB-2026-${Date.now().toString().slice(-4)}`;
+      const activeRecNo = data.data?.receiptNo || (tenantStore?.generateNextReceiptNo ? tenantStore.generateNextReceiptNo(schoolId, 'sibling') : `SIB-2026-${Date.now().toString().slice(-4)}`);
       // Record receipts in tenantStore
       payments.forEach(p => {
         tenantStore.addReceipt(schoolId, {
           receiptNo: activeRecNo,
+          receiptType: 'sibling',
           admNo: p.admNo,
           studentName: p.studentName,
           className: p.className,

@@ -24,7 +24,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
-    shopName: 'J D Book',
+    
     supplierName: '',
     mobileNo: '',
     gstNo: '',
@@ -41,7 +41,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
     fetch('/api/stationary/suppliers')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) setSuppliers(data.data);
+        if (data.success && Array.isArray(data.data)) setSuppliers(data.data);
       })
       .catch(() => {});
   }, []);
@@ -67,7 +67,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
   const openEditModal = (s) => {
     setEditingId(s.id);
     setFormData({
-      shopName: s.shopName,
+      
       supplierName: s.supplierName,
       mobileNo: s.mobileNo,
       gstNo: s.gstNo,
@@ -124,11 +124,10 @@ export function SupplierShopMasterPage({ onNavigate }) {
   );
 
   const exportCSV = () => {
-    const headers = ['S.NO.', 'SUPPLIER NAME', 'SHOP', 'MOBILE NO', 'CITY', 'GST NO', 'PAN NO', 'ADDRESS'];
+    const headers = ['S.NO.', 'SUPPLIER NAME', 'MOBILE NO', 'CITY', 'GST NO', 'PAN NO', 'ADDRESS'];
     const rows = filteredSuppliers.map((s, idx) => [
       idx + 1,
       `"${s.supplierName}"`,
-      `"${s.shopName}"`,
       `"${s.mobileNo}"`,
       `"${s.city}"`,
       `"${s.gstNo}"`,
@@ -157,7 +156,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
           <span className="text-slate-400">/</span>
           <span className="text-slate-500 text-sm font-medium">Stationary</span>
           <span className="text-slate-400">/</span>
-          <span className="text-indigo-600 text-sm font-semibold">Supplier Shop Master</span>
+          <span className="text-indigo-600 text-sm font-semibold">Supplier Master</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -224,7 +223,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
                     <td className="py-3 px-4 text-center font-medium text-slate-400">{idx + 1}</td>
                     <td className="py-3 px-4">
                       <div className="font-semibold text-slate-800">{s.supplierName}</div>
-                      <div className="text-[11px] text-slate-400">Shop: {s.shopName} • {s.address}</div>
+                      <div className="text-[11px] text-slate-400">{s.address || (s.city ? `${s.city}, ${s.state || ''}` : '')}</div>
                     </td>
                     <td className="py-3 px-4 font-mono font-medium text-slate-700">{s.mobileNo}</td>
                     <td className="py-3 px-4 text-slate-600">{s.city}</td>
@@ -279,17 +278,7 @@ export function SupplierShopMasterPage({ onNavigate }) {
             </div>
 
             <form onSubmit={handleSave} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Select Shop</label>
-                <select
-                  value={formData.shopName}
-                  onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
-                >
-                  <option value="J D Book">J D Book</option>
-                  <option value="J D Uniform">J D Uniform</option>
-                </select>
-              </div>
+              
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">

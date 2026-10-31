@@ -10,63 +10,7 @@ import {
   DollarSign
 } from 'lucide-react';
 
-const INITIAL_PURCHASES = [
-  {
-    id: '1',
-    supplierName: 'GLOBAL BOOK DISTRIBUTORS',
-    phone: '9876543210',
-    itemName: 'School Diary 2026-27',
-    itemQty: 250,
-    itemRate: 85,
-    gstPercent: 0,
-    purchaseDate: '2026-03-25',
-    total: 21250
-  },
-  {
-    id: '2',
-    supplierName: 'GLOBAL BOOK DISTRIBUTORS',
-    phone: '9876543210',
-    itemName: '4-Line English Notebook (172 Pgs)',
-    itemQty: 500,
-    itemRate: 25,
-    gstPercent: 0,
-    purchaseDate: '2026-03-25',
-    total: 12500
-  },
-  {
-    id: '3',
-    supplierName: 'ROYAL UNIFORMS & FABRICS',
-    phone: '9414056789',
-    itemName: 'T Shirt- W (22)',
-    itemQty: 100,
-    itemRate: 180,
-    gstPercent: 5,
-    purchaseDate: '2026-03-28',
-    total: 18900
-  },
-  {
-    id: '4',
-    supplierName: 'ROYAL UNIFORMS & FABRICS',
-    phone: '9414056789',
-    itemName: 'Pant ( 20 )',
-    itemQty: 100,
-    itemRate: 280,
-    gstPercent: 5,
-    purchaseDate: '2026-03-28',
-    total: 29400
-  },
-  {
-    id: '5',
-    supplierName: 'CLASSIC PAPER MART',
-    phone: '9828098765',
-    itemName: 'Practical File / Register',
-    itemQty: 300,
-    itemRate: 45,
-    gstPercent: 12,
-    purchaseDate: '2026-04-02',
-    total: 15120
-  }
-];
+const INITIAL_PURCHASES = [];
 
 export function PurchaseItemsReportPage({ onNavigate }) {
   const [records, setRecords] = useState(INITIAL_PURCHASES);
@@ -79,7 +23,7 @@ export function PurchaseItemsReportPage({ onNavigate }) {
     fetch('/api/stationary/purchases')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const flattened = [];
           data.data.forEach((p, pIdx) => {
             if (p.items && p.items.length) {

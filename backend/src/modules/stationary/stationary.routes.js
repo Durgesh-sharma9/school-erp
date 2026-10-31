@@ -9,9 +9,11 @@ import {
   getCategories,
   createCategory,
   deleteCategory,
+  updateCategory,
   getItems,
   createItem,
   deleteItem,
+  updateItem,
   getSets,
   createSet,
   deleteSet,
@@ -40,11 +42,13 @@ router.delete('/suppliers/:id', deleteSupplier);
 router.get('/categories', getCategories);
 router.post('/categories', createCategory);
 router.delete('/categories/:id', deleteCategory);
+router.put('/categories/:id', updateCategory);
 
 // Items
 router.get('/items', getItems);
 router.post('/items', createItem);
 router.delete('/items/:id', deleteItem);
+router.put('/items/:id', updateItem);
 
 // Sets
 router.get('/sets', getSets);

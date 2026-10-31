@@ -37,42 +37,79 @@ export function SchoolInventoryHubPage({ onNavigate }) {
   // Get active tenant/school from localStorage
   const activeSchoolId = localStorage.getItem('active_school_id') || 'sch_jd_intl';
 
-  // 100% Fresh Persistent Local Storage (NO HARDCODED SEED DATA)
-  const [items, setItems] = useState(() => {
+  // Safe loader that strips any old mock data
+  const loadCleanLocal = (key) => {
+    if (typeof window === 'undefined') return [];
     try {
-      const stored = localStorage.getItem(`inv_items_${activeSchoolId}`);
-      return stored ? JSON.parse(stored) : [];
+      const val = localStorage.getItem(key);
+      if (!val) return [];
+      const parsed = JSON.parse(val);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(it => {
+        const n = ((it.name || it.itemName || '') + '').toLowerCase();
+        return !n.includes('summer polo') && !n.includes('school diary 2026-27') && it.barcode !== 'BC-DIR-001';
+      });
     } catch {
       return [];
     }
-  });
+  };
 
-  const [suppliers, setSuppliers] = useState(() => {
-    try {
-      const stored = localStorage.getItem(`inv_suppliers_${activeSchoolId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [items, setItems] = useState(() => loadCleanLocal(`inv_items_${activeSchoolId}`));
+  const [suppliers, setSuppliers] = useState(() => loadCleanLocal(`inv_suppliers_${activeSchoolId}`));
+  const [transactions, setTransactions] = useState(() => loadCleanLocal(`inv_tx_${activeSchoolId}`));
+  const [packages, setPackages] = useState(() => loadCleanLocal(`inv_packages_${activeSchoolId}`));
+  const [categories, setCategories] = useState([]);
+  const [showQuickAddCat, setShowQuickAddCat] = useState(false);
+  const [quickCatInput, setQuickCatInput] = useState('');
 
-  const [transactions, setTransactions] = useState(() => {
-    try {
-      const stored = localStorage.getItem(`inv_tx_${activeSchoolId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const loadCategories = () => {
+    fetch('/api/stationary/categories')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data)) setCategories(d.data);
+      })
+      .catch(() => {});
+  };
 
-  const [packages, setPackages] = useState(() => {
-    try {
-      const stored = localStorage.getItem(`inv_packages_${activeSchoolId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Sync real data from backend API
+  useEffect(() => {
+    fetch('/api/stationary/items')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data)) {
+          if (d.data.length > 0) {
+            setItems(d.data.map(it => ({
+              id: it.id,
+              name: it.itemName,
+              category: it.categoryName,
+              barcode: it.barcode,
+              purchasePrice: it.rate,
+              sellingPrice: it.rate,
+              stock: it.availableQty,
+              minStock: it.reorderQty || 10,
+              unit: 'Pcs'
+            })));
+          }
+        }
+      }).catch(() => {});
+
+    loadCategories();
+    fetch('/api/stationary/sets')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data)) {
+          if (d.data.length > 0) {
+            setPackages(d.data.map(s => ({
+              id: s.id,
+              name: s.setName,
+              category: s.categoryName,
+              price: s.totalCost,
+              items: s.items || []
+            })));
+          }
+        }
+      }).catch(() => {});
+  }, [activeSchoolId]);
 
   // Sync to local storage on change
   useEffect(() => {
@@ -202,9 +239,17 @@ export function SchoolInventoryHubPage({ onNavigate }) {
   const handleAddNewItem = (e) => {
     e.preventDefault();
     if (!newItemForm.name.trim()) {
-      toast.error('Item name enter karein');
+      toast.error('Please enter an item name');
       return;
     }
+    if (newItemForm.category.trim() && !categories.some(c => c.categoryName.toLowerCase() === newItemForm.category.trim().toLowerCase())) {
+      fetch('/api/stationary/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryName: newItemForm.category.trim() })
+      }).then(() => loadCategories()).catch(() => {});
+    }
+
     const itemObj = {
       id: `ITM-${Date.now().toString().slice(-5)}`,
       name: newItemForm.name.trim(),
@@ -219,13 +264,13 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     setItems([itemObj, ...items]);
     setAddItemModalOpen(false);
     setNewItemForm({ name: '', category: 'Stationery', barcode: '', purchasePrice: '', sellingPrice: '', stock: '', minStock: 10, unit: 'Pcs' });
-    toast.success(`✅ "${itemObj.name}" inventory me add ho gaya!`);
+    toast.success(`"${itemObj.name}" added to inventory successfully!`);
   };
 
   const handleAddNewSupplier = (e) => {
     e.preventDefault();
     if (!newSupplierForm.name.trim()) {
-      toast.error('Supplier name zaroori hai');
+      toast.error('Supplier name is required');
       return;
     }
     const supObj = {
@@ -242,13 +287,13 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     setSuppliers([supObj, ...suppliers]);
     setAddSupplierModalOpen(false);
     setNewSupplierForm({ name: '', contactPerson: '', phone: '', gstin: '', address: '' });
-    toast.success(`✅ Supplier "${supObj.name}" register ho gaya!`);
+    toast.success(`Supplier "${supObj.name}" registered successfully!`);
   };
 
   const handleCreatePackage = (e) => {
     e.preventDefault();
     if (!newPackageForm.name.trim() || !newPackageForm.selectedItems.length) {
-      toast.error('Package name aur kam se kam ek item select karein');
+      toast.error('Please enter package name and select at least one item');
       return;
     }
     const pkgObj = {
@@ -262,7 +307,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     setSelectedPackageId(pkgObj.id);
     setAddPackageModalOpen(false);
     setNewPackageForm({ name: '', category: 'Book Set', price: '', selectedItems: [] });
-    toast.success(`🎉 Package "${pkgObj.name}" create ho gaya!`);
+    toast.success(`Package "${pkgObj.name}" created successfully!`);
   };
 
   const handleToggleStudentSelection = (stId) => {
@@ -281,11 +326,11 @@ export function SchoolInventoryHubPage({ onNavigate }) {
 
   const executeBulkIssuance = () => {
     if (!activePackage) {
-      toast.error('Pehle koi Package/Set create ya select karein!');
+      toast.error('Please create or select a package/kit first!');
       return;
     }
     if (!selectedStudentIds.length) {
-      toast.error('Kam se kam ek student select karein!');
+      toast.error('Please select at least one student!');
       return;
     }
 
@@ -296,7 +341,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
       const totalNeeded = pkgItem.qty * qtyNeeded;
       if (!liveItem || liveItem.stock < totalNeeded) {
         hasStockIssue = true;
-        toast.error(`Stock kam hai: ${pkgItem.name} chahiye ${totalNeeded}, uplabdh hai ${liveItem?.stock || 0}`);
+        toast.error(`Insufficient stock: ${pkgItem.name} required: ${totalNeeded}, available: ${liveItem?.stock || 0}`);
       }
     });
 
@@ -326,7 +371,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     };
 
     setTransactions([newTx, ...transactions]);
-    toast.success(`🎉 ${qtyNeeded} students ko ${activePackage.name} issue ho gaya!`);
+    toast.success(`Issued ${activePackage.name} to ${qtyNeeded} students successfully!`);
   };
 
   const handleReturnItem = () => {
@@ -353,7 +398,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
 
     setTransactions([newTx, ...transactions]);
     setReturnModalOpen(false);
-    toast.success(restocked ? 'Samaan wapas stock me add ho gaya!' : `Fine ₹${returnFineAmount} record ho gaya!`);
+    toast.success(restocked ? 'Item returned and restocked successfully!' : `Fine ₹${returnFineAmount} recorded successfully!`);
   };
 
   const handleRecordStockIn = (e) => {
@@ -365,7 +410,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     const remaining = totalCost - paid;
 
     if (!purchaseItemId || !purchaseSupplierId || qty <= 0) {
-      toast.error('Item, Supplier aur Quantity fill karein');
+      toast.error('Please enter item, supplier, and quantity');
       return;
     }
 
@@ -402,7 +447,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
 
     setTransactions([newTx, ...transactions]);
     setPurchaseModalOpen(false);
-    toast.success(`📦 ${qty} units stock me add ho gaye!`);
+    toast.success(`Recorded stock-in for ${qty} units successfully!`);
   };
 
   const handlePaySupplier = (e) => {
@@ -423,7 +468,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
     );
 
     setSupplierPayModalOpen(false);
-    toast.success(`₹${supplierPayAmount} payment ${activeSupplierForPay.name} ko record ho gayi!`);
+    toast.success(`Payment of ₹${supplierPayAmount} recorded for ${activeSupplierForPay.name} successfully!`);
   };
 
   return (
@@ -437,12 +482,19 @@ export function SchoolInventoryHubPage({ onNavigate }) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 tracking-tight">School Inventory & Stock Hub</h1>
-              <p className="text-xs text-gray-500">Completely Fresh Production Database • Real-Time Stock & Issuance Control</p>
+              <p className="text-xs text-gray-500">Real-Time Stock, Class Kits, Supplier Ledgers & Issuance Control</p>
             </div>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => onNavigate?.('/items-master')}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 shadow-sm transition"
+          >
+            <Tag className="w-4 h-4 text-fuchsia-600" />
+            Category & Items Master
+          </button>
           <button
             onClick={() => setAddItemModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-fuchsia-600 text-white text-xs font-semibold hover:bg-fuchsia-700 shadow-sm transition"
@@ -460,7 +512,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
           <button
             onClick={() => {
               if (items.length === 0 || suppliers.length === 0) {
-                toast.error('Pehle Item aur Supplier add karein!');
+                toast.error('Please add an Item and Supplier first!');
                 return;
               }
               setPurchaseItemId(items[0]?.id || '');
@@ -473,40 +525,6 @@ export function SchoolInventoryHubPage({ onNavigate }) {
             Stock-In Purchase
           </button>
         </div>
-      </div>
-
-      {/* Modern Pill Tabs */}
-      <div className="flex items-center gap-2 border-b border-gray-200 pb-2 overflow-x-auto">
-        {[
-          { id: 'overview', label: 'Overview & Stock Health', icon: TrendingUp },
-          { id: 'bulk_issue', label: '🚀 Bulk Class Issuance', icon: Users, badge: 'Popular' },
-          { id: 'returns', label: '🔄 Returns & Damage Control', icon: RotateCcw },
-          { id: 'suppliers', label: '🚚 Supplier Ledgers & Purchases', icon: Truck },
-          { id: 'audit', label: '📑 All Movement Audit Log', icon: FileText },
-          { id: 'rollover', label: '📅 Session Rollover', icon: Calendar }
-        ].map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-fuchsia-600 text-white shadow-sm'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-100'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
-              {tab.badge && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-fuchsia-800 text-white' : 'bg-fuchsia-100 text-fuchsia-700'}`}>
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
       </div>
 
       {/* ================= TAB 1: OVERVIEW & STOCK HEALTH ================= */}
@@ -588,15 +606,15 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               {items.length === 0 ? (
                 <div className="text-center py-12 px-4">
                   <Package className="w-12 h-12 mx-auto text-gray-300 stroke-[1.5]" />
-                  <h3 className="mt-2 text-sm font-bold text-gray-900">Koi Items Nahi Hain (Fresh Database)</h3>
+                  <h3 className="mt-2 text-sm font-bold text-gray-900">No Items in Inventory</h3>
                   <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                    Aapka inventory database bilkul clean hai. Pehla item add karne ke liye neeche click karein.
+                    Your inventory catalog is empty. Click below to add your first stock item.
                   </p>
                   <button
                     onClick={() => setAddItemModalOpen(true)}
                     className="mt-4 px-4 py-2 rounded-lg bg-fuchsia-600 text-white text-xs font-bold hover:bg-fuchsia-700 transition shadow-sm"
                   >
-                    + Pehla Item Add Karein
+                    + Add First Item
                   </button>
                 </div>
               ) : (
@@ -664,7 +682,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                   <button
                     onClick={() => {
                       if (items.length === 0) {
-                        toast.error('Pehle Items add karein, fir kit banayein!');
+                        toast.error('Please add items before creating a kit!');
                         return;
                       }
                       setAddPackageModalOpen(true);
@@ -678,19 +696,19 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                 {packages.length === 0 ? (
                   <div className="text-center py-6 text-gray-400 text-xs">
                     <Layers className="w-8 h-8 mx-auto mb-1 stroke-1 text-gray-300" />
-                    <p className="font-medium text-gray-600">Koi Package/Kit create nahi hai</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Jaise "Class 5 Book Set" ya "Uniform Kit"</p>
+                    <p className="font-medium text-gray-600">No Packages or Kits Created Yet</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">e.g. "Class 5 Book Set" or "Uniform Kit"</p>
                     <button
                       onClick={() => {
                         if (items.length === 0) {
-                          toast.error('Pehle Items add karein!');
+                          toast.error('Please add inventory items first!');
                           return;
                         }
                         setAddPackageModalOpen(true);
                       }}
                       className="mt-3 px-3 py-1.5 rounded-lg border border-fuchsia-200 text-fuchsia-700 font-bold text-[11px] hover:bg-fuchsia-50 transition"
                     >
-                      + Kit Banayein
+                      + Create New Kit
                     </button>
                   </div>
                 ) : (
@@ -717,7 +735,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                   </button>
                 </div>
                 {transactions.length === 0 ? (
-                  <p className="text-center py-6 text-xs text-gray-400">Abhi tak koi transaction record nahi hui hai</p>
+                  <p className="text-center py-6 text-xs text-gray-400">No inventory transactions recorded yet</p>
                 ) : (
                   <div className="space-y-2 mt-3">
                     {transactions.slice(0, 4).map(tx => (
@@ -749,21 +767,21 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               Bulk Issue to Entire Class / Section
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Ek click me poori class ya batch ko Book Set ya Uniform Kit issue karein
+              Issue complete book sets or uniform packages to entire classes in 1-click
             </p>
           </div>
 
           {packages.length === 0 ? (
             <div className="p-8 border border-dashed border-gray-300 rounded-xl text-center space-y-3">
               <Layers className="w-10 h-10 text-gray-400 mx-auto" />
-              <h3 className="text-sm font-bold text-gray-900">Pehle koi Package / Set banayein</h3>
+              <h3 className="text-sm font-bold text-gray-900">Create a Package / Kit First</h3>
               <p className="text-xs text-gray-500 max-w-md mx-auto">
-                Bulk issue karne ke liye ek kit hona zaroori hai (jaise "Class 5 Complete Set").
+                A package or kit must be created before performing bulk issuance (e.g. "Class 5 Complete Set").
               </p>
               <button
                 onClick={() => {
                   if (items.length === 0) {
-                    toast.error('Pehle Items add karein!');
+                    toast.error('Please add inventory items first!');
                     setAddItemModalOpen(true);
                   } else {
                     setAddPackageModalOpen(true);
@@ -771,7 +789,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                 }}
                 className="px-4 py-2 rounded-lg bg-fuchsia-600 text-white text-xs font-bold hover:bg-fuchsia-700 transition"
               >
-                + Kit / Package Banayein
+                + Create Kit / Package
               </button>
             </div>
           ) : (
@@ -848,7 +866,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
 
                   {filteredBulkStudents.length === 0 ? (
                     <div className="p-8 border border-gray-200 rounded-lg text-center text-xs text-gray-500">
-                      Is Class me abhi koi students enrolled nahi hain.
+                      No students currently enrolled in this class.
                     </div>
                   ) : (
                     <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100 max-h-[380px] overflow-y-auto">
@@ -908,7 +926,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                     disabled={selectedStudentIds.length === 0 || !activePackage}
                     className="w-full py-2.5 px-4 rounded-lg bg-fuchsia-600 text-white text-xs font-bold hover:bg-fuchsia-700 disabled:opacity-50 transition shadow-sm"
                   >
-                    1-Click Bulk Issue Karein ({selectedStudentIds.length} Students)
+                    1-Click Bulk Issue ({selectedStudentIds.length} Students)
                   </button>
                 </div>
               </div>
@@ -926,7 +944,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               Item Return & Damage / Lost Tracking
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Issued samaan wapas jama karna ya damaged/lost hone par penalty record karna
+              Track returned items, inspect damages, and record replacement penalties or refunds
             </p>
           </div>
 
@@ -936,7 +954,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Student Name ya Roll No search karein..."
+                placeholder="Search student by name or admission/roll number..."
                 value={returnSearch}
                 onChange={e => setReturnSearch(e.target.value)}
                 className="w-full pl-9 text-xs rounded-lg border-gray-300 shadow-sm focus:border-fuchsia-500"
@@ -977,7 +995,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               </div>
 
               {items.length === 0 ? (
-                <p className="text-xs text-gray-500">Pehle inventory me items add karein</p>
+                <p className="text-xs text-gray-500">Please add items to inventory first</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {items.slice(0, 6).map(it => (
@@ -1029,7 +1047,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                 Suppliers & Vendors Ledger
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                Suppliers ki purchase entry, payment record aur remaining balance ka account
+                Manage vendor purchase entries, payment histories, and outstanding ledger balances
               </p>
             </div>
             <button
@@ -1044,15 +1062,15 @@ export function SchoolInventoryHubPage({ onNavigate }) {
           {suppliers.length === 0 ? (
             <div className="bg-white p-12 rounded-xl border border-gray-200 text-center space-y-3">
               <Truck className="w-12 h-12 text-gray-300 mx-auto" />
-              <h3 className="text-sm font-bold text-gray-900">Koi Supplier Registered Nahi Hai</h3>
+              <h3 className="text-sm font-bold text-gray-900">No Suppliers Registered Yet</h3>
               <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                Uniform, Kitabein ya Stationery provide karne wale vendors ko register karein.
+                Register suppliers and vendors providing books, uniforms, and stationery.
               </p>
               <button
                 onClick={() => setAddSupplierModalOpen(true)}
                 className="mt-2 px-4 py-2 rounded-lg bg-fuchsia-600 text-white text-xs font-bold hover:bg-fuchsia-700 transition"
               >
-                + Pehla Supplier Add Karein
+                + Add First Supplier
               </button>
             </div>
           ) : (
@@ -1097,7 +1115,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                     <button
                       onClick={() => {
                         if (items.length === 0) {
-                          toast.error('Pehle Items add karein!');
+                          toast.error('Please add inventory items first!');
                           setAddItemModalOpen(true);
                           return;
                         }
@@ -1127,7 +1145,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
                 Complete Stock Movement & Transaction Ledger
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                Sabhi Issue, Bulk Issue, Purchase, Return aur Damage movements ka audit log
+                Complete audit trail of all item issuances, purchases, returns, and damages
               </p>
             </div>
           </div>
@@ -1135,7 +1153,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
           {transactions.length === 0 ? (
             <div className="py-12 text-center text-gray-400 text-xs">
               <FileText className="w-10 h-10 mx-auto text-gray-300 stroke-1 mb-2" />
-              Abhi tak koi transaction record nahi hui hai.
+              No inventory transactions recorded yet.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -1194,7 +1212,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
               Academic Session Inventory Rollover Wizard
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Current Academic Session ka bacha hua stock new session me carry forward karein
+              Carry forward verified remaining inventory into the upcoming academic session
             </p>
           </div>
 
@@ -1203,7 +1221,7 @@ export function SchoolInventoryHubPage({ onNavigate }) {
             <div className="text-xs text-amber-800 space-y-1">
               <p className="font-bold">Year-End Stock Audit & Carry Forward</p>
               <p>
-                Session rollover karne se pehle godown ke actual items ko count karke verification karein. Unverified stock automatically "Write-off" ho jayega.
+                Verify warehouse physical counts before executing session rollover. Unverified inventory will automatically be written off.
               </p>
             </div>
           </div>

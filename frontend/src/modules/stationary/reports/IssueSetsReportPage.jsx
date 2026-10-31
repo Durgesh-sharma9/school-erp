@@ -11,93 +11,7 @@ import {
   ShoppingBag
 } from 'lucide-react';
 
-const INITIAL_RECORDS = [
-  {
-    id: '1',
-    name: 'AARAV SHARMA',
-    className: 'I - A',
-    billNo: 'BILL-2026-001',
-    noOfSets: 1,
-    type: 'Sale',
-    totalCost: 1850,
-    gst: 0,
-    finalCost: 1850,
-    cash: 1850,
-    bank: 0,
-    discount: 0,
-    paid: 1850,
-    balance: 0,
-    issueDate: '2026-04-02'
-  },
-  {
-    id: '2',
-    name: 'ANANYA VERMA',
-    className: 'II - A',
-    billNo: 'BILL-2026-002',
-    noOfSets: 1,
-    type: 'Sale',
-    totalCost: 2100,
-    gst: 0,
-    finalCost: 2100,
-    cash: 1000,
-    bank: 0,
-    discount: 100,
-    paid: 1000,
-    balance: 1000,
-    issueDate: '2026-04-03'
-  },
-  {
-    id: '3',
-    name: 'KABIR MEHTA',
-    className: 'V - B',
-    billNo: 'BILL-2026-003',
-    noOfSets: 1,
-    type: 'Sale',
-    totalCost: 2750,
-    gst: 0,
-    finalCost: 2750,
-    cash: 0,
-    bank: 2750,
-    discount: 0,
-    paid: 2750,
-    balance: 0,
-    issueDate: '2026-04-05'
-  },
-  {
-    id: '4',
-    name: 'DIVYA SINGH',
-    className: 'IX - A',
-    billNo: 'BILL-2026-004',
-    noOfSets: 2,
-    type: 'Sale',
-    totalCost: 6400,
-    gst: 0,
-    finalCost: 6400,
-    cash: 3000,
-    bank: 3400,
-    discount: 0,
-    paid: 6400,
-    balance: 0,
-    issueDate: '2026-04-06'
-  },
-  {
-    id: '5',
-    name: 'ROHAN PATEL',
-    className: 'XI - SCI',
-    billNo: 'BILL-2026-005',
-    noOfSets: 1,
-    type: 'Sale',
-    totalCost: 4200,
-    gst: 0,
-    finalCost: 4200,
-    cash: 2000,
-    bank: 0,
-    discount: 200,
-    paid: 2000,
-    balance: 2000,
-    issueDate: '2026-04-08'
-  }
-];
+const INITIAL_RECORDS = [];
 
 export function IssueSetsReportPage({ onNavigate }) {
   const [records, setRecords] = useState(INITIAL_RECORDS);
@@ -111,7 +25,7 @@ export function IssueSetsReportPage({ onNavigate }) {
     fetch('/api/stationary/sales')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data?.length) {
+        if (data.success && Array.isArray(data.data)) {
           const mapped = data.data.map((item, idx) => ({
             id: item.id || String(idx + 1),
             name: item.studentName || item.name || 'STUDENT',
