@@ -298,6 +298,24 @@ export const menuCategories = [
     ]
   },
   {
+    id: 'daily-test',
+    title: 'Daily Test',
+    icon: Trophy,
+    subItems: [
+      { title: 'Daily Test Ranking', path: '/daily-test' },
+      { title: 'Create Daily Test', path: '/daily-test-create' }
+    ]
+  },
+  {
+    id: 'performance',
+    title: 'Performance',
+    icon: TrendingUp,
+    subItems: [
+      { title: 'Student Performance', path: '/student-performance' },
+      { title: 'Teacher Performance', path: '/teacher-performance' }
+    ]
+  },
+  {
     id: 'fee',
     title: 'Fee',
     icon: IndianRupee, // currency_rupee in UAB
