@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { tenantStore } from '../../services/tenantStore';
 import {
   BookOpen,
   Search,
@@ -20,10 +22,17 @@ import toast from 'react-hot-toast';
 const INITIAL_PURCHASES = [];
 
 export function PurchaseBooksPage({ onNavigate }) {
+  const { schoolId } = useAuth();
+  const effectiveSchoolId = schoolId || 'sch_jd_intl';
+
   const [purchases, setPurchases] = useState(INITIAL_PURCHASES);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewInvoice, setViewInvoice] = useState(null);
+
+  // Supplier list state from tenantStore
+  const [suppliersList, setSuppliersList] = useState([]);
+  const [isCustomSupplier, setIsCustomSupplier] = useState(false);
 
   const [formData, setFormData] = useState({
     supplierName: 'Goyal Book Depot',
@@ -39,19 +48,48 @@ export function PurchaseBooksPage({ onNavigate }) {
   });
 
   useEffect(() => {
+    // Load suppliers for dropdown
+    const list = tenantStore.getLibrarySuppliers(effectiveSchoolId) || [];
+    setSuppliersList(list);
+
     fetch('/api/library/purchases')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data?.length) setPurchases(data.data);
       })
       .catch(() => {});
-  }, []);
+  }, [effectiveSchoolId]);
+
+  const handleSupplierSelect = (val) => {
+    if (val === '__custom__') {
+      setIsCustomSupplier(true);
+      setFormData(prev => ({ ...prev, supplierName: '', city: '', mobileNo: '' }));
+      return;
+    }
+    setIsCustomSupplier(false);
+    const found = suppliersList.find(s => s.name === val);
+    if (found) {
+      setFormData(prev => ({
+        ...prev,
+        supplierName: found.name,
+        city: found.city || '',
+        mobileNo: found.mobile || ''
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, supplierName: val }));
+    }
+  };
 
   const openAddModal = () => {
+    const list = tenantStore.getLibrarySuppliers(effectiveSchoolId) || [];
+    setSuppliersList(list);
+    const defaultSup = list[0] || { name: 'Goyal Book Depot', city: 'Jaipur', mobile: '9829012345' };
+    setIsCustomSupplier(false);
+
     setFormData({
-      supplierName: 'Goyal Book Depot',
-      city: 'Jaipur',
-      mobileNo: '9829012345',
+      supplierName: defaultSup.name,
+      city: defaultSup.city || 'Jaipur',
+      mobileNo: defaultSup.mobile || '9829012345',
       purchaseDate: new Date().toISOString().slice(0, 10),
       billNo: `INV-${Date.now().toString().slice(-5)}`,
       billDate: new Date().toISOString().slice(0, 10),
@@ -118,6 +156,15 @@ export function PurchaseBooksPage({ onNavigate }) {
       total: grandTotal,
       items: formData.items
     };
+
+    if (isCustomSupplier && formData.supplierName) {
+      tenantStore.addLibrarySupplier(effectiveSchoolId, {
+        name: formData.supplierName,
+        city: formData.city,
+        mobile: formData.mobileNo
+      });
+      setSuppliersList(tenantStore.getLibrarySuppliers(effectiveSchoolId));
+    }
 
     setPurchases(prev => [newPurchase, ...prev]);
     toast.success('Book purchase invoice recorded and inventory updated');
@@ -313,16 +360,51 @@ export function PurchaseBooksPage({ onNavigate }) {
             <form onSubmit={handleSavePurchase} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Supplier Name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.supplierName}
-                    onChange={(e) => setFormData({ ...formData, supplierName: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    required
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Supplier Name <span className="text-rose-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomSupplier(!isCustomSupplier);
+                        if (!isCustomSupplier) {
+                          setFormData(prev => ({ ...prev, supplierName: '' }));
+                        } else if (suppliersList.length > 0) {
+                          handleSupplierSelect(suppliersList[0].name);
+                        }
+                      }}
+                      className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                      {isCustomSupplier ? 'Select from list' : '+ New Supplier'}
+                    </button>
+                  </div>
+
+                  {isCustomSupplier ? (
+                    <input
+                      type="text"
+                      placeholder="Type supplier / publisher name..."
+                      value={formData.supplierName}
+                      onChange={(e) => setFormData({ ...formData, supplierName: e.target.value })}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                      required
+                    />
+                  ) : (
+                    <select
+                      value={formData.supplierName}
+                      onChange={(e) => handleSupplierSelect(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                      required
+                    >
+                      <option value="">-- Select Registered Supplier --</option>
+                      {suppliersList.map(s => (
+                        <option key={s.id || s.name} value={s.name}>
+                          {s.name} {s.city ? `(${s.city})` : ''}
+                        </option>
+                      ))}
+                      <option value="__custom__">+ Enter Custom / New Supplier...</option>
+                    </select>
+                  )}
                 </div>
 
                 <div>
@@ -400,37 +482,32 @@ export function PurchaseBooksPage({ onNavigate }) {
               <div className="pt-2">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-semibold text-slate-700">Book Line Items</span>
-                  <button
-                    type="button"
-                    onClick={addItemRow}
-                    className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Another Book
-                  </button>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {formData.items.length} {formData.items.length === 1 ? 'Title' : 'Titles'}
+                  </span>
                 </div>
 
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 font-semibold">
                       <tr>
-                        <th className="py-2 px-3">BOOK TITLE</th>
-                        <th className="py-2 px-3 w-24">QTY</th>
-                        <th className="py-2 px-3 w-28">RATE (₹)</th>
-                        <th className="py-2 px-3 w-28 text-right">TOTAL (₹)</th>
-                        <th className="py-2 px-2 w-10 text-center"></th>
+                        <th className="py-2.5 px-3">BOOK TITLE</th>
+                        <th className="py-2.5 px-3 w-24">QTY</th>
+                        <th className="py-2.5 px-3 w-28">RATE (₹)</th>
+                        <th className="py-2.5 px-3 w-28 text-right">TOTAL (₹)</th>
+                        <th className="py-2.5 px-2 w-10 text-center"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {formData.items.map((item, idx) => (
-                        <tr key={idx}>
+                        <tr key={idx} className="hover:bg-slate-50/50">
                           <td className="p-2">
                             <input
                               type="text"
                               placeholder="Enter book title..."
                               value={item.bookTitle}
                               onChange={(e) => handleItemChange(idx, 'bookTitle', e.target.value)}
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-300"
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:border-indigo-500"
                               required
                             />
                           </td>
@@ -440,7 +517,7 @@ export function PurchaseBooksPage({ onNavigate }) {
                               min="1"
                               value={item.qty}
                               onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-300"
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:border-indigo-500"
                             />
                           </td>
                           <td className="p-2">
@@ -449,7 +526,7 @@ export function PurchaseBooksPage({ onNavigate }) {
                               min="0"
                               value={item.rate}
                               onChange={(e) => handleItemChange(idx, 'rate', e.target.value)}
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-300"
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:border-indigo-500"
                             />
                           </td>
                           <td className="p-2 text-right font-semibold text-slate-700">
@@ -460,7 +537,8 @@ export function PurchaseBooksPage({ onNavigate }) {
                               <button
                                 type="button"
                                 onClick={() => removeItemRow(idx)}
-                                className="text-rose-500 hover:text-rose-700"
+                                className="text-rose-500 hover:text-rose-700 p-1 rounded"
+                                title="Remove row"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -470,6 +548,21 @@ export function PurchaseBooksPage({ onNavigate }) {
                       ))}
                     </tbody>
                   </table>
+
+                  {/* + Add Another Book placed below table as requested */}
+                  <div className="p-2.5 bg-slate-50/80 border-t border-slate-200 flex justify-between items-center">
+                    <button
+                      type="button"
+                      onClick={addItemRow}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 rounded-lg shadow-sm transition-all active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-indigo-600" />
+                      + Add Another Book
+                    </button>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Subtotal Items: <strong>{totalQty}</strong> pcs
+                    </span>
+                  </div>
                 </div>
 
                 {/* Totals Summary */}

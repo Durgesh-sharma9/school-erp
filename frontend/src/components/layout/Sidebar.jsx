@@ -118,6 +118,7 @@ export const studentMenuCategories = [
       { title: 'Notifications', path: '/all-notifications' },
       { title: 'Voice Sms', path: '/get-voice-sms' },
       { title: 'Circular', path: '/get-circular' },
+      { title: 'School Feedback', path: '/student-feedback' },
       { title: 'Complaint', path: '/get-complaint' }
     ]
   },
@@ -231,6 +232,7 @@ export const menuCategories = [
       { title: 'ID Card Generator', path: '/id-card-generator' },
       { title: 'Admit Card Generator', path: '/admit-card-generator' },
       { title: 'Exam Date Sheet', path: '/exam-date-sheet' },
+      { title: 'Student Feedback', path: '/student-feedback' },
       { title: 'Reports', path: '/student-reports' }
     ]
   },
@@ -414,6 +416,7 @@ export const menuCategories = [
     subItems: [
       { title: 'Exam Term', path: '/exam-terms' },
       { title: 'Exam Names', path: '/exam-names' },
+      { title: 'Exam Date Sheet', path: '/exam-date-sheet' },
       { title: 'Group Master', path: '/group-master' },
       { title: 'Grade Master', path: '/grade-master' },
       { title: 'Link Student With Subject', path: '/link-student-with-subject' },
@@ -540,7 +543,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (path.includes('user')) return { users: true };
     if (path.includes('fee')) return { fee: true };
     if (path.includes('hostel')) return { hostel: true };
-    if (path.includes('exam') || path.includes('marks') || path.includes('grade') || path.includes('toppers') || path.includes('prc') || path.includes('performance') || path.includes('consolidated')) return { examination: true };
+    if (path.includes('exam') || path.includes('date-sheet') || path.includes('datesheet') || path.includes('marks') || path.includes('grade') || path.includes('toppers') || path.includes('prc') || path.includes('performance') || path.includes('consolidated')) return { examination: true };
     if (path.includes('payroll') || path.includes('staff-salary') || path.includes('staff-attendance') || path.includes('staff-list')) return { payroll: true };
     if (path.includes('front') || path.includes('complaint') || path.includes('visitor') || path.includes('gate-pass') || path.includes('reminder') || path.includes('notification-count')) return { frontOffice: true };
     if (path.includes('library') || path.includes('book')) return { library: true };

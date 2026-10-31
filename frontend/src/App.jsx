@@ -16,6 +16,7 @@ import { StudentPortfolioPage } from './modules/students/StudentPortfolioPage';
 import { IdCardGeneratorPage } from './modules/students/IdCardGeneratorPage';
 import { AdmitCardGeneratorPage } from './modules/students/AdmitCardGeneratorPage';
 import { ExamDateSheetPage } from './modules/students/ExamDateSheetPage';
+import { StudentFeedbackPage } from './modules/students/StudentFeedbackPage';
 import {
   FeeCollectionPage,
   FeeHeadGroupPage,
@@ -435,6 +436,11 @@ function AppContent() {
               case '/822':
               case '/pay-fee':
               case '/get-datesheet':
+                return role === 'STUDENT' ? (
+                  <StudentPortalPage onNavigate={handleNavigate} currentPath={normalizePath(currentPath)} />
+                ) : (
+                  <ExamDateSheetPage onNavigate={handleNavigate} />
+                );
               case '/student-admit-card':
               case '/get-result':
               case '/get-attendance':
@@ -508,7 +514,13 @@ function AppContent() {
               case '/admit-card-generator':
                 return <AdmitCardGeneratorPage onNavigate={handleNavigate} />;
               case '/exam-date-sheet':
+              case '/exam-datesheet':
+              case '/datesheet':
                 return <ExamDateSheetPage onNavigate={handleNavigate} />;
+              case '/student-feedback':
+              case '/school-feedback':
+              case '/feedback':
+                return <StudentFeedbackPage onNavigate={handleNavigate} />;
               case '/fee-collect':
               case '/fee-collection':
                 return <FeeCollectionPage onNavigate={handleNavigate} />;

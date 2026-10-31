@@ -1031,6 +1031,158 @@ class TenantDataStore {
     return newPunch;
   }
 
+  // --- Library Suppliers ---
+  getLibrarySuppliers(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const key = this.getStorageKey(schoolId, 'library_suppliers');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: 'sup_1', name: 'Goyal Book Depot', city: 'Jaipur', mobile: '9829012345', address: 'Chaura Rasta, Jaipur', gstNo: '08AABCG1234F1Z5' },
+      { id: 'sup_2', name: 'Oxford University Press', city: 'New Delhi', mobile: '9811023456', address: 'Jai Singh Road, New Delhi', gstNo: '07AAABO0001Z1' },
+      { id: 'sup_3', name: 'S. Chand & Company Ltd', city: 'Jaipur', mobile: '9414056789', address: 'M.I. Road, Jaipur', gstNo: '08AAACS1234E1Z9' },
+      { id: 'sup_4', name: 'Arya Book Depot', city: 'Jaipur', mobile: '9828034567', address: 'Tonk Road, Jaipur', gstNo: '08AABCA5678H1Z2' },
+      { id: 'sup_5', name: 'NCERT & CBSE Publication Depot', city: 'Jaipur', mobile: '9414012345', address: 'Mansarovar, Jaipur', gstNo: '08AAACN9012K1Z3' }
+    ];
+  }
+
+  saveLibrarySuppliers(schoolId, list) {
+    if (!schoolId) return;
+    try {
+      const key = this.getStorageKey(schoolId, 'library_suppliers');
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  addLibrarySupplier(schoolId, supplier) {
+    if (!schoolId || !supplier) return null;
+    const current = this.getLibrarySuppliers(schoolId);
+    const newSup = {
+      id: supplier.id || 'sup_' + Date.now(),
+      ...supplier
+    };
+    const updated = [newSup, ...current];
+    this.saveLibrarySuppliers(schoolId, updated);
+    return newSup;
+  }
+
+  // --- Two-Way Student & School Feedback ---
+  getFeedbacks(schoolId) {
+    if (!schoolId) return [];
+    try {
+      const key = this.getStorageKey(schoolId, 'student_feedbacks');
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    // Default seed feedbacks for demonstration
+    return [
+      {
+        id: 'fb_1',
+        type: 'to_school', // student to school
+        direction: 'STUDENT_TO_SCHOOL',
+        studentName: 'Aarav Sharma',
+        admNo: '1001',
+        className: 'Class X-A',
+        category: 'Academics & Teaching',
+        subject: 'Interactive Science Lab Sessions',
+        feedbackText: 'The physics lab practical demonstrations this term were very engaging and clear. Request to increase time for hands-on experiments.',
+        rating: 5,
+        status: 'Acknowledged',
+        schoolReply: 'Thank you Aarav! We have scheduled extra 30 mins lab time every Wednesday starting next week.',
+        date: '2026-10-28',
+        submittedBy: 'Student (Aarav Sharma)'
+      },
+      {
+        id: 'fb_2',
+        type: 'to_school',
+        direction: 'STUDENT_TO_SCHOOL',
+        studentName: 'Priya Meena',
+        admNo: '1002',
+        className: 'Class IX-B',
+        category: 'Library & Study Resources',
+        subject: 'Additional Sample Question Papers Needed',
+        feedbackText: 'Could the school library arrange more CBSE exemplar reference guides and sample question papers for Mathematics?',
+        rating: 4,
+        status: 'Action Taken',
+        schoolReply: '15 new copies of CBSE Math Exemplars added to Library racks today.',
+        date: '2026-10-29',
+        submittedBy: 'Student (Priya Meena)'
+      },
+      {
+        id: 'fb_3',
+        type: 'from_school', // school to student
+        direction: 'SCHOOL_TO_STUDENT',
+        studentName: 'Dev Sharma',
+        admNo: '1002',
+        className: 'Class I - A',
+        category: 'Academic Progress & Excellence',
+        subject: 'Commendable Reading & Phonics Growth',
+        feedbackText: 'Dev has shown outstanding grasp in phonics and English reading this month. Keep practicing regular cursive writing.',
+        rating: 5,
+        status: 'Delivered',
+        teacherName: 'Mrs. Sunita Verma (Class Teacher)',
+        date: '2026-10-27',
+        badge: 'Star Student'
+      },
+      {
+        id: 'fb_4',
+        type: 'from_school',
+        direction: 'SCHOOL_TO_STUDENT',
+        studentName: 'Aaditya Singh',
+        admNo: '1621',
+        className: 'Class I - A',
+        category: 'Discipline & Conduct',
+        subject: 'Punctuality and Homework Submission',
+        feedbackText: 'Aaditya is very polite and helpful to classmates. Recommended to submit daily math workbook exercises on time.',
+        rating: 4,
+        status: 'Delivered',
+        teacherName: 'Mr. Rajesh Goyal (Math Faculty)',
+        date: '2026-10-29',
+        badge: 'Helping Hand'
+      }
+    ];
+  }
+
+  saveFeedbacks(schoolId, feedbacks) {
+    if (!schoolId) return;
+    try {
+      const key = this.getStorageKey(schoolId, 'student_feedbacks');
+      localStorage.setItem(key, JSON.stringify(feedbacks));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  addFeedback(schoolId, fb) {
+    if (!schoolId || !fb) return null;
+    const current = this.getFeedbacks(schoolId);
+    const newFb = {
+      id: fb.id || 'fb_' + Date.now(),
+      date: fb.date || new Date().toISOString().split('T')[0],
+      status: fb.status || (fb.direction === 'SCHOOL_TO_STUDENT' ? 'Delivered' : 'Submitted'),
+      ...fb
+    };
+    const updated = [newFb, ...current];
+    this.saveFeedbacks(schoolId, updated);
+    return newFb;
+  }
+
+  updateFeedback(schoolId, id, updates) {
+    if (!schoolId || !id) return null;
+    const current = this.getFeedbacks(schoolId);
+    const updated = current.map(item => item.id === id ? { ...item, ...updates } : item);
+    this.saveFeedbacks(schoolId, updated);
+    return updated.find(item => item.id === id);
+  }
+
 }
 
 export const tenantStore = new TenantDataStore();
