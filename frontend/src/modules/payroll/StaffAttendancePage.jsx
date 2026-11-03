@@ -25,7 +25,8 @@ import {
   Briefcase,
   SlidersHorizontal,
   Home,
-  Radio
+  Radio,
+  Loader2
 } from 'lucide-react';
 import {
   AreaChart,
@@ -41,8 +42,40 @@ import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrim
 import StatsCard from '../../components/StatsCard';
 import { cn } from '../../utils/cn';
 
-// Clean Fresh Staff Master Roster
-const INITIAL_STAFF_MASTER = [];
+export const INITIAL_STAFF_MASTER = [];
+
+// Map User from /users endpoint to Staff Attendance Roster
+export function mapUserToStaff(user, index) {
+  const code = user.empCode || user.code || String(index + 101);
+  const cleanName =
+    user.displayName ||
+    user.staffName ||
+    (user.name ? user.name.replace(/^\[[^\]]+\]\s*/, '') : 'Staff Member');
+  const dept = user.department || (user.category === 'Teaching' ? 'Academics' : user.category || 'General');
+  const desig = user.designation || user.role || 'Staff';
+  const isDriver = user.role === 'Driver' || user.category === 'Transport';
+  const shift = user.shift || (isDriver ? 'Transport Split (06:30 - 16:30)' : 'School Hours (08:00 - 14:00)');
+  const defaultIn = user.defaultIn || user.shiftIn || (isDriver ? '06:30' : '08:00');
+  const defaultOut = user.defaultOut || user.shiftOut || (isDriver ? '16:30' : '14:00');
+
+  return {
+    id: String(user.id || code),
+    code: String(code),
+    name: cleanName,
+    designation: desig,
+    department: dept,
+    shift: shift,
+    mobile: user.phone || user.mobileNo || user.mobile || '',
+    defaultIn: defaultIn,
+    defaultOut: defaultOut,
+    inTime: defaultIn,
+    outTime: defaultOut,
+    status: 'Present',
+    remarks: '',
+    gender: user.gender || 'Not Specified',
+    pic: user.pic || ''
+  };
+}
 
 const DEPARTMENTS = ['ALL', 'TEACHING', 'ADMINISTRATIVE', 'TRANSPORT', 'SUPPORT'];
 
@@ -61,18 +94,9 @@ export function StaffAttendancePage({ onNavigate }) {
   const [attendanceDate, setAttendanceDate] = useState(todayStr);
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [markSearchQuery, setMarkSearchQuery] = useState('');
-  const [staffRoster, setStaffRoster] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`staff_attendance_${todayStr}`);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return INITIAL_STAFF_MASTER.map(s => ({
-      ...s,
-      inTime: s.defaultIn,
-      outTime: s.defaultOut,
-      remarks: ''
-    }));
-  });
+  const [rawUsers, setRawUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [staffRoster, setStaffRoster] = useState([]);
 
   // Manage / Shift Tab State
   const [manageDeptFilter, setManageDeptFilter] = useState('ALL');
@@ -91,7 +115,7 @@ export function StaffAttendancePage({ onNavigate }) {
   const [reportViewMode, setReportViewMode] = useState('matrix'); // 'matrix' | 'logs'
 
   // Analytics Tab State
-  const [selectedStaffId, setSelectedStaffId] = useState(INITIAL_STAFF_MASTER[0]?.id || '');
+  const [selectedStaffId, setSelectedStaffId] = useState('');
   const [analyticsMonth, setAnalyticsMonth] = useState(new Date());
   const [analyticsViewMode, setAnalyticsViewMode] = useState('calendar'); // 'calendar' | 'chart'
 
@@ -99,6 +123,99 @@ export function StaffAttendancePage({ onNavigate }) {
   useEffect(() => {
     if (isAttender) setAttendanceDate(todayStr);
   }, [isAttender, todayStr]);
+
+  // Apply saved or default roster for a given date from users list
+  const applyRosterForDate = (targetDate, users) => {
+    if (!users || users.length === 0) {
+      setStaffRoster([]);
+      return;
+    }
+
+    let savedAttendanceMap = new Map();
+    try {
+      const saved = localStorage.getItem(`staff_attendance_${targetDate}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(p => {
+            if (p.id) savedAttendanceMap.set(String(p.id), p);
+            if (p.code) savedAttendanceMap.set(String(p.code), p);
+          });
+        }
+      }
+    } catch (e) {}
+
+    const roster = users.map((u, idx) => {
+      const base = mapUserToStaff(u, idx);
+      const existing = savedAttendanceMap.get(String(base.id)) || savedAttendanceMap.get(String(base.code));
+      if (existing) {
+        return {
+          ...base,
+          status: existing.status || 'Present',
+          inTime: existing.inTime || base.defaultIn,
+          outTime: existing.outTime || base.defaultOut,
+          remarks: existing.remarks || ''
+        };
+      }
+      return base;
+    });
+
+    setStaffRoster(roster);
+    setSelectedStaffId(prev => (prev && roster.some(s => s.id === prev) ? prev : roster[0]?.id || ''));
+  };
+
+  // Fetch users list from /users API (/api/user-management/users)
+  const fetchStaffUsers = async () => {
+    setLoadingUsers(true);
+    // 1. Instant check from local cache
+    try {
+      const cached = localStorage.getItem('school_erp_users_list');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRawUsers(parsed);
+          applyRosterForDate(attendanceDate, parsed);
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fetch fresh from backend endpoint /api/user-management/users
+    try {
+      const res = await fetch('/api/user-management/users');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        setRawUsers(data.data);
+        try {
+          localStorage.setItem('school_erp_users_list', JSON.stringify(data.data));
+        } catch (e) {}
+        applyRosterForDate(attendanceDate, data.data);
+      }
+    } catch (err) {
+      console.error('[StaffAttendance] Failed to fetch /users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStaffUsers();
+  }, [schoolId]);
+
+  // Synchronize roster whenever attendance date changes
+  useEffect(() => {
+    if (rawUsers && rawUsers.length > 0) {
+      applyRosterForDate(attendanceDate, rawUsers);
+    }
+  }, [attendanceDate]);
+
+  // Dynamically compute available departments based on loaded staff members
+  const availableDepartments = useMemo(() => {
+    const depts = new Set(['ALL']);
+    staffRoster.forEach(s => {
+      if (s.department) depts.add(s.department);
+    });
+    return Array.from(depts);
+  }, [staffRoster]);
 
   // Handle Preset Changes for Reports
   const applyReportPreset = (preset) => {
@@ -168,7 +285,7 @@ export function StaffAttendancePage({ onNavigate }) {
   const handleSaveAttendance = () => {
     try {
       localStorage.setItem(`staff_attendance_${attendanceDate}`, JSON.stringify(staffRoster));
-      toast.success(`Staff Attendance for ${attendanceDate} saved successfully!`);
+      toast.success(`Staff Attendance for ${attendanceDate} saved successfully! (${staffRoster.length} staff)`);
     } catch (e) {
       toast.error('Failed to persist attendance');
     }
@@ -177,10 +294,10 @@ export function StaffAttendancePage({ onNavigate }) {
   // Filtered Roster for Mark Tab
   const filteredMarkRoster = useMemo(() => {
     return staffRoster.filter(s => {
-      const matchDept = selectedDept === 'ALL' || s.department === selectedDept;
+      const matchDept = selectedDept === 'ALL' || (s.department && s.department.toLowerCase() === selectedDept.toLowerCase());
       const matchSearch = !markSearchQuery ||
         s.name.toLowerCase().includes(markSearchQuery.toLowerCase()) ||
-        s.code.includes(markSearchQuery) ||
+        s.code.toLowerCase().includes(markSearchQuery.toLowerCase()) ||
         s.designation.toLowerCase().includes(markSearchQuery.toLowerCase());
       return matchDept && matchSearch;
     });
@@ -536,6 +653,23 @@ export function StaffAttendancePage({ onNavigate }) {
 
                 <button
                   type="button"
+                  onClick={() => {
+                    setStaffRoster(prev => prev.map(s => ({
+                      ...s,
+                      inTime: s.status === 'Absent' ? '-' : s.defaultIn,
+                      outTime: s.status === 'Absent' ? '-' : s.defaultOut
+                    })));
+                    toast.success('Reset all present staff to standard school timings (08:00 - 14:00)');
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Reset In/Out timings to default school timings"
+                >
+                  <Clock className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Reset School Timings</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleSaveAttendance}
                   className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer ml-auto sm:ml-0"
                 >
@@ -548,7 +682,7 @@ export function StaffAttendancePage({ onNavigate }) {
             {/* Department Filter Pills */}
             <div className="flex items-center gap-1.5 border-t border-slate-100 pt-3 overflow-x-auto">
               <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider mr-1">Department:</span>
-              {DEPARTMENTS.map(dept => (
+              {availableDepartments.map(dept => (
                 <button
                   key={dept}
                   type="button"
@@ -636,35 +770,65 @@ export function StaffAttendancePage({ onNavigate }) {
                           {staff.shift}
                         </td>
 
-                        {/* In-Time Input */}
+                        {/* In-Time Input (Default as per school timings, editable for late comers) */}
                         <td className="py-2.5 px-3 text-center">
-                          <input
-                            type="time"
-                            value={staff.inTime === '-' ? '' : staff.inTime}
-                            onChange={(e) => {
-                              const val = e.target.value || '-';
-                              setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, inTime: val } : s));
-                            }}
-                            disabled={isAbsent}
-                            className="w-20 px-1.5 py-0.5 text-center rounded border border-slate-200 bg-white text-xs font-mono disabled:bg-slate-100 disabled:text-slate-400 outline-none"
-                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <input
+                              type="time"
+                              value={staff.inTime === '-' ? '' : staff.inTime}
+                              onChange={(e) => {
+                                const val = e.target.value || '-';
+                                setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, inTime: val } : s));
+                              }}
+                              disabled={isAbsent}
+                              title="School In-Time (Default: 08:00, editable for late comers)"
+                              className={cn(
+                                "w-24 px-2 py-1 text-center rounded-lg border text-xs font-mono font-bold outline-none transition-all",
+                                isAbsent
+                                  ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                                  : staff.inTime && staff.defaultIn && staff.inTime > staff.defaultIn && staff.inTime !== '-'
+                                  ? "bg-amber-50 border-amber-400 text-amber-900 focus:ring-2 focus:ring-amber-400/30"
+                                  : "bg-white border-slate-300 text-slate-800 hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20"
+                              )}
+                            />
+                            {staff.inTime && staff.defaultIn && staff.inTime > staff.defaultIn && staff.inTime !== '-' && !isAbsent && (
+                              <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                                Late Entry
+                              </span>
+                            )}
+                          </div>
                         </td>
 
-                        {/* Out-Time Input */}
+                        {/* Out-Time Input (Default as per school timings, editable) */}
                         <td className="py-2.5 px-3 text-center">
                           {punchMode === 'single_punch' ? (
                             <span className="text-slate-400 font-mono text-[10.5px] italic">Single Punch</span>
                           ) : (
-                            <input
-                              type="time"
-                              value={staff.outTime === '-' ? '' : staff.outTime}
-                              onChange={(e) => {
-                                const val = e.target.value || '-';
-                                setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, outTime: val } : s));
-                              }}
-                              disabled={isAbsent}
-                              className="w-20 px-1.5 py-0.5 text-center rounded border border-slate-200 bg-white text-xs font-mono disabled:bg-slate-100 disabled:text-slate-400 outline-none"
-                            />
+                            <div className="flex flex-col items-center gap-1">
+                              <input
+                                type="time"
+                                value={staff.outTime === '-' ? '' : staff.outTime}
+                                onChange={(e) => {
+                                  const val = e.target.value || '-';
+                                  setStaffRoster(prev => prev.map(s => s.id === staff.id ? { ...s, outTime: val } : s));
+                                }}
+                                disabled={isAbsent}
+                                title="School Out-Time (Default: 14:00, editable)"
+                                className={cn(
+                                  "w-24 px-2 py-1 text-center rounded-lg border text-xs font-mono font-bold outline-none transition-all",
+                                  isAbsent
+                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                                    : staff.outTime && staff.defaultOut && staff.outTime < staff.defaultOut && staff.outTime !== '-'
+                                    ? "bg-rose-50 border-rose-400 text-rose-900 focus:ring-2 focus:ring-rose-400/30"
+                                    : "bg-white border-slate-300 text-slate-800 hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20"
+                                )}
+                              />
+                              {staff.outTime && staff.defaultOut && staff.outTime < staff.defaultOut && staff.outTime !== '-' && !isAbsent && (
+                                <span className="text-[9px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                                  Early Exit
+                                </span>
+                              )}
+                            </div>
                           )}
                         </td>
 
@@ -742,6 +906,35 @@ export function StaffAttendancePage({ onNavigate }) {
                       </tr>
                     );
                   })}
+                  {filteredMarkRoster.length === 0 && (
+                    <tr>
+                      <td colSpan="8" className="py-12 text-center text-slate-500">
+                        {loadingUsers ? (
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                            <span className="text-xs font-semibold text-slate-600">Loading staff list from Users...</span>
+                          </div>
+                        ) : staffRoster.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                            <Users className="w-10 h-10 text-slate-300" />
+                            <p className="font-bold text-slate-800 text-sm">No staff registered in Users</p>
+                            <p className="text-xs text-slate-400">Add staff members in User Management to track their attendance here.</p>
+                            {onNavigate && (
+                              <button
+                                type="button"
+                                onClick={() => onNavigate('/users')}
+                                className="mt-2 px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition cursor-pointer"
+                              >
+                                Go to User Management
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-400">No staff members match the selected department or search query.</p>
+                        )}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -847,7 +1040,7 @@ export function StaffAttendancePage({ onNavigate }) {
                   onChange={(e) => setReportDeptFilter(e.target.value)}
                   className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 outline-none"
                 >
-                  {DEPARTMENTS.map(d => (
+                  {availableDepartments.map(d => (
                     <option key={d} value={d}>{d === 'ALL' ? 'All Departments' : d}</option>
                   ))}
                 </select>
@@ -891,7 +1084,7 @@ export function StaffAttendancePage({ onNavigate }) {
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                   {staffRoster
-                    .filter(s => reportDeptFilter === 'ALL' || s.department === reportDeptFilter)
+                    .filter(s => reportDeptFilter === 'ALL' || (s.department && s.department.toLowerCase() === reportDeptFilter.toLowerCase()))
                     .map(staff => {
                       let pCount = 0;
                       let aCount = 0;
@@ -1211,7 +1404,7 @@ export function StaffAttendancePage({ onNavigate }) {
                 onChange={(e) => setManageDeptFilter(e.target.value)}
                 className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 outline-none"
               >
-                {DEPARTMENTS.map(d => (
+                {availableDepartments.map(d => (
                   <option key={d} value={d}>{d === 'ALL' ? 'All Departments' : d}</option>
                 ))}
               </select>
@@ -1222,7 +1415,7 @@ export function StaffAttendancePage({ onNavigate }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {staffRoster
                 .filter(s => {
-                  const matchD = manageDeptFilter === 'ALL' || s.department === manageDeptFilter;
+                  const matchD = manageDeptFilter === 'ALL' || (s.department && s.department.toLowerCase() === manageDeptFilter.toLowerCase());
                   const matchS = !manageSearch ||
                     s.name.toLowerCase().includes(manageSearch.toLowerCase()) ||
                     s.code.includes(manageSearch) ||

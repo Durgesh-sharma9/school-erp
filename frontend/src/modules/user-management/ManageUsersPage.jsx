@@ -338,7 +338,10 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
       setLoading(true);
       const res = await fetch('/api/user-management/users');
       const d = await res.json();
-      if (d.success) setUsers(d.data);
+      if (d.success) {
+        setUsers(d.data);
+        try { localStorage.setItem('school_erp_users_list', JSON.stringify(d.data)); } catch {}
+      }
     } catch {
       toast.error('Failed to load staff list');
     } finally {

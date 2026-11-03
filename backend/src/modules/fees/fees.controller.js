@@ -343,27 +343,54 @@ export const getFeeHeads = async (req, res, next) => {
 export const saveFeeHead = async (req, res, next) => {
   try {
     const schoolId = getActiveSchoolId(req);
-    const { id, feeHead, priority, applyFor = 'Both', gender = 'Both', installment = 'Quarterly', feeType = 'dayscholar', isBoard = false } = req.body;
+    const {
+      id,
+      feeHead,
+      shortName = '',
+      feeGroup = '',
+      priority,
+      applyFor = 'Both',
+      gender = 'Both',
+      installment = 'Quarterly',
+      feeType = 'Day Scholar',
+      isBoard = false
+    } = req.body;
     if (!TENANT_FEE_HEADS[schoolId]) TENANT_FEE_HEADS[schoolId] = [];
 
     if (id) {
       TENANT_FEE_HEADS[schoolId] = TENANT_FEE_HEADS[schoolId].map(h =>
-        h.id === String(id) ? { ...h, feeHead, priority: Number(priority), applyFor, gender, installment, feeType, isBoard } : h
+        h.id === String(id)
+          ? {
+              ...h,
+              feeHead,
+              shortName,
+              feeGroup,
+              priority: Number(priority),
+              applyFor,
+              gender,
+              installment,
+              feeType,
+              isBoard: Boolean(isBoard)
+            }
+          : h
       );
-    persistFees();
-    return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
+      persistFees();
+      return res.status(200).json({ success: true, message: 'Fee Head updated successfully' });
     } else {
       const newHead = {
         id: String(Date.now()),
         feeHead,
+        shortName,
+        feeGroup,
         priority: Number(priority) || TENANT_FEE_HEADS[schoolId].length + 1,
         applyFor,
         gender,
         installment,
         feeType,
-        isBoard
+        isBoard: Boolean(isBoard)
       };
       TENANT_FEE_HEADS[schoolId].push(newHead);
+      persistFees();
       return res.status(201).json({ success: true, message: 'Fee Head added successfully', data: newHead });
     }
   } catch (error) {

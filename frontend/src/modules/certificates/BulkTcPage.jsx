@@ -61,7 +61,7 @@ export function BulkTcPage({ onNavigate }) {
               <Home className="w-3.5 h-3.5" />
             </button>
             <span>•</span>
-            <span className="text-slate-500">Students</span>
+            <span className="text-slate-500">Certificates</span>
             <span>•</span>
             <span className="text-indigo-600 font-medium">Generate bulk Tc</span>
           </div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'school-erp-cache-v1';
+const CACHE_NAME = 'school-erp-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -39,6 +39,17 @@ self.addEventListener('fetch', (event) => {
 
   // Ignore non-HTTP(S) requests like chrome-extension://
   if (!request.url.startsWith('http')) return;
+
+  // Do not cache in dev, localhost, HMR, or Vite internal modules
+  if (
+    request.url.includes('/@vite') ||
+    request.url.includes('/@react-refresh') ||
+    request.url.includes('/src/') ||
+    request.url.includes('localhost') ||
+    request.url.includes('127.0.0.1')
+  ) {
+    return;
+  }
 
   // Do not cache API mutations or live API endpoints
   if (request.url.includes('/api/')) {

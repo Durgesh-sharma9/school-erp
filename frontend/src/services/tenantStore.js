@@ -41,7 +41,8 @@ const INITIAL_PROFILES = {
     brandingImages: {
       school_logo: "https://temp.erichost.app/assets/schools/jdisjr_221/school/1_school_photo_1766831297_f7516d5fc58b9af84fb1.jpg",
       board_logo: "",
-      principal_sig: ""
+      principal_sig: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNzAiIHdpZHRoPSIyNDAiIGhlaWdodD0iNzAiPgogIDxwYXRoIGQ9Ik0gMjUsNTIgUSA0MCwxNSA1MCwzNSBRIDYwLDU1IDc1LDIyIFEgODUsNDUgMTAwLDI4IFEgMTE1LDEyIDEzNSwzOCBRIDE1MCw1MiAxNjUsMTggUSAxODAsNDUgMjA1LDIyIFEgMjIwLDEyIDIzMCwyOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYyYjVjIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTSAyMCw0NiBRIDY1LDM4IDEyNSw0MiBRIDE4NSw0NiAyMjUsNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBmMmI1YyIgc3Ryb2tlLXdpZHRoPSIxLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IidCcnVzaCBTY3JpcHQgTVQnLCAnU2Vnb2UgU2NyaXB0JywgY3Vyc2l2ZSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIzMCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMwZjJiNWMiIGZvbnQtc3R5bGU9Iml0YWxpYyI+QWJoaWxhc2hhPC90ZXh0Pgo8L3N2Zz4=",
+      school_stamp: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+CiAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI5NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWUzYThhIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1kYXNoYXJyYXk9IjMsMyIvPgogIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFlM2E4YSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI2NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWUzYThhIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBpZD0idFRvcCIgZD0iTSAyNCwxMDAgQSA3Niw3NiAwIDEsMSAxNzYsMTAwIiBmaWxsPSJub25lIi8+CiAgPHBhdGggaWQ9InRCb3R0b20iIGQ9Ik0gMTc2LDEwMCBBIDc2LDc2IDAgMCwxIDI0LDEwMCIgZmlsbD0ibm9uZSIvPgogIDx0ZXh0IGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzFlM2E4YSIgbGV0dGVyLXNwYWNpbmc9IjEuNSI+CiAgICA8dGV4dFBhdGggaHJlZj0iI3RUb3AiIHN0YXJ0T2Zmc2V0PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKYhSBKIEQgSU5URVJOQVRJT05BTCBTQ0hPT0wg4piFPC90ZXh0UGF0aD4KICA8L3RleHQ+CiAgPHRleHQgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjMWUzYThhIiBsZXR0ZXItc3BhY2luZz0iMS41Ij4KICAgIDx0ZXh0UGF0aCBocmVmPSIjdEJvdHRvbSIgc3RhcnRPZmZzZXQ9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4piFIEpBSVBVUiAoUkFKLikg4piFPC90ZXh0UGF0aD4KICA8L3RleHQ+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwLCAxMDApIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4KICAgIDx0ZXh0IHk9Ii0yMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjguNSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMxZTNhOGEiPkFGRklMSUFURUQgVE8gQ0JTRTwvdGV4dD4KICAgIDx0ZXh0IHk9Ii00IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiPvCfjpM8L3RleHQ+CiAgICA8dGV4dCB5PSIxNCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMWUzYThhIiBsZXR0ZXItc3BhY2luZz0iMSI+T0ZGSUNJQUw8L3RleHQ+CiAgICA8dGV4dCB5PSIyNiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjguNSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMxZTNhOGEiIGxldHRlci1zcGFjaW5nPSIxIj5TRUFMPC90ZXh0PgogIDwvZz4KPC9zdmc+"
     }
   },
   'sch_dps_branch2': {
@@ -80,6 +81,34 @@ class TenantDataStore {
   }
 
   // Register and initialize a brand-new self-registered school
+  // Get current active school ID with reliable fallback
+  getActiveSchoolId() {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedActiveId = localStorage.getItem('active_school_id');
+        if (storedActiveId) return storedActiveId;
+        const authUser = JSON.parse(localStorage.getItem('erp_auth_user') || '{}');
+        if (authUser?.schoolId) return authUser.schoolId;
+      }
+    } catch (e) {}
+    return 'sch_jd_intl';
+  }
+
+  // Get active school object with reliable fallback
+  getActiveSchool() {
+    try {
+      const schoolId = this.getActiveSchoolId();
+      const profile = this.getSchoolProfile(schoolId) || {};
+      return {
+        id: schoolId,
+        schoolId: schoolId,
+        ...profile
+      };
+    } catch (e) {
+      return { id: 'sch_jd_intl', schoolId: 'sch_jd_intl' };
+    }
+  }
+
   registerNewSchool(school, user) {
     if (!school || !school.id) return;
     const schoolId = school.id;
@@ -932,10 +961,10 @@ class TenantDataStore {
       console.error(e);
     }
     return [
-      { id: '1', feeHead: 'Admission Fee', priority: 1, applyFor: 'New', gender: 'Both', installment: 'Only Once', feeType: 'dayscholar', isBoard: false },
-      { id: '2', feeHead: 'Tuition Fee', priority: 2, applyFor: 'Both', gender: 'Both', installment: 'Quarterly', feeType: 'dayscholar', isBoard: false },
-      { id: '3', feeHead: 'Activity Fee', priority: 3, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false },
-      { id: '4', feeHead: 'Examination Fee', priority: 4, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'dayscholar', isBoard: false }
+      { id: '1', feeHead: 'Admission Fee', shortName: 'ADM', feeGroup: 'Admission Fee', priority: 1, applyFor: 'New', gender: 'Both', installment: 'Only Once', feeType: 'Day Scholar', isBoard: false },
+      { id: '2', feeHead: 'Tuition Fee', shortName: 'TUI', feeGroup: 'Tuition Fee', priority: 2, applyFor: 'Both', gender: 'Both', installment: 'Quarterly', feeType: 'Day Scholar', isBoard: false },
+      { id: '3', feeHead: 'Activity Fee', shortName: 'ACT', feeGroup: 'Activity Fee', priority: 3, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'Day Scholar', isBoard: false },
+      { id: '4', feeHead: 'Examination Fee', shortName: 'EXAM', feeGroup: 'Examination Fee', priority: 4, applyFor: 'Both', gender: 'Both', installment: 'Annually', feeType: 'Day Scholar', isBoard: false }
     ];
   }
 

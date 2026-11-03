@@ -104,9 +104,9 @@ export function ManualCcBcPage({ onNavigate }) {
               <Home className="w-3.5 h-3.5" />
             </button>
             <span>•</span>
-            <span className="text-slate-500">Student</span>
+            <span className="text-slate-500">Certificates</span>
             <span>•</span>
-            <span className="text-indigo-600 font-medium">Generate Manual Certificate</span>
+            <span className="text-indigo-600 font-medium">Manual CC/BC/TF</span>
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export function ManualCcBcPage({ onNavigate }) {
           <div className="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAddModal(false)}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer ml-auto mb-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -432,7 +432,7 @@ export function ManualCcBcPage({ onNavigate }) {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowPrintModal(false)}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer ml-auto mb-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -464,7 +464,13 @@ export function ManualCcBcPage({ onNavigate }) {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="mt-4 flex items-center justify-end space-x-2.5 pt-2">
+              <button
+                onClick={() => setShowPrintModal(false)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Close
+              </button>
               <button
                 onClick={() => window.print()}
                 className="px-5 py-2 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold shadow-xs"

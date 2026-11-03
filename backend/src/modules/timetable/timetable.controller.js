@@ -96,43 +96,18 @@ export const getSyncedSubjects = () => {
 };
 
 export const getSyncedTeachers = () => {
-  const teaching = (usersList || []).filter(u => 
-    u.category === 'Teaching' || 
-    u.role === 'Teacher' || 
-    u.department === 'Academics'
-  );
-
-  const list = teaching.map(u => ({
-    id: u.id,
-    empCode: u.empCode || '',
-    name: u.displayName || u.name.replace(/^\[\d+\]\s*/, ''),
-    fullName: u.name,
-    email: u.email || '',
-    phone: u.phone || '',
-    designation: u.designation || 'Faculty',
-    department: u.department || 'Academics',
-    active: u.isActive !== false,
-    classes: u.classes || [],
-    subjects: u.subjects || []
-  }));
-
-  // Legacy teacher ID aliases
-  const legacyTeachers = [
-    { id: 't_kanwar', name: 'Pooja Kanwar', email: 'pooja.kanwar@jdintl.edu', active: true, subjects: ['sub_sst'], classes: ['c_10a'] },
-    { id: 't_verma', name: 'Priti Verma', email: 'priti.verma@jdintl.edu', active: true, subjects: ['sub_eng'], classes: ['c_10a'] },
-    { id: 't_sen', name: 'Dr. Suresh Sen', email: 'suresh.sen@school.edu', active: true, subjects: ['sub_phy', 'sub_bio'], classes: ['c_10a'] },
-    { id: 't_sharma', name: 'R. K. Sharma', email: 'rk.sharma@school.edu', active: true, subjects: ['sub_math'], classes: ['c_10a'] },
-    { id: 't_joshi', name: 'Meenakshi Joshi', email: 'meenakshi.j@school.edu', active: true, subjects: ['sub_chem'], classes: ['c_10a'] },
-    { id: 't_saxena', name: 'Amit Saxena', email: 'amit.saxena@school.edu', active: true, subjects: ['sub_cs'], classes: ['c_10a'] },
-    { id: 't_kavita', name: 'Kavita Sharma', email: 'kavita.sharma@school.edu', active: true, subjects: ['sub_hindi'], classes: ['c_10a'] },
-    { id: 't_singh', name: 'Vikram Singh', email: 'vikram.singh@school.edu', active: true, subjects: ['sub_pe'], classes: ['c_10a'] },
-    { id: 't_rathore', name: 'Neetu Rathore', email: 'neetu.rathore@school.edu', active: true, subjects: ['sub_art'], classes: ['c_10a'] }
+  return [
+    { id: 't_sharma', empCode: '201', name: 'Monika Rani Verma', shortName: 'Monika Verma', designation: 'PGT Mathematics', department: 'Academics', email: 'monika.verma@jdintl.edu', phone: '9870943695', active: true, subjects: ['sub_math'], classes: ['c_10a'] },
+    { id: 't_joshi', empCode: '202', name: 'Sunita Kumari', shortName: 'Sunita Kumari', designation: 'TGT Science', department: 'Academics', email: 'sunita.kumari@jdintl.edu', phone: '9511719644', active: true, subjects: ['sub_chem', 'sub_phy'], classes: ['c_10a'] },
+    { id: 't_kanwar', empCode: '301', name: 'Pooja Kanwar', shortName: 'Pooja Kanwar', designation: 'PRT Faculty', department: 'Academics', email: 'pooja.kanwar@jdintl.edu', phone: '9876543210', active: true, subjects: ['sub_sst'], classes: ['c_10a'] },
+    { id: 't_verma', empCode: '102', name: 'Priti Verma', shortName: 'Priti Verma', designation: 'Primary Teacher', department: 'Academics', email: 'priti.verma@jdintl.edu', phone: '9414056789', active: true, subjects: ['sub_eng'], classes: ['c_10a'] },
+    { id: 't_singh', empCode: '205', name: 'Mr. Rakesh Sharma', shortName: 'Rakesh Sharma', designation: 'PGT Senior Physics Faculty', department: 'Academics', email: 'rakesh.sharma@jdintl.edu', phone: '9829989330', active: true, subjects: ['sub_phy', 'sub_pe'], classes: ['c_10a'] },
+    { id: 't_sen', empCode: '204', name: 'Dr. Arun Joshi', shortName: 'Dr. Arun Joshi', designation: 'PGT Senior Science & Biology', department: 'Academics', email: 'arun.joshi@jdintl.edu', phone: '9829011204', active: true, subjects: ['sub_bio', 'sub_phy'], classes: ['c_10a'] },
+    { id: 't_saxena', empCode: '111', name: 'Mr. Amit Pareek', shortName: 'Amit Pareek', designation: 'TGT Computer & Science', department: 'Academics', email: 'amit.pareek@jdintl.edu', phone: '9829011111', active: true, subjects: ['sub_cs'], classes: ['c_10a'] },
+    { id: 't_kavita', empCode: '210', name: 'Nisha Goyal', shortName: 'Nisha Goyal', designation: 'Pre-Primary & Hindi Faculty', department: 'Academics', email: 'nisha.goyal@jdintl.edu', phone: '9988776655', active: true, subjects: ['sub_hindi'], classes: ['c_10a'] },
+    { id: 't_rathore', empCode: '105', name: 'Mrs. Suman Meena', shortName: 'Suman Meena', designation: 'Arts & Activity Faculty', department: 'Academics', email: 'suman.meena@jdintl.edu', phone: '9829011105', active: true, subjects: ['sub_art'], classes: ['c_10a'] },
+    { id: 'f_101', empCode: '101', name: 'Abhilasha Bhatt', shortName: 'Abhilasha Bhatt', designation: 'Principal & Senior Faculty', department: 'Academics', email: 'abhilasha.bhatt@jdintl.edu', phone: '9672992836', active: true, subjects: ['sub_eng'], classes: ['c_10a'] }
   ];
-  legacyTeachers.forEach(lt => {
-    if (!list.some(t => t.id === lt.id)) list.push(lt);
-  });
-
-  return list;
 };
 
 export const findClass = (id) => {
@@ -244,7 +219,7 @@ let STORE_ATTENDANCE = [
   {
     id: 'att_01',
     schoolId: 'sch_jd_intl',
-    teacherId: 't_sen',
+    teacherId: 't_joshi',
     date: new Date().toISOString().split('T')[0],
     status: 'ABSENT',
     reason: 'Casual Leave (Approved Medical)'
@@ -256,13 +231,26 @@ let STORE_REPLACEMENTS = [
     id: 'rep_001',
     schoolId: 'sch_jd_intl',
     date: new Date().toISOString().split('T')[0],
-    periodId: 'p_2',
+    periodId: 'p_4',
     classId: 'c_10a',
-    originalTeacherId: 't_sen',
-    replacementTeacherId: 't_saxena',
-    reason: 'Casual Leave',
+    originalTeacherId: 't_joshi',
+    replacementTeacherId: 't_sharma',
+    reason: 'Casual Leave Coverage',
     status: 'Assigned',
-    notifiedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    notifiedAt: '08:30 AM',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'rep_002',
+    schoolId: 'sch_jd_intl',
+    date: new Date().toISOString().split('T')[0],
+    periodId: 'p_5',
+    classId: 'c_10a',
+    originalTeacherId: 't_joshi',
+    replacementTeacherId: 't_saxena',
+    reason: 'Medical Leave Coverage',
+    status: 'In Progress',
+    notifiedAt: '08:35 AM',
     createdAt: new Date().toISOString()
   }
 ];
