@@ -54,7 +54,7 @@ export function JobOpeningsPage({ onNavigate }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
   const [copiedBroadcast, setCopiedBroadcast] = useState(false);
-  const [qrViewMode, setQrViewMode] = useState('standee'); // 'standee' | 'minimal'
+  const [qrViewMode, setQrViewMode] = useState('minimal'); // 'standee' | 'minimal'
   const [broadcastTab, setBroadcastTab] = useState('whatsapp'); // 'whatsapp' | 'walkin' | 'teachers' | 'non_teaching' | 'sms'
   const [broadcastPreviewOpen, setBroadcastPreviewOpen] = useState(false);
   const [downloadingQr, setDownloadingQr] = useState(false);
