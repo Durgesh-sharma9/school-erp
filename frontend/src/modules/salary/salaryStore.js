@@ -1138,6 +1138,43 @@ export const getActiveStaffRoster = () => {
   return INITIAL_STAFF_ROSTER;
 };
 
+export const getAllStaffRoster = () => {
+  try {
+    const saved = localStorage.getItem('erp_staff_roster');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(s => ({
+          id: s.id || `emp_${s.code}`,
+          code: s.code,
+          name: s.name,
+          department: s.department || 'GENERAL',
+          designation: s.designation || 'Staff',
+          phone: s.mobile || s.phone || '',
+          email: s.email || `${s.name.toLowerCase().replace(/\s+/g, '.')}@jdinternationalschool.com`,
+          bankName: s.bankName || 'State Bank of India',
+          accNo: s.accNo || s.accountNo || '—',
+          ifsc: s.ifsc || 'SBIN0001234',
+          pan: s.pan || 'ABCDE1234F',
+          pfNo: s.pfNo || 'RJ/JAI/0012345/001',
+          esiNo: s.esiNo || '—',
+          basicSalary: Number(s.basicSalary || s.bs || 25000),
+          grossSalary: Number(s.grossSalary || s.gross || Math.round((s.basicSalary || 25000) * 1.35)),
+          status: s.status || 'Active',
+          gender: s.gender || 'Male',
+          category: s.category || 'Teaching',
+          employmentType: s.employmentType || 'Permanent',
+          workType: s.workType || 'Full Time',
+          joinDate: s.appoinDate || s.doj || '2022-04-01'
+        }));
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading staff roster:', e);
+  }
+  return INITIAL_STAFF_ROSTER;
+};
+
 export const calculateSalaryDetails = ({
   grossSalary,
   configuredWorkingDays,
@@ -1554,6 +1591,106 @@ export const salaryStorage = {
       return updatedRoster;
     } catch (e) {
       console.error('Error updating staff salary:', e);
+      return [];
+    }
+  },
+
+  saveStaffRoster: (roster) => {
+    try {
+      localStorage.setItem('erp_staff_roster', JSON.stringify(roster));
+      salaryStorage.recalculateMonthRecords('2026-11');
+      window.dispatchEvent(new Event('school_erp_staff_salary_updated'));
+    } catch (e) {
+      console.error('Error saving staff roster:', e);
+    }
+  },
+
+  addStaffMember: (newStaff) => {
+    try {
+      const roster = getAllStaffRoster();
+      const code = newStaff.code || `EMP${String(roster.length + 1).padStart(3, '0')}`;
+      const staff = {
+        id: newStaff.id || `emp_${Date.now()}`,
+        code: code,
+        name: newStaff.name || 'New Staff',
+        department: newStaff.department || 'Administration',
+        designation: newStaff.designation || 'Teacher',
+        phone: newStaff.phone || '',
+        email: newStaff.email || `${code.toLowerCase()}@greenwood.edu`,
+        bankName: newStaff.bankName || 'State Bank of India',
+        accNo: newStaff.accNo || '—',
+        ifsc: newStaff.ifsc || 'SBIN0001234',
+        pan: newStaff.pan || 'ABCDE1234F',
+        pfNo: newStaff.pfNo || 'RJ/JAI/0012345/001',
+        esiNo: newStaff.esiNo || '—',
+        basicSalary: Number(newStaff.basicSalary || 25000),
+        grossSalary: Number(newStaff.grossSalary || 35000),
+        status: newStaff.status || 'Active',
+        gender: newStaff.gender || 'Male',
+        category: newStaff.category || 'Teaching',
+        employmentType: newStaff.employmentType || 'Permanent',
+        workType: newStaff.workType || 'Full Time',
+        joinDate: newStaff.joinDate || new Date().toISOString().slice(0, 10),
+        ...newStaff
+      };
+      const updated = [staff, ...roster];
+      salaryStorage.saveStaffRoster(updated);
+      return updated;
+    } catch (e) {
+      console.error('Error adding staff member:', e);
+      return [];
+    }
+  },
+
+  updateStaffMember: (staffId, patch) => {
+    try {
+      const roster = getAllStaffRoster();
+      const updated = roster.map(s => {
+        if (s.id === staffId || s.code === staffId) {
+          return { ...s, ...patch };
+        }
+        return s;
+      });
+      salaryStorage.saveStaffRoster(updated);
+      return updated;
+    } catch (e) {
+      console.error('Error updating staff member:', e);
+      return [];
+    }
+  },
+
+  deleteStaffMember: (staffId) => {
+    try {
+      const roster = getAllStaffRoster();
+      // Soft-delete to Inactive
+      const updated = roster.map(s => {
+        if (s.id === staffId || s.code === staffId) {
+          return { ...s, status: 'Inactive' };
+        }
+        return s;
+      });
+      salaryStorage.saveStaffRoster(updated);
+      return updated;
+    } catch (e) {
+      console.error('Error deleting staff member:', e);
+      return [];
+    }
+  },
+
+  bulkUpdateStaffStatus: (staffIds, status) => {
+    try {
+      const roster = getAllStaffRoster();
+      const idSet = new Set(staffIds);
+      const updated = roster.map(s => {
+        if (idSet.has(s.id) || idSet.has(s.code)) {
+          return { ...s, status };
+        }
+        return s;
+      });
+      salaryStorage.saveStaffRoster(updated);
+      return updated;
+    } catch (e) {
+      console.error('Error in bulk status update:', e);
       return [];
     }
   },

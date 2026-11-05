@@ -570,7 +570,9 @@ export function SalarySettingsPage({ onNavigate }) {
               { id: 'rules', label: 'Payroll Rules & CTC', icon: Calculator },
               { id: 'attendance', label: 'Attendance & Leave Policy', icon: CalendarDays },
               { id: 'workflow', label: 'Approval Workflow', icon: ShieldCheck },
-              { id: 'bank', label: 'School Bank & Signatory', icon: Landmark }
+              { id: 'bank', label: 'School Bank & Signatory', icon: Landmark },
+              { id: 'departments', label: 'Departments Master', icon: Building2 },
+              { id: 'designations', label: 'Designations Master', icon: Briefcase }
             ].map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -590,26 +592,6 @@ export function SalarySettingsPage({ onNavigate }) {
                 </button>
               );
             })}
-          </div>
-
-          <div className="flex items-center gap-1.5 py-1 text-xs">
-            <span className="text-[11px] text-slate-400 font-semibold hidden md:inline">Masters:</span>
-            <button
-              type="button"
-              onClick={() => onNavigate?.('/department-master')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 transition text-[11px] cursor-pointer"
-            >
-              <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-              Department Master
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate?.('/designation-master')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 transition text-[11px] cursor-pointer"
-            >
-              <Briefcase className="w-3.5 h-3.5 text-violet-600" />
-              Designation Master
-            </button>
           </div>
         </div>
 

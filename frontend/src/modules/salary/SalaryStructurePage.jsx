@@ -1,824 +1,1390 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  SlidersHorizontal,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  ShieldCheck,
-  Calculator,
-  Home,
-  ChevronRight,
-  Layers,
-  Sparkles,
-  Info,
   Users,
   Search,
-  Filter,
-  Edit3,
-  IndianRupee,
+  Plus,
+  Download,
+  Eye,
+  Edit2,
+  Trash2,
+  RefreshCcw,
+  CheckSquare,
+  Square,
+  Lock,
+  ChevronRight,
+  ChevronLeft,
   X,
-  TrendingUp,
-  RotateCcw,
   Building,
-  Check
+  Upload,
+  Check,
+  Paperclip,
+  Briefcase,
+  IndianRupee,
+  Phone,
+  Mail,
+  Landmark,
+  ShieldCheck,
+  Calendar,
+  Layers,
+  Sparkles,
+  Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   salaryStorage,
-  DEFAULT_SALARY_POLICIES,
+  getAllStaffRoster,
   getActiveStaffRoster,
-  calculateStaffSalary
+  calculateStaffSalary,
+  DEFAULT_DEPARTMENTS,
+  DEFAULT_DESIGNATIONS
 } from './salaryStore';
 
 export function SalaryStructurePage({ onNavigate }) {
-  const [activeTab, setActiveTab] = useState('STAFF_MASTER'); // 'STAFF_MASTER' | 'POLICY_RULES'
+  // Staff records state from store
+  const [staffList, setStaffList] = useState(() => getAllStaffRoster());
   const [policies, setPolicies] = useState(() => salaryStorage.getPolicies());
-  const [staffList, setStaffList] = useState(() => getActiveStaffRoster());
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDeptFilter, setSelectedDeptFilter] = useState('ALL');
-  const [testGross, setTestGross] = useState(50000);
+  const [departments, setDepartments] = useState(() => salaryStorage.getDepartments());
+  const [designations, setDesignations] = useState(() => salaryStorage.getDesignations());
 
-  // Edit Modal State
-  const [editingStaff, setEditingStaff] = useState(null);
-  const [formGross, setFormGross] = useState(0);
-  const [formBasic, setFormBasic] = useState(0);
+  // Filters & Search
+  const [search, setSearch] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [deptFilter, setDeptFilter] = useState('');
+  const [empTypeFilter, setEmpTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
-  // Re-fetch staff when salary is updated
-  useEffect(() => {
-    const handleUpdate = () => {
-      setStaffList(getActiveStaffRoster());
-    };
-    window.addEventListener('school_erp_staff_salary_updated', handleUpdate);
-    return () => window.removeEventListener('school_erp_staff_salary_updated', handleUpdate);
-  }, []);
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState('');
 
-  // Department List
-  const departments = useMemo(() => {
-    const set = new Set(staffList.map(s => s.department).filter(Boolean));
-    return Array.from(set);
-  }, [staffList]);
+  // Modals state
+  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingStaffId, setEditingStaffId] = useState(null);
+  const [step, setStep] = useState(1);
+  const [viewingStaff, setViewingStaff] = useState(null);
 
-  // Filtered staff roster
-  const filteredStaff = useMemo(() => {
-    return staffList.filter(s => {
-      const matchDept = selectedDeptFilter === 'ALL' || s.department === selectedDeptFilter;
-      const matchQuery = !searchQuery.trim() ||
-        s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.designation?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchDept && matchQuery;
-    });
-  }, [staffList, selectedDeptFilter, searchQuery]);
+  // Sub-modals for inline master creation
+  const [showAddDeptModal, setShowAddDeptModal] = useState(false);
+  const [showAddDesgModal, setShowAddDesgModal] = useState(false);
+  const [newDeptName, setNewDeptName] = useState('');
+  const [newDesgName, setNewDesgName] = useState('');
 
-  // Computed Staff Salary Data for Display
-  const computedStaffData = useMemo(() => {
-    return filteredStaff.map(staff => {
-      const calc = calculateStaffSalary(staff, policies, {
-        grossSalary: staff.grossSalary,
-        totalDays: 30,
-        presentDays: 30,
-        paidLeaveDays: 0
-      });
-      return {
-        ...staff,
-        ...calc
-      };
-    });
-  }, [filteredStaff, policies]);
-
-  // Metrics
-  const totalMonthlyGross = computedStaffData.reduce((sum, s) => sum + (s.grossSalary || 0), 0);
-  const totalMonthlyNet = computedStaffData.reduce((sum, s) => sum + (s.netSalary || 0), 0);
-  const avgStaffGross = computedStaffData.length > 0 ? Math.round(totalMonthlyGross / computedStaffData.length) : 0;
-
-  // Edit Staff Structure Handlers
-  const handleOpenEdit = (staff) => {
-    setEditingStaff(staff);
-    setFormGross(staff.grossSalary || 30000);
-    const basicPct = policies.basicPercentOfGross || 45;
-    setFormBasic(staff.basicSalary || Math.round((staff.grossSalary || 30000) * (basicPct / 100)));
-  };
-
-  const handleGrossChange = (val) => {
-    const gross = Math.max(0, Number(val));
-    setFormGross(gross);
-    const basicPct = policies.basicPercentOfGross || 45;
-    setFormBasic(Math.round(gross * (basicPct / 100)));
-  };
-
-  const handleSaveStaffStructure = (e) => {
-    e.preventDefault();
-    if (!editingStaff) return;
-    if (formGross <= 0) {
-      toast.error('Gross salary must be greater than ₹0');
-      return;
-    }
-
-    salaryStorage.updateStaffSalary(editingStaff.id, {
-      grossSalary: formGross,
-      basicSalary: formBasic
-    });
-
-    setStaffList(getActiveStaffRoster());
-    setEditingStaff(null);
-    toast.success(`Updated salary structure for ${editingStaff.name}!`);
-  };
-
-  // Allowances Handlers for Policy Tab
-  const handleAddAllowance = () => {
-    const newAl = {
-      id: `al_${Date.now()}`,
-      label: 'New Allowance',
-      calculationType: 'percent_of_basic',
-      value: 10
-    };
-    setPolicies(prev => ({
-      ...prev,
-      allowances: [...(prev.allowances || []), newAl]
-    }));
-  };
-
-  const handleRemoveAllowance = (id) => {
-    setPolicies(prev => ({
-      ...prev,
-      allowances: prev.allowances.filter(a => a.id !== id)
-    }));
-  };
-
-  const handleUpdateAllowance = (id, field, value) => {
-    setPolicies(prev => ({
-      ...prev,
-      allowances: prev.allowances.map(a => a.id === id ? { ...a, [field]: value } : a)
-    }));
-  };
-
-  // Save Settings
-  const handleSavePolicies = () => {
-    salaryStorage.savePolicies(policies);
-    salaryStorage.recalculateMonthRecords('2026-11');
-    toast.success('Salary policy rules updated and payroll recalculated!');
-  };
-
-  const handleResetPolicies = () => {
-    setPolicies(DEFAULT_SALARY_POLICIES);
-    salaryStorage.savePolicies(DEFAULT_SALARY_POLICIES);
-    salaryStorage.recalculateMonthRecords('2026-11');
-    toast.success('Reset to standard CBSE school salary structure!');
-  };
-
-  // Live Simulation Calculator for Policy Tab
-  const simBasic = Math.round(testGross * ((policies.basicPercentOfGross || 45) / 100));
-  let simAllowances = 0;
-  const simAllowancesBreakdown = (policies.allowances || []).map(al => {
-    let amt = 0;
-    if (al.calculationType === 'percent_of_basic') amt = Math.round(simBasic * (al.value / 100));
-    else if (al.calculationType === 'percent_of_gross') amt = Math.round(testGross * (al.value / 100));
-    else amt = Number(al.value) || 0;
-    simAllowances += amt;
-    return { ...al, amt };
+  // Wizard form state
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    gender: 'Male',
+    dob: '1990-01-01',
+    joiningDate: new Date().toISOString().slice(0, 10),
+    department: 'Administration',
+    designation: 'Principal',
+    category: 'Teaching',
+    employmentType: 'Permanent',
+    workType: 'Full Time',
+    workingHours: 8,
+    email: '',
+    phone: '',
+    pan: 'ABCDE1234F',
+    aadhaar: '123456789012',
+    address: 'Jaipur, Rajasthan',
+    enablePortalAccess: false,
+    portalRole: 'Employee',
+    monthlyGross: 35000,
+    salaryStartDate: new Date().toISOString().slice(0, 10),
+    salaryBasic: 15750,
+    salaryHra: 6300,
+    salarySpecialAllowance: 3500,
+    salaryTransport: 1800,
+    salaryMedical: 1250,
+    salaryOtherAllowance: 6400,
+    salaryPf: 1800,
+    salaryEsi: 0,
+    salaryProfessionalTax: 200,
+    bankAccountHolder: '',
+    bankName: 'State Bank of India',
+    bankAccountNumber: '389201948201',
+    bankConfirmAccountNumber: '389201948201',
+    bankIfscCode: 'SBIN0001234',
+    bankBranchName: 'Bhankrota, Jaipur',
+    bankUpiId: ''
   });
 
-  const simGross = simBasic + simAllowances;
-  const epfWage = Math.min(simBasic, policies.deductions?.epf?.wageCeiling || 15000);
-  const epf = policies.deductions?.epf?.enabled ? Math.round(epfWage * ((policies.deductions.epf.employeePercent || 12) / 100)) : 0;
-  const esi = (policies.deductions?.esi?.enabled && simGross <= (policies.deductions.esi.grossCeiling || 21000))
-    ? Math.round(simGross * ((policies.deductions.esi.employeePercent || 0.75) / 100))
-    : 0;
-  const pt = 200;
-  const simTotalDeductions = epf + esi + pt;
-  const simNet = Math.max(0, simGross - simTotalDeductions);
+  // Re-fetch staff when updated
+  const refreshData = () => {
+    setStaffList(getAllStaffRoster());
+    setDepartments(salaryStorage.getDepartments());
+    setDesignations(salaryStorage.getDesignations());
+    setPolicies(salaryStorage.getPolicies());
+  };
 
-  // Live preview for Modal
-  const modalLiveCalc = useMemo(() => {
-    if (!editingStaff) return null;
-    return calculateStaffSalary({
-      ...editingStaff,
-      grossSalary: formGross,
-      basicSalary: formBasic
-    }, policies, {
-      grossSalary: formGross,
-      totalDays: 30,
-      presentDays: 30,
-      paidLeaveDays: 0
+  useEffect(() => {
+    const handleUpdate = () => refreshData();
+    window.addEventListener('school_erp_staff_salary_updated', handleUpdate);
+    window.addEventListener('school_erp_salary_departments_updated', handleUpdate);
+    window.addEventListener('school_erp_salary_designations_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('school_erp_staff_salary_updated', handleUpdate);
+      window.removeEventListener('school_erp_salary_departments_updated', handleUpdate);
+      window.removeEventListener('school_erp_salary_designations_updated', handleUpdate);
+    };
+  }, []);
+
+  // Filtered staff
+  const filteredStaff = useMemo(() => {
+    return staffList.filter(s => {
+      if (genderFilter && s.gender !== genderFilter) return false;
+      if (categoryFilter && s.category !== categoryFilter) return false;
+      if (deptFilter && s.department !== deptFilter) return false;
+      if (empTypeFilter && s.employmentType !== empTypeFilter) return false;
+      if (statusFilter && s.status !== statusFilter) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const matchName = s.name?.toLowerCase().includes(q);
+        const matchCode = s.code?.toLowerCase().includes(q);
+        const matchPhone = s.phone?.includes(q);
+        const matchEmail = s.email?.toLowerCase().includes(q);
+        if (!matchName && !matchCode && !matchPhone && !matchEmail) return false;
+      }
+      return true;
     });
-  }, [editingStaff, formGross, formBasic, policies]);
+  }, [staffList, genderFilter, categoryFilter, deptFilter, empTypeFilter, statusFilter, search]);
+
+  // Bulk Selection Handlers
+  const handleSelectRow = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredStaff.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredStaff.map(s => s.id));
+    }
+  };
+
+  const handleBulkStatusChange = () => {
+    if (selectedIds.length === 0 || !bulkStatus) return;
+    salaryStorage.bulkUpdateStaffStatus(selectedIds, bulkStatus);
+    toast.success(`Updated ${selectedIds.length} staff to ${bulkStatus}`);
+    setSelectedIds([]);
+    setBulkStatus('');
+    refreshData();
+  };
+
+  // CSV Export
+  const handleExportCSV = () => {
+    if (filteredStaff.length === 0) {
+      toast.error('No staff records to export');
+      return;
+    }
+    const headers = ['Employee ID', 'Name', 'Department', 'Designation', 'Category', 'Employment Type', 'Mobile', 'Email', 'Gross Salary', 'Basic Salary', 'Bank Name', 'Account No', 'IFSC', 'PAN', 'Status'];
+    const rows = filteredStaff.map(s => [
+      s.code,
+      `"${s.name}"`,
+      `"${s.department}"`,
+      `"${s.designation}"`,
+      s.category || 'Teaching',
+      s.employmentType || 'Permanent',
+      s.phone || '',
+      s.email || '',
+      s.grossSalary || 0,
+      s.basicSalary || 0,
+      `"${s.bankName || ''}"`,
+      `"${s.accNo || ''}"`,
+      s.ifsc || '',
+      s.pan || '',
+      s.status || 'Active'
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Staff_Roster_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Staff roster exported to CSV!');
+  };
+
+  // Soft Deactivate
+  const handleDeactivate = (staff) => {
+    if (window.confirm(`Are you sure you want to mark ${staff.name} as Inactive? This will not delete historical records.`)) {
+      salaryStorage.deleteStaffMember(staff.id);
+      toast.success(`${staff.name} marked as Inactive`);
+      refreshData();
+    }
+  };
+
+  // Open Add Onboard Wizard
+  const openAddStaff = () => {
+    setIsEditing(false);
+    setEditingStaffId(null);
+    setStep(1);
+    setFormData({
+      firstName: '',
+      lastName: '',
+      gender: 'Male',
+      dob: '1990-01-01',
+      joiningDate: new Date().toISOString().slice(0, 10),
+      department: departments[0]?.name || 'Administration',
+      designation: designations[0]?.name || 'Principal',
+      category: 'Teaching',
+      employmentType: 'Permanent',
+      workType: 'Full Time',
+      workingHours: 8,
+      email: '',
+      phone: '',
+      pan: 'ABCDE1234F',
+      aadhaar: '123456789012',
+      address: 'Jaipur, Rajasthan',
+      enablePortalAccess: false,
+      portalRole: 'Employee',
+      monthlyGross: 35000,
+      salaryStartDate: new Date().toISOString().slice(0, 10),
+      salaryBasic: 15750,
+      salaryHra: 6300,
+      salarySpecialAllowance: 3500,
+      salaryTransport: 1800,
+      salaryMedical: 1250,
+      salaryOtherAllowance: 6400,
+      salaryPf: 1800,
+      salaryEsi: 0,
+      salaryProfessionalTax: 200,
+      bankAccountHolder: '',
+      bankName: 'State Bank of India',
+      bankAccountNumber: '389201948201',
+      bankConfirmAccountNumber: '389201948201',
+      bankIfscCode: 'SBIN0001234',
+      bankBranchName: 'Bhankrota, Jaipur',
+      bankUpiId: ''
+    });
+    setIsOpenAddModal(true);
+  };
+
+  // Start Edit
+  const startEdit = (staff) => {
+    setIsEditing(true);
+    setEditingStaffId(staff.id);
+    setStep(1);
+    const parts = (staff.name || '').split(' ');
+    const fName = parts[0] || '';
+    const lName = parts.slice(1).join(' ') || '';
+    const gross = Number(staff.grossSalary || 35000);
+    const basic = Number(staff.basicSalary || Math.round(gross * 0.45));
+
+    // Dynamic component split
+    const hra = Math.round(basic * 0.4);
+    const special = Math.round(gross * 0.1);
+    const transport = 1800;
+    const medical = 1250;
+    const other = Math.max(0, gross - (basic + hra + special + transport + medical));
+
+    setFormData({
+      firstName: fName,
+      lastName: lName,
+      gender: staff.gender || 'Male',
+      dob: staff.dob || '1990-01-01',
+      joiningDate: staff.joinDate || new Date().toISOString().slice(0, 10),
+      department: staff.department || 'Administration',
+      designation: staff.designation || 'Staff',
+      category: staff.category || 'Teaching',
+      employmentType: staff.employmentType || 'Permanent',
+      workType: staff.workType || 'Full Time',
+      workingHours: 8,
+      email: staff.email || '',
+      phone: staff.phone || '',
+      pan: staff.pan || 'ABCDE1234F',
+      aadhaar: staff.aadhaar || '123456789012',
+      address: staff.address || 'Jaipur, Rajasthan',
+      enablePortalAccess: false,
+      portalRole: 'Employee',
+      monthlyGross: gross,
+      salaryStartDate: staff.joinDate || new Date().toISOString().slice(0, 10),
+      salaryBasic: basic,
+      salaryHra: hra,
+      salarySpecialAllowance: special,
+      salaryTransport: transport,
+      salaryMedical: medical,
+      salaryOtherAllowance: other,
+      salaryPf: basic > 15000 ? 1800 : Math.round(basic * 0.12),
+      salaryEsi: gross <= 21000 ? Math.round(gross * 0.0075) : 0,
+      salaryProfessionalTax: 200,
+      bankAccountHolder: staff.name || '',
+      bankName: staff.bankName || 'State Bank of India',
+      bankAccountNumber: staff.accNo || '',
+      bankConfirmAccountNumber: staff.accNo || '',
+      bankIfscCode: staff.ifsc || 'SBIN0001234',
+      bankBranchName: 'Jaipur',
+      bankUpiId: ''
+    });
+    setIsOpenAddModal(true);
+  };
+
+  // Auto-calculate breakdown when Gross changes
+  const handleGrossChange = (val) => {
+    const gross = Number(val) || 0;
+    const basic = Math.round(gross * 0.45);
+    const hra = Math.round(basic * 0.4);
+    const special = Math.round(gross * 0.1);
+    const transport = 1800;
+    const medical = 1250;
+    const other = Math.max(0, gross - (basic + hra + special + transport + medical));
+    const pf = basic > 15000 ? 1800 : Math.round(basic * 0.12);
+    const esi = gross <= 21000 ? Math.round(gross * 0.0075) : 0;
+
+    setFormData(prev => ({
+      ...prev,
+      monthlyGross: gross,
+      salaryBasic: basic,
+      salaryHra: hra,
+      salarySpecialAllowance: special,
+      salaryTransport: transport,
+      salaryMedical: medical,
+      salaryOtherAllowance: other,
+      salaryPf: pf,
+      salaryEsi: esi
+    }));
+  };
+
+  // Form Submission
+  const handleWizardSubmit = (e) => {
+    e.preventDefault();
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim() || 'New Staff';
+
+    if (isEditing) {
+      salaryStorage.updateStaffMember(editingStaffId, {
+        name: fullName,
+        department: formData.department,
+        designation: formData.designation,
+        category: formData.category,
+        employmentType: formData.employmentType,
+        workType: formData.workType,
+        gender: formData.gender,
+        phone: formData.phone,
+        email: formData.email,
+        pan: formData.pan,
+        bankName: formData.bankName,
+        accNo: formData.bankAccountNumber,
+        ifsc: formData.bankIfscCode,
+        grossSalary: Number(formData.monthlyGross),
+        basicSalary: Number(formData.salaryBasic)
+      });
+      toast.success(`Staff record for ${fullName} updated!`);
+    } else {
+      salaryStorage.addStaffMember({
+        name: fullName,
+        department: formData.department,
+        designation: formData.designation,
+        category: formData.category,
+        employmentType: formData.employmentType,
+        workType: formData.workType,
+        gender: formData.gender,
+        phone: formData.phone,
+        email: formData.email || `${formData.firstName.toLowerCase()}@greenwood.edu`,
+        pan: formData.pan,
+        bankName: formData.bankName,
+        accNo: formData.bankAccountNumber,
+        ifsc: formData.bankIfscCode,
+        grossSalary: Number(formData.monthlyGross),
+        basicSalary: Number(formData.salaryBasic),
+        joinDate: formData.joiningDate
+      });
+      toast.success(`Staff member ${fullName} onboarded successfully!`);
+    }
+    setIsOpenAddModal(false);
+    refreshData();
+  };
+
+  // Master Data Add Handlers
+  const handleAddDept = () => {
+    if (!newDeptName.trim()) return;
+    const newDept = { id: `dept_${Date.now()}`, name: newDeptName.trim() };
+    const updated = [...departments, newDept];
+    salaryStorage.saveDepartments(updated);
+    setDepartments(updated);
+    setFormData(p => ({ ...p, department: newDept.name }));
+    setNewDeptName('');
+    setShowAddDeptModal(false);
+    toast.success('Department created!');
+  };
+
+  const handleAddDesg = () => {
+    if (!newDesgName.trim()) return;
+    const newDesg = { id: `desg_${Date.now()}`, name: newDesgName.trim() };
+    const updated = [...designations, newDesg];
+    salaryStorage.saveDesignations(updated);
+    setDesignations(updated);
+    setFormData(p => ({ ...p, designation: newDesg.name }));
+    setNewDesgName('');
+    setShowAddDesgModal(false);
+    toast.success('Designation created!');
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800 space-y-5">
+    <div className="space-y-6 pb-12">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <button
-              onClick={() => onNavigate?.('/dashboard')}
-              className="text-slate-500 hover:text-emerald-600 transition-colors flex items-center gap-1 text-xs font-medium"
-            >
-              <Home className="w-3.5 h-3.5" />
-              Home
-            </button>
-            <span className="text-slate-400 text-xs">/</span>
-            <button
-              onClick={() => onNavigate?.('/salary-hub')}
-              className="text-slate-500 hover:text-emerald-600 transition-colors text-xs font-medium"
-            >
-              Salary Hub
-            </button>
-            <span className="text-slate-400 text-xs">/</span>
-            <span className="text-emerald-600 text-xs font-semibold">Salary Structure</span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+            <span className="cursor-pointer hover:text-blue-600" onClick={() => onNavigate?.('/salary-hub')}>Salary Hub</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="font-semibold text-slate-700">Staff Management</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-            <SlidersHorizontal className="w-6 h-6 text-emerald-600" />
-            Salary Structure & Staff CTC Master
-          </h1>
-          <p className="text-xs text-slate-500">
-            Manage individual staff compensation packages, allowances breakdown, and institutional statutory rules.
-          </p>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Staff Management</h1>
+          <p className="text-sm text-slate-500">Add, edit, filter, and deactivate profiles inside Greenwood High School.</p>
         </div>
 
         <div className="flex items-center gap-2">
-          {activeTab === 'POLICY_RULES' ? (
-            <>
-              <button
-                type="button"
-                onClick={handleResetPolicies}
-                className="px-3.5 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl transition"
-              >
-                Reset Defaults
-              </button>
-              <button
-                type="button"
-                onClick={handleSavePolicies}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition"
-              >
-                Save Policy Rules
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onNavigate?.('/salary-processing')}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <Calculator className="w-4 h-4" />
-              Open Processing Studio
-            </button>
-          )}
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 bg-white rounded-xl text-xs font-bold shadow-soft transition-all"
+          >
+            <Download className="w-4 h-4 text-slate-500" /> Export CSV
+          </button>
+          <button
+            onClick={openAddStaff}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-soft hover:shadow transition-all"
+          >
+            <Plus className="w-4 h-4" /> Add Staff
+          </button>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex items-center border-b border-slate-200 gap-6 text-xs font-bold">
-        <button
-          type="button"
-          onClick={() => setActiveTab('STAFF_MASTER')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition cursor-pointer ${
-            activeTab === 'STAFF_MASTER'
-              ? 'border-emerald-600 text-emerald-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Staff Salary Master ({staffList.length} Staff)
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('POLICY_RULES')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition cursor-pointer ${
-            activeTab === 'POLICY_RULES'
-              ? 'border-emerald-600 text-emerald-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          Institutional Rules & Slabs Setup
-        </button>
+      {/* Metric Cards Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+            <span>Total Staff Roster</span>
+            <Users className="w-4 h-4 text-blue-500" />
+          </div>
+          <div className="text-2xl font-extrabold text-slate-800">{staffList.length}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Active: {staffList.filter(s => s.status !== 'Inactive').length} &bull; Teaching: {staffList.filter(s => s.category === 'Teaching').length}</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+            <span>Total Monthly Gross</span>
+            <IndianRupee className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="text-2xl font-extrabold text-slate-800">
+            ₹{staffList.filter(s => s.status !== 'Inactive').reduce((acc, s) => acc + (s.grossSalary || 0), 0).toLocaleString('en-IN')}
+          </div>
+          <div className="text-[11px] text-emerald-600 font-semibold mt-0.5">Approved package commitments</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+            <span>Average Package</span>
+            <Briefcase className="w-4 h-4 text-indigo-500" />
+          </div>
+          <div className="text-2xl font-extrabold text-slate-800">
+            ₹{Math.round(staffList.reduce((acc, s) => acc + (s.grossSalary || 0), 0) / (staffList.length || 1)).toLocaleString('en-IN')}
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Per staff monthly average</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+            <span>Active Departments</span>
+            <Building className="w-4 h-4 text-amber-500" />
+          </div>
+          <div className="text-2xl font-extrabold text-slate-800">11</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Across all functional faculties</div>
+        </div>
       </div>
 
-      {/* ================= TAB 1: STAFF SALARY MASTER ================= */}
-      {activeTab === 'STAFF_MASTER' && (
-        <div className="space-y-4 animate-fadeIn">
-          {/* KPI Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Monthly CTC Bill</span>
-              <div className="text-xl font-black text-slate-900 mt-1 font-mono">
-                ₹{totalMonthlyGross.toLocaleString('en-IN')}
-              </div>
-              <span className="text-[11px] text-slate-500">Gross across {computedStaffData.length} active staff</span>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Average Monthly CTC</span>
-              <div className="text-xl font-black text-emerald-600 mt-1 font-mono">
-                ₹{avgStaffGross.toLocaleString('en-IN')}
-              </div>
-              <span className="text-[11px] text-slate-500">Average compensation package</span>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Net Take-Home</span>
-              <div className="text-xl font-black text-blue-600 mt-1 font-mono">
-                ₹{totalMonthlyNet.toLocaleString('en-IN')}
-              </div>
-              <span className="text-[11px] text-slate-500">After statutory deductions</span>
-            </div>
+      {/* Filter Toolbar */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft flex flex-wrap items-center gap-3">
+        {/* Search */}
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search name, ID, phone..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50/50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          />
+        </div>
+
+        {/* Gender Filter */}
+        <select
+          value={genderFilter}
+          onChange={(e) => setGenderFilter(e.target.value)}
+          className="border border-slate-200 rounded-xl py-2 px-3 text-xs bg-slate-50/50 text-slate-700 font-medium focus:outline-none"
+        >
+          <option value="">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+
+        {/* Category Filter */}
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="border border-slate-200 rounded-xl py-2 px-3 text-xs bg-slate-50/50 text-slate-700 font-medium focus:outline-none"
+        >
+          <option value="">All Categories</option>
+          <option value="Teaching">Teaching</option>
+          <option value="Non Teaching">Non Teaching</option>
+        </select>
+
+        {/* Employment Type */}
+        <select
+          value={empTypeFilter}
+          onChange={(e) => setEmpTypeFilter(e.target.value)}
+          className="border border-slate-200 rounded-xl py-2 px-3 text-xs bg-slate-50/50 text-slate-700 font-medium focus:outline-none"
+        >
+          <option value="">All Types</option>
+          <option value="Permanent">Permanent</option>
+          <option value="Temporary">Temporary</option>
+          <option value="Full Time">Full Time</option>
+          <option value="Part Time">Part Time</option>
+        </select>
+
+        {/* Status */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border border-slate-200 rounded-xl py-2 px-3 text-xs bg-slate-50/50 text-slate-700 font-medium focus:outline-none"
+        >
+          <option value="">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Suspended">Suspended</option>
+        </select>
+
+        {/* Department */}
+        <select
+          value={deptFilter}
+          onChange={(e) => setDeptFilter(e.target.value)}
+          className="border border-slate-200 rounded-xl py-2 px-3 text-xs bg-slate-50/50 text-slate-700 font-medium focus:outline-none"
+        >
+          <option value="">All Departments</option>
+          {departments.map((d, idx) => (
+            <option key={d.id || idx} value={d.name}>{d.name}</option>
+          ))}
+        </select>
+
+        {/* Clear Filters */}
+        {(search || genderFilter || categoryFilter || deptFilter || empTypeFilter || statusFilter) && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setGenderFilter('');
+              setCategoryFilter('');
+              setDeptFilter('');
+              setEmpTypeFilter('');
+              setStatusFilter('');
+            }}
+            className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1 ml-auto"
+          >
+            <RefreshCcw className="w-3.5 h-3.5" /> Clear Filters
+          </button>
+        )}
+      </div>
+
+      {/* Bulk Action Strip */}
+      {selectedIds.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl flex items-center justify-between text-xs text-blue-800 animate-fadeIn shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckSquare className="w-4 h-4 text-blue-600" />
+            <span className="font-bold">{selectedIds.length} staff selected</span>
           </div>
-
-          {/* Search & Filters */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-72">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  placeholder="Search staff by name or code..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 bg-slate-50"
-                />
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                <Filter className="w-3.5 h-3.5 text-slate-400" />
-                <select
-                  value={selectedDeptFilter}
-                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                  className="text-xs font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer"
-                >
-                  <option value="ALL">All Departments</option>
-                  {departments.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <span className="text-xs font-bold text-slate-500">
-              Showing {computedStaffData.length} of {staffList.length} staff
-            </span>
+          <div className="flex items-center gap-2">
+            <select
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
+              className="border border-blue-200 rounded-xl py-1.5 px-3 bg-white text-xs text-slate-700 font-semibold focus:outline-none"
+            >
+              <option value="">Bulk Action Status...</option>
+              <option value="Active">Mark Active</option>
+              <option value="Inactive">Mark Inactive</option>
+              <option value="Suspended">Mark Suspended</option>
+            </select>
+            <button
+              onClick={handleBulkStatusChange}
+              disabled={!bulkStatus}
+              className="px-4 py-1.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-soft"
+            >
+              Apply
+            </button>
           </div>
+        </div>
+      )}
 
-          {/* Staff CTC Master Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
-                  <tr>
-                    <th className="py-3 px-4">Staff Member</th>
-                    <th className="py-3 px-3">Department</th>
-                    <th className="py-3 px-3">Designation</th>
-                    <th className="py-3 px-3 text-right">Gross CTC (₹)</th>
-                    <th className="py-3 px-3 text-right">Basic Pay (₹)</th>
-                    <th className="py-3 px-3 text-right">Allowances</th>
-                    <th className="py-3 px-3 text-right">Statutory Deductions</th>
-                    <th className="py-3 px-3 text-right">Net Take-Home</th>
-                    <th className="py-3 px-4 text-center w-28">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {computedStaffData.map((staff) => (
-                    <tr key={staff.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="font-extrabold text-slate-900">{staff.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                          Code: {staff.code} &bull; {staff.phone || 'No phone'}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                          {staff.department}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-600">
-                        {staff.designation}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-black font-mono text-slate-900">
-                        ₹{staff.grossSalary?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-slate-700">
-                        ₹{staff.basic?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-slate-700">
-                        ₹{staff.totalAllowances?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-rose-600 font-bold">
-                        -₹{staff.totalDeductions?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-black font-mono text-emerald-600 text-sm">
-                        ₹{staff.netSalary?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(staff)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition cursor-pointer"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                          Edit CTC
+      {/* Main Staff Table */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-50/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                <th className="p-3.5 pl-4 w-10">
+                  <button onClick={handleSelectAll} className="p-1 text-slate-400 hover:text-slate-600">
+                    {selectedIds.length === filteredStaff.length && filteredStaff.length > 0 ? (
+                      <CheckSquare className="w-4 h-4 text-blue-600" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                  </button>
+                </th>
+                <th className="p-3.5">Staff Member</th>
+                <th className="p-3.5">Category / Role</th>
+                <th className="p-3.5">Department</th>
+                <th className="p-3.5">Type</th>
+                <th className="p-3.5 text-right">Gross Salary</th>
+                <th className="p-3.5 text-right">Basic Base</th>
+                <th className="p-3.5">Status</th>
+                <th className="p-3.5 text-center pr-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {filteredStaff.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-12 text-slate-400">
+                    No staff records found matching the active filters.
+                  </td>
+                </tr>
+              ) : (
+                filteredStaff.map((staff) => {
+                  const isSelected = selectedIds.includes(staff.id);
+                  const isInactive = staff.status === 'Inactive';
+                  const isSuspended = staff.status === 'Suspended';
+                  return (
+                    <tr
+                      key={staff.id}
+                      className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-blue-50/40' : ''}`}
+                    >
+                      <td className="p-3.5 pl-4">
+                        <button onClick={() => handleSelectRow(staff.id)} className="p-1 text-slate-400 hover:text-slate-600">
+                          {isSelected ? (
+                            <CheckSquare className="w-4 h-4 text-blue-600" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
                         </button>
                       </td>
+
+                      <td className="p-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs border border-blue-200 shadow-inner flex-shrink-0">
+                            {staff.name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 leading-tight">{staff.name}</p>
+                            <p className="text-[10px] text-slate-400 font-medium mt-0.5">{staff.code} &bull; {staff.phone || staff.email}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="p-3.5">
+                        <p className="font-semibold text-slate-800 text-xs">{staff.category || 'Teaching'}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{staff.designation || 'Staff'}</p>
+                      </td>
+
+                      <td className="p-3.5">
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200">
+                          {staff.department || 'General'}
+                        </span>
+                      </td>
+
+                      <td className="p-3.5">
+                        <span className="text-xs font-semibold text-slate-600">
+                          {staff.employmentType || 'Permanent'}
+                        </span>
+                      </td>
+
+                      <td className="p-3.5 text-right font-extrabold text-slate-800">
+                        ₹{(staff.grossSalary || 0).toLocaleString('en-IN')}
+                      </td>
+
+                      <td className="p-3.5 text-right font-semibold text-slate-600">
+                        ₹{(staff.basicSalary || 0).toLocaleString('en-IN')}
+                      </td>
+
+                      <td className="p-3.5">
+                        <span
+                          className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
+                            isInactive
+                              ? 'bg-slate-100 text-slate-600'
+                              : isSuspended
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          }`}
+                        >
+                          {staff.status || 'Active'}
+                        </span>
+                      </td>
+
+                      <td className="p-3.5 pr-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => setViewingStaff(staff)}
+                            className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-lg transition-colors"
+                            title="View Profile"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => startEdit(staff)}
+                            className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-colors"
+                            title="Edit Profile"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeactivate(staff)}
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
+                            title="Deactivate Member"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Table Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+          <span>Showing {filteredStaff.length} of {staffList.length} staff records</span>
+          <div className="flex items-center gap-4 text-slate-600 font-semibold">
+            <span>Teaching: {filteredStaff.filter(s => s.category === 'Teaching').length}</span>
+            <span>Non-Teaching: {filteredStaff.filter(s => s.category !== 'Teaching').length}</span>
+            <span className="text-emerald-700 font-bold">Total Gross: ₹{filteredStaff.reduce((a, s) => a + (s.grossSalary || 0), 0).toLocaleString('en-IN')}</span>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* ================= TAB 2: INSTITUTIONAL POLICY SETUP ================= */}
-      {activeTab === 'POLICY_RULES' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
-          {/* Left 8 Cols: Policy Configuration Form */}
-          <div className="lg:col-span-8 space-y-5">
-            {/* 1. Basic Salary Component */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">1. Basic Salary Component</h3>
-                  <p className="text-[11px] text-slate-400">Percentage of staff gross salary designated as core Basic Pay</p>
-                </div>
-                <span className="text-base font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-                  {policies.basicPercentOfGross}%
-                </span>
-              </div>
-
-              <div className="pt-2">
-                <input
-                  type="range"
-                  min="30"
-                  max="60"
-                  step="5"
-                  value={policies.basicPercentOfGross || 45}
-                  onChange={(e) => setPolicies({ ...policies, basicPercentOfGross: Number(e.target.value) })}
-                  className="w-full accent-emerald-600 cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-1">
-                  <span>30% Minimum</span>
-                  <span>40% Standard</span>
-                  <span>45% Recommended</span>
-                  <span>50%</span>
-                  <span>60% Maximum</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Allowances Master */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">2. Allowances & Compensation Additions</h3>
-                  <p className="text-[11px] text-slate-400">HRA, DA, Travel, Medical, and custom institutional allowances</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddAllowance}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-xl flex items-center gap-1 transition cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Add Allowance
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {(policies.allowances || []).map((al) => (
-                  <div key={al.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-center gap-3">
-                    <div className="flex-1 w-full sm:w-auto">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Allowance Label</label>
-                      <input
-                        type="text"
-                        value={al.label}
-                        onChange={(e) => handleUpdateAllowance(al.id, 'label', e.target.value)}
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-semibold"
-                      />
-                    </div>
-
-                    <div className="w-full sm:w-48">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Calculation Type</label>
-                      <select
-                        value={al.calculationType}
-                        onChange={(e) => handleUpdateAllowance(al.id, 'calculationType', e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-medium"
-                      >
-                        <option value="percent_of_basic">% of Basic Pay</option>
-                        <option value="percent_of_gross">% of Gross Salary</option>
-                        <option value="fixed_amount">Fixed Amount (₹)</option>
-                      </select>
-                    </div>
-
-                    <div className="w-full sm:w-28">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                        {al.calculationType === 'fixed_amount' ? 'Amount (₹)' : 'Value (%)'}
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={al.value}
-                        onChange={(e) => handleUpdateAllowance(al.id, 'value', Number(e.target.value))}
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold"
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAllowance(al.id)}
-                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition self-end sm:self-center cursor-pointer"
-                      title="Remove allowance"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Statutory Compliance Rules */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                3. Statutory Compliance Settings (EPF & ESIC)
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* EPF Box */}
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900">Employees' Provident Fund (EPF)</span>
-                    <input
-                      type="checkbox"
-                      checked={policies.deductions?.epf?.enabled}
-                      onChange={(e) => setPolicies({
-                        ...policies,
-                        deductions: {
-                          ...policies.deductions,
-                          epf: { ...policies.deductions?.epf, enabled: e.target.checked }
-                        }
-                      })}
-                      className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-500">12% deduction on Basic Pay up to statutory ceiling.</p>
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400">Employee Share (%)</label>
-                      <input
-                        type="number"
-                        value={policies.deductions?.epf?.employeePercent || 12}
-                        onChange={(e) => setPolicies({
-                          ...policies,
-                          deductions: {
-                            ...policies.deductions,
-                            epf: { ...policies.deductions?.epf, employeePercent: Number(e.target.value) }
-                          }
-                        })}
-                        className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-bold"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400">Ceiling Limit (₹)</label>
-                      <input
-                        type="number"
-                        value={policies.deductions?.epf?.wageCeiling || 15000}
-                        onChange={(e) => setPolicies({
-                          ...policies,
-                          deductions: {
-                            ...policies.deductions,
-                            epf: { ...policies.deductions?.epf, wageCeiling: Number(e.target.value) }
-                          }
-                        })}
-                        className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-bold"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* ESIC Box */}
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900">Employees' State Insurance (ESIC)</span>
-                    <input
-                      type="checkbox"
-                      checked={policies.deductions?.esi?.enabled}
-                      onChange={(e) => setPolicies({
-                        ...policies,
-                        deductions: {
-                          ...policies.deductions,
-                          esi: { ...policies.deductions?.esi, enabled: e.target.checked }
-                        }
-                      })}
-                      className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-500">0.75% deduction if gross wage is ≤ ₹21,000/month.</p>
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400">Employee Share (%)</label>
-                      <input
-                        type="number"
-                        step="0.05"
-                        value={policies.deductions?.esi?.employeePercent || 0.75}
-                        onChange={(e) => setPolicies({
-                          ...policies,
-                          deductions: {
-                            ...policies.deductions,
-                            esi: { ...policies.deductions?.esi, employeePercent: Number(e.target.value) }
-                          }
-                        })}
-                        className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-bold"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400">Gross Wage Ceiling (₹)</label>
-                      <input
-                        type="number"
-                        value={policies.deductions?.esi?.grossCeiling || 21000}
-                        onChange={(e) => setPolicies({
-                          ...policies,
-                          deductions: {
-                            ...policies.deductions,
-                            esi: { ...policies.deductions?.esi, grossCeiling: Number(e.target.value) }
-                          }
-                        })}
-                        className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-bold"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right 4 Cols: Live Simulation Calculator */}
-          <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 space-y-4 sticky top-20">
-            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <Calculator className="w-5 h-5 text-emerald-600" />
+      {/* --- ADD / EDIT 2-STEP WIZARD MODAL --- */}
+      {isOpenAddModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-3xl w-full border border-slate-200 shadow-2xl overflow-hidden my-6 animate-scaleUp">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Live Compensation Simulator</h3>
-                <p className="text-[11px] text-slate-400">Test how policies calculate on sample salaries</p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Sample Monthly Gross CTC (₹)
-              </label>
-              <input
-                type="number"
-                step="1000"
-                value={testGross}
-                onChange={(e) => setTestGross(Math.max(0, Number(e.target.value)))}
-                className="w-full px-3 py-2 text-sm font-mono font-bold rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-
-            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Basic Salary ({policies.basicPercentOfGross}%):</span>
-                <span className="font-mono font-bold text-slate-800">₹{simBasic.toLocaleString('en-IN')}</span>
-              </div>
-
-              {simAllowancesBreakdown.map(al => (
-                <div key={al.id} className="flex justify-between py-1 text-slate-600 text-[11px]">
-                  <span>{al.label}:</span>
-                  <span className="font-mono font-semibold">₹{al.amt?.toLocaleString('en-IN')}</span>
-                </div>
-              ))}
-
-              <div className="flex justify-between py-1.5 border-t border-slate-100 font-bold text-slate-900">
-                <span>Calculated Gross:</span>
-                <span className="font-mono text-emerald-700">₹{simGross.toLocaleString('en-IN')}</span>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 space-y-1">
-                <div className="flex justify-between text-rose-600 text-[11px]">
-                  <span>EPF Deduction (12%):</span>
-                  <span className="font-mono">-₹{epf.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-rose-600 text-[11px]">
-                  <span>ESIC Deduction:</span>
-                  <span className="font-mono">-₹{esi.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-rose-600 text-[11px]">
-                  <span>Professional Tax:</span>
-                  <span className="font-mono">-₹{pt}</span>
-                </div>
-              </div>
-
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mt-3 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-emerald-800">Net Take-Home Pay</span>
-                  <div className="text-lg font-black text-emerald-700 font-mono">
-                    ₹{simNet.toLocaleString('en-IN')}
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-emerald-700 bg-white px-2.5 py-1 rounded-lg border border-emerald-200">
-                  {simGross > 0 ? Math.round((simNet / simGross) * 100) : 0}% of Gross
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= MODAL: EDIT STAFF SALARY STRUCTURE ================= */}
-      {editingStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-indigo-600" />
-                  Assign & Edit Staff Salary Package
-                </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  {editingStaff.name} ({editingStaff.code}) &bull; {editingStaff.designation}
-                </p>
+                <h2 className="text-lg font-extrabold text-slate-800">
+                  {isEditing ? 'Edit Staff Profile' : 'Onboard New Staff Member'}
+                </h2>
+                <p className="text-xs text-slate-500">Configure employment details and statutory salary breakdown.</p>
               </div>
               <button
-                type="button"
-                onClick={() => setEditingStaff(null)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 cursor-pointer"
+                onClick={() => setIsOpenAddModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-500 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveStaffStructure} className="p-5 space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    Gross Monthly CTC (₹) <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="500"
-                    min="1"
-                    value={formGross}
-                    onChange={(e) => handleGrossChange(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold font-mono text-slate-900 focus:outline-none focus:border-indigo-500 bg-white"
-                  />
+            {/* Stepper Indicator */}
+            <div className="flex items-center justify-center py-3.5 px-6 border-b border-slate-100 bg-slate-50/30">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    step === 1 ? 'bg-blue-600 text-white shadow-soft ring-4 ring-blue-100' : 'bg-emerald-500 text-white'
+                  }`}
+                >
+                  {step > 1 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '1'}
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    Basic Salary Component (₹)
-                  </label>
-                  <input
-                    type="number"
-                    step="500"
-                    min="1"
-                    value={formBasic}
-                    onChange={(e) => setFormBasic(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold font-mono text-slate-900 focus:outline-none focus:border-indigo-500 bg-white"
-                  />
+                  <p className={`text-xs font-bold leading-tight ${step === 1 ? 'text-slate-800' : 'text-slate-600'}`}>Step 1</p>
+                  <p className="text-[10px] text-slate-400">Basic Details</p>
                 </div>
               </div>
 
-              {/* Dynamic Live Calculated Breakdown Preview */}
-              {modalLiveCalc && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
-                  <div className="text-[11px] font-extrabold uppercase text-slate-600 tracking-wider flex items-center justify-between border-b border-slate-200 pb-1.5">
-                    <span>Structure Breakdown Preview</span>
-                    <span className="text-emerald-700">Gross: ₹{formGross?.toLocaleString('en-IN')}</span>
-                  </div>
+              <div className={`w-16 h-0.5 mx-4 transition-all duration-300 ${step > 1 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
-                  <div className="space-y-1 text-slate-600 text-[11px]">
-                    <div className="flex justify-between">
-                      <span>Basic Pay:</span>
-                      <span className="font-mono font-bold text-slate-800">₹{modalLiveCalc.basic?.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total Allowances (HRA/DA/Special):</span>
-                      <span className="font-mono font-bold text-slate-800">₹{modalLiveCalc.totalAllowances?.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-rose-600">
-                      <span>Statutory Deductions (EPF + ESI + PT):</span>
-                      <span className="font-mono font-bold">-₹{modalLiveCalc.totalDeductions?.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between pt-1 border-t border-slate-200 text-xs font-black text-emerald-700">
-                      <span>Estimated Net Take-Home:</span>
-                      <span className="font-mono text-sm">₹{modalLiveCalc.netSalary?.toLocaleString('en-IN')}</span>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    step === 2 ? 'bg-blue-600 text-white shadow-soft ring-4 ring-blue-100' : 'bg-slate-100 text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  2
                 </div>
-              )}
+                <div>
+                  <p className={`text-xs font-bold leading-tight ${step === 2 ? 'text-slate-800' : 'text-slate-400'}`}>Step 2</p>
+                  <p className="text-[10px] text-slate-400">Salary & Documents</p>
+                </div>
+              </div>
+            </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingStaff(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
-                >
-                  Save Salary Structure
-                </button>
+            {/* Form Content */}
+            <form onSubmit={handleWizardSubmit}>
+              <div className="p-6 max-h-[62vh] overflow-y-auto space-y-6">
+                {step === 1 ? (
+                  <div className="space-y-5 animate-fadeIn">
+                    {/* Personal Information */}
+                    <div>
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Personal Information</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">First Name <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.firstName}
+                            onChange={e => setFormData({ ...formData, firstName: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            placeholder="First name"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Last Name <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.lastName}
+                            onChange={e => setFormData({ ...formData, lastName: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            placeholder="Last name"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Gender</label>
+                          <select
+                            value={formData.gender}
+                            onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Mobile Number <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.phone}
+                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            placeholder="10-digit mobile"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Email Address</label>
+                          <input
+                            type="email"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            placeholder="email@example.com"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">PAN Card Number</label>
+                          <input
+                            type="text"
+                            value={formData.pan}
+                            onChange={e => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 uppercase"
+                            placeholder="ABCDE1234F"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-slate-100" />
+
+                    {/* Employment Details */}
+                    <div>
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Employment Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Date of Joining</label>
+                          <input
+                            type="date"
+                            value={formData.joiningDate}
+                            onChange={e => setFormData({ ...formData, joiningDate: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Staff Category</label>
+                          <select
+                            value={formData.category}
+                            onChange={e => setFormData({ ...formData, category: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="Teaching">Teaching</option>
+                            <option value="Non Teaching">Non Teaching</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="block text-xs text-slate-600 font-semibold">Department</label>
+                            <button
+                              type="button"
+                              onClick={() => setShowAddDeptModal(true)}
+                              className="text-[10px] text-blue-600 font-bold hover:underline"
+                            >
+                              + Add New
+                            </button>
+                          </div>
+                          <select
+                            value={formData.department}
+                            onChange={e => setFormData({ ...formData, department: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            {departments.map((d, i) => (
+                              <option key={d.id || i} value={d.name}>{d.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="block text-xs text-slate-600 font-semibold">Designation</label>
+                            <button
+                              type="button"
+                              onClick={() => setShowAddDesgModal(true)}
+                              className="text-[10px] text-blue-600 font-bold hover:underline"
+                            >
+                              + Add New
+                            </button>
+                          </div>
+                          <select
+                            value={formData.designation}
+                            onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            {designations.map((d, i) => (
+                              <option key={d.id || i} value={d.name}>{d.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Employment Type</label>
+                          <select
+                            value={formData.employmentType}
+                            onChange={e => setFormData({ ...formData, employmentType: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="Permanent">Permanent</option>
+                            <option value="Temporary">Temporary</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Work Type</label>
+                          <select
+                            value={formData.workType}
+                            onChange={e => setFormData({ ...formData, workType: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="Full Time">Full Time</option>
+                            <option value="Part Time">Part Time</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Gross Salary Header */}
+                    <div>
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Salary Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Monthly Gross Salary (₹) <span className="text-red-500">*</span></label>
+                          <input
+                            type="number"
+                            min="1000"
+                            required
+                            value={formData.monthlyGross}
+                            onChange={e => handleGrossChange(e.target.value)}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-400 font-semibold mb-1">Annual CTC (₹) (Read Only)</label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              readOnly
+                              value={`₹${(Number(formData.monthlyGross) * 12).toLocaleString('en-IN')}`}
+                              className="w-full h-10 pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 text-slate-500 font-bold cursor-not-allowed"
+                            />
+                            <Lock className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Effective Date</label>
+                          <input
+                            type="date"
+                            value={formData.salaryStartDate}
+                            onChange={e => setFormData({ ...formData, salaryStartDate: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-slate-100" />
+
+                    {/* Breakdown */}
+                    <div>
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Salary Structure (Breakdown)</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/70 p-4 rounded-2xl border border-slate-100">
+                        {/* Earnings */}
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 text-emerald-700">Earnings Components</h4>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Basic Base</label>
+                              <input
+                                type="number"
+                                value={formData.salaryBasic}
+                                onChange={e => setFormData({ ...formData, salaryBasic: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">HRA (40%)</label>
+                              <input
+                                type="number"
+                                value={formData.salaryHra}
+                                onChange={e => setFormData({ ...formData, salaryHra: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Special Allowance</label>
+                              <input
+                                type="number"
+                                value={formData.salarySpecialAllowance}
+                                onChange={e => setFormData({ ...formData, salarySpecialAllowance: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Transport Allowance</label>
+                              <input
+                                type="number"
+                                value={formData.salaryTransport}
+                                onChange={e => setFormData({ ...formData, salaryTransport: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Medical Allowance</label>
+                              <input
+                                type="number"
+                                value={formData.salaryMedical}
+                                onChange={e => setFormData({ ...formData, salaryMedical: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Other Allowance</label>
+                              <input
+                                type="number"
+                                value={formData.salaryOtherAllowance}
+                                onChange={e => setFormData({ ...formData, salaryOtherAllowance: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Deductions */}
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 text-red-600">Statutory Deductions</h4>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">PF Deduction (12%)</label>
+                              <input
+                                type="number"
+                                value={formData.salaryPf}
+                                onChange={e => setFormData({ ...formData, salaryPf: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs text-red-700 font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">ESI Deduction</label>
+                              <input
+                                type="number"
+                                value={formData.salaryEsi}
+                                onChange={e => setFormData({ ...formData, salaryEsi: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs text-red-700 font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-bold mb-0.5">Professional Tax</label>
+                              <input
+                                type="number"
+                                value={formData.salaryProfessionalTax}
+                                onChange={e => setFormData({ ...formData, salaryProfessionalTax: Number(e.target.value) })}
+                                className="w-full h-9 px-2.5 py-1 border border-slate-200 rounded-lg text-xs text-red-700 font-semibold"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-slate-100" />
+
+                    {/* Bank Details */}
+                    <div>
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Bank Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Bank Name</label>
+                          <input
+                            type="text"
+                            value={formData.bankName}
+                            onChange={e => setFormData({ ...formData, bankName: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800"
+                            placeholder="e.g. State Bank of India"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Account Number</label>
+                          <input
+                            type="text"
+                            value={formData.bankAccountNumber}
+                            onChange={e => setFormData({ ...formData, bankAccountNumber: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800"
+                            placeholder="Account number"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">IFSC Code</label>
+                          <input
+                            type="text"
+                            value={formData.bankIfscCode}
+                            onChange={e => setFormData({ ...formData, bankIfscCode: e.target.value.toUpperCase() })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 uppercase"
+                            placeholder="SBIN0001234"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-slate-600 font-semibold mb-1">Branch Name</label>
+                          <input
+                            type="text"
+                            value={formData.bankBranchName}
+                            onChange={e => setFormData({ ...formData, bankBranchName: e.target.value })}
+                            className="w-full h-10 px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800"
+                            placeholder="Branch location"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Wizard Footer Controls */}
+              <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                {step === 1 ? (
+                  <div></div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-700 transition"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Previous Step
+                  </button>
+                )}
+
+                {step === 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-soft transition"
+                  >
+                    Next: Salary & Bank <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-soft transition"
+                  >
+                    <Check className="w-4 h-4" /> {isEditing ? 'Save Staff Changes' : 'Complete Onboarding'}
+                  </button>
+                )}
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- VIEW STAFF PROFILE MODAL --- */}
+      {viewingStaff && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-scaleUp">
+            <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-between items-start">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center font-black text-xl border border-white/30">
+                  {viewingStaff.name?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-black">{viewingStaff.name}</h3>
+                  <p className="text-xs text-blue-100 mt-0.5">{viewingStaff.designation} &bull; {viewingStaff.department}</p>
+                  <p className="text-[10px] text-blue-200 mt-0.5">Emp ID: {viewingStaff.code} &bull; Status: {viewingStaff.status || 'Active'}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingStaff(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div>
+                  <span className="text-slate-400 font-semibold">Phone:</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{viewingStaff.phone || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold">Email:</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{viewingStaff.email || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold">Category:</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{viewingStaff.category || 'Teaching'}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold">Employment:</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{viewingStaff.employmentType || 'Permanent'}</p>
+                </div>
+              </div>
+
+              {/* Salary Snapshot */}
+              <div className="bg-emerald-50/60 border border-emerald-200 p-4 rounded-2xl flex justify-between items-center">
+                <div>
+                  <span className="text-[10px] uppercase font-extrabold text-emerald-800">Monthly Gross Salary</span>
+                  <p className="text-xl font-extrabold text-emerald-900 mt-0.5">₹{(viewingStaff.grossSalary || 0).toLocaleString('en-IN')}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Basic Component</span>
+                  <p className="text-sm font-bold text-slate-700 mt-0.5">₹{(viewingStaff.basicSalary || 0).toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+
+              {/* Bank Details */}
+              <div className="border border-slate-200 p-4 rounded-2xl space-y-2">
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Disbursement Account</span>
+                <div className="grid grid-cols-2 gap-2 text-slate-700 font-medium">
+                  <div>Bank: <span className="font-bold text-slate-900">{viewingStaff.bankName || 'State Bank of India'}</span></div>
+                  <div>Account: <span className="font-bold text-slate-900">{viewingStaff.accNo || '—'}</span></div>
+                  <div>IFSC: <span className="font-bold text-slate-900">{viewingStaff.ifsc || 'SBIN0001234'}</span></div>
+                  <div>PAN: <span className="font-bold text-slate-900">{viewingStaff.pan || 'ABCDE1234F'}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  const s = viewingStaff;
+                  setViewingStaff(null);
+                  startEdit(s);
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-soft"
+              >
+                Edit Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Add Department Modal */}
+      {showAddDeptModal && (
+        <div className="fixed inset-0 z-60 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-200 shadow-xl">
+            <h3 className="text-sm font-bold text-slate-800">Add New Department</h3>
+            <input
+              type="text"
+              autoFocus
+              value={newDeptName}
+              onChange={e => setNewDeptName(e.target.value)}
+              placeholder="e.g. Computer Science"
+              className="w-full px-3 py-2 border rounded-xl text-xs"
+            />
+            <div className="flex justify-end gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setShowAddDeptModal(false)}
+                className="px-3 py-1.5 border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddDept}
+                className="px-4 py-1.5 bg-blue-600 text-white font-bold rounded-lg"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Add Designation Modal */}
+      {showAddDesgModal && (
+        <div className="fixed inset-0 z-60 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-200 shadow-xl">
+            <h3 className="text-sm font-bold text-slate-800">Add New Designation</h3>
+            <input
+              type="text"
+              autoFocus
+              value={newDesgName}
+              onChange={e => setNewDesgName(e.target.value)}
+              placeholder="e.g. Senior PGT Teacher"
+              className="w-full px-3 py-2 border rounded-xl text-xs"
+            />
+            <div className="flex justify-end gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setShowAddDesgModal(false)}
+                className="px-3 py-1.5 border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddDesg}
+                className="px-4 py-1.5 bg-blue-600 text-white font-bold rounded-lg"
+              >
+                Create
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
+export default SalaryStructurePage;

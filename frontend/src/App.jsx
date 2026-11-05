@@ -753,17 +753,21 @@ function AppContent() {
                 return <SalaryProcessingPage onNavigate={handleNavigate} />;
               case '/salary-payslips':
               case '/salary-payslip':
+              case '/payslips':
                 return <SalaryPayslipsPage onNavigate={handleNavigate} />;
               case '/salary-structure':
               case '/salary-rules':
+              case '/staff':
                 return <SalaryStructurePage onNavigate={handleNavigate} />;
               case '/salary-settings':
               case '/salary-setting':
               case '/salary-policies':
                 return <SalarySettingsPage onNavigate={handleNavigate} />;
               case '/salary-analytics':
+              case '/analytics':
                 return <SalaryAnalyticsPage onNavigate={handleNavigate} />;
               case '/salary-reports':
+              case '/reports':
                 return <SalaryReportsPage onNavigate={handleNavigate} />;
 
               // Recruitment & Talent Hub (HireHub clone)

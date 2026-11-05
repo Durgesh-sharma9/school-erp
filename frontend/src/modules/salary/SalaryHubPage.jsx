@@ -306,7 +306,7 @@ export function SalaryHubPage({ onNavigate }) {
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
           {[
-            { label: 'Register Staff', path: '/payroll-registration', Icon: UserPlus, color: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200/70' },
+            { label: 'Register Staff', path: '/salary-structure', Icon: UserPlus, color: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200/70' },
             { label: 'Process Payroll', path: '/salary-processing', Icon: Calculator, color: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200/70' },
             { label: 'Generate Payslips', path: '/salary-payslips', Icon: FileSpreadsheet, color: 'bg-teal-50 text-teal-700 hover:bg-teal-100 border-teal-200/70' },
             { label: 'Attendance logs', path: '/salary-attendance', Icon: Calendar, color: 'bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200/70' },
