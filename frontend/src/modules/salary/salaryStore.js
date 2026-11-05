@@ -1284,6 +1284,54 @@ export const calculateStaffSalary = (staff, policies = DEFAULT_SALARY_POLICIES, 
   };
 };
 
+export const DEFAULT_ADVANCES = [
+  {
+    id: 'adv_1',
+    staffId: 'emp_005',
+    staffCode: 'EMP024',
+    staffName: 'Mr. Ram Singh',
+    department: 'Administration',
+    designation: 'Driver',
+    amount: 15000,
+    disbursedDate: '2026-10-15',
+    monthlyDeduction: 2500,
+    recoveredAmount: 5000,
+    remainingAmount: 10000,
+    purpose: 'Festival & Household Needs',
+    status: 'Active'
+  },
+  {
+    id: 'adv_2',
+    staffId: 'emp_008',
+    staffCode: 'EMP030',
+    staffName: 'Mrs. Kamala Devi',
+    department: 'Administration',
+    designation: 'Housekeeping Staff',
+    amount: 6000,
+    disbursedDate: '2026-10-20',
+    monthlyDeduction: 1000,
+    recoveredAmount: 2000,
+    remainingAmount: 4000,
+    purpose: 'Medical Emergency',
+    status: 'Active'
+  },
+  {
+    id: 'adv_3',
+    staffId: 'emp_018',
+    staffCode: 'EMP007',
+    staffName: 'Mr. Deepak Sharma',
+    department: 'Maths',
+    designation: 'TGT',
+    amount: 25000,
+    disbursedDate: '2026-09-10',
+    monthlyDeduction: 5000,
+    recoveredAmount: 10000,
+    remainingAmount: 15000,
+    purpose: 'Educational Tools & Laptop Purchase',
+    status: 'Active'
+  }
+];
+
 export const salaryStorage = {
   getPolicies: () => {
     try {
@@ -1420,8 +1468,31 @@ export const salaryStorage = {
     // Generate accurate calculated records from real active staff roster
     const policies = salaryStorage.getPolicies();
     const activeRoster = getActiveStaffRoster();
+    const attendanceRecords = salaryStorage.getMonthlyAttendance(monthKey);
+
     const records = activeRoster.map(staff => {
-      const calc = calculateStaffSalary(staff, policies);
+      const att = attendanceRecords.find(a => a.staffId?.id === staff.id || a.staffId?.code === staff.code) || {};
+      const unpaidLeaveDays = att.unpaidLeaveDays ?? 0;
+      const halfDays = att.halfDays ?? 0;
+      const overtimeHours = att.overtimeHours ?? 0;
+      const workingDays = att.workingDays || 23;
+      const presentDays = att.presentDays || (workingDays - unpaidLeaveDays);
+
+      const dailyRate = workingDays > 0 ? staff.grossSalary / workingDays : 0;
+      const lopDeduction = Math.round(dailyRate * (unpaidLeaveDays + (halfDays * 0.5)));
+      const overtimePay = Math.round(overtimeHours > 0 ? (dailyRate / 8) * overtimeHours : 0);
+
+      const calc = calculateStaffSalary(staff, policies, {
+        grossSalary: staff.grossSalary,
+        presentDays: presentDays,
+        totalDays: workingDays,
+        bonus: 0,
+        overtimePay: overtimePay,
+        otherDeductions: lopDeduction,
+        advanceRecovery: 0,
+        tds: 0
+      });
+
       return {
         id: `sal_${staff.id}_${monthKey}`,
         staffId: staff.id,
@@ -1438,10 +1509,14 @@ export const salaryStorage = {
         pfNo: staff.pfNo,
         esiNo: staff.esiNo,
         month: monthKey,
-        status: 'Approved', // 'Draft', 'Approved', 'Disbursed'
+        status: 'Pending',
         payMode: 'Bank Transfer',
         disbursedDate: `${monthKey}-28`,
         receiptNo: `PAY-${monthKey.replace('-', '')}-${staff.code.replace('EMP-', '')}`,
+        lopDeduction,
+        unpaidLeaveDays,
+        halfDays,
+        overtimeHours,
         ...calc
       };
     });
@@ -1732,6 +1807,107 @@ export const salaryStorage = {
       return updated;
     } catch (e) {
       console.error('Error toggling attendance lock:', e);
+      return [];
+    }
+  },
+
+  disburseAll: (monthKey, paymentDetails = {}) => {
+    try {
+      const records = salaryStorage.getMonthlyRecords(monthKey);
+      const disDate = paymentDetails.payDate || new Date().toISOString().slice(0, 10);
+      const updated = records.map(r => ({
+        ...r,
+        status: 'Paid',
+        payMode: paymentDetails.payMethod || 'Bank Transfer',
+        disbursedDate: disDate,
+        transactionRef: paymentDetails.payRef || `TXN-${Date.now().toString().slice(-6)}`,
+        disburseRemarks: paymentDetails.payRemarks || 'Monthly Payroll Disbursed'
+      }));
+      salaryStorage.saveMonthlyRecords(monthKey, updated);
+      return updated;
+    } catch (e) {
+      console.error('Error disbursing all salaries:', e);
+      return [];
+    }
+  },
+
+  reopenPayroll: (monthKey, { reason = 'Administrative Reopen' } = {}) => {
+    try {
+      const records = salaryStorage.getMonthlyRecords(monthKey);
+      const updated = records.map(r => ({
+        ...r,
+        status: 'Pending',
+        reopenedReason: reason,
+        reopenedAt: new Date().toISOString()
+      }));
+      salaryStorage.saveMonthlyRecords(monthKey, updated);
+      return updated;
+    } catch (e) {
+      console.error('Error reopening payroll:', e);
+      return [];
+    }
+  },
+
+  disburseSingle: (monthKey, recordId, paymentDetails = {}) => {
+    try {
+      const records = salaryStorage.getMonthlyRecords(monthKey);
+      const disDate = paymentDetails.payDate || new Date().toISOString().slice(0, 10);
+      const updated = records.map(r => {
+        if (r.id === recordId || r.staffId === recordId || r.code === recordId) {
+          return {
+            ...r,
+            status: 'Paid',
+            payMode: paymentDetails.payMethod || 'Bank Transfer',
+            disbursedDate: disDate,
+            transactionRef: paymentDetails.payRef || `TXN-${Date.now().toString().slice(-6)}`,
+            disburseRemarks: paymentDetails.payRemarks || 'Disbursed'
+          };
+        }
+        return r;
+      });
+      salaryStorage.saveMonthlyRecords(monthKey, updated);
+      return updated;
+    } catch (e) {
+      console.error('Error disbursing single salary:', e);
+      return [];
+    }
+  },
+
+  getAdvances: () => {
+    try {
+      const saved = localStorage.getItem('school_erp_salary_advances');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error reading salary advances:', e);
+    }
+    return DEFAULT_ADVANCES;
+  },
+
+  saveAdvances: (advances) => {
+    try {
+      localStorage.setItem('school_erp_salary_advances', JSON.stringify(advances));
+      window.dispatchEvent(new Event('school_erp_salary_advances_updated'));
+    } catch (e) {
+      console.error('Error saving salary advances:', e);
+    }
+  },
+
+  addAdvance: (newAdv) => {
+    try {
+      const current = salaryStorage.getAdvances();
+      const adv = {
+        id: `adv_${Date.now()}`,
+        status: 'Active',
+        recoveredAmount: 0,
+        remainingAmount: Number(newAdv.amount || 0),
+        disbursedDate: new Date().toISOString().slice(0, 10),
+        ...newAdv
+      };
+      const updated = [adv, ...current];
+      salaryStorage.saveAdvances(updated);
+      return updated;
+    } catch (e) {
+      console.error('Error adding advance:', e);
       return [];
     }
   }

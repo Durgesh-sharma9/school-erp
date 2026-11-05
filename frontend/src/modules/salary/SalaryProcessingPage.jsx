@@ -1,873 +1,1474 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  IndianRupee,
   Calculator,
-  Search,
-  Filter,
-  CheckCircle2,
-  Clock,
+  Landmark,
+  IndianRupee,
+  Plus,
+  Check,
+  X,
+  ShieldCheck,
   Lock,
   Unlock,
   Eye,
   Edit3,
-  CheckSquare,
-  Square,
-  FileDown,
-  Printer,
-  Home,
-  ChevronRight,
-  ShieldCheck,
+  Trash2,
   CreditCard,
-  Building,
-  AlertCircle,
-  X,
-  Layers,
-  Sparkles,
-  RefreshCw,
   Calendar,
-  Check
+  Clock,
+  AlertTriangle,
+  Info,
+  CheckCircle2,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  SlidersHorizontal,
+  RefreshCw,
+  Search,
+  Building2,
+  FileSpreadsheet,
+  Coins,
+  ArrowRightLeft,
+  Users
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
-import { tenantStore } from '../../services/tenantStore';
-import { salaryStorage, calculateStaffSalary } from './salaryStore';
+import { salaryStorage, calculateStaffSalary, calculateSalaryDetails } from './salaryStore';
+
+// Indian currency formatter
+const formatINR = (val) => {
+  const num = Math.round(Number(val) || 0);
+  return '₹' + num.toLocaleString('en-IN');
+};
+
+const getDeptBadgeStyle = (dept) => {
+  const d = (dept || '').toLowerCase();
+  if (d.includes('admin')) return 'bg-blue-50 text-blue-700 border border-blue-200';
+  if (d.includes('sci')) return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+  if (d.includes('math')) return 'bg-indigo-50 text-indigo-700 border border-indigo-200';
+  if (d.includes('eng')) return 'bg-amber-50 text-amber-700 border border-amber-200';
+  if (d.includes('comp') || d.includes('tech')) return 'bg-purple-50 text-purple-700 border border-purple-200';
+  if (d.includes('acc') || d.includes('fin')) return 'bg-teal-50 text-teal-700 border border-teal-200';
+  return 'bg-slate-50 text-slate-700 border border-slate-200';
+};
 
 export function SalaryProcessingPage({ onNavigate }) {
   const { currentSchool } = useAuth();
-  const schoolId = currentSchool?.id || 'school_default';
 
+  // Navigation tab: 'runs' | 'structures' | 'advances'
+  const [activeTab, setActiveTab] = useState('runs');
+
+  // Month & Year state (Default: November 2026)
   const [selectedMonth, setSelectedMonth] = useState('2026-11');
-  const [selectedDept, setSelectedDept] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
   const [records, setRecords] = useState(() => salaryStorage.getMonthlyRecords('2026-11'));
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [advances, setAdvances] = useState(() => salaryStorage.getAdvances());
 
-  // Modals
-  const [breakdownModalItem, setBreakdownModalItem] = useState(null);
-  const [editModalItem, setEditModalItem] = useState(null);
+  // Filter states
+  const [deptFilter, setDeptFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedDepts, setCollapsedDepts] = useState({});
 
-  // Listen for external salary changes
+  // Modals state
+  const [breakdownRecord, setBreakdownRecord] = useState(null);
+  const [editAdjustmentRecord, setEditAdjustmentRecord] = useState(null);
+  const [disburseModalOpen, setDisburseModalOpen] = useState(false);
+  const [singleDisburseRecord, setSingleDisburseRecord] = useState(null);
+  const [reopenModalOpen, setReopenModalOpen] = useState(false);
+  const [reopenReason, setReopenReason] = useState('Attendance adjustments required');
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
+  const [newAdvanceModalOpen, setNewAdvanceModalOpen] = useState(false);
+  const [editStructureRecord, setEditStructureRecord] = useState(null);
+
+  // Disburse Form
+  const [disburseForm, setDisburseForm] = useState({
+    payMethod: 'Bank Transfer',
+    payDate: new Date().toISOString().slice(0, 10),
+    payRef: 'NEFT-202611-BATCH01',
+    payRemarks: 'November 2026 Monthly Staff Salary Disbursed'
+  });
+
+  // Edit Adjustment Form
+  const [adjForm, setAdjForm] = useState({
+    bonus: 0,
+    overtimePay: 0,
+    retroPay: 0,
+    advanceRecovery: 0,
+    tds: 0,
+    otherDeductions: 0
+  });
+
+  // New Advance Form
+  const [advForm, setAdvForm] = useState({
+    staffId: '',
+    amount: '',
+    purpose: '',
+    monthlyDeduction: ''
+  });
+
+  // Listen for storage updates
   useEffect(() => {
     const handleUpdate = () => {
       setRecords(salaryStorage.getMonthlyRecords(selectedMonth));
+      setAdvances(salaryStorage.getAdvances());
     };
     window.addEventListener('school_salary_records_updated', handleUpdate);
-    return () => window.removeEventListener('school_salary_records_updated', handleUpdate);
+    window.addEventListener('school_erp_salary_attendance_updated', handleUpdate);
+    window.addEventListener('school_erp_salary_advances_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('school_salary_records_updated', handleUpdate);
+      window.removeEventListener('school_erp_salary_attendance_updated', handleUpdate);
+      window.removeEventListener('school_erp_salary_advances_updated', handleUpdate);
+    };
   }, [selectedMonth]);
 
-  // Month change
+  // Handle Month Change
   const handleMonthChange = (month) => {
     setSelectedMonth(month);
     const loaded = salaryStorage.getMonthlyRecords(month);
     setRecords(loaded);
-    setSelectedIds([]);
+  };
+
+  // Toggle Department Accordion Collapse
+  const toggleDeptCollapse = (deptName) => {
+    setCollapsedDepts((prev) => ({
+      ...prev,
+      [deptName]: !prev[deptName]
+    }));
   };
 
   // Filtered records
   const filteredRecords = useMemo(() => {
-    return records.filter(r => {
-      const matchDept = selectedDept === 'ALL' || r.department === selectedDept;
-      const matchQuery = !searchQuery.trim() ||
-        r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.designation?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchDept && matchQuery;
+    return records.filter((r) => {
+      const matchDept = deptFilter === 'All' || r.department === deptFilter;
+      const matchStatus = statusFilter === 'All' || r.status === statusFilter;
+      const q = searchQuery.toLowerCase().trim();
+      const matchQuery =
+        !q ||
+        r.name?.toLowerCase().includes(q) ||
+        r.code?.toLowerCase().includes(q) ||
+        r.designation?.toLowerCase().includes(q);
+      return matchDept && matchStatus && matchQuery;
     });
-  }, [records, selectedDept, searchQuery]);
+  }, [records, deptFilter, statusFilter, searchQuery]);
 
-  // Unique departments for filter
-  const departments = useMemo(() => {
-    const set = new Set(records.map(r => r.department).filter(Boolean));
-    return Array.from(set);
+  // Group by department
+  const grouped = useMemo(() => {
+    const map = {};
+    filteredRecords.forEach((row) => {
+      const deptName = row.department || 'Administration';
+      if (!map[deptName]) {
+        map[deptName] = [];
+      }
+      map[deptName].push(row);
+    });
+    return map;
+  }, [filteredRecords]);
+
+  // Sorted department list
+  const sortedDeptNames = useMemo(() => {
+    return Object.keys(grouped).sort((a, b) => {
+      if (a === 'Administration') return -1;
+      if (b === 'Administration') return 1;
+      return a.localeCompare(b);
+    });
+  }, [grouped]);
+
+  // Available unique departments
+  const allDepartments = useMemo(() => {
+    const set = new Set(records.map((r) => r.department).filter(Boolean));
+    return Array.from(set).sort();
   }, [records]);
 
-  // Selection
-  const allSelected = filteredRecords.length > 0 && filteredRecords.every(r => selectedIds.includes(r.id));
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredRecords.map(r => r.id));
-    }
-  };
+  // 6 Metric Summaries (Matching Screenshot Exactly)
+  const totalGrossPayroll = records.reduce((sum, r) => sum + (r.grossSalary || 0), 0);
+  const totalNetPayroll = records.reduce((sum, r) => sum + (r.netSalary || 0), 0);
+  const totalDeductions = records.reduce((sum, r) => sum + (r.totalDeductions || 0), 0);
+  const paidEmployeesCount = records.filter((r) => r.status === 'Paid' || r.status === 'Disbursed').length;
+  const pendingPaymentsCount = records.length - paidEmployeesCount;
+  const draftEmployeesCount = records.length;
 
-  const toggleSelectOne = (id) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  // Summary Metrics
-  const totalGross = filteredRecords.reduce((sum, r) => sum + (r.grossSalary || 0), 0);
-  const totalDeductions = filteredRecords.reduce((sum, r) => sum + (r.totalDeductions || 0), 0);
-  const totalNet = filteredRecords.reduce((sum, r) => sum + (r.netSalary || 0), 0);
-
-  // Recalculate All Handlers
-  const handleRecalculateAll = () => {
-    const updated = salaryStorage.recalculateMonthRecords(selectedMonth);
-    setRecords(updated);
-    toast.success(`Recalculated all staff salaries for ${selectedMonth} with latest policies!`);
-  };
-
-  // Single Staff Status Change
-  const handleToggleStatus = (recordId, newStatus) => {
-    const updated = records.map(r => {
-      if (r.id === recordId) {
-        return {
-          ...r,
-          status: newStatus,
-          ...(newStatus === 'Disbursed' ? { disbursedDate: new Date().toISOString().slice(0, 10) } : {})
-        };
-      }
-      return r;
-    });
-    setRecords(updated);
-    salaryStorage.saveMonthlyRecords(selectedMonth, updated);
-    toast.success(`Salary marked as ${newStatus}`);
-  };
-
-  // Quick Action: Batch Approve / Lock
-  const handleBatchApprove = () => {
-    if (selectedIds.length === 0) {
-      toast.error('Select at least one employee');
-      return;
-    }
-    const updated = records.map(r => {
-      if (selectedIds.includes(r.id)) {
-        return { ...r, status: 'Approved' };
-      }
-      return r;
-    });
-    setRecords(updated);
-    salaryStorage.saveMonthlyRecords(selectedMonth, updated);
-    toast.success(`Approved payroll for ${selectedIds.length} staff members!`);
-  };
-
-  // Quick Action: Batch Disburse
-  const handleBatchDisburse = () => {
-    if (selectedIds.length === 0) {
-      toast.error('Select at least one employee');
-      return;
-    }
-    const updated = records.map(r => {
-      if (selectedIds.includes(r.id)) {
-        return { ...r, status: 'Disbursed', disbursedDate: new Date().toISOString().slice(0, 10) };
-      }
-      return r;
-    });
-    setRecords(updated);
-    salaryStorage.saveMonthlyRecords(selectedMonth, updated);
-    toast.success(`Marked ${selectedIds.length} staff salaries as Disbursed!`);
-  };
-
-  // Navigate directly to this staff member's payslip
-  const handleNavigateToPayslip = (recordId) => {
-    try {
-      localStorage.setItem('salary_payslip_selected_staff', recordId);
-    } catch (e) {
-      console.warn('Storage set error:', e);
-    }
-    onNavigate?.('/salary-payslips');
-  };
-
-  // Save manual edit adjustments
-  const handleSaveEdit = (e) => {
+  // Handle Bulk Disburse
+  const handleConfirmDisburseAll = (e) => {
     e.preventDefault();
-    if (!editModalItem) return;
+    const updated = salaryStorage.disburseAll(selectedMonth, disburseForm);
+    setRecords(updated);
+    setDisburseModalOpen(false);
+    toast.success(`Successfully disbursed salaries for all ${records.length} staff members via ${disburseForm.payMethod}!`);
+  };
+
+  // Handle Single Disburse
+  const handleConfirmSingleDisburse = (e) => {
+    e.preventDefault();
+    if (!singleDisburseRecord) return;
+    const updated = salaryStorage.disburseSingle(selectedMonth, singleDisburseRecord.id, disburseForm);
+    setRecords(updated);
+    setSingleDisburseRecord(null);
+    toast.success(`Salary disbursed for ${singleDisburseRecord.name}!`);
+  };
+
+  // Handle Reopen
+  const handleConfirmReopen = (e) => {
+    e.preventDefault();
+    const updated = salaryStorage.reopenPayroll(selectedMonth, { reason: reopenReason });
+    setRecords(updated);
+    setReopenModalOpen(false);
+    toast.success(`Payroll reopened for adjustments. Status reset to Pending.`);
+  };
+
+  // Open Edit Adjustments Modal
+  const openEditAdjustmentModal = (rec) => {
+    setEditAdjustmentRecord(rec);
+    setAdjForm({
+      bonus: rec.bonus || 0,
+      overtimePay: rec.overtimePay || 0,
+      retroPay: rec.retroPay || 0,
+      advanceRecovery: rec.advanceRecovery || 0,
+      tds: rec.tds || 0,
+      otherDeductions: rec.lopDeduction || 0
+    });
+  };
+
+  // Save Edit Adjustment
+  const handleSaveAdjustment = (e) => {
+    e.preventDefault();
+    if (!editAdjustmentRecord) return;
 
     const policies = salaryStorage.getPolicies();
-    const recalculated = calculateStaffSalary(editModalItem, policies, {
-      grossSalary: Number(editModalItem.grossSalary),
-      bonus: Number(editModalItem.bonus || 0),
-      overtimePay: Number(editModalItem.overtimePay || 0),
-      advanceRecovery: Number(editModalItem.advanceRecovery || 0),
-      tds: Number(editModalItem.tds || 0),
-      presentDays: Number(editModalItem.presentDays || 30),
-      totalDays: Number(editModalItem.totalDays || 30)
+    const calc = calculateStaffSalary(editAdjustmentRecord, policies, {
+      grossSalary: editAdjustmentRecord.grossSalary,
+      presentDays: editAdjustmentRecord.presentDays,
+      totalDays: editAdjustmentRecord.totalDays,
+      bonus: Number(adjForm.bonus) || 0,
+      overtimePay: Number(adjForm.overtimePay) || 0,
+      advanceRecovery: Number(adjForm.advanceRecovery) || 0,
+      tds: Number(adjForm.tds) || 0,
+      otherDeductions: Number(adjForm.otherDeductions) || 0
     });
 
-    const updated = records.map(r => {
-      if (r.id === editModalItem.id) {
+    const updated = records.map((r) => {
+      if (r.id === editAdjustmentRecord.id) {
         return {
           ...r,
-          ...recalculated,
-          grossSalary: Number(editModalItem.grossSalary),
-          bonus: Number(editModalItem.bonus || 0),
-          overtimePay: Number(editModalItem.overtimePay || 0),
-          advanceRecovery: Number(editModalItem.advanceRecovery || 0),
-          tds: Number(editModalItem.tds || 0),
-          presentDays: Number(editModalItem.presentDays || 30)
+          ...calc,
+          bonus: Number(adjForm.bonus) || 0,
+          overtimePay: Number(adjForm.overtimePay) || 0,
+          retroPay: Number(adjForm.retroPay) || 0,
+          advanceRecovery: Number(adjForm.advanceRecovery) || 0,
+          tds: Number(adjForm.tds) || 0
         };
       }
       return r;
     });
 
-    setRecords(updated);
     salaryStorage.saveMonthlyRecords(selectedMonth, updated);
-    setEditModalItem(null);
-    toast.success('Salary adjustments saved and recalculated successfully!');
+    setRecords(updated);
+    setEditAdjustmentRecord(null);
+    toast.success(`Adjustments updated for ${editAdjustmentRecord.name}!`);
   };
 
-  // Export CSV
-  const exportCSV = () => {
-    const headers = [
-      'Emp Code', 'Name', 'Department', 'Designation', 'Present Days', 'Basic (₹)',
-      'Allowances (₹)', 'Bonus (₹)', 'Gross (₹)', 'EPF (₹)', 'ESI (₹)', 'PT (₹)',
-      'Advance (₹)', 'Total Deductions (₹)', 'Net Salary (₹)', 'Status', 'Bank Name', 'Account No', 'IFSC'
-    ];
-
-    const rows = filteredRecords.map(r => [
-      `"${r.code}"`,
-      `"${r.name}"`,
-      `"${r.department}"`,
-      `"${r.designation}"`,
-      r.presentDays || 30,
-      r.basic || 0,
-      r.totalAllowances || 0,
-      r.bonus || 0,
-      r.grossSalary || 0,
-      r.epf || 0,
-      r.esi || 0,
-      r.professionalTax || 0,
-      r.advanceRecovery || 0,
-      r.totalDeductions || 0,
-      r.netSalary || 0,
-      `"${r.status || 'Approved'}"`,
-      `"${r.bankName || ''}"`,
-      `"${r.accNo || ''}"`,
-      `"${r.ifsc || ''}"`
-    ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const link = document.createElement('a');
-    link.href = encodeURI(csvContent);
-    link.download = `Salary_Register_${selectedMonth}.csv`;
-    link.click();
-    toast.success('Salary Register exported to CSV!');
-  };
-
-  // Print Formatted Payroll Sheet
-  const handlePrintSheet = () => {
-    const printWindow = window.open('', '_blank', 'width=1000,height=900');
-    if (!printWindow) {
-      toast.error('Pop-up blocked. Please allow pop-ups to print the payroll sheet.');
+  // Handle Add Advance
+  const handleAddAdvance = (e) => {
+    e.preventDefault();
+    const targetStaff = records.find((r) => r.staffId === advForm.staffId || r.code === advForm.staffId);
+    if (!targetStaff) {
+      toast.error('Please select a valid staff member');
       return;
     }
 
-    const bankSettings = salaryStorage.getBankSettings();
-    const prof = tenantStore.getSchoolProfile(schoolId);
-    const schoolName = bankSettings.schoolAccountName || prof?.schoolName || 'JD INTERNATIONAL SCHOOL';
-    const address = prof?.address || 'Jaisinghpura, Bhankrota, Jaipur - 302026';
+    const updated = salaryStorage.addAdvance({
+      staffId: targetStaff.staffId,
+      staffCode: targetStaff.code,
+      staffName: targetStaff.name,
+      department: targetStaff.department,
+      designation: targetStaff.designation,
+      amount: Number(advForm.amount),
+      monthlyDeduction: Number(advForm.monthlyDeduction),
+      purpose: advForm.purpose
+    });
 
-    const rowsHtml = filteredRecords.map((r, i) => `
-      <tr>
-        <td style="text-align: center;">${i + 1}</td>
-        <td><strong>${r.name}</strong><br><small style="color: #64748b;">${r.code} • ${r.designation}</small></td>
-        <td>${r.department}</td>
-        <td style="text-align: center;">${r.presentDays || 28} / ${r.totalDays || 30}</td>
-        <td style="text-align: right; font-family: monospace;">₹${r.basic?.toLocaleString('en-IN')}</td>
-        <td style="text-align: right; font-family: monospace;">₹${r.totalAllowances?.toLocaleString('en-IN')}</td>
-        <td style="text-align: right; font-family: monospace; font-weight: bold;">₹${r.grossSalary?.toLocaleString('en-IN')}</td>
-        <td style="text-align: right; font-family: monospace; color: #dc2626;">-₹${r.totalDeductions?.toLocaleString('en-IN')}</td>
-        <td style="text-align: right; font-family: monospace; font-weight: 900; color: #047857;">₹${r.netSalary?.toLocaleString('en-IN')}</td>
-        <td style="text-align: center;"><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${r.status || 'Approved'}</span></td>
-        <td><small>${r.bankName || 'SBI'}<br>A/C: ${r.accNo || '—'}</small></td>
-      </tr>
-    `).join('');
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Monthly Payroll Register - ${selectedMonth}</title>
-        <style>
-          @page { size: A4 landscape; margin: 10mm; }
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; color: #0f172a; margin: 0; padding: 10px; }
-          .header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; }
-          .school-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #065f46; }
-          .school-sub { font-size: 10px; color: #475569; margin-top: 2px; }
-          .sheet-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-top: 6px; }
-          .summary-bar { display: flex; justify-content: space-between; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-weight: bold; font-size: 11px; }
-          table { width: 100%; border-collapse: collapse; font-size: 10px; }
-          th { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; font-weight: 800; text-transform: uppercase; font-size: 9px; }
-          td { border: 1px solid #e2e8f0; padding: 5px 8px; }
-          .footer-signs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-top: 50px; text-align: center; font-weight: bold; font-size: 11px; }
-          .sign-box { border-top: 1px solid #94a3b8; padding-top: 6px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="school-title">${schoolName}</div>
-          <div class="school-sub">${address}</div>
-          <div class="sheet-title">Monthly Staff Payroll Register & Remittance Summary &bull; Month: ${selectedMonth}</div>
-        </div>
-
-        <div class="summary-bar">
-          <div>Total Staff: ${filteredRecords.length}</div>
-          <div>Total Gross Wages: ₹${totalGross.toLocaleString('en-IN')}</div>
-          <div>Total Deductions: ₹${totalDeductions.toLocaleString('en-IN')}</div>
-          <div style="color: #047857;">Total Net Disbursed: ₹${totalNet.toLocaleString('en-IN')}</div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th style="text-align: center; width: 30px;">#</th>
-              <th>Employee Details</th>
-              <th>Department</th>
-              <th style="text-align: center;">Days</th>
-              <th style="text-align: right;">Basic (₹)</th>
-              <th style="text-align: right;">Allowances</th>
-              <th style="text-align: right;">Gross Pay (₹)</th>
-              <th style="text-align: right;">Deductions</th>
-              <th style="text-align: right;">Net Payable (₹)</th>
-              <th style="text-align: center;">Status</th>
-              <th>Bank Account</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-
-        <div class="footer-signs">
-          <div><div class="sign-box">Prepared by (Accountant)</div></div>
-          <div><div class="sign-box">Verified by (Finance Officer)</div></div>
-          <div><div class="sign-box">${bankSettings.signatoryName || 'Principal / Director'}<br><small style="color:#64748b;">${bankSettings.signatoryDesignation || 'Authorized Signatory'}</small></div></div>
-        </div>
-        <script>
-          window.onload = function() { window.print(); };
-        </script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
+    setAdvances(updated);
+    setNewAdvanceModalOpen(false);
+    setAdvForm({ staffId: '', amount: '', purpose: '', monthlyDeduction: '' });
+    toast.success(`New salary advance recorded for ${targetStaff.name}!`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800 space-y-4">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <button
-              onClick={() => onNavigate?.('/dashboard')}
-              className="text-slate-500 hover:text-emerald-600 transition-colors flex items-center gap-1 text-xs font-medium cursor-pointer"
-            >
-              <Home className="w-3.5 h-3.5" />
-              Home
-            </button>
-            <span className="text-slate-400 text-xs">/</span>
-            <button
-              onClick={() => onNavigate?.('/salary-hub')}
-              className="text-slate-500 hover:text-emerald-600 transition-colors text-xs font-medium cursor-pointer"
-            >
-              Salary Hub
-            </button>
-            <span className="text-slate-400 text-xs">/</span>
-            <span className="text-emerald-600 text-xs font-semibold">Process Salary</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-            <Calculator className="w-6 h-6 text-emerald-600" />
-            Monthly Salary Processing Studio
-          </h1>
-          <p className="text-xs text-slate-500">
-            Review staff earnings, verify attendance days, calculate statutory deductions & approve payouts.
-          </p>
+    <div className="p-4 md:p-6 space-y-4 bg-slate-50/50 min-h-screen antialiased text-slate-800 pb-20">
+      
+      {/* ─── TOP ORGANIZATION HEADER ─── */}
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 font-extrabold text-xs border border-blue-100 shadow-2xs">
+          <Building2 className="w-3.5 h-3.5" />
+          J D International School
+        </span>
+      </div>
+
+      {/* ─── 1. TOP 6 METRIC CARDS (Exact Match to Screenshot) ─── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Card 1: Gross Payroll */}
+        <div className="bg-white p-3.5 rounded-xl border border-cyan-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Gross Payroll
+          </span>
+          <span className="block text-base sm:text-lg font-black text-slate-800 mt-1">
+            {formatINR(totalGrossPayroll)}
+          </span>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Card 2: Net Payroll */}
+        <div className="bg-white p-3.5 rounded-xl border border-blue-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Net Payroll
+          </span>
+          <span className="block text-base sm:text-lg font-black text-blue-600 mt-1">
+            {formatINR(totalNetPayroll)}
+          </span>
+        </div>
+
+        {/* Card 3: Total Deductions */}
+        <div className="bg-white p-3.5 rounded-xl border border-rose-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Total Deductions
+          </span>
+          <span className="block text-base sm:text-lg font-black text-rose-600 mt-1">
+            -{formatINR(totalDeductions)}
+          </span>
+        </div>
+
+        {/* Card 4: Pending Payments */}
+        <div className="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Pending Payments
+          </span>
+          <span className="block text-base sm:text-lg font-black text-slate-800 mt-1">
+            {pendingPaymentsCount}
+          </span>
+        </div>
+
+        {/* Card 5: Paid Employees */}
+        <div className="bg-white p-3.5 rounded-xl border border-emerald-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Paid Employees
+          </span>
+          <span className="block text-base sm:text-lg font-black text-emerald-600 mt-1">
+            {paidEmployeesCount}
+          </span>
+        </div>
+
+        {/* Card 6: Draft Employees */}
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-soft hover:shadow-md transition-all">
+          <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Draft Employees
+          </span>
+          <span className="block text-base sm:text-lg font-black text-slate-800 mt-1">
+            {draftEmployeesCount}
+          </span>
+        </div>
+      </div>
+
+      {/* ─── 2. ACTION / MONTH CONTROL BAR (Exact Match to Screenshot) ─── */}
+      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        {/* Left side: Month display, badge, employee count, updated time */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 shadow-2xs">
+            <Calendar className="w-3.5 h-3.5 text-blue-600" />
+            <select
+              value={selectedMonth}
+              onChange={(e) => handleMonthChange(e.target.value)}
+              className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer"
+            >
+              <option value="2026-11">November 2026</option>
+              <option value="2026-10">October 2026</option>
+              <option value="2026-09">September 2026</option>
+              <option value="2026-08">August 2026</option>
+            </select>
+          </div>
+
+          <span className="inline-block px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider border border-purple-200 text-purple-700 bg-purple-50">
+            Payslips Generated
+          </span>
+
+          <span className="text-xs text-slate-400 font-bold">• {records.length} Employees</span>
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">• Last Updated: 03:07 pm</span>
+        </div>
+
+        {/* Right side: Action Buttons */}
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
           <button
-            type="button"
-            onClick={handleRecalculateAll}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
-            title="Recalculate all records with latest policies"
+            onClick={() => setDisburseModalOpen(true)}
+            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-soft hover:shadow hover:-translate-y-0.5 active:translate-y-0"
           >
-            <RefreshCw className="w-4 h-4 text-indigo-600" />
-            Recalculate All
+            <CreditCard className="w-3.5 h-3.5" /> Disburse Salary
           </button>
+
           <button
-            type="button"
-            onClick={exportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+            onClick={() => setReopenModalOpen(true)}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-soft"
           >
-            <FileDown className="w-4 h-4 text-emerald-600" />
-            Export CSV
+            <RefreshCw className="w-3.5 h-3.5" /> Reopen
           </button>
+
           <button
-            type="button"
-            onClick={handlePrintSheet}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+            onClick={() => setFiltersDrawerOpen(!filtersDrawerOpen)}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-soft"
           >
-            <Printer className="w-4 h-4 text-blue-600" />
-            Print Sheet
-          </button>
-          <button
-            type="button"
-            onClick={handleBatchApprove}
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Approve ({selectedIds.length})
-          </button>
-          <button
-            type="button"
-            onClick={handleBatchDisburse}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <CreditCard className="w-4 h-4" />
-            Disburse ({selectedIds.length})
+            <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
           </button>
         </div>
       </div>
 
-      {/* Filter Toolbar & Summary Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          {/* Month Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-            <span className="text-xs font-bold text-slate-500">Month:</span>
-            <select
-              value={selectedMonth}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              className="text-xs font-extrabold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
-            >
-              <option value="2026-11">Nov 2026</option>
-              <option value="2026-10">Oct 2026</option>
-              <option value="2026-09">Sep 2026</option>
-              <option value="2026-08">Aug 2026</option>
-            </select>
-          </div>
+      {/* ─── 3. WORKFLOW STATUS STEPPER (Exact Match to Screenshot) ─── */}
+      <div className="bg-white px-4 py-2.5 rounded-xl border border-slate-100 shadow-soft overflow-x-auto">
+        <div className="flex items-center gap-2 text-[11px] font-bold whitespace-nowrap min-w-[700px]">
+          <span className="text-emerald-600 flex items-center gap-1">✓ Attendance →</span>
+          <span className="text-emerald-600 flex items-center gap-1">✓ Calculated →</span>
+          <span className="text-emerald-600 flex items-center gap-1">✓ Accountant Review →</span>
+          <span className="text-emerald-600 flex items-center gap-1">✓ Pending Admin →</span>
+          <span className="text-emerald-600 flex items-center gap-1">✓ Approved →</span>
+          <span className="text-amber-600 flex items-center gap-1 font-extrabold">
+            🟡 Payslips →
+          </span>
+          <span className={paidEmployeesCount > 0 ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}>
+            {paidEmployeesCount > 0 ? '✓ Paid' : '⚪ Paid'}
+          </span>
+        </div>
+      </div>
 
-          {/* Department Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
+      {/* ─── 4. SEGMENTED NAVIGATION TABS (Runs, Salary Structures, Advances) ─── */}
+      <div className="flex items-center gap-2">
+        {[
+          { id: 'runs', label: 'Runs' },
+          { id: 'structures', label: 'Salary Structures' },
+          { id: 'advances', label: 'Advances' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-blue-600 text-white shadow-soft'
+                : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── FILTERS DRAWER / QUICK BAR ─── */}
+      {filtersDrawerOpen && (
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-soft grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in duration-150">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Filter by Department
+            </label>
             <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="text-xs font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer"
+              value={deptFilter}
+              onChange={(e) => setDeptFilter(e.target.value)}
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white"
             >
-              <option value="ALL">All Departments</option>
-              {departments.map(d => (
-                <option key={d} value={d}>{d}</option>
+              <option value="All">All Departments ({records.length})</option>
+              {allDepartments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
           </div>
 
-          {/* Search Box */}
-          <div className="relative flex-1 sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search staff name or code..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 bg-slate-50"
-            />
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Filter by Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white"
+            >
+              <option value="All">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Search Staff
+            </label>
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, ID..."
+                className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white"
+              />
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Live Quick Totals */}
-        <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 w-full sm:w-auto justify-end">
-          <div>
-            Gross: <span className="font-extrabold text-slate-800 font-mono">₹{totalGross.toLocaleString('en-IN')}</span>
-          </div>
-          <div>
-            Deductions: <span className="font-extrabold text-rose-600 font-mono">-₹{totalDeductions.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-xl border border-emerald-200 font-extrabold font-mono">
-            Net: ₹{totalNet.toLocaleString('en-IN')}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Processing Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
-              <tr>
-                <th className="py-3 px-3 text-center w-10">
-                  <button onClick={toggleSelectAll} className="cursor-pointer text-slate-500 hover:text-emerald-600">
-                    {allSelected ? <CheckSquare className="w-4 h-4 text-emerald-600" /> : <Square className="w-4 h-4" />}
-                  </button>
-                </th>
-                <th className="py-3 px-4">Employee Details</th>
-                <th className="py-3 px-3">Department</th>
-                <th className="py-3 px-3 text-center">Attendance</th>
-                <th className="py-3 px-3 text-right">Basic (₹)</th>
-                <th className="py-3 px-3 text-right">Allowances</th>
-                <th className="py-3 px-3 text-right">Gross (₹)</th>
-                <th className="py-3 px-3 text-right">EPF + ESI + PT</th>
-                <th className="py-3 px-3 text-right">Net Salary</th>
-                <th className="py-3 px-3 text-center">Status</th>
-                <th className="py-3 px-3 text-center w-36">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredRecords.length > 0 ? (
-                filteredRecords.map((rec) => {
-                  const isChecked = selectedIds.includes(rec.id);
-                  const isDisbursed = rec.status === 'Disbursed';
-                  const isApproved = rec.status === 'Approved';
-
-                  return (
-                    <tr
-                      key={rec.id}
-                      className={`hover:bg-slate-50/80 transition-colors ${isChecked ? 'bg-emerald-50/30' : ''}`}
-                    >
-                      <td className="py-3 px-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => toggleSelectOne(rec.id)}
-                          className="cursor-pointer text-slate-400 hover:text-emerald-600"
-                        >
-                          {isChecked ? <CheckSquare className="w-4 h-4 text-emerald-600" /> : <Square className="w-4 h-4" />}
-                        </button>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-extrabold text-slate-900">{rec.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                          {rec.code} &bull; {rec.designation}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-                          {rec.department}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">
-                          {rec.presentDays || 28} / {rec.totalDays || 30} Days
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right font-medium font-mono text-slate-700">
-                        ₹{rec.basic?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-right font-medium font-mono text-slate-700">
-                        ₹{rec.totalAllowances?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-right font-bold font-mono text-slate-800">
-                        ₹{rec.grossSalary?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-right font-medium font-mono text-rose-600">
-                        -₹{rec.totalDeductions?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-right font-black font-mono text-emerald-600 text-sm">
-                        ₹{rec.netSalary?.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          isDisbursed
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : isApproved
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}>
-                          {rec.status || 'Approved'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setBreakdownModalItem(rec)}
-                            title="View Full Calculation Breakdown"
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditModalItem({ ...rec })}
-                            title="Edit Adjustments / Days / Bonus / Advance"
-                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleNavigateToPayslip(rec.id)}
-                            title="View / Print Official Payslip"
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* 1-Click Status Quick Action */}
-                          {!isDisbursed && (
-                            <button
-                              type="button"
-                              onClick={() => handleToggleStatus(rec.id, isApproved ? 'Disbursed' : 'Approved')}
-                              title={isApproved ? "Mark as Disbursed" : "Approve Salary"}
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition cursor-pointer ${
-                                isApproved
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
-                                  : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100'
-                              }`}
-                            >
-                              {isApproved ? 'Disburse' : 'Approve'}
-                            </button>
-                          )}
-                        </div>
-                      </td>
+      {/* ─── TAB 1: PAYROLL RUNS (Exact Table Matching Screenshot) ─── */}
+      {activeTab === 'runs' && (
+        <div className="space-y-4">
+          {sortedDeptNames.length === 0 ? (
+            <div className="bg-white rounded-xl border border-slate-100 p-12 text-center shadow-soft">
+              <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-700">No staff salary records found</h3>
+              <p className="text-xs text-slate-400 mt-1">Try resetting the department or status filter.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-100 shadow-soft overflow-hidden">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-left border-collapse table-auto min-w-[950px]">
+                  <thead className="bg-slate-50/70 border-b border-slate-200">
+                    <tr>
+                      <th className="pl-4 pr-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Employee
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Department
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Gross Salary
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Deductions
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Net Salary
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+                        Status
+                      </th>
+                      <th className="pr-4 pl-3 py-2 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase text-right">
+                        Actions
+                      </th>
                     </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={11} className="py-12 text-center text-slate-400">
-                    <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="font-bold text-slate-700">No staff salary records found</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Try adjusting your department filter or search keyword.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </thead>
 
-      {/* ================= MODAL: DETAILED BREAKDOWN ================= */}
-      {breakdownModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Calculator className="w-4 h-4 text-emerald-600" />
-                  Salary Calculation Breakdown
-                </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  {breakdownModalItem.name} ({breakdownModalItem.code}) &bull; {selectedMonth}
-                </p>
+                  <tbody>
+                    {sortedDeptNames.map((deptName) => {
+                      const deptRecords = grouped[deptName] || [];
+                      const isCollapsed = !!collapsedDepts[deptName];
+
+                      return (
+                        <React.Fragment key={deptName}>
+                          {/* Department Accordion Row */}
+                          <tr
+                            onClick={() => toggleDeptCollapse(deptName)}
+                            className="bg-slate-50/80 border-y border-slate-150 cursor-pointer select-none hover:bg-slate-100/80 transition-colors"
+                          >
+                            <td colSpan="7" className="px-4 py-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-slate-400 text-xs">
+                                  {isCollapsed ? '▶' : '▼'}
+                                </span>
+                                <span className="font-extrabold text-xs text-slate-800">
+                                  {deptName}
+                                </span>
+                                <span className="text-[9px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                                  {deptRecords.length} Employees
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Employee Rows under Department */}
+                          {!isCollapsed &&
+                            deptRecords.map((rec) => {
+                              const isPaid = rec.status === 'Paid' || rec.status === 'Disbursed';
+                              const totalDeds = rec.totalDeductions || 0;
+
+                              return (
+                                <tr
+                                  key={rec.id}
+                                  className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors odd:bg-white even:bg-slate-50/20"
+                                >
+                                  {/* Employee info */}
+                                  <td className="pl-4 pr-3 py-2.5">
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-extrabold text-[11px] border border-slate-200 shrink-0">
+                                        {rec.name?.charAt(0).toUpperCase() || 'E'}
+                                      </div>
+                                      <div>
+                                        <p className="font-extrabold text-slate-850 text-xs leading-none">
+                                          {rec.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+                                          {rec.code} • {rec.designation}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* Department */}
+                                  <td className="px-3 py-2.5 text-xs font-semibold text-slate-600">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 border border-slate-200">
+                                      {rec.department}
+                                    </span>
+                                  </td>
+
+                                  {/* Gross Salary */}
+                                  <td className="px-3 py-2.5 text-xs">
+                                    <span className="inline-block px-2.5 py-0.5 rounded text-emerald-800 bg-emerald-50 border border-emerald-200 font-bold">
+                                      {formatINR(rec.grossSalary)}
+                                    </span>
+                                  </td>
+
+                                  {/* Deductions */}
+                                  <td className="px-3 py-2.5 text-xs">
+                                    <span className="inline-block px-2.5 py-0.5 rounded text-rose-800 bg-rose-50 border border-rose-200 font-bold">
+                                      -{formatINR(totalDeds)}
+                                    </span>
+                                  </td>
+
+                                  {/* Net Salary */}
+                                  <td className="px-3 py-2.5 text-xs">
+                                    <span className="inline-block px-2.5 py-0.5 rounded text-blue-800 bg-blue-50 border border-blue-200 font-extrabold">
+                                      {formatINR(rec.netSalary)}
+                                    </span>
+                                  </td>
+
+                                  {/* Status */}
+                                  <td className="px-3 py-2.5 text-xs">
+                                    <span
+                                      className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                        isPaid
+                                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                      }`}
+                                    >
+                                      {isPaid ? 'Paid' : 'Pending'}
+                                    </span>
+                                  </td>
+
+                                  {/* Actions */}
+                                  <td className="pr-4 pl-3 py-2.5 text-right whitespace-nowrap">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      {/* View Breakdown */}
+                                      <button
+                                        onClick={() => setBreakdownRecord(rec)}
+                                        title="View Breakdown"
+                                        className="p-1 border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-all cursor-pointer shadow-2xs hover:scale-105"
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      {/* Edit Adjustments */}
+                                      {!isPaid && (
+                                        <button
+                                          onClick={() => openEditAdjustmentModal(rec)}
+                                          title="Edit Adjustments (Bonus, OT, Advance)"
+                                          className="p-1 border border-amber-250 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-md transition-all cursor-pointer shadow-2xs hover:scale-105"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+
+                                      {/* Disburse Single */}
+                                      {!isPaid && (
+                                        <button
+                                          onClick={() => setSingleDisburseRecord(rec)}
+                                          title="Disburse Single Payment"
+                                          className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow-2xs transition-all cursor-pointer hover:scale-105"
+                                        >
+                                          <CreditCard className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+
+                                      {/* Payslips Studio Shortcut */}
+                                      <button
+                                        onClick={() => onNavigate?.('/salary-payslips')}
+                                        title="Go to Payslip Studio"
+                                        className="p-1 border border-slate-200 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-md transition-all cursor-pointer shadow-2xs hover:scale-105"
+                                      >
+                                        <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── TAB 2: SALARY STRUCTURES ─── */}
+      {activeTab === 'structures' && (
+        <div className="bg-white rounded-xl border border-slate-100 shadow-soft p-4 space-y-4">
+          <div className="flex justify-between items-center border-b pb-3">
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-800">
+                School Staff Salary Structures Directory
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                View &amp; configure monthly gross salary packages and base pay.
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate?.('/salary-structure')}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-soft"
+            >
+              Open Full Structure Studio
+            </button>
+          </div>
+
+          <div className="w-full overflow-x-auto rounded-lg border border-slate-100">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="p-2.5 font-extrabold text-slate-600">Employee</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Department</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Designation</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Basic Pay</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Gross Monthly</th>
+                  <th className="p-2.5 font-extrabold text-slate-600 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {records.map((staff) => (
+                  <tr key={staff.id} className="hover:bg-slate-50/50">
+                    <td className="p-2.5 font-bold text-slate-800">
+                      {staff.name}{' '}
+                      <span className="text-[10px] text-slate-400 font-semibold block">
+                        {staff.code}
+                      </span>
+                    </td>
+                    <td className="p-2.5 text-slate-600">{staff.department}</td>
+                    <td className="p-2.5 text-slate-600">{staff.designation}</td>
+                    <td className="p-2.5 font-bold text-slate-700">{formatINR(staff.basic)}</td>
+                    <td className="p-2.5 font-extrabold text-emerald-700">
+                      {formatINR(staff.grossSalary)}
+                    </td>
+                    <td className="p-2.5 text-right">
+                      <button
+                        onClick={() => setEditStructureRecord(staff)}
+                        className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold"
+                      >
+                        Edit Structure
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 3: ADVANCES & LOANS ─── */}
+      {activeTab === 'advances' && (
+        <div className="bg-white rounded-xl border border-slate-100 shadow-soft p-4 space-y-4">
+          <div className="flex justify-between items-center border-b pb-3">
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-800">
+                Staff Salary Advance &amp; Loan Register
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                Manage advance disbursements and monthly recovery deductions.
+              </p>
+            </div>
+            <button
+              onClick={() => setNewAdvanceModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-soft"
+            >
+              <Plus className="w-3.5 h-3.5" /> Issue New Advance
+            </button>
+          </div>
+
+          <div className="w-full overflow-x-auto rounded-lg border border-slate-100">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="p-2.5 font-extrabold text-slate-600">Employee</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Purpose</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Advance Amount</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Monthly EMI</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Recovered</th>
+                  <th className="p-2.5 font-extrabold text-slate-600">Balance</th>
+                  <th className="p-2.5 font-extrabold text-slate-600 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {advances.map((adv) => (
+                  <tr key={adv.id} className="hover:bg-slate-50/50">
+                    <td className="p-2.5 font-bold text-slate-800">
+                      {adv.staffName}{' '}
+                      <span className="text-[10px] text-slate-400 font-semibold block">
+                        {adv.staffCode} • {adv.department}
+                      </span>
+                    </td>
+                    <td className="p-2.5 text-slate-600 font-medium">{adv.purpose}</td>
+                    <td className="p-2.5 font-extrabold text-slate-900">{formatINR(adv.amount)}</td>
+                    <td className="p-2.5 font-bold text-rose-600">
+                      -{formatINR(adv.monthlyDeduction)} / mo
+                    </td>
+                    <td className="p-2.5 font-bold text-emerald-600">
+                      {formatINR(adv.recoveredAmount)}
+                    </td>
+                    <td className="p-2.5 font-black text-amber-700">
+                      {formatINR(adv.remainingAmount)}
+                    </td>
+                    <td className="p-2.5 text-center">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {adv.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 1: VIEW BREAKDOWN MODAL ─── */}
+      {breakdownRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-sm text-slate-700 border border-slate-200">
+                  {breakdownRecord.name?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-sm font-extrabold text-slate-800">{breakdownRecord.name}</h2>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    {breakdownRecord.code} • {breakdownRecord.designation}
+                  </p>
+                </div>
               </div>
               <button
-                type="button"
-                onClick={() => setBreakdownModalItem(null)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 cursor-pointer"
+                onClick={() => setBreakdownRecord(null)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
-              {/* Earnings Breakdown */}
-              <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3.5 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
-                  <span>Gross Earnings</span>
-                  <span className="text-sm font-black text-emerald-700 font-mono">₹{breakdownModalItem.grossSalary?.toLocaleString('en-IN')}</span>
+            {/* Salary Components */}
+            <div className="space-y-2 text-xs">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-150 space-y-1.5">
+                <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                  Earnings Breakdown
+                </p>
+                <div className="flex justify-between">
+                  <span>Basic Pay</span>
+                  <span className="font-bold text-slate-800">{formatINR(breakdownRecord.basic)}</span>
                 </div>
-                <div className="space-y-1.5 pt-1 text-slate-700">
-                  <div className="flex justify-between">
-                    <span>Basic Salary ({breakdownModalItem.payableDays || 28} payable days):</span>
-                    <span className="font-bold font-mono">₹{breakdownModalItem.basic?.toLocaleString('en-IN')}</span>
-                  </div>
-                  {breakdownModalItem.allowancesBreakdown && Object.entries(breakdownModalItem.allowancesBreakdown).map(([k, v]) => (
-                    <div key={k} className="flex justify-between text-slate-600">
-                      <span className="uppercase text-[10px]">{k.toUpperCase()} Allowance:</span>
-                      <span className="font-semibold font-mono">₹{v?.toLocaleString('en-IN')}</span>
-                    </div>
-                  ))}
-                  {breakdownModalItem.bonus > 0 && (
-                    <div className="flex justify-between text-emerald-700 font-bold">
-                      <span>Performance Bonus / Incentive:</span>
-                      <span className="font-mono">+₹{breakdownModalItem.bonus?.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
-                  {breakdownModalItem.overtimePay > 0 && (
-                    <div className="flex justify-between text-emerald-700 font-bold">
-                      <span>Overtime / Extra Classes:</span>
-                      <span className="font-mono">+₹{breakdownModalItem.overtimePay?.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
+                <div className="flex justify-between">
+                  <span>Allowances (HRA, DA, Special)</span>
+                  <span className="font-bold text-slate-800">
+                    {formatINR(breakdownRecord.totalAllowances || 0)}
+                  </span>
                 </div>
-              </div>
-
-              {/* Deductions Breakdown */}
-              <div className="bg-rose-50/50 border border-rose-200 rounded-xl p-3.5 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-rose-800 flex items-center justify-between">
-                  <span>Deductions & Statutory Contributions</span>
-                  <span className="text-sm font-black text-rose-700 font-mono">-₹{breakdownModalItem.totalDeductions?.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="space-y-1.5 pt-1 text-slate-700">
-                  <div className="flex justify-between">
-                    <span>Provident Fund (EPF 12%):</span>
-                    <span className="font-bold font-mono">₹{breakdownModalItem.epf?.toLocaleString('en-IN')}</span>
+                {breakdownRecord.bonus > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Performance Bonus</span>
+                    <span>+{formatINR(breakdownRecord.bonus)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Employee State Insurance (ESIC):</span>
-                    <span className="font-bold font-mono">₹{breakdownModalItem.esi?.toLocaleString('en-IN')}</span>
+                )}
+                {breakdownRecord.overtimePay > 0 && (
+                  <div className="flex justify-between text-purple-600 font-bold">
+                    <span>Overtime Allowance</span>
+                    <span>+{formatINR(breakdownRecord.overtimePay)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Professional Tax (PT Slab):</span>
-                    <span className="font-bold font-mono">₹{breakdownModalItem.professionalTax?.toLocaleString('en-IN')}</span>
-                  </div>
-                  {breakdownModalItem.advanceRecovery > 0 && (
-                    <div className="flex justify-between text-amber-700 font-semibold">
-                      <span>Salary Advance Recovery:</span>
-                      <span className="font-mono">₹{breakdownModalItem.advanceRecovery?.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
-                  {breakdownModalItem.tds > 0 && (
-                    <div className="flex justify-between text-rose-700 font-semibold">
-                      <span>Income Tax (TDS Deduction):</span>
-                      <span className="font-mono">₹{breakdownModalItem.tds?.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
+                )}
+                <div className="flex justify-between border-t border-slate-200 pt-1.5 font-extrabold text-emerald-700 text-sm">
+                  <span>Total Gross Salary</span>
+                  <span>{formatINR(breakdownRecord.grossSalary)}</span>
                 </div>
               </div>
 
-              {/* Net Payable Final Card */}
-              <div className="bg-slate-900 text-white p-4 rounded-xl flex items-center justify-between">
+              {/* Deductions Components */}
+              <div className="bg-rose-50/60 p-3 rounded-xl border border-rose-150 space-y-1.5">
+                <p className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider mb-1">
+                  Deductions Breakdown
+                </p>
+                <div className="flex justify-between">
+                  <span>EPF (Employee Contribution)</span>
+                  <span className="font-bold text-rose-700">-{formatINR(breakdownRecord.epf || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>ESI Contribution</span>
+                  <span className="font-bold text-rose-700">-{formatINR(breakdownRecord.esi || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Professional Tax</span>
+                  <span className="font-bold text-rose-700">
+                    -{formatINR(breakdownRecord.professionalTax || 0)}
+                  </span>
+                </div>
+                {breakdownRecord.lopDeduction > 0 && (
+                  <div className="flex justify-between text-rose-800 font-bold">
+                    <span>Attendance LOP Deduction ({breakdownRecord.unpaidLeaveDays} days)</span>
+                    <span>-{formatINR(breakdownRecord.lopDeduction)}</span>
+                  </div>
+                )}
+                {breakdownRecord.tds > 0 && (
+                  <div className="flex justify-between text-rose-800 font-bold">
+                    <span>TDS / Income Tax</span>
+                    <span>-{formatINR(breakdownRecord.tds)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-rose-200 pt-1.5 font-extrabold text-rose-800">
+                  <span>Total Deductions</span>
+                  <span>-{formatINR(breakdownRecord.totalDeductions)}</span>
+                </div>
+              </div>
+
+              {/* Net Payable Card */}
+              <div className="bg-blue-600 text-white p-3.5 rounded-xl shadow-soft flex justify-between items-center">
                 <div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Net Take-Home Pay</div>
-                  <div className="text-xl font-black text-emerald-400 font-mono">
-                    ₹{breakdownModalItem.netSalary?.toLocaleString('en-IN')}
-                  </div>
+                  <span className="text-[10px] font-extrabold text-blue-200 uppercase tracking-wider block">
+                    Take-Home Net Salary
+                  </span>
+                  <span className="text-xs text-blue-100">Disbursement Ready</span>
                 </div>
-                <div className="text-right text-[11px] text-slate-300">
-                  <div>Bank: <strong>{breakdownModalItem.bankName}</strong></div>
-                  <div className="font-mono text-[10px] text-slate-400">A/C: {breakdownModalItem.accNo}</div>
-                </div>
+                <span className="text-xl font-black">{formatINR(breakdownRecord.netSalary)}</span>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+            <div className="flex justify-end pt-2 border-t">
               <button
-                type="button"
-                onClick={() => handleNavigateToPayslip(breakdownModalItem.id)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+                onClick={() => setBreakdownRecord(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold"
               >
-                <Printer className="w-3.5 h-3.5" />
-                View & Print Payslip
-              </button>
-              <button
-                type="button"
-                onClick={() => setBreakdownModalItem(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition cursor-pointer"
-              >
-                Close Breakdown
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= MODAL: EDIT SALARY ADJUSTMENTS ================= */}
-      {editModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden flex flex-col">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-amber-600" />
-                  Edit Salary Adjustments
-                </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  {editModalItem.name} &bull; {selectedMonth}
-                </p>
+      {/* ─── MODAL 2: DISBURSE SALARY MODAL ─── */}
+      {disburseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-600" />
+                <h2 className="text-sm font-extrabold text-slate-800">
+                  Confirm Monthly Payroll Disbursement
+                </h2>
               </div>
               <button
-                type="button"
-                onClick={() => setEditModalItem(null)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 cursor-pointer"
+                onClick={() => setDisburseModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="p-5 space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Base Gross CTC (₹)</label>
-                  <input
-                    type="number"
-                    step="500"
-                    min="0"
-                    value={editModalItem.grossSalary || 30000}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, grossSalary: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold focus:outline-none focus:border-emerald-500 bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Present Working Days</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="31"
-                    value={editModalItem.presentDays || 28}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, presentDays: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-emerald-500 bg-white"
-                  />
-                </div>
+            <form onSubmit={handleConfirmDisburseAll} className="space-y-3.5 text-xs">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">
+                  Disbursement Summary
+                </span>
+                <p className="text-sm font-black text-emerald-900 mt-1">
+                  Total {records.length} Employees • Net Payable: {formatINR(totalNetPayroll)}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Disbursement Mode
+                </label>
+                <select
+                  value={disburseForm.payMethod}
+                  onChange={(e) => setDisburseForm({ ...disburseForm, payMethod: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800 bg-white"
+                >
+                  <option value="Bank Transfer">Bank Transfer (NEFT/RTGS/NACH)</option>
+                  <option value="Cheque">Corporate Cheque</option>
+                  <option value="Cash">Cash Voucher</option>
+                  <option value="UPI">Direct UPI</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Bonus / Incentive (₹)</label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Payment Date
+                  </label>
                   <input
-                    type="number"
-                    min="0"
-                    value={editModalItem.bonus || 0}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, bonus: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono focus:outline-none focus:border-emerald-500 bg-white"
+                    type="date"
+                    value={disburseForm.payDate}
+                    onChange={(e) => setDisburseForm({ ...disburseForm, payDate: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                    required
                   />
                 </div>
+
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Overtime Pay (₹)</label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Batch Ref / UTR
+                  </label>
                   <input
-                    type="number"
-                    min="0"
-                    value={editModalItem.overtimePay || 0}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, overtimePay: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono focus:outline-none focus:border-emerald-500 bg-white"
+                    type="text"
+                    value={disburseForm.payRef}
+                    onChange={(e) => setDisburseForm({ ...disburseForm, payRef: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                    required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Advance Recovery (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editModalItem.advanceRecovery || 0}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, advanceRecovery: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono focus:outline-none focus:border-emerald-500 bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">TDS Tax (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editModalItem.tds || 0}
-                    onChange={(e) => setEditModalItem({ ...editModalItem, tds: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono focus:outline-none focus:border-emerald-500 bg-white"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Remarks / Audit Note
+                </label>
+                <input
+                  type="text"
+                  value={disburseForm.payRemarks}
+                  onChange={(e) => setDisburseForm({ ...disburseForm, payRemarks: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-medium text-slate-800"
+                />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-3 border-t">
                 <button
                   type="button"
-                  onClick={() => setEditModalItem(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer"
+                  onClick={() => setDisburseModalOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-soft"
                 >
-                  Recalculate & Save
+                  Confirm &amp; Disburse All
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* ─── MODAL 3: REOPEN PAYROLL MODAL ─── */}
+      {reopenModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-amber-600" />
+                <h2 className="text-sm font-extrabold text-slate-800">
+                  Reopen Payroll for Adjustments
+                </h2>
+              </div>
+              <button
+                onClick={() => setReopenModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmReopen} className="space-y-3.5 text-xs">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800">
+                <p className="font-bold text-xs">Administrative Notice</p>
+                <p className="text-[11px] mt-0.5">
+                  Reopening will allow accountants and admin to modify attendance loss-of-pay,
+                  bonus, or structure and recalculate payslips.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Reason for Reopening
+                </label>
+                <textarea
+                  rows="3"
+                  value={reopenReason}
+                  onChange={(e) => setReopenReason(e.target.value)}
+                  placeholder="e.g. Attendance records corrected after teacher leave approval..."
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-medium text-slate-800"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setReopenModalOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-soft"
+                >
+                  Confirm Reopen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 4: EDIT ADJUSTMENTS MODAL ─── */}
+      {editAdjustmentRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h2 className="text-sm font-extrabold text-slate-800">
+                  Edit Salary Adjustments
+                </h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  {editAdjustmentRecord.name} • {editAdjustmentRecord.code}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditAdjustmentRecord(null)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAdjustment} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Bonus / Incentive
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={adjForm.bonus}
+                    onChange={(e) => setAdjForm({ ...adjForm, bonus: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Overtime Pay
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={adjForm.overtimePay}
+                    onChange={(e) => setAdjForm({ ...adjForm, overtimePay: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Advance Recovery
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={adjForm.advanceRecovery}
+                    onChange={(e) => setAdjForm({ ...adjForm, advanceRecovery: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    TDS Deduction
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={adjForm.tds}
+                    onChange={(e) => setAdjForm({ ...adjForm, tds: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setEditAdjustmentRecord(null)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-soft"
+                >
+                  Save &amp; Recalculate
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 5: SINGLE DISBURSE MODAL ─── */}
+      {singleDisburseRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h2 className="text-sm font-extrabold text-slate-800">Disburse Salary</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  {singleDisburseRecord.name} • {singleDisburseRecord.code}
+                </p>
+              </div>
+              <button
+                onClick={() => setSingleDisburseRecord(null)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmSingleDisburse} className="space-y-3 text-xs">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex justify-between items-center">
+                <span className="font-bold text-slate-600">Net Payable:</span>
+                <span className="text-base font-black text-blue-800">
+                  {formatINR(singleDisburseRecord.netSalary)}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Payment Mode
+                </label>
+                <select
+                  value={disburseForm.payMethod}
+                  onChange={(e) => setDisburseForm({ ...disburseForm, payMethod: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                >
+                  <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Transaction Ref / Cheque No
+                </label>
+                <input
+                  type="text"
+                  value={disburseForm.payRef}
+                  onChange={(e) => setDisburseForm({ ...disburseForm, payRef: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setSingleDisburseRecord(null)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-soft"
+                >
+                  Mark Paid
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 6: NEW ADVANCE MODAL ─── */}
+      {newAdvanceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h2 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                <Coins className="w-4 h-4 text-emerald-600" />
+                Issue New Staff Salary Advance
+              </h2>
+              <button
+                onClick={() => setNewAdvanceModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddAdvance} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Select Staff Member
+                </label>
+                <select
+                  value={advForm.staffId}
+                  onChange={(e) => setAdvForm({ ...advForm, staffId: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-semibold text-slate-800 bg-white"
+                  required
+                >
+                  <option value="">-- Choose Employee --</option>
+                  {records.map((r) => (
+                    <option key={r.id} value={r.code}>
+                      {r.name} ({r.code} • {r.department})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Advance Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="500"
+                    value={advForm.amount}
+                    onChange={(e) => setAdvForm({ ...advForm, amount: e.target.value })}
+                    placeholder="e.g. 15000"
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Monthly EMI Recovery (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="100"
+                    value={advForm.monthlyDeduction}
+                    onChange={(e) => setAdvForm({ ...advForm, monthlyDeduction: e.target.value })}
+                    placeholder="e.g. 2500"
+                    className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Purpose / Justification
+                </label>
+                <input
+                  type="text"
+                  value={advForm.purpose}
+                  onChange={(e) => setAdvForm({ ...advForm, purpose: e.target.value })}
+                  placeholder="e.g. Family medical emergency, festival..."
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-medium text-slate-800"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setNewAdvanceModalOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-soft"
+                >
+                  Confirm &amp; Disburse
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 7: EDIT STRUCTURE MODAL ─── */}
+      {editStructureRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h2 className="text-sm font-extrabold text-slate-800">Update Salary Structure</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  {editStructureRecord.name} • {editStructureRecord.code}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditStructureRecord(null)}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Gross Monthly Salary (₹)
+                </label>
+                <input
+                  type="number"
+                  defaultValue={editStructureRecord.grossSalary}
+                  id="structure_gross_input"
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-black text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                  Base Basic Pay (₹)
+                </label>
+                <input
+                  type="number"
+                  defaultValue={editStructureRecord.basic}
+                  id="structure_basic_input"
+                  className="w-full px-3 py-2 border rounded-lg text-xs font-bold text-slate-800"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setEditStructureRecord(null)}
+                  className="px-4 py-2 border rounded-lg text-xs font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const gross = document.getElementById('structure_gross_input')?.value;
+                    const basic = document.getElementById('structure_basic_input')?.value;
+                    salaryStorage.updateStaffSalary(editStructureRecord.staffId, {
+                      grossSalary: gross,
+                      basicSalary: basic
+                    });
+                    setEditStructureRecord(null);
+                    toast.success(`Salary structure updated for ${editStructureRecord.name}!`);
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-soft"
+                >
+                  Save Structure
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

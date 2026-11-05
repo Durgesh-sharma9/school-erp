@@ -746,6 +746,8 @@ function AppContent() {
               case '/attendance-summary':
               case '/monthly-attendance-summary':
                 return <SalaryAttendancePage onNavigate={handleNavigate} />;
+              case '/payroll':
+              case '/payroll-processing':
               case '/salary-processing':
               case '/salary-process':
                 return <SalaryProcessingPage onNavigate={handleNavigate} />;
