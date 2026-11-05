@@ -69,23 +69,23 @@ export function SalaryAnalyticsPage({ onNavigate }) {
     return records.filter(r => selectedDeptIds.includes(r.department));
   }, [records, selectedDeptIds]);
 
-  // Grounding Academic & Tuition Benchmarks
+  // Grounding Academic & Tuition Benchmarks (Consistent Monthly & Annual Scale)
   const totalStudents = 460;
   const totalClasses = 14;
-  const annualTuitionRevenue = 6048000;
-  const monthlyTuitionCollection = Math.round(annualTuitionRevenue / 12); // ₹5,04,000
+  const monthlyTuitionCollection = 5840000; // ₹58.4 Lakhs/month (~₹12,700/student/mo)
+  const annualTuitionRevenue = monthlyTuitionCollection * 12; // ₹7.008 Crore annually
 
   // Financial aggregates
   const totalPayroll = filteredRecords.reduce((acc, r) => acc + (r.grossSalary || 0), 0);
   const totalNet = filteredRecords.reduce((acc, r) => acc + (r.netSalary || 0), 0);
   const totalDeductions = filteredRecords.reduce((acc, r) => acc + (r.totalDeductions || 0), 0);
   const averageSalary = filteredRecords.length > 0 ? Math.round(totalPayroll / filteredRecords.length) : 0;
-  const averageFee = totalStudents > 0 ? Math.round(annualTuitionRevenue / totalStudents) : 0;
+  const averageFee = totalStudents > 0 ? Math.round(monthlyTuitionCollection / totalStudents) : 0;
 
-  // Salary to Fee Ratio (Gross Payroll / Monthly Tuition Revenue * 100)
+  // Salary to Fee Ratio (Monthly Gross Payroll / Monthly Tuition Revenue * 100)
   const salaryToFeeRatio = monthlyTuitionCollection > 0
-    ? Number(((totalPayroll / annualTuitionRevenue) * 100).toFixed(1))
-    : 48.3;
+    ? Number(((totalPayroll / monthlyTuitionCollection) * 100).toFixed(1))
+    : 50.0;
 
   const getRatioStatus = (ratio) => {
     if (ratio < 40) return { label: 'Optimal', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
@@ -108,12 +108,12 @@ export function SalaryAnalyticsPage({ onNavigate }) {
     return Object.values(map);
   }, [filteredRecords]);
 
-  // Revenue vs Payroll Bar Chart data
+  // Revenue vs Payroll Bar Chart data (Monthly Comparison)
   const revenueVsPayrollData = [
-    { month: 'Jul 26', tuition: 504000, payroll: 2880000 },
-    { month: 'Aug 26', tuition: 620000, payroll: 2910000 },
-    { month: 'Sep 26', tuition: 540000, payroll: 2905000 },
-    { month: 'Oct 26', tuition: 580000, payroll: 2915000 },
+    { month: 'Jul 26', tuition: 5600000, payroll: 2880000 },
+    { month: 'Aug 26', tuition: 6200000, payroll: 2910000 },
+    { month: 'Sep 26', tuition: 5400000, payroll: 2905000 },
+    { month: 'Oct 26', tuition: 5800000, payroll: 2915000 },
     { month: 'Nov 26', tuition: monthlyTuitionCollection, payroll: totalPayroll }
   ];
 

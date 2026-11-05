@@ -55,16 +55,19 @@ export function SalaryReportsPage({ onNavigate }) {
     }
 
     if (reportType === 'payroll') {
-      return records.map(r => ({
-        code: r.code,
-        name: r.name,
-        department: r.department,
-        basic: r.basicSalary || 0,
-        allowances: (r.grossSalary || 0) - (r.basicSalary || 0),
-        deductions: r.totalDeductions || 0,
-        netSalary: r.netSalary || 0,
-        paymentStatus: r.status || 'Pending'
-      }));
+      return records.map(r => {
+        const basic = r.basicSalary ?? r.basic ?? 0;
+        return {
+          code: r.code,
+          name: r.name,
+          department: r.department,
+          basic: basic,
+          allowances: (r.grossSalary || 0) - basic,
+          deductions: r.totalDeductions || 0,
+          netSalary: r.netSalary || 0,
+          paymentStatus: r.status || 'Pending'
+        };
+      });
     }
 
     if (reportType === 'outstanding') {
@@ -99,7 +102,7 @@ export function SalaryReportsPage({ onNavigate }) {
         const d = r.department || 'General';
         if (!map[d]) map[d] = { department: d, count: 0, totalBasic: 0, totalGross: 0, totalNet: 0 };
         map[d].count += 1;
-        map[d].totalBasic += (r.basicSalary || 0);
+        map[d].totalBasic += (r.basicSalary ?? r.basic ?? 0);
         map[d].totalGross += (r.grossSalary || 0);
         map[d].totalNet += (r.netSalary || 0);
       });
@@ -242,9 +245,9 @@ export function SalaryReportsPage({ onNavigate }) {
         {/* Printable Header Branding */}
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <h2 className="text-xl font-black text-slate-900">Greenwood High School</h2>
+            <h2 className="text-xl font-black text-slate-900">JD INTERNATIONAL SCHOOL</h2>
             <p className="text-xs text-slate-500 font-medium">
-              123, Varthur Road, Near Prestige Lakeside, Gunjur, Bengaluru, KA 560087
+              Jaisinghpura, Bhankrota, Jaipur, Rajasthan - 302026 &bull; CBSE Affiliation: 1730000
             </p>
           </div>
           <div className="text-left sm:text-right">

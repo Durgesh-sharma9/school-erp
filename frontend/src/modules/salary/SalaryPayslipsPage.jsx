@@ -142,9 +142,9 @@ export function SalaryPayslipsPage({ onNavigate }) {
               <span style="font-size: 24px; font-weight: 900; color: #2563eb;">🏛️</span>
             </div>
             <div>
-              <h1 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Greenwood High School</h1>
-              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">123, Varthur Road, Near Prestige Lakeside, Gunjur, Bengaluru, KA 560087</p>
-              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Affiliation No: 1730000 &bull; Tel: +91 80 2200 6000 &bull; Email: info@greenwood.edu</p>
+              <h1 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">JD INTERNATIONAL SCHOOL</h1>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Jaisinghpura, Bhankrota, Jaipur, Rajasthan - 302026</p>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Affiliation No: 1730000 &bull; Tel: +91 141 2200 600 &bull; Email: info@jdinternationalschool.com</p>
             </div>
           </div>
           <div style="text-align: right;">
@@ -200,11 +200,14 @@ export function SalaryPayslipsPage({ onNavigate }) {
               <th style="padding: 6px 8px; text-align: left; border-right: 1px solid #e2e8f0;">Earnings Component</th>
               <th style="padding: 6px 8px; text-align: right;">Amount (INR)</th>
             </tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Basic Pay</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.basicSalary || 0).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">House Rent Allowance (HRA)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.hra || Math.round((slip.basicSalary || 0) * 0.4)).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Special Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.specialAllowance || Math.round((slip.grossSalary || 0) * 0.1)).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Transport Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹1,800</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Medical Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹1,250</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Basic Pay</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.basicSalary ?? slip.basic ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">House Rent Allowance (HRA)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.hra ?? slip.allowancesBreakdown?.hra ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Special Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.specialAllowance ?? slip.allowancesBreakdown?.specialAllowance ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Transport Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.transportAllowance ?? slip.allowancesBreakdown?.transportAllowance ?? 1800).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Medical Allowance</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.medicalAllowance ?? slip.allowancesBreakdown?.medicalAllowance ?? 1250).toLocaleString('en-IN')}</td></tr>
+            ${(slip.otherAllowance ?? slip.allowancesBreakdown?.otherAllowance ?? 0) > 0 ? `
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Other Allowances</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.otherAllowance ?? slip.allowancesBreakdown?.otherAllowance ?? 0).toLocaleString('en-IN')}</td></tr>
+            ` : ''}
             <tr style="background: #f8fafc; font-weight: 800; border-top: 1px solid #e2e8f0;">
               <td style="padding: 6px 8px; border-right: 1px solid #e2e8f0;">Gross Earnings</td>
               <td style="padding: 6px 8px; text-align: right; color: #0f172a;">₹${(slip.grossSalary || 0).toLocaleString('en-IN')}</td>
@@ -217,10 +220,13 @@ export function SalaryPayslipsPage({ onNavigate }) {
               <th style="padding: 6px 8px; text-align: left; border-right: 1px solid #e2e8f0;">Deductions Component</th>
               <th style="padding: 6px 8px; text-align: right;">Amount (INR)</th>
             </tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Provident Fund (EPF)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.epfDeduction || 1800).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">ESI Contribution</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.esiDeduction || 0).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Professional Tax</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.profTax || 200).toLocaleString('en-IN')}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Loss of Pay (LOP)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600; color: #ef4444;">₹${(slip.otherDeductions || 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Provident Fund (EPF)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.epfDeduction ?? slip.epf ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">ESI Contribution</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.esiDeduction ?? slip.esi ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Professional Tax (Rajasthan)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600;">₹${(slip.profTax ?? slip.professionalTax ?? 0).toLocaleString('en-IN')}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Loss of Pay (LOP)</td><td style="padding: 5px 8px; text-align: right; font-weight: 600; color: #ef4444;">₹${(slip.lopDeduction ?? slip.unpaidLeaveDeduction ?? slip.otherDeductions ?? 0).toLocaleString('en-IN')}</td></tr>
+            ${(slip.advanceDeduction ?? slip.advanceRecovery ?? 0) > 0 ? `
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 5px 8px; border-right: 1px solid #e2e8f0;">Advance / Loan Recovery</td><td style="padding: 5px 8px; text-align: right; font-weight: 600; color: #ef4444;">₹${(slip.advanceDeduction ?? slip.advanceRecovery ?? 0).toLocaleString('en-IN')}</td></tr>
+            ` : ''}
             <tr style="background: #f8fafc; font-weight: 800; border-top: 1px solid #e2e8f0;">
               <td style="padding: 6px 8px; border-right: 1px solid #e2e8f0;">Total Deductions</td>
               <td style="padding: 6px 8px; text-align: right; color: #dc2626;">₹${(slip.totalDeductions || 0).toLocaleString('en-IN')}</td>
@@ -242,7 +248,7 @@ export function SalaryPayslipsPage({ onNavigate }) {
         <!-- Footer -->
         <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; text-align: center; font-size: 10px; color: #94a3b8;">
           <p style="margin: 0;">This is a system-generated payslip and does not require a physical signature.</p>
-          <p style="margin: 3px 0 0 0;">Greenwood High School HRMS & Payroll System &bull; Generated: ${new Date().toLocaleDateString('en-IN')}</p>
+          <p style="margin: 3px 0 0 0;">JD INTERNATIONAL SCHOOL HRMS & Payroll System &bull; Generated: ${new Date().toLocaleDateString('en-IN')}</p>
         </div>
       </div>
     `;
@@ -314,8 +320,8 @@ export function SalaryPayslipsPage({ onNavigate }) {
       `"${r.department}"`,
       `"${r.designation}"`,
       r.grossSalary,
-      r.basicSalary,
-      r.grossSalary - r.basicSalary,
+      r.basicSalary ?? r.basic ?? 0,
+      (r.grossSalary || 0) - (r.basicSalary ?? r.basic ?? 0),
       r.totalDeductions,
       r.netSalary,
       r.status
@@ -483,7 +489,8 @@ export function SalaryPayslipsPage({ onNavigate }) {
                 </tr>
               ) : (
                 filteredRecords.map((slip) => {
-                  const additions = Math.max(0, (slip.grossSalary || 0) - (slip.basicSalary || 0));
+                  const basePay = slip.basicSalary ?? slip.basic ?? 0;
+                  const additions = Math.max(0, (slip.grossSalary || 0) - basePay);
                   return (
                     <tr key={slip.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3.5 pl-5">
@@ -503,7 +510,7 @@ export function SalaryPayslipsPage({ onNavigate }) {
                       </td>
 
                       <td className="p-3.5 text-right font-semibold text-slate-600">
-                        ₹{(slip.basicSalary || 0).toLocaleString('en-IN')}
+                        ₹{basePay.toLocaleString('en-IN')}
                       </td>
 
                       <td className="p-3.5 text-right font-semibold text-emerald-600">

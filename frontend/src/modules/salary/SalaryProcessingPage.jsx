@@ -62,6 +62,7 @@ export function SalaryProcessingPage({ onNavigate }) {
   const [selectedMonth, setSelectedMonth] = useState('2026-11');
   const [records, setRecords] = useState(() => salaryStorage.getMonthlyRecords('2026-11'));
   const [advances, setAdvances] = useState(() => salaryStorage.getAdvances());
+  const [monthlyConfig, setMonthlyConfig] = useState(() => salaryStorage.getMonthlyConfig('2026-11'));
 
   // Filter states
   const [deptFilter, setDeptFilter] = useState('All');
@@ -111,14 +112,17 @@ export function SalaryProcessingPage({ onNavigate }) {
     const handleUpdate = () => {
       setRecords(salaryStorage.getMonthlyRecords(selectedMonth));
       setAdvances(salaryStorage.getAdvances());
+      setMonthlyConfig(salaryStorage.getMonthlyConfig(selectedMonth));
     };
     window.addEventListener('school_salary_records_updated', handleUpdate);
     window.addEventListener('school_erp_salary_attendance_updated', handleUpdate);
     window.addEventListener('school_erp_salary_advances_updated', handleUpdate);
+    window.addEventListener('school_erp_monthly_config_updated', handleUpdate);
     return () => {
       window.removeEventListener('school_salary_records_updated', handleUpdate);
       window.removeEventListener('school_erp_salary_attendance_updated', handleUpdate);
       window.removeEventListener('school_erp_salary_advances_updated', handleUpdate);
+      window.removeEventListener('school_erp_monthly_config_updated', handleUpdate);
     };
   }, [selectedMonth]);
 
@@ -127,6 +131,7 @@ export function SalaryProcessingPage({ onNavigate }) {
     setSelectedMonth(month);
     const loaded = salaryStorage.getMonthlyRecords(month);
     setRecords(loaded);
+    setMonthlyConfig(salaryStorage.getMonthlyConfig(month));
   };
 
   // Toggle Department Accordion Collapse
@@ -191,8 +196,26 @@ export function SalaryProcessingPage({ onNavigate }) {
   // Handle Bulk Disburse
   const handleConfirmDisburseAll = (e) => {
     e.preventDefault();
+
+    // Pre-flight validation: check for missing bank details
+    if (disburseForm.payMethod === 'Bank Transfer' || disburseForm.payMethod === 'NEFT' || disburseForm.payMethod === 'RTGS') {
+      const missingBank = records.filter(r => (!r.accNo || r.accNo === '—' || !r.ifsc) && r.status !== 'Paid');
+      if (missingBank.length > 0) {
+        const proceed = window.confirm(
+          `Pre-flight Notice: ${missingBank.length} employee(s) (e.g. ${missingBank[0]?.name}) have incomplete bank account details. Do you wish to continue disbursement via ${disburseForm.payMethod}?`
+        );
+        if (!proceed) return;
+      }
+    }
+
     const updated = salaryStorage.disburseAll(selectedMonth, disburseForm);
     setRecords(updated);
+    // Mark admin approved as well
+    salaryStorage.saveMonthlyConfig(selectedMonth, {
+      ...monthlyConfig,
+      adminApproved: true,
+      accountantReviewed: true
+    });
     setDisburseModalOpen(false);
     toast.success(`Successfully disbursed salaries for all ${records.length} staff members via ${disburseForm.payMethod}!`);
   };
@@ -201,6 +224,14 @@ export function SalaryProcessingPage({ onNavigate }) {
   const handleConfirmSingleDisburse = (e) => {
     e.preventDefault();
     if (!singleDisburseRecord) return;
+
+    if (disburseForm.payMethod === 'Bank Transfer' || disburseForm.payMethod === 'NEFT' || disburseForm.payMethod === 'RTGS') {
+      if (!singleDisburseRecord.accNo || singleDisburseRecord.accNo === '—' || !singleDisburseRecord.ifsc) {
+        const proceed = window.confirm(`Notice: ${singleDisburseRecord.name} does not have complete bank account details. Proceed with disbursement?`);
+        if (!proceed) return;
+      }
+    }
+
     const updated = salaryStorage.disburseSingle(selectedMonth, singleDisburseRecord.id, disburseForm);
     setRecords(updated);
     setSingleDisburseRecord(null);
@@ -418,19 +449,54 @@ export function SalaryProcessingPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* ─── 3. WORKFLOW STATUS STEPPER (Exact Match to Screenshot) ─── */}
+      {/* ─── 3. WORKFLOW STATUS STEPPER (Exact Match to Screenshot & Fully Interactive) ─── */}
       <div className="bg-white px-4 py-2.5 rounded-xl border border-slate-100 shadow-soft overflow-x-auto">
         <div className="flex items-center gap-2 text-[11px] font-bold whitespace-nowrap min-w-[700px]">
-          <span className="text-emerald-600 flex items-center gap-1">✓ Attendance →</span>
+          <button
+            onClick={() => onNavigate?.('/salary-attendance')}
+            className="text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer transition-colors"
+            title="Click to view or edit attendance summary"
+          >
+            ✓ Attendance →
+          </button>
           <span className="text-emerald-600 flex items-center gap-1">✓ Calculated →</span>
-          <span className="text-emerald-600 flex items-center gap-1">✓ Accountant Review →</span>
-          <span className="text-emerald-600 flex items-center gap-1">✓ Pending Admin →</span>
-          <span className="text-emerald-600 flex items-center gap-1">✓ Approved →</span>
-          <span className="text-amber-600 flex items-center gap-1 font-extrabold">
+          <button
+            onClick={() => {
+              const next = !(monthlyConfig.accountantReviewed ?? true);
+              const updated = { ...monthlyConfig, accountantReviewed: next };
+              salaryStorage.saveMonthlyConfig(selectedMonth, updated);
+              setMonthlyConfig(updated);
+              toast.success(`Accountant review marked as ${next ? 'complete' : 'pending'}`);
+            }}
+            className={`${(monthlyConfig.accountantReviewed ?? true) ? 'text-emerald-600' : 'text-amber-600'} hover:underline flex items-center gap-1 cursor-pointer`}
+            title="Click to toggle accountant review status"
+          >
+            {(monthlyConfig.accountantReviewed ?? true) ? '✓ Accountant Review →' : '⏳ Accountant Review →'}
+          </button>
+          
+          <button
+            onClick={() => {
+              const next = !(monthlyConfig.adminApproved ?? (paidEmployeesCount > 0));
+              const updated = { ...monthlyConfig, adminApproved: next };
+              salaryStorage.saveMonthlyConfig(selectedMonth, updated);
+              setMonthlyConfig(updated);
+              toast.success(`Admin approval marked as ${next ? 'approved' : 'pending'}`);
+            }}
+            className={`${(monthlyConfig.adminApproved || paidEmployeesCount > 0) ? 'text-emerald-600' : 'text-amber-600'} hover:underline flex items-center gap-1 cursor-pointer`}
+            title="Click to toggle admin approval"
+          >
+            {(monthlyConfig.adminApproved || paidEmployeesCount > 0) ? '✓ Approved →' : '⏳ Pending Admin →'}
+          </button>
+
+          <button
+            onClick={() => onNavigate?.('/salary-payslips')}
+            className="text-amber-600 hover:text-amber-700 flex items-center gap-1 font-extrabold cursor-pointer transition-colors"
+            title="Click to view & print payslips"
+          >
             🟡 Payslips →
-          </span>
-          <span className={paidEmployeesCount > 0 ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}>
-            {paidEmployeesCount > 0 ? '✓ Paid' : '⚪ Paid'}
+          </button>
+          <span className={paidEmployeesCount === records.length && records.length > 0 ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}>
+            {paidEmployeesCount === records.length && records.length > 0 ? '✓ Paid' : paidEmployeesCount > 0 ? `🟡 Paid (${paidEmployeesCount}/${records.length})` : '⚪ Paid'}
           </span>
         </div>
       </div>

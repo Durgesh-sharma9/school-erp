@@ -191,8 +191,18 @@ export function SalaryAttendancePage({ onNavigate }) {
     return Array.from(set).sort();
   }, [records]);
 
+  // Check if month payroll is already disbursed
+  const isMonthDisbursed = useMemo(() => {
+    const monthRecs = salaryStorage.getMonthlyRecords(monthKey);
+    return monthRecs.length > 0 && monthRecs.every((r) => r.status === 'Paid');
+  }, [monthKey, records]);
+
   // Lock Toggle
   const handleLockToggle = (record) => {
+    if (isMonthDisbursed) {
+      toast.error('Attendance is permanently locked for disbursed payroll months!');
+      return;
+    }
     const isCurrentlyLocked = record.isLocked;
     salaryStorage.toggleAttendanceLock(monthKey, record._id);
     toast.success(
@@ -202,6 +212,10 @@ export function SalaryAttendancePage({ onNavigate }) {
 
   // Open Edit Modal
   const openEditModal = (record) => {
+    if (isMonthDisbursed) {
+      toast.error('Attendance is locked because payroll for this month has already been disbursed!');
+      return;
+    }
     setEditRecord(record);
     setEditForm({
       paidLeaveDays: record.paidLeaveDays || 0,
@@ -238,6 +252,10 @@ export function SalaryAttendancePage({ onNavigate }) {
   const handleEditSave = (e) => {
     e.preventDefault();
     if (!editRecord) return;
+    if (isMonthDisbursed) {
+      toast.error('Cannot edit attendance for a disbursed month!');
+      return;
+    }
 
     salaryStorage.updateStaffAttendance(monthKey, editRecord._id, {
       paidLeaveDays: Number(editForm.paidLeaveDays) || 0,
@@ -246,6 +264,9 @@ export function SalaryAttendancePage({ onNavigate }) {
       overtimeHours: Number(editForm.overtimeHours) || 0,
       remarks: editForm.remarks
     });
+
+    // Reactive sync: recalculate monthly salary records so processing updates immediately
+    salaryStorage.recalculateMonthRecords(monthKey);
 
     toast.success(`Updated attendance for ${editRecord.staffId?.name}!`);
     setEditRecord(null);
@@ -338,6 +359,10 @@ export function SalaryAttendancePage({ onNavigate }) {
 
   // Save Working Calendar
   const handleSaveCalendar = () => {
+    if (isMonthDisbursed) {
+      toast.error('Cannot modify calendar for a disbursed month!');
+      return;
+    }
     const workingDays = calendarDays.filter((d) => d.status === 'Working').length;
     const weeklyOffs = calendarDays.filter((d) => d.status === 'WeeklyOff').length;
     const publicHolidays = calendarDays.filter((d) => d.status === 'PublicHoliday').length;
@@ -378,6 +403,8 @@ export function SalaryAttendancePage({ onNavigate }) {
     });
 
     salaryStorage.saveMonthlyAttendance(monthKey, updatedAttendance);
+    // Reactive sync: recalculate monthly salary records with new working days
+    salaryStorage.recalculateMonthRecords(monthKey);
     setMonthlyConfig(newConfig);
     setRecords(updatedAttendance);
     setCalendarOpen(false);
@@ -386,6 +413,24 @@ export function SalaryAttendancePage({ onNavigate }) {
 
   return (
     <div className="space-y-4 p-4 md:p-6 bg-slate-50/50 min-h-screen">
+      {/* Disbursed / Paid Immutability Alert */}
+      {isMonthDisbursed && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between text-amber-900 text-xs">
+          <div className="flex items-center gap-2.5">
+            <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <div>
+              <span className="font-extrabold">Attendance Immutability Guard Active:</span>
+              <span className="ml-1 text-amber-800">
+                Payroll for {MONTHS[selectedMonth]?.label} {selectedYear} has already been disbursed. Attendance records are locked to preserve accounting integrity.
+              </span>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full bg-amber-200/60 font-bold text-[10px] text-amber-800">
+            DISBURSED
+          </span>
+        </div>
+      )}
+
       {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-slate-100 shadow-soft gap-4 transition-all duration-300 hover:shadow-md hover:border-slate-200">
         <div>
@@ -794,9 +839,9 @@ export function SalaryAttendancePage({ onNavigate }) {
 
                                     <button
                                       onClick={() => openEditModal(row)}
-                                      disabled={locked}
+                                      disabled={locked || isMonthDisbursed}
                                       className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer shadow-sm disabled:opacity-30 disabled:hover:bg-blue-50"
-                                      title="Edit summary correction variables"
+                                      title={isMonthDisbursed ? 'Locked: Month payroll already disbursed' : locked ? 'Record locked' : 'Edit summary correction variables'}
                                     >
                                       <Edit3 className="w-3 h-3 text-blue-500" /> Edit
                                     </button>

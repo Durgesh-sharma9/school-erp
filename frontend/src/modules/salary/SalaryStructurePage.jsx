@@ -386,7 +386,7 @@ export function SalaryStructurePage({ onNavigate }) {
         workType: formData.workType,
         gender: formData.gender,
         phone: formData.phone,
-        email: formData.email || `${formData.firstName.toLowerCase()}@greenwood.edu`,
+        email: formData.email || `${formData.firstName.toLowerCase()}@jdinternationalschool.com`,
         pan: formData.pan,
         bankName: formData.bankName,
         accNo: formData.bankAccountNumber,
@@ -437,7 +437,7 @@ export function SalaryStructurePage({ onNavigate }) {
             <span className="font-semibold text-slate-700">Staff Management</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Staff Management</h1>
-          <p className="text-sm text-slate-500">Add, edit, filter, and deactivate profiles inside Greenwood High School.</p>
+          <p className="text-sm text-slate-500">Add, edit, filter, and deactivate profiles inside JD International School, Jaipur.</p>
         </div>
 
         <div className="flex items-center gap-2">

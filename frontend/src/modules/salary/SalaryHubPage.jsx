@@ -53,9 +53,10 @@ export function SalaryHubPage({ onNavigate }) {
 
   const leavesToday = 1;
   const workingToday = totalStaff - leavesToday;
-  const workingDays = 23;
-  const holidays = 0;
-  const weeklyOffs = 5;
+  const monthlyConfig = useMemo(() => salaryStorage.getMonthlyConfig(selectedMonth), [selectedMonth]);
+  const workingDays = monthlyConfig?.workingDays || 23;
+  const holidays = monthlyConfig?.publicHolidays || 0;
+  const weeklyOffs = monthlyConfig?.weeklyOffs || 5;
 
   const formatCurrency = (val) => {
     return '₹' + Number(val || 0).toLocaleString('en-IN');
@@ -546,38 +547,36 @@ export function SalaryHubPage({ onNavigate }) {
             </div>
           </div>
 
-          {/* Quick Bank Advice & Export Pill */}
-          <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-4 text-white shadow-md space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-white/10 text-emerald-300">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                Disbursement Ready
+          {/* Quick Bank Advice & Export Card (Exact Match to Screenshot) */}
+          <div className="bg-gradient-to-br from-[#2D2889] via-[#3B2D9E] to-[#4F2CAE] rounded-3xl p-5 text-white shadow-xl space-y-3.5 border border-indigo-400/20">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-indigo-100 backdrop-blur-xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                DISBURSEMENT READY
               </span>
-              <span className="text-[10px] font-mono text-slate-400">SBI e-Payment</span>
             </div>
 
             <div>
-              <h4 className="text-sm font-extrabold text-white">November 2026 Bank Transfer Advice</h4>
-              <p className="text-[11px] text-slate-300 mt-0.5">
-                Export approved NEFT/RTGS payment sheet for 45 verified staff members.
+              <h4 className="text-base font-extrabold text-white tracking-tight">November 2026 Salary Workflows</h4>
+              <p className="text-xs text-indigo-100/80 mt-1 leading-relaxed font-medium">
+                Generate official bank transfer advice, export NEFT/RTGS payment sheets, or manage school allowance structure.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => onNavigate?.('/salary-reports')}
-                className="flex-1 py-2 bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold rounded-xl text-center shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-white hover:bg-slate-50 text-[#1e1b4b] text-xs font-black rounded-2xl text-center shadow-md transition-all cursor-pointer hover:shadow-lg active:scale-98"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export Bank Sheet</span>
+                Bank Advice
               </button>
               <button
                 type="button"
-                onClick={() => onNavigate?.('/salary-payslips')}
-                className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl text-center transition cursor-pointer border border-white/20"
+                onClick={() => onNavigate?.('/salary-settings')}
+                className="flex-1 py-2.5 bg-white/15 hover:bg-white/25 text-white text-xs font-extrabold rounded-2xl text-center transition-all cursor-pointer border border-white/20 backdrop-blur-xs active:scale-98"
               >
-                Payslips
+                Salary Settings
               </button>
             </div>
           </div>

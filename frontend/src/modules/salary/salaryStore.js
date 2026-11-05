@@ -163,7 +163,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Principal",
     "phone": "9829010000",
-    "email": "principal@greenwood.edu",
+    "email": "principal@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100000",
     "ifsc": "SBIN0001234",
@@ -184,7 +184,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Vice Principal",
     "phone": "9829010001",
-    "email": "viceprincipal@greenwood.edu",
+    "email": "viceprincipal@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100001",
     "ifsc": "HDFC0000456",
@@ -205,7 +205,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "PGT",
     "phone": "9829010002",
-    "email": "vijay@greenwood.edu",
+    "email": "vijay@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100002",
     "ifsc": "ICIC0000789",
@@ -226,7 +226,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Transport Manager",
     "phone": "9829010003",
-    "email": "hari@greenwood.edu",
+    "email": "hari@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100003",
     "ifsc": "SBIN0001234",
@@ -247,7 +247,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Driver",
     "phone": "9829010004",
-    "email": "ram@greenwood.edu",
+    "email": "ram@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100004",
     "ifsc": "HDFC0000456",
@@ -268,7 +268,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Driver",
     "phone": "9829010005",
-    "email": "mohan@greenwood.edu",
+    "email": "mohan@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100005",
     "ifsc": "ICIC0000789",
@@ -289,7 +289,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Driver",
     "phone": "9829010006",
-    "email": "shyam@greenwood.edu",
+    "email": "shyam@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100006",
     "ifsc": "SBIN0001234",
@@ -310,7 +310,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Housekeeping Staff",
     "phone": "9829010007",
-    "email": "kamala@greenwood.edu",
+    "email": "kamala@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100007",
     "ifsc": "HDFC0000456",
@@ -331,7 +331,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Housekeeping Staff",
     "phone": "9829010008",
-    "email": "savitri@greenwood.edu",
+    "email": "savitri@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100008",
     "ifsc": "ICIC0000789",
@@ -352,7 +352,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "Housekeeping Staff",
     "phone": "9829010009",
-    "email": "munni@greenwood.edu",
+    "email": "munni@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100009",
     "ifsc": "SBIN0001234",
@@ -373,7 +373,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Administration",
     "designation": "TGT",
     "phone": "9829010010",
-    "email": "om@greenwood.edu",
+    "email": "om@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100010",
     "ifsc": "HDFC0000456",
@@ -394,7 +394,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "PGT",
     "phone": "9829010011",
-    "email": "amit@greenwood.edu",
+    "email": "amit@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100011",
     "ifsc": "ICIC0000789",
@@ -415,7 +415,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "PGT",
     "phone": "9829010012",
-    "email": "priya@greenwood.edu",
+    "email": "priya@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100012",
     "ifsc": "SBIN0001234",
@@ -436,7 +436,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "TGT",
     "phone": "9829010013",
-    "email": "rahul@greenwood.edu",
+    "email": "rahul@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100013",
     "ifsc": "HDFC0000456",
@@ -457,7 +457,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "TGT",
     "phone": "9829010014",
-    "email": "naresh@greenwood.edu",
+    "email": "naresh@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100014",
     "ifsc": "ICIC0000789",
@@ -478,7 +478,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "PRT",
     "phone": "9829010015",
-    "email": "vimla@greenwood.edu",
+    "email": "vimla@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100015",
     "ifsc": "SBIN0001234",
@@ -499,7 +499,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Science",
     "designation": "PRT",
     "phone": "9829010016",
-    "email": "fatima@greenwood.edu",
+    "email": "fatima@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100016",
     "ifsc": "HDFC0000456",
@@ -520,7 +520,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Maths",
     "designation": "PGT",
     "phone": "9829010017",
-    "email": "anjali@greenwood.edu",
+    "email": "anjali@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100017",
     "ifsc": "ICIC0000789",
@@ -541,7 +541,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Maths",
     "designation": "TGT",
     "phone": "9829010018",
-    "email": "sanjay@greenwood.edu",
+    "email": "sanjay@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100018",
     "ifsc": "SBIN0001234",
@@ -562,7 +562,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Maths",
     "designation": "TGT",
     "phone": "9829010019",
-    "email": "shashi@greenwood.edu",
+    "email": "shashi@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100019",
     "ifsc": "HDFC0000456",
@@ -583,7 +583,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Maths",
     "designation": "PRT",
     "phone": "9829010020",
-    "email": "usha@greenwood.edu",
+    "email": "usha@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100020",
     "ifsc": "ICIC0000789",
@@ -604,7 +604,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Maths",
     "designation": "PRT",
     "phone": "9829010021",
-    "email": "lakshmi@greenwood.edu",
+    "email": "lakshmi@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100021",
     "ifsc": "SBIN0001234",
@@ -625,7 +625,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "PGT",
     "phone": "9829010022",
-    "email": "kavita@greenwood.edu",
+    "email": "kavita@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100022",
     "ifsc": "HDFC0000456",
@@ -646,7 +646,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "TGT",
     "phone": "9829010023",
-    "email": "deepak@greenwood.edu",
+    "email": "deepak@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100023",
     "ifsc": "ICIC0000789",
@@ -667,7 +667,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "PRT",
     "phone": "9829010024",
-    "email": "sunitar@greenwood.edu",
+    "email": "sunitar@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100024",
     "ifsc": "SBIN0001234",
@@ -688,7 +688,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "PRT",
     "phone": "9829010025",
-    "email": "mary@greenwood.edu",
+    "email": "mary@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100025",
     "ifsc": "HDFC0000456",
@@ -709,7 +709,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "PRT",
     "phone": "9829010026",
-    "email": "rekha@greenwood.edu",
+    "email": "rekha@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100026",
     "ifsc": "ICIC0000789",
@@ -730,7 +730,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "English",
     "designation": "PRT",
     "phone": "9829010027",
-    "email": "saroj@greenwood.edu",
+    "email": "saroj@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100027",
     "ifsc": "SBIN0001234",
@@ -751,7 +751,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Hindi",
     "designation": "TGT",
     "phone": "9829010028",
-    "email": "meena@greenwood.edu",
+    "email": "meena@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100028",
     "ifsc": "HDFC0000456",
@@ -772,7 +772,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Hindi",
     "designation": "PRT",
     "phone": "9829010029",
-    "email": "radha@greenwood.edu",
+    "email": "radha@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100029",
     "ifsc": "ICIC0000789",
@@ -793,7 +793,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Hindi",
     "designation": "PRT",
     "phone": "9829010030",
-    "email": "anita@greenwood.edu",
+    "email": "anita@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100030",
     "ifsc": "SBIN0001234",
@@ -814,7 +814,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Computer",
     "designation": "PGT",
     "phone": "9829010031",
-    "email": "rakesh@greenwood.edu",
+    "email": "rakesh@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100031",
     "ifsc": "HDFC0000456",
@@ -835,7 +835,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Computer",
     "designation": "TGT",
     "phone": "9829010032",
-    "email": "neha@greenwood.edu",
+    "email": "neha@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100032",
     "ifsc": "ICIC0000789",
@@ -856,7 +856,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Computer",
     "designation": "Lab Assistant",
     "phone": "9829010033",
-    "email": "babu@greenwood.edu",
+    "email": "babu@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100033",
     "ifsc": "SBIN0001234",
@@ -877,7 +877,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Accounts",
     "designation": "Accountant",
     "phone": "9829010034",
-    "email": "sunil@greenwood.edu",
+    "email": "sunil@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100034",
     "ifsc": "HDFC0000456",
@@ -898,7 +898,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Accounts",
     "designation": "Accountant",
     "phone": "9829010035",
-    "email": "rani@greenwood.edu",
+    "email": "rani@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100035",
     "ifsc": "ICIC0000789",
@@ -919,7 +919,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Sports",
     "designation": "Sports Coach",
     "phone": "9829010036",
-    "email": "suresh@greenwood.edu",
+    "email": "suresh@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100036",
     "ifsc": "SBIN0001234",
@@ -940,7 +940,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Library",
     "designation": "Librarian",
     "phone": "9829010037",
-    "email": "kusum@greenwood.edu",
+    "email": "kusum@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100037",
     "ifsc": "HDFC0000456",
@@ -961,7 +961,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Library",
     "designation": "Lab Assistant",
     "phone": "9829010038",
-    "email": "pawan@greenwood.edu",
+    "email": "pawan@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100038",
     "ifsc": "ICIC0000789",
@@ -982,7 +982,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Security",
     "designation": "Security Guard",
     "phone": "9829010039",
-    "email": "dinesh@greenwood.edu",
+    "email": "dinesh@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100039",
     "ifsc": "SBIN0001234",
@@ -1003,7 +1003,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Security",
     "designation": "Security Guard",
     "phone": "9829010040",
-    "email": "birju@greenwood.edu",
+    "email": "birju@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100040",
     "ifsc": "HDFC0000456",
@@ -1024,7 +1024,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Security",
     "designation": "Security Guard",
     "phone": "9829010041",
-    "email": "chandra@greenwood.edu",
+    "email": "chandra@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100041",
     "ifsc": "ICIC0000789",
@@ -1045,7 +1045,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Reception",
     "designation": "Receptionist",
     "phone": "9829010042",
-    "email": "geeta@greenwood.edu",
+    "email": "geeta@jdinternationalschool.com",
     "bankName": "State Bank of India",
     "accNo": "389201100042",
     "ifsc": "SBIN0001234",
@@ -1066,7 +1066,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Reception",
     "designation": "Office Executive",
     "phone": "9829010043",
-    "email": "arun@greenwood.edu",
+    "email": "arun@jdinternationalschool.com",
     "bankName": "HDFC Bank",
     "accNo": "389201100043",
     "ifsc": "HDFC0000456",
@@ -1087,7 +1087,7 @@ export const INITIAL_STAFF_ROSTER = [
     "department": "Reception",
     "designation": "Music Teacher",
     "phone": "9829010044",
-    "email": "renuka@greenwood.edu",
+    "email": "renuka@jdinternationalschool.com",
     "bankName": "ICICI Bank",
     "accNo": "389201100044",
     "ifsc": "ICIC0000789",
@@ -1231,18 +1231,18 @@ export const DEFAULT_MONTHLY_CONFIG = {
 
 export const calculateStaffSalary = (staff, policies = DEFAULT_SALARY_POLICIES, overrides = {}) => {
   const gross = Number(overrides.grossSalary ?? staff.grossSalary ?? 30000);
-  const totalDays = overrides.totalDays ?? 30;
-  const presentDays = overrides.presentDays ?? 28;
-  const paidLeaveDays = overrides.paidLeaveDays ?? 2;
-  const payableDays = Math.min(totalDays, presentDays + paidLeaveDays);
-  const attendanceRatio = totalDays > 0 ? payableDays / totalDays : 1;
+  const totalDays = Number(overrides.totalDays ?? overrides.workingDays ?? 23);
+  const lopDays = Number(overrides.unpaidLeaveDays ?? overrides.lopDays ?? 0);
+  const halfDays = Number(overrides.halfDays ?? 0);
+  const paidLeaveDays = Number(overrides.paidLeaveDays ?? 0);
+  const presentDays = Number(overrides.presentDays ?? Math.max(0, totalDays - lopDays - (halfDays * 0.5)));
 
-  // Basic calculation
+  // Contractual Basic Base (Full contractual component - NOT reduced by attendanceRatio)
   const basicPercent = policies.basicPercentOfGross || 45;
   const baseBasic = staff.basicSalary || Math.round(gross * (basicPercent / 100));
-  const basic = Math.round(baseBasic * attendanceRatio);
+  const basic = baseBasic;
 
-  // Allowances calculation
+  // Allowances breakdown
   let totalAllowances = 0;
   const allowancesBreakdown = {};
 
@@ -1251,26 +1251,40 @@ export const calculateStaffSalary = (staff, policies = DEFAULT_SALARY_POLICIES, 
     if (al.calculationType === 'percent_of_basic') {
       amt = Math.round(basic * (al.value / 100));
     } else if (al.calculationType === 'percent_of_gross') {
-      amt = Math.round(gross * (al.value / 100) * attendanceRatio);
+      amt = Math.round(gross * (al.value / 100));
     } else {
-      amt = Math.round((al.value || 0) * attendanceRatio);
+      amt = Math.round(al.value || 0);
     }
     allowancesBreakdown[al.id] = amt;
     totalAllowances += amt;
   });
 
+  // Balance residual difference into 'other' allowance so Basic + Allowances == Full Gross
+  const allocated = basic + totalAllowances;
+  if (gross > allocated) {
+    const residual = gross - allocated;
+    allowancesBreakdown['other'] = (allowancesBreakdown['other'] || 0) + residual;
+    totalAllowances += residual;
+  }
+
   const bonus = Number(overrides.bonus || 0);
   const overtime = Number(overrides.overtimePay || 0);
   const calculatedGross = basic + totalAllowances + bonus + overtime;
 
-  // Deductions: EPF (12% of basic up to ceiling 15,000)
+  // LOP Deduction: Calculated once based on contractual Gross and monthly working days
+  const dailyRate = totalDays > 0 ? gross / totalDays : 0;
+  const computedLopDeduction = Math.round(dailyRate * (lopDays + (halfDays * 0.5)));
+  const otherDeductions = Number(overrides.otherDeductions ?? computedLopDeduction);
+
+  // EPF: 12% on (Basic + DA) up to wage ceiling of ₹15,000
   let epf = 0;
   if (policies.deductions?.epf?.enabled) {
-    const epfWage = Math.min(basic, policies.deductions.epf.wageCeiling || 15000);
+    const da = allowancesBreakdown['da'] || 0;
+    const epfWage = Math.min(basic + da, policies.deductions.epf.wageCeiling || 15000);
     epf = Math.round(epfWage * ((policies.deductions.epf.employeePercent || 12) / 100));
   }
 
-  // Deductions: ESI (0.75% of gross if gross <= ceiling 21,000)
+  // ESI: 0.75% of gross if gross <= ceiling of ₹21,000
   let esi = 0;
   if (policies.deductions?.esi?.enabled) {
     const esiCeiling = policies.deductions.esi.grossCeiling || 21000;
@@ -1279,9 +1293,10 @@ export const calculateStaffSalary = (staff, policies = DEFAULT_SALARY_POLICIES, 
     }
   }
 
-  // Deductions: Professional Tax
+  // Professional Tax: In Rajasthan, Professional Tax is 0 (exempt by state policy)
   let professionalTax = 0;
-  if (policies.deductions?.professionalTax?.enabled) {
+  const ptState = policies.deductions?.professionalTax?.state || 'Rajasthan';
+  if (policies.deductions?.professionalTax?.enabled && ptState !== 'Rajasthan') {
     const slabs = policies.deductions.professionalTax.slabs || [];
     for (const slab of slabs) {
       if (calculatedGross >= slab.minGross && (slab.maxGross === null || calculatedGross <= slab.maxGross)) {
@@ -1291,33 +1306,48 @@ export const calculateStaffSalary = (staff, policies = DEFAULT_SALARY_POLICIES, 
     }
   }
 
-  const advanceRecovery = Number(overrides.advanceRecovery || 0);
+  const advanceRecovery = Number(overrides.advanceRecovery ?? overrides.advanceDeduction ?? 0);
   const tds = Number(overrides.tds || 0);
-  const otherDeductions = Number(overrides.otherDeductions || 0);
 
   const totalDeductions = epf + esi + professionalTax + advanceRecovery + tds + otherDeductions;
   const netSalary = Math.max(0, calculatedGross - totalDeductions);
 
   return {
     basic,
+    basicSalary: basic,
+    hra: allowancesBreakdown['hra'] || 0,
+    da: allowancesBreakdown['da'] || 0,
+    specialAllowance: allowancesBreakdown['special'] || 0,
+    transportAllowance: allowancesBreakdown['ta'] || 1800,
+    medicalAllowance: allowancesBreakdown['ma'] || 1250,
+    otherAllowance: allowancesBreakdown['other'] || 0,
     allowancesBreakdown,
     totalAllowances,
     bonus,
     overtimePay: overtime,
     grossSalary: calculatedGross,
     epf,
+    epfDeduction: epf,
     esi,
+    esiDeduction: esi,
     professionalTax,
+    profTax: professionalTax,
     advanceRecovery,
+    advanceDeduction: advanceRecovery,
     tds,
     otherDeductions,
+    unpaidLeaveDeduction: otherDeductions,
+    lopDeduction: otherDeductions,
     totalDeductions,
     netSalary,
     totalDays,
+    workingDays: totalDays,
     presentDays,
     paidLeaveDays,
-    payableDays,
-    attendanceRatio
+    lopDays,
+    unpaidLeaveDays: lopDays,
+    halfDays,
+    dailyRate
   };
 };
 
@@ -1506,6 +1536,7 @@ export const salaryStorage = {
     const policies = salaryStorage.getPolicies();
     const activeRoster = getActiveStaffRoster();
     const attendanceRecords = salaryStorage.getMonthlyAttendance(monthKey);
+    const allAdvances = salaryStorage.getAdvances();
 
     const records = activeRoster.map(staff => {
       const att = attendanceRecords.find(a => a.staffId?.id === staff.id || a.staffId?.code === staff.code) || {};
@@ -1519,6 +1550,15 @@ export const salaryStorage = {
       const lopDeduction = Math.round(dailyRate * (unpaidLeaveDays + (halfDays * 0.5)));
       const overtimePay = Math.round(overtimeHours > 0 ? (dailyRate / 8) * overtimeHours : 0);
 
+      // Auto-populate active advance EMI for this staff member
+      const staffAdvance = allAdvances.find(adv =>
+        (adv.staffCode === staff.code || adv.staffName === staff.name || adv.staffId === staff.id) &&
+        adv.status === 'Active'
+      );
+      const advanceDeduction = staffAdvance
+        ? Math.min(Number(staffAdvance.monthlyDeduction || 0), Number(staffAdvance.remainingAmount || 0))
+        : 0;
+
       const calc = calculateStaffSalary(staff, policies, {
         grossSalary: staff.grossSalary,
         presentDays: presentDays,
@@ -1526,7 +1566,7 @@ export const salaryStorage = {
         bonus: 0,
         overtimePay: overtimePay,
         otherDeductions: lopDeduction,
-        advanceRecovery: 0,
+        advanceRecovery: advanceDeduction,
         tds: 0
       });
 
@@ -1616,7 +1656,7 @@ export const salaryStorage = {
         department: newStaff.department || 'Administration',
         designation: newStaff.designation || 'Teacher',
         phone: newStaff.phone || '',
-        email: newStaff.email || `${code.toLowerCase()}@greenwood.edu`,
+        email: newStaff.email || `${code.toLowerCase()}@jdinternationalschool.com`,
         bankName: newStaff.bankName || 'State Bank of India',
         accNo: newStaff.accNo || '—',
         ifsc: newStaff.ifsc || 'SBIN0001234',
@@ -1699,6 +1739,7 @@ export const salaryStorage = {
     const policies = salaryStorage.getPolicies();
     const activeRoster = getActiveStaffRoster();
     const attendanceRecords = salaryStorage.getMonthlyAttendance(monthKey);
+    const allAdvances = salaryStorage.getAdvances();
 
     const existing = (() => {
       try {
@@ -1711,6 +1752,12 @@ export const salaryStorage = {
 
     const records = activeRoster.map(staff => {
       const oldRec = existing.find(r => r.staffId === staff.id || r.code === staff.code) || {};
+
+      // If salary for this staff is already 'Paid', strictly protect the disbursed record!
+      if (oldRec.status === 'Paid') {
+        return oldRec;
+      }
+
       const att = attendanceRecords.find(a => a.staffId?.id === staff.id || a.staffId?.code === staff.code) || {};
 
       const unpaidLeaveDays = att.unpaidLeaveDays ?? 0;
@@ -1723,6 +1770,15 @@ export const salaryStorage = {
       const lopDeduction = Math.round(dailyRate * (unpaidLeaveDays + (halfDays * 0.5)));
       const overtimePay = Math.round(overtimeHours > 0 ? (dailyRate / 8) * overtimeHours : 0);
 
+      // Auto-populate active advance EMI for this staff member
+      const staffAdvance = allAdvances.find(adv =>
+        (adv.staffCode === staff.code || adv.staffName === staff.name || adv.staffId === staff.id) &&
+        adv.status === 'Active'
+      );
+      const advanceDeduction = oldRec.advanceRecovery !== undefined
+        ? Number(oldRec.advanceRecovery)
+        : (staffAdvance ? Math.min(Number(staffAdvance.monthlyDeduction || 0), Number(staffAdvance.remainingAmount || 0)) : 0);
+
       const calc = calculateStaffSalary(staff, policies, {
         grossSalary: staff.grossSalary,
         presentDays: presentDays,
@@ -1730,7 +1786,7 @@ export const salaryStorage = {
         bonus: oldRec.bonus || 0,
         overtimePay: overtimePay || oldRec.overtimePay || 0,
         otherDeductions: lopDeduction,
-        advanceRecovery: oldRec.advanceRecovery || 0,
+        advanceRecovery: advanceDeduction,
         tds: oldRec.tds || 0
       });
 
@@ -1750,7 +1806,7 @@ export const salaryStorage = {
         pfNo: staff.pfNo,
         esiNo: staff.esiNo,
         month: monthKey,
-        status: oldRec.status || 'Approved',
+        status: oldRec.status || 'Pending',
         payMode: oldRec.payMode || 'Bank Transfer',
         disbursedDate: oldRec.disbursedDate || `${monthKey}-28`,
         receiptNo: oldRec.receiptNo || `PAY-${monthKey.replace('-', '')}-${staff.code.replace('EMP-', '')}`,
@@ -1961,6 +2017,38 @@ export const salaryStorage = {
         disburseRemarks: paymentDetails.payRemarks || 'Monthly Payroll Disbursed'
       }));
       salaryStorage.saveMonthlyRecords(monthKey, updated);
+
+      // Decrement active advances balances
+      try {
+        let advModified = false;
+        const currentAdvances = salaryStorage.getAdvances();
+        const updatedAdvances = currentAdvances.map(adv => {
+          const rec = updated.find(r =>
+            (r.code === adv.staffCode || r.name === adv.staffName || r.staffId === adv.staffId) &&
+            (r.advanceRecovery > 0 || r.advanceDeduction > 0)
+          );
+          if (rec && adv.status === 'Active') {
+            const deductionAmt = Number(rec.advanceRecovery || rec.advanceDeduction || 0);
+            const newRemaining = Math.max(0, (adv.remainingAmount || 0) - deductionAmt);
+            const newRecovered = (adv.recoveredAmount || 0) + deductionAmt;
+            advModified = true;
+            return {
+              ...adv,
+              remainingAmount: newRemaining,
+              recoveredAmount: newRecovered,
+              status: newRemaining === 0 ? 'Completed' : 'Active',
+              lastDisbursedMonth: monthKey
+            };
+          }
+          return adv;
+        });
+        if (advModified) {
+          salaryStorage.saveAdvances(updatedAdvances);
+        }
+      } catch (advErr) {
+        console.warn('Error updating advances ledger upon disbursement:', advErr);
+      }
+
       return updated;
     } catch (e) {
       console.error('Error disbursing all salaries:', e);
@@ -1989,9 +2077,10 @@ export const salaryStorage = {
     try {
       const records = salaryStorage.getMonthlyRecords(monthKey);
       const disDate = paymentDetails.payDate || new Date().toISOString().slice(0, 10);
+      let paidRecord = null;
       const updated = records.map(r => {
         if (r.id === recordId || r.staffId === recordId || r.code === recordId) {
-          return {
+          paidRecord = {
             ...r,
             status: 'Paid',
             payMode: paymentDetails.payMethod || 'Bank Transfer',
@@ -1999,10 +2088,35 @@ export const salaryStorage = {
             transactionRef: paymentDetails.payRef || `TXN-${Date.now().toString().slice(-6)}`,
             disburseRemarks: paymentDetails.payRemarks || 'Disbursed'
           };
+          return paidRecord;
         }
         return r;
       });
       salaryStorage.saveMonthlyRecords(monthKey, updated);
+
+      // Decrement advance if applicable
+      if (paidRecord && (paidRecord.advanceRecovery > 0 || paidRecord.advanceDeduction > 0)) {
+        try {
+          const currentAdvances = salaryStorage.getAdvances();
+          const deductionAmt = Number(paidRecord.advanceRecovery || paidRecord.advanceDeduction || 0);
+          const updatedAdvances = currentAdvances.map(adv => {
+            if ((adv.staffCode === paidRecord.code || adv.staffName === paidRecord.name) && adv.status === 'Active') {
+              const newRemaining = Math.max(0, (adv.remainingAmount || 0) - deductionAmt);
+              const newRecovered = (adv.recoveredAmount || 0) + deductionAmt;
+              return {
+                ...adv,
+                remainingAmount: newRemaining,
+                recoveredAmount: newRecovered,
+                status: newRemaining === 0 ? 'Completed' : 'Active',
+                lastDisbursedMonth: monthKey
+              };
+            }
+            return adv;
+          });
+          salaryStorage.saveAdvances(updatedAdvances);
+        } catch (e) {}
+      }
+
       return updated;
     } catch (e) {
       console.error('Error disbursing single salary:', e);
