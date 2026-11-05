@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Home, Search, Printer, CheckCircle, X, AlertCircle, Award, FileText, Eye, Check, ChevronDown, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Home, Search, Printer, CheckCircle, X, AlertCircle, Award, FileText, Eye, Check, ChevronDown, Calendar, Plus, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { tenantStore } from '../../services/tenantStore';
 
@@ -182,6 +182,67 @@ export function TransferCertificatePage({ onNavigate }) {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const langDropdownRef = useRef(null);
 
+  // Add New TC Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTcData, setNewTcData] = useState(null);
+  const [isNewLangDropdownOpen, setIsNewLangDropdownOpen] = useState(false);
+  const newLangDropdownRef = useRef(null);
+
+  // Registered students directory for quick auto-fill
+  const DEMO_STUDENTS = [
+    { id: '1002', admNo: '1002', srNo: '1002', name: 'DEV SHARMA', className: 'I', section: 'A', fatherName: 'Rajesh Sharma', motherName: 'Sunita Sharma', dob: '2019-01-01', admissionDate: '2020-04-01', pendingFees: 0 },
+    { id: '1245', admNo: '1245', srNo: '1245', name: 'PAYAL BUNKAR', className: 'XII', section: 'A', fatherName: 'Ramesh Bunkar', motherName: 'Geeta Bunkar', dob: '2008-05-14', admissionDate: '2017-07-10', pendingFees: 4800 },
+    { id: '1120', admNo: '1120', srNo: '1120', name: 'HARSH VARDHAN', className: 'VIII', section: 'B', fatherName: 'Surendra Kumar', motherName: 'Anita Devi', dob: '2012-07-22', admissionDate: '2021-04-05', pendingFees: 0 },
+    { id: '1621', admNo: '1621', srNo: '1621', name: 'AADITYA SINGH', className: 'X', section: 'A', fatherName: 'Mahipal Singh', motherName: 'Pushpa Kanwar', dob: '2010-09-12', admissionDate: '2019-04-02', pendingFees: 12000 },
+    { id: '1448', admNo: '1448', srNo: '1448', name: 'RIDHIMA SINHA', className: 'II', section: 'A', fatherName: 'RAUNAK KUMAR SINHA', motherName: 'PRIYA SINHA', dob: '2018-10-18', admissionDate: '2020-01-01', pendingFees: 38200 }
+  ];
+  const [studentsList, setStudentsList] = useState(DEMO_STUDENTS);
+  const [studentSearchInput, setStudentSearchInput] = useState('');
+  const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
+
+  const filteredStudentSuggestions = useMemo(() => {
+    if (!studentSearchInput.trim()) return studentsList.slice(0, 8);
+    const q = studentSearchInput.toLowerCase();
+    return studentsList.filter(
+      s =>
+        (s.name && s.name.toLowerCase().includes(q)) ||
+        (s.admNo && String(s.admNo).toLowerCase().includes(q)) ||
+        (s.srNo && String(s.srNo).toLowerCase().includes(q))
+    ).slice(0, 8);
+  }, [studentsList, studentSearchInput]);
+
+  useEffect(() => {
+    fetch('/api/students')
+      .then(res => res.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+          const mapped = d.data.map((s, idx) => ({
+            id: s.id || `std_${idx}`,
+            admNo: s.admNo || '',
+            srNo: s.srNo || s.admNo || '',
+            name: (s.name || `${s.firstName || ''} ${s.lastName || ''}`).toUpperCase().trim(),
+            className: s.className || 'X',
+            section: s.section || 'A',
+            fatherName: s.fatherName || s.fathers_name || '',
+            motherName: s.motherName || s.mothers_name || '',
+            dob: s.dob || '2012-05-15',
+            admissionDate: s.admissionDate || s.admDate || '2020-04-01',
+            pendingFees: s.pendingFees ?? (s.totalFees && s.paidFees ? (s.totalFees - s.paidFees) : 0)
+          }));
+          setStudentsList(prev => {
+            const combined = [...mapped];
+            prev.forEach(p => {
+              if (!combined.some(c => String(c.admNo) === String(p.admNo))) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Live School Profile
   const [schoolProfile, setSchoolProfile] = useState(() => {
     try {
@@ -235,6 +296,9 @@ export function TransferCertificatePage({ onNavigate }) {
     function handleClickOutside(event) {
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
         setIsLangDropdownOpen(false);
+      }
+      if (newLangDropdownRef.current && !newLangDropdownRef.current.contains(event.target)) {
+        setIsNewLangDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -314,6 +378,123 @@ export function TransferCertificatePage({ onNavigate }) {
     setShowViewModal(false);
   };
 
+  const handleOpenAddNewModal = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setNewTcData({
+      admNo: '',
+      srNo: '',
+      studentRegNo: '',
+      name: '',
+      className: 'X-A',
+      fatherName: '',
+      motherName: '',
+      nationality: 'Indian',
+      placeOfBirth: 'Jaipur',
+      category: 'General',
+      dob: '2012-05-15',
+      dobWords: '',
+      admissionDate: '2020-04-01',
+      admissionClass: 'I',
+      lastClass: 'X',
+      examResult: 'Passed and Promoted',
+      isFailed: 'No',
+      subjects: 'HINDI,ENGLISH,MATHEMATICS,SCIENCE,SOCIAL SCIENCE',
+      isPromoted: 'Yes',
+      promotedClassFigures: 'XI',
+      promotedClassWords: 'Eleven',
+      schoolDues: 'Up to March (2027)',
+      dueAmount: 0,
+      openingAmount: 0,
+      concession: 'No',
+      totalWorkingDays: 218,
+      daysPresent: 204,
+      nccCadet: 'No',
+      extraCurricular: 'Active Participant',
+      generalConduct: 'Good',
+      applicationDate: today,
+      issueDate: today,
+      dateOfLeaving: today,
+      reasonLeaving: 'Parent job transfer',
+      remarks: 'Good character and moral conduct',
+      tcNo: '',
+      fbno: '0',
+      proofOfDob: 'Birth Certificate',
+      onceTwiceInClass: 'No',
+      printType: 'हिंदी / English',
+      status: 'Pending'
+    });
+    setStudentSearchInput('');
+    setShowStudentSuggestions(false);
+    setIsNewLangDropdownOpen(false);
+    setShowAddModal(true);
+  };
+
+  const handleSelectStudentForNewTc = (student) => {
+    setStudentSearchInput(`[${student.admNo || student.id}] ${student.name}`);
+    setShowStudentSuggestions(false);
+    setNewTcData(prev => ({
+      ...prev,
+      admNo: student.admNo || '',
+      srNo: student.srNo || student.admNo || '',
+      studentRegNo: student.studentRegNo || `REG-${student.admNo || '100'}`,
+      name: (student.name || '').toUpperCase().trim(),
+      className: student.className ? `${student.className}-${student.section || 'A'}` : 'X-A',
+      fatherName: student.fatherName || '',
+      motherName: student.motherName || '',
+      dob: student.dob || prev.dob,
+      admissionDate: student.admissionDate || prev.admissionDate,
+      dueAmount: student.pendingFees ?? 0,
+      openingAmount: 0
+    }));
+  };
+
+  const handleNewTcChange = (field, value) => {
+    setNewTcData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveNewTc = (e, shouldIssueDirectly = false) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!newTcData?.name?.trim()) {
+      toast.error('Please enter student name!');
+      return;
+    }
+    if (!newTcData?.admNo?.trim()) {
+      toast.error('Please enter admission number!');
+      return;
+    }
+
+    setTcList(prev => {
+      const nextSNo = (prev.length > 0 ? Math.max(...prev.map(p => p.sNo || 0)) : 0) + 1;
+      let assignedTcNo = '';
+      let assignedStatus = 'Pending';
+      let assignedIssueDate = '';
+
+      if (shouldIssueDirectly) {
+        assignedTcNo = getNextTcNumber(prev);
+        assignedStatus = 'Issued';
+        assignedIssueDate = newTcData.issueDate || new Date().toISOString().split('T')[0];
+      }
+
+      const newRecord = {
+        ...newTcData,
+        sNo: nextSNo,
+        tcNo: assignedTcNo,
+        status: assignedStatus,
+        issueDate: assignedIssueDate
+      };
+
+      toast.success(
+        shouldIssueDirectly
+          ? `TC Approved & Issued for ${newRecord.name}! Assigned TC No: ${assignedTcNo}`
+          : `New TC record created for ${newRecord.name} (Pending Approval)`
+      );
+
+      return [newRecord, ...prev];
+    });
+
+    setShowAddModal(false);
+  };
+
   const handlePrint = (tc) => {
     setSelectedTc(tc);
     setShowPrintModal(true);
@@ -391,6 +572,15 @@ export function TransferCertificatePage({ onNavigate }) {
             </div>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={handleOpenAddNewModal}
+          className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add New TC</span>
+        </button>
       </div>
 
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
@@ -400,15 +590,26 @@ export function TransferCertificatePage({ onNavigate }) {
             <span className="text-xs font-semibold text-slate-700">
               Transfer Certificates: <strong className="text-slate-900">{filtered.length}</strong>
             </span>
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, adm no..."
-                className="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, adm no..."
+                  className="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenAddNewModal}
+                className="px-4 py-2 rounded-lg bg-[#5c67f6] hover:bg-indigo-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors shrink-0 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New</span>
+              </button>
             </div>
           </div>
 
@@ -899,6 +1100,535 @@ export function TransferCertificatePage({ onNavigate }) {
       {/* 1:1 CBSE OFFICIAL 24-POINT TRANSFER CERTIFICATE MODAL                 */}
       {/* Supports Both 'हिंदी / English' Bilingual and English Modes          */}
       {/* ===================================================================== */}
+      {/* ===================================================================== */}
+      {/* ADD NEW TC MODAL (CBSE STANDARD 24-POINT + STUDENT DIRECTORY LOOKUP)  */}
+      {/* ===================================================================== */}
+      {showAddModal && newTcData && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 tracking-wide uppercase">
+                    GENERATE NEW TC
+                  </h2>
+                  <p className="text-[11px] text-slate-500">CBSE Standard 24-Point Format Transfer Certificate Entry</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Student Directory Autocomplete Search */}
+            <div className="relative mb-3.5">
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Quick Search & Auto-Fill from Student Directory (Optional):
+              </label>
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Type student name or admission number to auto-populate fields..."
+                  value={studentSearchInput}
+                  onChange={(e) => {
+                    setStudentSearchInput(e.target.value);
+                    setShowStudentSuggestions(true);
+                  }}
+                  onFocus={() => setShowStudentSuggestions(true)}
+                  className="w-full text-xs pl-8 pr-8 py-2.5 border border-indigo-200 rounded-lg bg-indigo-50/20 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800"
+                />
+                {studentSearchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStudentSearchInput('');
+                      setShowStudentSuggestions(false);
+                    }}
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Suggestions Dropdown */}
+              {showStudentSuggestions && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-100">
+                  {filteredStudentSuggestions.length > 0 ? (
+                    filteredStudentSuggestions.map((st) => (
+                      <div
+                        key={st.id || st.admNo}
+                        onClick={() => handleSelectStudentForNewTc(st)}
+                        className="p-2.5 hover:bg-indigo-50 cursor-pointer flex items-center justify-between text-xs transition-colors"
+                      >
+                        <div>
+                          <span className="font-bold text-slate-800">[{st.admNo}] {st.name}</span>
+                          <span className="text-slate-500 ml-2">Class: {st.className}-{st.section || 'A'}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Father: {st.fatherName || '—'}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 text-xs text-slate-500 text-center">
+                      No matching students found. You can enter details manually below.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Red Financial Info Dues */}
+            <div className="text-rose-600 text-xs font-semibold flex items-center gap-6 mb-3">
+              <div>Due Amount : {newTcData.dueAmount ?? 0}</div>
+              <div>Opening Amount : {newTcData.openingAmount ?? 0}</div>
+            </div>
+
+            {/* Student Basic Information Form Fields */}
+            <div className="bg-slate-50/90 border border-slate-200 rounded-lg p-3 text-xs text-slate-700 mb-4 leading-relaxed">
+              <div className="text-[11px] font-bold text-slate-700 uppercase mb-2">Student Basic Details</div>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Adm No *</label>
+                  <input
+                    type="text"
+                    value={newTcData.admNo || ''}
+                    onChange={(e) => handleNewTcChange('admNo', e.target.value)}
+                    placeholder="e.g. 1501"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-semibold text-slate-800 bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Scholar / SR No</label>
+                  <input
+                    type="text"
+                    value={newTcData.srNo || ''}
+                    onChange={(e) => handleNewTcChange('srNo', e.target.value)}
+                    placeholder="e.g. 1501"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs text-slate-800 bg-white"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Student Full Name *</label>
+                  <input
+                    type="text"
+                    value={newTcData.name || ''}
+                    onChange={(e) => handleNewTcChange('name', e.target.value.toUpperCase())}
+                    placeholder="e.g. AARAV SHARMA"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-900 bg-white uppercase"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Class & Section *</label>
+                  <input
+                    type="text"
+                    value={newTcData.className || ''}
+                    onChange={(e) => handleNewTcChange('className', e.target.value)}
+                    placeholder="e.g. X-A"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs text-slate-800 bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Father's Name *</label>
+                  <input
+                    type="text"
+                    value={newTcData.fatherName || ''}
+                    onChange={(e) => handleNewTcChange('fatherName', e.target.value)}
+                    placeholder="Father's full name"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs text-slate-800 bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Mother's Name</label>
+                  <input
+                    type="text"
+                    value={newTcData.motherName || ''}
+                    onChange={(e) => handleNewTcChange('motherName', e.target.value)}
+                    placeholder="Mother's full name"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs text-slate-800 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5">Date of Birth</label>
+                  <input
+                    type="date"
+                    value={newTcData.dob || ''}
+                    onChange={(e) => handleNewTcChange('dob', e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs text-slate-800 bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 3-Column CBSE 24-Point Input Grid */}
+            <form onSubmit={(e) => handleSaveNewTc(e, false)} className="space-y-3.5 text-xs">
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Student Registration No"
+                    value={newTcData.studentRegNo || ''}
+                    onChange={(e) => handleNewTcChange('studentRegNo', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.isFailed || 'No'}
+                      onChange={(e) => handleNewTcChange('isFailed', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="No">Failed* : No</option>
+                      <option value="Yes">Failed* : Yes</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.examResult || 'Passed and Promoted'}
+                      onChange={(e) => handleNewTcChange('examResult', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="Passed and Promoted">Got Last Exam Result* : Passed & Promoted</option>
+                      <option value="Passed">Got Last Exam Result* : Passed</option>
+                      <option value="Promoted to XI">Got Last Exam Result* : Promoted to XI</option>
+                      <option value="Promoted to VIII">Got Last Exam Result* : Promoted to VIII</option>
+                      <option value="Detained">Got Last Exam Result* : Detained</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.isPromoted || 'Yes'}
+                      onChange={(e) => handleNewTcChange('isPromoted', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="Yes">Promotion* : Yes</option>
+                      <option value="Qualified for Promotion">Promotion* : Qualified for Promotion</option>
+                      <option value="No">Promotion* : No</option>
+                      <option value="N/A">Promotion* : N/A</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.feesPaid || 'Yes'}
+                      onChange={(e) => handleNewTcChange('feesPaid', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="Yes">Fees Paid* : Yes</option>
+                      <option value="No">Fees Paid* : No</option>
+                      <option value="Partial">Fees Paid* : Partial</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium">
+                    Last Fee Paid date
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Up to March (2027)"
+                    value={newTcData.schoolDues || 'Up to March (2027)'}
+                    onChange={(e) => handleNewTcChange('schoolDues', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 3 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.concession || 'No'}
+                      onChange={(e) => handleNewTcChange('concession', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="No">Fees Concession* : No</option>
+                      <option value="Yes">Fees Concession* : Yes</option>
+                      <option value="Nil">Fees Concession* : Nil</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.nccCadet || 'No'}
+                      onChange={(e) => handleNewTcChange('nccCadet', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="No">NCC/Scout : No</option>
+                      <option value="Scout Member">NCC/Scout : Scout Member</option>
+                      <option value="NCC Cadet">NCC/Scout : NCC Cadet</option>
+                      <option value="Guide">NCC/Scout : Guide</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    placeholder="Attendance"
+                    value={newTcData.daysPresent ?? 204}
+                    onChange={(e) => handleNewTcChange('daysPresent', parseInt(e.target.value, 10) || 0)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 4 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div>
+                  <input
+                    type="number"
+                    placeholder="School Open days"
+                    value={newTcData.totalWorkingDays ?? 218}
+                    onChange={(e) => handleNewTcChange('totalWorkingDays', parseInt(e.target.value, 10) || 0)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <div className="relative">
+                    <select
+                      value={newTcData.generalConduct || 'Good'}
+                      onChange={(e) => handleNewTcChange('generalConduct', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-700 bg-white appearance-none focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="Good">General Conduct* : Good</option>
+                      <option value="Very Good">General Conduct* : Very Good</option>
+                      <option value="Exemplary">General Conduct* : Exemplary</option>
+                      <option value="Satisfactory">General Conduct* : Satisfactory</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium z-10">
+                    Date of Application
+                  </span>
+                  <input
+                    type={newTcData.applicationDate ? 'date' : 'text'}
+                    placeholder="mm/dd/yyyy"
+                    value={newTcData.applicationDate || ''}
+                    onFocus={(e) => (e.target.type = 'date')}
+                    onBlur={(e) => {
+                      if (!newTcData.applicationDate) e.target.type = 'text';
+                    }}
+                    onChange={(e) => handleNewTcChange('applicationDate', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium z-10">
+                    Issue Date*
+                  </span>
+                  <input
+                    type={newTcData.issueDate ? 'date' : 'text'}
+                    placeholder="mm/dd/yyyy"
+                    value={newTcData.issueDate || ''}
+                    onFocus={(e) => (e.target.type = 'date')}
+                    onBlur={(e) => {
+                      if (!newTcData.issueDate) e.target.type = 'text';
+                    }}
+                    onChange={(e) => handleNewTcChange('issueDate', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium z-10">
+                    Date of Leaving*
+                  </span>
+                  <input
+                    type={newTcData.dateOfLeaving ? 'date' : 'text'}
+                    placeholder="04/01/2026"
+                    value={newTcData.dateOfLeaving || ''}
+                    onFocus={(e) => (e.target.type = 'date')}
+                    onBlur={(e) => {
+                      if (!newTcData.dateOfLeaving) e.target.type = 'text';
+                    }}
+                    onChange={(e) => handleNewTcChange('dateOfLeaving', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Reason of Leaving*"
+                    value={newTcData.reasonLeaving || ''}
+                    onChange={(e) => handleNewTcChange('reasonLeaving', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 6 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium z-10">
+                    subjects
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="subjects"
+                    value={newTcData.subjects || ''}
+                    onChange={(e) => handleNewTcChange('subjects', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500 font-medium z-10">
+                    Fee Book No. / Manual TC No.
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="0"
+                    value={newTcData.fbno || '0'}
+                    onChange={(e) => handleNewTcChange('fbno', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Remark"
+                    value={newTcData.remarks || ''}
+                    onChange={(e) => handleNewTcChange('remarks', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 7 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Proof Of DOB"
+                    value={newTcData.proofOfDob || ''}
+                    onChange={(e) => handleNewTcChange('proofOfDob', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Once/Twice In Class"
+                    value={newTcData.onceTwiceInClass || ''}
+                    onChange={(e) => handleNewTcChange('onceTwiceInClass', e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-md text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Row: Language Selection + Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-slate-200">
+                {/* Print Type Dropdown */}
+                <div className="relative" ref={newLangDropdownRef}>
+                  <span className="absolute -top-2 left-2 px-1 bg-white text-[10px] text-indigo-600 font-semibold z-10">
+                    Print Type*
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsNewLangDropdownOpen(!isNewLangDropdownOpen)}
+                    className="px-4 py-2 border-2 border-indigo-500/80 rounded-lg text-xs font-medium text-slate-800 bg-white flex items-center justify-between gap-4 min-w-[150px] shadow-2xs hover:border-indigo-600 transition-colors cursor-pointer"
+                  >
+                    <span>{newTcData.printType || 'हिंदी / English'}</span>
+                    <ChevronDown className="w-4 h-4 text-indigo-600 shrink-0" />
+                  </button>
+
+                  {/* Dropdown Popup Menu */}
+                  {isNewLangDropdownOpen && (
+                    <div className="absolute bottom-full mb-1 left-0 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1.5 space-y-1">
+                      {['None', 'हिंदी / English', 'English'].map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => {
+                            handleNewTcChange('printType', option);
+                            setIsNewLangDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                            newTcData.printType === option
+                              ? 'bg-indigo-50 text-indigo-600'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>{option}</span>
+                          {newTcData.printType === option && (
+                            <Check className="w-4 h-4 text-indigo-600 shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Action Buttons */}
+                <div className="flex items-center gap-2.5 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium text-xs rounded-lg transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => handleSaveNewTc(e, false)}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+                  >
+                    Save as Pending
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => handleSaveNewTc(e, true)}
+                    className="px-5 py-2 bg-[#5c67f6] hover:bg-indigo-600 text-white font-semibold text-xs rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Generate & Issue TC</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {showPrintModal && selectedTc && (
         <div
           className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"

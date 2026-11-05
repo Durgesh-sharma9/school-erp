@@ -277,7 +277,7 @@ export function TimetableReportsPage({ onNavigate }) {
         </div>
 
         {/* Quick Module Navigation Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <button
             onClick={() => onNavigate && onNavigate('/timetable-dashboard')}
             className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
@@ -340,19 +340,6 @@ export function TimetableReportsPage({ onNavigate }) {
             <div className="truncate">
               <p className="text-xs font-bold text-slate-800">Lesson Plans</p>
               <p className="text-[10px] text-slate-400 truncate">Curriculum tracker</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => onNavigate && onNavigate('/timetable-homework')}
-            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
-          >
-            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-bold text-slate-800">Homework</p>
-              <p className="text-[10px] text-slate-400 truncate">Class assignments</p>
             </div>
           </button>
         </div>

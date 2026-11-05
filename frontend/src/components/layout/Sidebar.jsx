@@ -408,8 +408,7 @@ export const menuCategories = [
       { title: 'Time Tables', path: '/timetables' },
       { title: 'Daily Desk', path: '/daily-desk' },
       { title: 'Lesson Planning', path: '/lesson-planning' },
-      { title: 'Reports', path: '/timetable-reports' },
-      { title: 'Homework', path: '/timetable-homework' }
+      { title: 'Reports', path: '/timetable-reports' }
     ]
   },
 
@@ -438,8 +437,6 @@ export const menuCategories = [
     subItems: [
       { title: 'CC/BC/TF', path: '/certificate-generater-new' },
       { title: 'TC Generation', path: '/transfer-certificate' },
-      { title: 'Gen Manual TC', path: '/generate-manual-tc' },
-      { title: 'Bulk TC Gen', path: '/add-update-tc-bulk' },
       { title: 'Manual CC/BC/TF', path: '/manual-cc-bc' }
     ]
   },

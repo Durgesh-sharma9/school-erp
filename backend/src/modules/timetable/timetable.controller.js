@@ -1001,6 +1001,17 @@ export const createReplacementAssignment = asyncHandler(async (req, res) => {
     return res.status(409).json(new ApiResponse(409, null, 'Selected teacher is already assigned as substitute in another class for this period'));
   }
 
+  // If replacing existing assignment for this exact slot, remove previous replacement record
+  const existingIdx = STORE_REPLACEMENTS.findIndex(r =>
+    r.schoolId === schoolId &&
+    r.date === date &&
+    r.periodId === periodId &&
+    r.classId === classId
+  );
+  if (existingIdx !== -1) {
+    STORE_REPLACEMENTS.splice(existingIdx, 1);
+  }
+
   const newRep = {
     id: `rep_${Date.now()}`,
     schoolId,
@@ -1017,13 +1028,27 @@ export const createReplacementAssignment = asyncHandler(async (req, res) => {
 
   STORE_REPLACEMENTS.unshift(newRep);
 
-  const replTeacher = TEACHERS_LIST.find(t => t.id === replacementTeacherId);
+  const syncedTeachers = getSyncedTeachers();
+  const replTeacher = syncedTeachers.find(t => t.id === replacementTeacherId) || TEACHERS_LIST.find(t => t.id === replacementTeacherId);
   return res.status(201).json(
     new ApiResponse(201, {
       ...newRep,
       replacementTeacherName: replTeacher?.name || replacementTeacherId
     }, 'Substitute teacher assigned successfully')
   );
+});
+
+export const deleteReplacementAssignment = asyncHandler(async (req, res) => {
+  const schoolId = req.schoolId || 'sch_jd_intl';
+  const { id } = req.params;
+
+  const idx = STORE_REPLACEMENTS.findIndex(r => r.id === id);
+  if (idx !== -1) {
+    STORE_REPLACEMENTS.splice(idx, 1);
+    return res.status(200).json(new ApiResponse(200, null, 'Substitution removed successfully'));
+  }
+
+  return res.status(404).json(new ApiResponse(404, null, 'Substitution record not found'));
 });
 
 export const getReplacementHistory = asyncHandler(async (req, res) => {

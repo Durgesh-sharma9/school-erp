@@ -389,15 +389,6 @@ const MODULES_INDEX = [
     desc: 'Standardized chapter lesson plans, learning outcomes, teaching aids and principal review',
     keywords: ['lesson planning', 'lesson plan', 'curriculum', 'pedagogy']
   },
-  {
-    id: 'm-tt-homework',
-    title: 'Homework Central & Study Tasks',
-    path: '/timetable-homework',
-    category: 'Timetable Pro',
-    icon: GraduationCap,
-    desc: 'Class-wise homework assignments, teacher task tracking and submission due dates',
-    keywords: ['timetable homework', 'homework', 'assignments', 'self study']
-  },
 
   // Leave & HR
   {

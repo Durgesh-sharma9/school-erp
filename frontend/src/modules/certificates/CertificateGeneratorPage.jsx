@@ -1,5 +1,40 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Home, Printer, Search, X, Award, CheckCircle, FileText, UserCheck, Briefcase, Calendar, ShieldCheck, ChevronDown, Check } from 'lucide-react';
+import {
+  Home,
+  Printer,
+  Search,
+  X,
+  Award,
+  CheckCircle,
+  FileText,
+  UserCheck,
+  Briefcase,
+  Calendar,
+  ShieldCheck,
+  ChevronDown,
+  Check,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  List,
+  ListOrdered,
+  RotateCcw,
+  RotateCw,
+  Palette,
+  Highlighter,
+  Eraser,
+  RefreshCw,
+  FileEdit,
+  Eye,
+  Plus,
+  Minus,
+  Sparkles
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { tenantStore } from '../../services/tenantStore';
 
@@ -377,6 +412,160 @@ export function CertificateGeneratorPage({ onNavigate }) {
     }, 200);
   };
 
+  // MS Word-Style Document Studio States
+  const [isWordMode, setIsWordMode] = useState(true);
+  const [docFontFamily, setDocFontFamily] = useState("'Times New Roman', Times, serif");
+  const [docFontSize, setDocFontSize] = useState("14.5px");
+  const [selectedTextColor, setSelectedTextColor] = useState("#0f172a");
+  const [templateResetKey, setTemplateResetKey] = useState(0);
+  const [isResetting, setIsResetting] = useState(false);
+  const certBodyRef = useRef(null);
+
+  const executeFormat = (command, value = null) => {
+    try {
+      document.execCommand(command, false, value);
+    } catch (err) {
+      console.error('Format command error:', err);
+    }
+  };
+
+  const preventBlurAndExecute = (e, command, value = null) => {
+    e.preventDefault();
+    executeFormat(command, value);
+  };
+
+  const insertDateAtCursor = (e) => {
+    e.preventDefault();
+    const formatted = new Date().toLocaleDateString('en-GB');
+    executeFormat('insertText', formatted);
+  };
+
+  const insertRefNoAtCursor = (e) => {
+    e.preventDefault();
+    executeFormat('insertText', certificateRefNo);
+  };
+
+  const insertNewParagraph = (e) => {
+    e.preventDefault();
+    if (certBodyRef.current) {
+      const p = document.createElement('p');
+      p.className = 'pt-2';
+      p.innerHTML = 'This is an additional official remark or endorsement.';
+      certBodyRef.current.appendChild(p);
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(p);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  };
+
+  const insertDivider = (e) => {
+    e.preventDefault();
+    executeFormat('insertHorizontalRule', null);
+  };
+
+  const buildStudentHtml = () => {
+    if (!selectedStudent) return '';
+
+    let parentText = '';
+    if (withOption === "Father's Name") {
+      parentText = `, son/daughter of Mr. <strong class="text-slate-950 font-bold">${selectedStudent.fatherName || 'Guardian'}</strong>`;
+    } else if (withOption === "Mother's Name") {
+      parentText = `, son/daughter of Mrs. <strong class="text-slate-950 font-bold">${selectedStudent.motherName || 'Mother'}</strong>`;
+    } else if (withOption === 'Both') {
+      parentText = `, son/daughter of Mr. <strong class="text-slate-950 font-bold">${selectedStudent.fatherName || 'Guardian'}</strong> and Mrs. <strong class="text-slate-950 font-bold">${selectedStudent.motherName || 'Mother'}</strong>`;
+    }
+
+    let extraParagraph = '';
+    if (reportType === 'Character Certificate') {
+      extraParagraph = `<p>During his/her tenure at this institution, his/her character, general conduct, moral demeanor, and discipline have been found to be <strong class="font-bold text-slate-950">EXCELLENT</strong>. To the best of our official knowledge and belief, he/she bears an exemplary reputation and has actively participated in co-curricular, sports, and institutional activities.</p>`;
+    } else if (reportType === 'Tution Fee Report') {
+      extraParagraph = `<p>As per official accounts and fee ledger records of the school office, the requisite tuition fee has been cleared for the session ${academicSession}. The total school tuition and composite fees deposited for the academic year amounts to <strong class="font-black text-slate-950">₹${tuitionFeeAmount}/-</strong>. No institutional dues are outstanding against the student as of today.</p>`;
+    } else if (reportType === 'Study Certificate') {
+      extraParagraph = `<p>The medium of instruction in this institution is <strong class="font-bold text-slate-950">English</strong>. The student has shown earnest scholastic aptitude, commendable attendance record, and diligent progress in all prescribed subjects under the Central Board of Secondary Education curriculum.</p>`;
+    } else if (reportType === 'Participation Certificate' || reportType === 'Participation Achievement') {
+      extraParagraph = `<p>The student has enthusiastically represented the school and achieved meritorious commendation in inter-school cultural events, literary competitions, and sports meets, bringing laurels and honor to our institution.</p>`;
+    }
+
+    return `
+      <p>This is to certify that Master / Miss <strong class="text-slate-950 font-black underline decoration-slate-400 underline-offset-4">${selectedStudent.name}</strong>${parentText}, bearing Admission Number <strong class="text-slate-950 font-bold">${selectedStudent.admNo}</strong> and Scholar Register (SR) Number <strong class="text-slate-950 font-bold">${selectedStudent.srNo}</strong>, is a bonafide regular student of Class <strong class="text-slate-950 font-bold">${selectedStudent.className} - Section ${selectedStudent.section}</strong> of this institution during the academic session <strong class="text-slate-950 font-bold">${academicSession}</strong>.</p>
+      ${extraParagraph}
+      <p class="pt-2">This certificate is issued on the bona fide request of the parent/guardian for official and academic purposes. We wish him/her resounding success and bright fortune in all future academic pursuits and endeavors.</p>
+    `.trim();
+  };
+
+  const buildStaffHtml = () => {
+    if (!selectedStaff) return '';
+    const prefix = selectedStaff.gender === 'Female' ? 'Mrs. / Ms.' : 'Mr.';
+
+    let extraParagraph = '';
+    if (staffReportType === 'Experience Certificate') {
+      extraParagraph = `<p>During his/her tenure with us, he/she has discharged his/her duties with utmost dedication, professionalism, and sincerity. He/she possesses sound pedagogical knowledge, exceptional student mentorship skills, and has contributed significantly toward institutional academic excellence.</p>`;
+    } else if (staffReportType === 'Relieving Certificate') {
+      extraParagraph = `<p>He/she has been officially relieved of his/her responsibilities at the close of institutional office hours on <strong class="font-bold text-slate-950">${issueDate}</strong> upon his/her own request. All institutional assets, administrative charges, and office clearances have been fully settled, and there are no dues pending against him/her.</p>`;
+    } else if (staffReportType === 'Salary Certificate') {
+      extraParagraph = `<p>As per official payroll and salary disbursement records, his/her current gross monthly compensation is <strong class="font-bold text-slate-950">₹${Number(selectedStaff.salary || 35000).toLocaleString('en-IN')}/-</strong>. This salary certificate is issued upon the employee's request for financial, banking, or official verification purposes.</p>`;
+    }
+
+    return `
+      <p>This is to certify that <strong class="text-slate-950 font-black underline decoration-slate-400 underline-offset-4">${prefix} ${selectedStaff.name}</strong>, bearing Employee Code <strong class="text-slate-950 font-bold">${selectedStaff.code}</strong>, has been serving in this institution as <strong class="text-slate-950 font-bold">${selectedStaff.designation}</strong> in the Department of <strong class="text-slate-950 font-bold">${selectedStaff.department}</strong> since <strong class="text-slate-950 font-bold">${selectedStaff.appoinDate}</strong>.</p>
+      ${extraParagraph}
+      <p>His/her character, personal integrity, and professional conduct during employment have been <strong class="font-bold text-slate-950">${staffConduct}</strong>. We extend our warmest appreciation for his/her valuable service and wish him/her continued success in all prospective assignments.</p>
+    `.trim();
+  };
+
+  const handleResetTemplate = () => {
+    setIsResetting(true);
+    try {
+      // 1. Reset typography & toolbar state
+      setDocFontFamily("'Times New Roman', Times, serif");
+      setDocFontSize("14.5px");
+      setSelectedTextColor("#0f172a");
+
+      // 2. Reset certificate metadata
+      setCertificateRefNo(`JDIS/CERT/2026/${Math.floor(100 + Math.random() * 900)}`);
+      setIssueDate(new Date().toLocaleDateString('en-GB'));
+      if (selectedStudent?.paidFees) {
+        setTuitionFeeAmount(Number(selectedStudent.paidFees).toLocaleString('en-IN'));
+      } else {
+        setTuitionFeeAmount('42,000');
+      }
+
+      // 3. Force remount of the entire certificate canvas
+      setTemplateResetKey((prev) => prev + 1);
+
+      toast.success('Certificate restored to original template!');
+    } catch (err) {
+      console.error('Reset template error:', err);
+    } finally {
+      setTimeout(() => setIsResetting(false), 500);
+    }
+  };
+
+  // Sync Body HTML when selected entity or template parameters change
+  useEffect(() => {
+    if (certBodyRef.current) {
+      if (activeTab === 'student') {
+        certBodyRef.current.innerHTML = buildStudentHtml();
+      } else {
+        certBodyRef.current.innerHTML = buildStaffHtml();
+      }
+    }
+  }, [
+    activeTab,
+    selectedStudent?.admNo,
+    selectedStaff?.id,
+    reportType,
+    staffReportType,
+    withOption,
+    academicSession,
+    tuitionFeeAmount,
+    issueDate,
+    staffConduct
+  ]);
+
   // Branding Elements
   const schoolName = schoolProfile?.schoolName || 'J D INTERNATIONAL SCHOOL';
   const schoolAffiliation = schoolProfile?.affiliationNo || '1730619';
@@ -401,6 +590,25 @@ export function CertificateGeneratorPage({ onNavigate }) {
     <div className="min-h-screen bg-[#f3f4f6]">
       {/* Print Specific CSS to isolate certificate */}
       <style>{`
+        /* Word Mode Clean Typography & Seamless Editing (No persistent dashed boxes) */
+        [contenteditable="true"] {
+          outline: none !important;
+        }
+        [contenteditable="true"]:focus {
+          outline: none !important;
+        }
+
+        /* Clean Word Document Editing Experience */
+        .word-mode-active [contenteditable="true"] {
+          cursor: text;
+        }
+
+        /* Subtle focus indicator on the active paragraph or element only when typing */
+        .word-mode-active [contenteditable="true"]:focus {
+          box-shadow: 0 0 0 1.5px rgba(59, 130, 246, 0.4);
+          border-radius: 3px;
+        }
+
         @media print {
           body * {
             visibility: hidden;
@@ -417,6 +625,13 @@ export function CertificateGeneratorPage({ onNavigate }) {
             padding: 0;
             box-shadow: none !important;
             border: none !important;
+          }
+          .no-print, .word-ribbon-toolbar {
+            display: none !important;
+          }
+          [contenteditable="true"] {
+            box-shadow: none !important;
+            outline: none !important;
           }
           @page {
             size: A4 portrait;
@@ -795,12 +1010,345 @@ export function CertificateGeneratorPage({ onNavigate }) {
       </div>
 
       {/* ===================================================================== */}
-      {/* LIVE CERTIFICATE PREVIEW SHEET (High Quality Authentic Layout)        */}
+      {/* LIVE CERTIFICATE PREVIEW SHEET WITH MS WORD WYSIWYG STUDIO            */}
       {/* ===================================================================== */}
-      <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-4">
+        {/* ===================================================================== */}
+        {/* MS WORD-STYLE WYSIWYG FORMATTING TOOLBAR RIBBON                       */}
+        {/* ===================================================================== */}
+        <div className="no-print bg-white rounded-xl shadow-md border border-slate-200/90 overflow-hidden transition-all">
+          {/* Word Header Bar */}
+          <div className="bg-gradient-to-r from-[#185abd] via-[#2b579a] to-[#104a8e] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-white">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-white text-[#2b579a] font-serif font-black flex items-center justify-center text-sm shadow-sm">
+                W
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xs tracking-wide uppercase">Word Document Studio</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-xs">
+                    {isWordMode ? 'WYSIWYG Edit Mode Active' : 'Read-Only Preview'}
+                  </span>
+                </div>
+                <p className="text-[10px] text-blue-100">
+                  Click anywhere directly on the certificate canvas below to type, replace words, or format
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Toggle Edit Mode */}
+              <button
+                type="button"
+                onClick={() => setIsWordMode(!isWordMode)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
+                  isWordMode
+                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                }`}
+              >
+                {isWordMode ? <FileEdit className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>{isWordMode ? 'Word Mode: ON' : 'Preview Mode'}</span>
+              </button>
+
+              {/* Reset to Default Template */}
+              <button
+                type="button"
+                onClick={handleResetTemplate}
+                title="Restore official template wording"
+                className="px-3 py-1 rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Reset Template</span>
+              </button>
+
+              {/* Print */}
+              <button
+                type="button"
+                onClick={() => setShowPrintModal(true)}
+                className="px-3.5 py-1 rounded-lg bg-white text-[#2b579a] hover:bg-blue-50 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Word Formatting Ribbon */}
+          {isWordMode && (
+            <div className="p-2.5 bg-slate-50/90 border-t border-slate-200/80 flex flex-wrap items-center gap-1.5 text-slate-700 text-xs">
+              {/* Undo / Redo */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'undo')}
+                  title="Undo (Ctrl+Z)"
+                  className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'redo')}
+                  title="Redo (Ctrl+Y)"
+                  className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Font Family Dropdown */}
+              <select
+                value={docFontFamily}
+                onChange={(e) => {
+                  setDocFontFamily(e.target.value);
+                  executeFormat('fontName', e.target.value);
+                }}
+                className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-blue-500 shadow-2xs cursor-pointer"
+                title="Document Font Family"
+              >
+                <option value="'Times New Roman', Times, serif">Times New Roman (Serif)</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Garamond', serif">Garamond</option>
+                <option value="Arial, Helvetica, sans-serif">Arial (Sans-serif)</option>
+                <option value="'Inter', -apple-system, sans-serif">Inter / Modern</option>
+                <option value="'Courier New', Courier, monospace">Courier (Typewriter)</option>
+              </select>
+
+              {/* Font Size Dropdown */}
+              <select
+                value={docFontSize}
+                onChange={(e) => {
+                  setDocFontSize(e.target.value);
+                  const selection = window.getSelection();
+                  if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const span = document.createElement('span');
+                    span.style.fontSize = e.target.value;
+                    try {
+                      range.surroundContents(span);
+                    } catch (err) {
+                      executeFormat('fontSize', '3');
+                    }
+                  }
+                }}
+                className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-blue-500 shadow-2xs cursor-pointer w-20"
+                title="Font Size"
+              >
+                <option value="12px">12 pt</option>
+                <option value="13px">13 pt</option>
+                <option value="14px">14 pt</option>
+                <option value="14.5px">14.5 pt</option>
+                <option value="16px">16 pt</option>
+                <option value="18px">18 pt</option>
+                <option value="20px">20 pt</option>
+              </select>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Bold, Italic, Underline, Strikethrough */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'bold')}
+                  title="Bold (Ctrl+B)"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-black cursor-pointer"
+                >
+                  <Bold className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'italic')}
+                  title="Italic (Ctrl+I)"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <Italic className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'underline')}
+                  title="Underline (Ctrl+U)"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <Underline className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'strikeThrough')}
+                  title="Strikethrough"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <Strikethrough className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Text Color & Highlight Picker */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs relative">
+                <label
+                  title="Text Color"
+                  className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-slate-100 cursor-pointer"
+                >
+                  <Palette className="w-3.5 h-3.5 text-slate-600" />
+                  <input
+                    type="color"
+                    value={selectedTextColor}
+                    onChange={(e) => {
+                      setSelectedTextColor(e.target.value);
+                      executeFormat('foreColor', e.target.value);
+                    }}
+                    className="w-4 h-4 p-0 border-0 rounded cursor-pointer"
+                  />
+                </label>
+
+                {/* Highlighter Quick Colors */}
+                <div className="flex items-center gap-1 pl-1 border-l border-slate-200">
+                  <Highlighter className="w-3.5 h-3.5 text-amber-500 ml-1" />
+                  {[
+                    { color: '#fef08a', name: 'Yellow' },
+                    { color: '#bbf7d0', name: 'Green' },
+                    { color: '#bae6fd', name: 'Cyan' },
+                    { color: 'transparent', name: 'None' }
+                  ].map((h) => (
+                    <button
+                      key={h.name}
+                      type="button"
+                      title={`Highlight ${h.name}`}
+                      onMouseDown={(e) => preventBlurAndExecute(e, 'hiliteColor', h.color)}
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 hover:scale-125 transition-transform cursor-pointer"
+                      style={{ backgroundColor: h.color === 'transparent' ? '#fff' : h.color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Text Alignment */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'justifyLeft')}
+                  title="Align Left"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <AlignLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'justifyCenter')}
+                  title="Center"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <AlignCenter className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'justifyRight')}
+                  title="Align Right"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <AlignRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'justifyFull')}
+                  title="Justify"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <AlignJustify className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Bullets & Numbering */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'insertUnorderedList')}
+                  title="Bullet List"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'insertOrderedList')}
+                  title="Numbered List"
+                  className="p-1.5 rounded hover:bg-blue-50 text-slate-700 hover:text-blue-700 cursor-pointer"
+                >
+                  <ListOrdered className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => preventBlurAndExecute(e, 'removeFormat')}
+                  title="Clear Formatting on Selection"
+                  className="p-1.5 rounded hover:bg-rose-50 text-slate-700 hover:text-rose-600 cursor-pointer"
+                >
+                  <Eraser className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="h-5 w-px bg-slate-300 mx-1" />
+
+              {/* Quick Word Helpers */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onMouseDown={insertDateAtCursor}
+                  title="Insert Today's Date at cursor"
+                  className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <Calendar className="w-3 h-3 text-indigo-500" />
+                  <span>Date</span>
+                </button>
+
+                <button
+                  type="button"
+                  onMouseDown={insertRefNoAtCursor}
+                  title="Insert Ref No at cursor"
+                  className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <Award className="w-3 h-3 text-amber-500" />
+                  <span>Ref No</span>
+                </button>
+
+                <button
+                  type="button"
+                  onMouseDown={insertNewParagraph}
+                  title="Add a new custom paragraph at bottom"
+                  className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <Plus className="w-3 h-3 text-emerald-600" />
+                  <span>Paragraph</span>
+                </button>
+
+                <button
+                  type="button"
+                  onMouseDown={insertDivider}
+                  title="Insert horizontal line divider"
+                  className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <Minus className="w-3 h-3 text-slate-500" />
+                  <span>Line</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Certificate Paper Canvas */}
         <div
           id="printable-certificate-sheet"
-          className="bg-white rounded-xl shadow-lg border border-slate-200/90 p-8 md:p-12 transition-all relative overflow-hidden"
+          key={templateResetKey}
+          spellCheck={false}
+          className={`bg-white rounded-xl shadow-lg border border-slate-200/90 p-8 md:p-12 transition-all relative overflow-hidden ${
+            isWordMode ? 'word-mode-active' : ''
+          }`}
           style={{ minHeight: '820px' }}
         >
           {/* Border Wrapper */}
@@ -835,17 +1383,37 @@ export function CertificateGeneratorPage({ onNavigate }) {
                 </div>
 
                 {/* School Name & CBSE Credentials */}
-                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-wider uppercase font-serif">
+                <h2
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="text-2xl md:text-3xl font-black text-slate-900 tracking-wider uppercase font-serif cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   {schoolName}
                 </h2>
-                <p className="text-xs text-slate-600 font-semibold tracking-wide">
+                <p
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="text-xs text-slate-600 font-semibold tracking-wide cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   Affiliated to CBSE, New Delhi • Affiliation No: {schoolAffiliation} • School Code: {schoolCode}
                 </p>
-                <p className="text-[11px] text-slate-500 font-medium">
+                <p
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="text-[11px] text-slate-500 font-medium cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   {schoolAddress} • Ph: {schoolContact}
                 </p>
                 {schoolEmail && (
-                  <p className="text-[10px] text-slate-400">
+                  <p
+                    contentEditable={isWordMode}
+                    suppressContentEditableWarning={true}
+                    spellCheck={false}
+                    className="text-[10px] text-slate-400 cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                  >
                     Email: {schoolEmail}
                   </p>
                 )}
@@ -864,11 +1432,21 @@ export function CertificateGeneratorPage({ onNavigate }) {
 
             {/* Certificate Header Bar: Serial No & Date */}
             <div className="flex justify-between items-center text-xs text-slate-600 font-semibold pt-4">
-              <div>
+              <div
+                contentEditable={isWordMode}
+                suppressContentEditableWarning={true}
+                spellCheck={false}
+                className="cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+              >
                 <span>Ref. No: </span>
                 <span className="text-slate-950 font-bold">{certificateRefNo}</span>
               </div>
-              <div>
+              <div
+                contentEditable={isWordMode}
+                suppressContentEditableWarning={true}
+                spellCheck={false}
+                className="cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+              >
                 <span>Date: </span>
                 <span className="text-slate-950 font-bold">{issueDate}</span>
               </div>
@@ -876,153 +1454,46 @@ export function CertificateGeneratorPage({ onNavigate }) {
 
             {/* Certificate Title Badge */}
             <div className="text-center my-6">
-              <span className="inline-block px-8 py-2 rounded-full bg-slate-900 text-white text-xs md:text-sm font-black tracking-widest uppercase shadow-sm border border-slate-800">
+              <span
+                contentEditable={isWordMode}
+                suppressContentEditableWarning={true}
+                spellCheck={false}
+                style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                className="inline-block px-8 py-2 rounded-full text-white text-xs md:text-sm font-black tracking-widest uppercase shadow-sm border border-slate-800 cursor-text select-text outline-none focus:ring-2 focus:ring-blue-400"
+              >
                 {activeTab === 'student' ? reportType : staffReportType}
               </span>
             </div>
 
             {/* ======================================================= */}
-            {/* BODY CONTENT: STUDENT CERTIFICATE                      */}
+            {/* BODY CONTENT: EDITABLE MS WORD CANVAS                   */}
             {/* ======================================================= */}
-            {activeTab === 'student' && selectedStudent && (
-              <div className="text-[13px] md:text-[14.5px] leading-relaxed text-slate-800 space-y-4 my-6 text-justify px-2 font-serif">
-                <p>
-                  This is to certify that Master / Miss{' '}
-                  <strong className="text-slate-950 font-black underline decoration-slate-400 underline-offset-4">
-                    {selectedStudent.name}
-                  </strong>
-                  {withOption === "Father's Name" && (
-                    <>
-                      , son/daughter of Mr.{' '}
-                      <strong className="text-slate-950 font-bold">{selectedStudent.fatherName}</strong>
-                    </>
-                  )}
-                  {withOption === "Mother's Name" && (
-                    <>
-                      , son/daughter of Mrs.{' '}
-                      <strong className="text-slate-950 font-bold">{selectedStudent.motherName}</strong>
-                    </>
-                  )}
-                  {withOption === 'Both' && (
-                    <>
-                      , son/daughter of Mr.{' '}
-                      <strong className="text-slate-950 font-bold">{selectedStudent.fatherName}</strong> and Mrs.{' '}
-                      <strong className="text-slate-950 font-bold">{selectedStudent.motherName}</strong>
-                    </>
-                  )}
-                  , bearing Admission Number{' '}
-                  <strong className="text-slate-950 font-bold">{selectedStudent.admNo}</strong> and Scholar Register
-                  (SR) Number <strong className="text-slate-950 font-bold">{selectedStudent.srNo}</strong>, is a
-                  bonafide regular student of Class{' '}
-                  <strong className="text-slate-950 font-bold">
-                    {selectedStudent.className} - Section {selectedStudent.section}
-                  </strong>{' '}
-                  of this institution during the academic session{' '}
-                  <strong className="text-slate-950 font-bold">{academicSession}</strong>.
-                </p>
-
-                {reportType === 'Character Certificate' && (
-                  <p>
-                    During his/her tenure at this institution, his/her character, general conduct, moral demeanor, and
-                    discipline have been found to be <strong className="font-bold text-slate-950">EXCELLENT</strong>.
-                    To the best of our official knowledge and belief, he/she bears an exemplary reputation and has
-                    actively participated in co-curricular, sports, and institutional activities.
-                  </p>
-                )}
-
-                {reportType === 'Tution Fee Report' && (
-                  <p>
-                    As per official accounts and fee ledger records of the school office, the requisite tuition fee has
-                    been cleared for the session {academicSession}. The total school tuition and composite fees
-                    deposited for the academic year amounts to{' '}
-                    <strong className="font-black text-slate-950">₹{tuitionFeeAmount}/-</strong>. No institutional
-                    dues are outstanding against the student as of today.
-                  </p>
-                )}
-
-                {reportType === 'Study Certificate' && (
-                  <p>
-                    The medium of instruction in this institution is{' '}
-                    <strong className="font-bold text-slate-950">English</strong>. The student has shown earnest
-                    scholastic aptitude, commendable attendance record, and diligent progress in all prescribed subjects
-                    under the Central Board of Secondary Education curriculum.
-                  </p>
-                )}
-
-                {(reportType === 'Participation Certificate' || reportType === 'Participation Achievement') && (
-                  <p>
-                    The student has enthusiastically represented the school and achieved meritorious commendation in
-                    inter-school cultural events, literary competitions, and sports meets, bringing laurels and honor to
-                    our institution.
-                  </p>
-                )}
-
-                <p className="pt-2">
-                  This certificate is issued on the bona fide request of the parent/guardian for official and academic
-                  purposes. We wish him/her resounding success and bright fortune in all future academic pursuits and
-                  endeavors.
-                </p>
-              </div>
-            )}
-
-            {/* ======================================================= */}
-            {/* BODY CONTENT: STAFF CERTIFICATE                        */}
-            {/* ======================================================= */}
-            {activeTab === 'staff' && selectedStaff && (
-              <div className="text-[13px] md:text-[14.5px] leading-relaxed text-slate-800 space-y-4 my-6 text-justify px-2 font-serif">
-                <p>
-                  This is to certify that{' '}
-                  <strong className="text-slate-950 font-black underline decoration-slate-400 underline-offset-4">
-                    {selectedStaff.gender === 'Female' ? 'Mrs. / Ms.' : 'Mr.'} {selectedStaff.name}
-                  </strong>
-                  , bearing Employee Code <strong className="text-slate-950 font-bold">{selectedStaff.code}</strong>,
-                  has been serving in this institution as{' '}
-                  <strong className="text-slate-950 font-bold">{selectedStaff.designation}</strong> in the Department
-                  of <strong className="text-slate-950 font-bold">{selectedStaff.department}</strong> since{' '}
-                  <strong className="text-slate-950 font-bold">{selectedStaff.appoinDate}</strong>.
-                </p>
-
-                {staffReportType === 'Experience Certificate' && (
-                  <p>
-                    During his/her tenure with us, he/she has discharged his/her duties with utmost dedication,
-                    professionalism, and sincerity. He/she possesses sound pedagogical knowledge, exceptional student
-                    mentorship skills, and has contributed significantly toward institutional academic excellence.
-                  </p>
-                )}
-
-                {staffReportType === 'Relieving Certificate' && (
-                  <p>
-                    He/she has been officially relieved of his/her responsibilities at the close of institutional office
-                    hours on <strong className="font-bold text-slate-950">{issueDate}</strong> upon his/her own
-                    request. All institutional assets, administrative charges, and office clearances have been fully
-                    settled, and there are no dues pending against him/her.
-                  </p>
-                )}
-
-                {staffReportType === 'Salary Certificate' && (
-                  <p>
-                    As per official payroll and salary disbursement records, his/her current gross monthly compensation
-                    is <strong className="font-bold text-slate-950">₹{Number(selectedStaff.salary || 35000).toLocaleString('en-IN')}/-</strong>.
-                    This salary certificate is issued upon the employee's request for financial, banking, or official
-                    verification purposes.
-                  </p>
-                )}
-
-                <p>
-                  His/her character, personal integrity, and professional conduct during employment have been{' '}
-                  <strong className="font-bold text-slate-950">{staffConduct}</strong>. We extend our warmest
-                  appreciation for his/her valuable service and wish him/her continued success in all prospective
-                  assignments.
-                </p>
-              </div>
-            )}
+            <div
+              ref={certBodyRef}
+              contentEditable={isWordMode}
+              suppressContentEditableWarning={true}
+              spellCheck={false}
+              dangerouslySetInnerHTML={{
+                __html: activeTab === 'student' ? buildStudentHtml() : buildStaffHtml()
+              }}
+              className="leading-relaxed text-slate-800 space-y-4 my-6 text-justify px-2 font-serif cursor-text outline-none focus:ring-1 focus:ring-blue-400 rounded-sm"
+              style={{
+                fontFamily: docFontFamily,
+                fontSize: docFontSize
+              }}
+            />
 
             {/* ======================================================= */}
             {/* SIGNATURES & OFFICIAL SCHOOL STAMP FOOTER               */}
             {/* ======================================================= */}
             <div className="pt-10 flex justify-between items-end text-xs text-slate-700">
               {/* Left: Place & Date */}
-              <div className="space-y-1">
+              <div
+                contentEditable={isWordMode}
+                suppressContentEditableWarning={true}
+                spellCheck={false}
+                className="space-y-1 cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+              >
                 <p>
                   <span className="text-slate-500">Place of Issue:</span>{' '}
                   <strong className="text-slate-900">{schoolProfile?.place || 'Jaipur'}</strong>
@@ -1046,7 +1517,12 @@ export function CertificateGeneratorPage({ onNavigate }) {
                     crossOrigin="anonymous"
                   />
                 </div>
-                <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider">
+                <span
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="text-[9px] font-black uppercase text-slate-500 tracking-wider cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   Official School Seal
                 </span>
               </div>
@@ -1061,10 +1537,20 @@ export function CertificateGeneratorPage({ onNavigate }) {
                     crossOrigin="anonymous"
                   />
                 </div>
-                <div className="w-36 border-t-2 border-slate-800 pt-1 font-black text-slate-900 text-xs">
+                <div
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="w-36 border-t-2 border-slate-800 pt-1 font-black text-slate-900 text-xs cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   Principal
                 </div>
-                <span className="text-[10px] text-slate-500 font-medium">
+                <span
+                  contentEditable={isWordMode}
+                  suppressContentEditableWarning={true}
+                  spellCheck={false}
+                  className="text-[10px] text-slate-500 font-medium cursor-text outline-none px-1 rounded-sm focus:ring-1 focus:ring-blue-400"
+                >
                   {schoolName}
                 </span>
               </div>

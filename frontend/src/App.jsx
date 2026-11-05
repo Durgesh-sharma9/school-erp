@@ -846,7 +846,7 @@ function AppContent() {
               case '/transfer-certificate':
                 return <TransferCertificatePage onNavigate={handleNavigate} />;
               case '/generate-manual-tc':
-                return <GenerateManualTcPage onNavigate={handleNavigate} />;
+                return <TransferCertificatePage onNavigate={handleNavigate} />;
               case '/add-update-tc-bulk':
                 return <BulkTcPage onNavigate={handleNavigate} />;
               case '/manual-cc-bc':

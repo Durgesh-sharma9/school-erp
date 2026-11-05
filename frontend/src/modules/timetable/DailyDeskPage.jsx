@@ -92,11 +92,40 @@ export function DailyDeskPage({ onNavigate }) {
     });
 
     const freeList = gridData?.freeTeachersByPeriod?.[slot.periodId] || [];
+    const available = freeList.find(t => t.id !== slot.teacherId);
+    const anyOtherTeacher = (gridData?.teachers || []).find(t => t.id !== slot.teacherId);
+
     setSubForm({
-      replacementTeacherId: freeList[0]?.id || '',
-      reason: 'Casual Leave'
+      replacementTeacherId: slot.replacement?.replacementTeacherId || available?.id || anyOtherTeacher?.id || '',
+      reason: slot.replacement?.reason || 'Casual Leave'
     });
     setAssignModalOpen(true);
+  };
+
+  const handleOpenSlotModal = handleOpenAssignModal;
+
+  const handleRemoveSubstitution = async (replacementId) => {
+    if (!replacementId) return;
+    setSubmittingSub(true);
+    try {
+      const res = await fetch(`/api/timetable/replacements/${replacementId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-school-id': schoolId || 'sch_jd_intl'
+        }
+      });
+      if (res.ok) {
+        toast.success('Substitution removed successfully!');
+        setAssignModalOpen(false);
+        fetchDailyDesk();
+      } else {
+        toast.error('Failed to remove substitution');
+      }
+    } catch {
+      toast.error('Network error while removing substitution');
+    } finally {
+      setSubmittingSub(false);
+    }
   };
 
   const handleAssignSubmit = async (e) => {
@@ -219,6 +248,11 @@ export function DailyDeskPage({ onNavigate }) {
     if (!selectedSlotForSub?.periodId) return [];
     return gridData?.freeTeachersByPeriod?.[selectedSlotForSub.periodId] || [];
   }, [selectedSlotForSub, gridData]);
+
+  const otherTeachersForActiveSlot = useMemo(() => {
+    const freeIds = new Set(freeTeachersForActiveSlot.map(t => t.id));
+    return teachers.filter(t => !freeIds.has(t.id) && t.id !== selectedSlotForSub?.teacherId);
+  }, [teachers, freeTeachersForActiveSlot, selectedSlotForSub]);
 
   const handleExportCSV = () => {
     if (!grid.length) return;
@@ -393,7 +427,7 @@ export function DailyDeskPage({ onNavigate }) {
         </div>
 
         {/* Quick Module Navigation Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <button
             onClick={() => onNavigate && onNavigate('/timetable-dashboard')}
             className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
@@ -456,19 +490,6 @@ export function DailyDeskPage({ onNavigate }) {
             <div className="truncate">
               <p className="text-xs font-bold text-slate-800">Reports & Logs</p>
               <p className="text-[10px] text-slate-400 truncate">Teacher activity</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => onNavigate && onNavigate('/timetable-homework')}
-            className="p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-left shadow-2xs hover:shadow-xs transition-all flex items-center space-x-2.5"
-          >
-            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-              <Users className="w-4 h-4" />
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-bold text-slate-800">Homework</p>
-              <p className="text-[10px] text-slate-400 truncate">Class assignments</p>
             </div>
           </button>
         </div>
@@ -581,7 +602,7 @@ export function DailyDeskPage({ onNavigate }) {
                     return (
                       <td key={sIdx} className="p-2 border-r border-slate-200 align-top">
                         <div
-                          onClick={() => handleOpenSlotModal(row, slot)}
+                          onClick={() => handleOpenAssignModal(row, slot)}
                           className={`p-2.5 rounded-xl border cursor-pointer hover:shadow-xs transition-all relative ${bgClass}`}
                         >
                           <div className="flex items-center justify-between text-xs font-bold text-slate-800">
@@ -613,7 +634,16 @@ export function DailyDeskPage({ onNavigate }) {
 
                           <div className="mt-1 pt-1 border-t border-slate-200/50 flex items-center justify-between text-[9px] text-slate-400">
                             <span>Period {slot.periodNumber}</span>
-                            <span className="text-indigo-600 font-bold">Assign Sub</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAssignModal(row, slot);
+                              }}
+                              className="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer"
+                            >
+                              {hasReplacement ? 'Change Sub' : 'Assign Sub'}
+                            </button>
                           </div>
                         </div>
                       </td>
@@ -635,7 +665,7 @@ export function DailyDeskPage({ onNavigate }) {
               <div>
                 <h3 className="font-bold text-base text-slate-900">Assign Substitute Teacher</h3>
                 <p className="text-xs text-slate-500">
-                  {selectedSlotForSub?.className} ?" Period {selectedSlotForSub?.periodNumber} ({selectedSlotForSub?.time})
+                  {selectedSlotForSub?.className} • Period {selectedSlotForSub?.periodNumber} ({selectedSlotForSub?.time})
                 </p>
               </div>
               <button
@@ -658,6 +688,23 @@ export function DailyDeskPage({ onNavigate }) {
                 </div>
               </div>
 
+              {selectedSlotForSub?.replacement && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-amber-900 block">Current Substitute:</span>
+                    <span className="text-amber-800 font-medium">{selectedSlotForSub.replacement.replacementTeacherName}</span>
+                    <span className="text-[10px] text-amber-600 ml-1.5">({selectedSlotForSub.replacement.reason || 'Assigned'})</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubstitution(selectedSlotForSub.replacement.id)}
+                    className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-semibold border border-rose-200 transition-colors cursor-pointer"
+                  >
+                    Remove Sub
+                  </button>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Select Available Substitute Faculty *
@@ -666,20 +713,27 @@ export function DailyDeskPage({ onNavigate }) {
                   required
                   value={subForm.replacementTeacherId}
                   onChange={(e) => setSubForm({ ...subForm, replacementTeacherId: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
-                  <option value="">-- Choose Free Teacher --</option>
-                  {freeTeachersForActiveSlot.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} (Free during this period)
-                    </option>
-                  ))}
-                  {/* Also list all teachers if desired */}
-                  {teachers.map((t) => (
-                    <option key={`all_${t.id}`} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
+                  <option value="">-- Choose Substitute Faculty --</option>
+                  {freeTeachersForActiveSlot.length > 0 && (
+                    <optgroup label="Available / Free Faculty (Recommended)">
+                      {freeTeachersForActiveSlot.map((t) => (
+                        <option key={`free_${t.id}`} value={t.id}>
+                          {t.name} (Free this period)
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {otherTeachersForActiveSlot.length > 0 && (
+                    <optgroup label="Other Faculty Staff">
+                      {otherTeachersForActiveSlot.map((t) => (
+                        <option key={`other_${t.id}`} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
                 <p className="text-[10px] text-slate-400 mt-1">
                   Faculty marked free have zero teaching allocations for this specific time slot.

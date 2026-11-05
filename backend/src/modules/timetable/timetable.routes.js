@@ -17,6 +17,7 @@ import {
   getDailyDeskData,
   markTeacherAttendance,
   createReplacementAssignment,
+  deleteReplacementAssignment,
   getReplacementHistory,
 
   // Lesson Planning
@@ -68,6 +69,7 @@ router.post('/timetables/:id/auto-generate', autoGenerateTimetable);
 router.get('/daily-desk', getDailyDeskData);
 router.post('/attendance', markTeacherAttendance);
 router.post('/replacements', createReplacementAssignment);
+router.delete('/replacements/:id', deleteReplacementAssignment);
 router.get('/replacement-history', getReplacementHistory);
 
 // =================================================================
