@@ -6,5 +6,4 @@ export { JobOpeningsPage } from './JobOpeningsPage';
 export { PublicApplyPortalPage } from './PublicApplyPortalPage';
 export { RecruitmentSettingsPage } from './RecruitmentSettingsPage';
 export { CandidateProfileModal } from './CandidateProfileModal';
-export { CandidateAddEditModal } from './CandidateAddEditModal';
 export { recruitmentStore, PIPELINE_STAGES } from './recruitmentStore';

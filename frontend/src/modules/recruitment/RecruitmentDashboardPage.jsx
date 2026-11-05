@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { recruitmentStore, PIPELINE_STAGES } from './recruitmentStore';
 import { CandidateProfileModal } from './CandidateProfileModal';
-import { CandidateAddEditModal } from './CandidateAddEditModal';
 import WhatsAppIcon from './components/WhatsAppIcon';
 
 /* ─────────────────────────────────────────────────────────────
@@ -203,7 +202,6 @@ export function RecruitmentDashboardPage({ onNavigate }) {
   const [openings, setOpenings] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
 
   const loadData = () => {
     setCandidates(recruitmentStore.getCandidates());
@@ -279,7 +277,7 @@ export function RecruitmentDashboardPage({ onNavigate }) {
         {/* Quick Action Buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => navigate('/recruitment-add')}
             className="flex-1 sm:flex-initial h-9 px-3.5 rounded-lg bg-gradient-to-r from-[#7C3AED] via-[#8A3BD4] to-[#00D2FF] hover:from-[#6D28D9] hover:via-[#7E22CE] hover:to-[#0284C7] text-white font-bold text-xs shadow-sm shadow-cyan-500/20 transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -655,13 +653,6 @@ export function RecruitmentDashboardPage({ onNavigate }) {
           alert(`Congratulations! ${res.staffName} has been hired and ported to Staff Roster! (Staff Code: ${res.staffId})`);
           loadData();
         }}
-      />
-
-      {/* Add Candidate Modal */}
-      <CandidateAddEditModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onCandidateCreated={loadData}
       />
 
     </div>
