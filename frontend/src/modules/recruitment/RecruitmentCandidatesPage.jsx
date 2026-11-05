@@ -10,7 +10,6 @@ import { recruitmentStore, PIPELINE_STAGES } from './recruitmentStore';
 import { PageHeader } from './components/PageHeader';
 import WhatsAppIcon from './components/WhatsAppIcon';
 import { CandidateProfileModal } from './CandidateProfileModal';
-import { CandidateAddEditModal } from './CandidateAddEditModal';
 import { CandidateDocumentsModal } from './components/CandidateDocumentsModal';
 
 function formatDisplayDate(dateStr) {
@@ -40,8 +39,6 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
   
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingCandidate, setEditingCandidate] = useState(null);
   const [docsModalCandidate, setDocsModalCandidate] = useState(null);
   const [sortField, setSortField] = useState('appliedDate');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -217,7 +214,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
-              onClick={() => onNavigate ? onNavigate('/recruitment-add') : setShowAddModal(true)}
+              onClick={() => navigate('/recruitment-add')}
               className="bg-gradient-to-r from-[#8A3BD4] to-[#A855F7] hover:opacity-95 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 shrink-0 shadow-md shadow-purple-500/20 h-9 text-xs px-4 flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5 stroke-[3]" /> Add Candidate
@@ -642,14 +639,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                           {/* Edit Pencil Button */}
                           <button
                             type="button"
-                            onClick={() => {
-                              if (onNavigate) {
-                                onNavigate(`/recruitment-add?id=${c.id}`);
-                              } else {
-                                setEditingCandidate(c);
-                                setShowAddModal(true);
-                              }
-                            }}
+                            onClick={() => navigate(`/recruitment-add?id=${c.id}`)}
                             className="h-7 w-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200/70 transition-all hover:scale-105 shadow-2xs cursor-pointer"
                             title="Edit Candidate"
                           >
@@ -731,19 +721,6 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
           }}
           onStatusChange={() => loadData()}
           onCandidateDeleted={() => loadData()}
-        />
-      )}
-
-      {/* Add / Edit Modal Fallback */}
-      {showAddModal && (
-        <CandidateAddEditModal
-          isOpen={showAddModal}
-          onClose={() => {
-            setShowAddModal(false);
-            setEditingCandidate(null);
-          }}
-          candidate={editingCandidate}
-          onSaved={() => loadData()}
         />
       )}
 
