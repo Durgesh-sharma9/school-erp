@@ -135,7 +135,7 @@ export function TeacherSubstitutionPage({ onNavigate }) {
             </div>
             <h3 className="text-2xl font-bold text-rose-600 mt-2">1</h3>
             <p className="text-[11px] text-rose-500 font-semibold flex items-center gap-1 mt-1">
-              <AlertTriangle className="w-3 h-3" /> Dr. Robert Smith (Casual Leave)
+              <AlertTriangle className="w-3 h-3" /> Mrs. Sunita Kumari (Casual Leave)
             </p>
           </div>
 
@@ -288,7 +288,7 @@ export function TeacherSubstitutionPage({ onNavigate }) {
                   </div>
                   <p className="text-xs text-slate-600">
                     Subject: <strong>Mathematics</strong> | Regular Faculty:{' '}
-                    <span className="line-through text-slate-400 font-medium">Dr. Robert Smith</span>
+                    <span className="line-through text-slate-400 font-medium">Mrs. Sunita Kumari</span>
                   </p>
                 </div>
 
@@ -296,16 +296,16 @@ export function TeacherSubstitutionPage({ onNavigate }) {
                   <select
                     className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white font-medium focus:outline-hidden"
                     onChange={(e) =>
-                      setSelectedSubstitutes({ ...selectedSubstitutes, 'Dr. Smith-3': e.target.value })
+                      setSelectedSubstitutes({ ...selectedSubstitutes, 'Mrs. Sunita-3': e.target.value })
                     }
                   >
-                    <option value="Prof. Anita Sharma">Prof. Anita Sharma (Free)</option>
-                    <option value="Mr. David Lee">Mr. David Lee (Free)</option>
-                    <option value="Ms. Sarah Jenkins">Ms. Sarah Jenkins (Free)</option>
+                    <option value="Mrs. Monika Rani Verma">Mrs. Monika Rani Verma (Free)</option>
+                    <option value="Mr. Amit Pareek">Mr. Amit Pareek (Free)</option>
+                    <option value="Ms. Pooja Kanwar">Ms. Pooja Kanwar (Free)</option>
                   </select>
 
                   <button
-                    onClick={() => handleAssign('Dr. Smith', '3', '10:15 AM', 'Grade 10-A', 'Mathematics')}
+                    onClick={() => handleAssign('Mrs. Sunita', '3', '10:15 AM', 'Grade 10-A', 'Mathematics')}
                     className="px-3 py-1.5 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors shrink-0"
                   >
                     <Send className="w-3 h-3" /> Assign
@@ -324,7 +324,7 @@ export function TeacherSubstitutionPage({ onNavigate }) {
                   </div>
                   <p className="text-xs text-slate-600">
                     Subject: <strong>Physics Lab</strong> | Regular Faculty:{' '}
-                    <span className="line-through text-slate-400 font-medium">Dr. Robert Smith</span>
+                    <span className="line-through text-slate-400 font-medium">Mrs. Sunita Kumari</span>
                   </p>
                 </div>
 
@@ -332,16 +332,16 @@ export function TeacherSubstitutionPage({ onNavigate }) {
                   <select
                     className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white font-medium focus:outline-hidden"
                     onChange={(e) =>
-                      setSelectedSubstitutes({ ...selectedSubstitutes, 'Dr. Smith-5': e.target.value })
+                      setSelectedSubstitutes({ ...selectedSubstitutes, 'Mrs. Sunita-5': e.target.value })
                     }
                   >
-                    <option value="Mr. David Lee">Mr. David Lee (Free)</option>
-                    <option value="Prof. Anita Sharma">Prof. Anita Sharma (Free)</option>
-                    <option value="Dr. Mehta">Dr. Mehta (Free)</option>
+                    <option value="Mr. Amit Pareek">Mr. Amit Pareek (Free)</option>
+                    <option value="Mrs. Monika Rani Verma">Mrs. Monika Rani Verma (Free)</option>
+                    <option value="Dr. Arun Joshi">Dr. Arun Joshi (Free)</option>
                   </select>
 
                   <button
-                    onClick={() => handleAssign('Dr. Smith', '5', '12:00 PM', 'Grade 9-B', 'Physics Lab')}
+                    onClick={() => handleAssign('Mrs. Sunita', '5', '12:00 PM', 'Grade 9-B', 'Physics Lab')}
                     className="px-3 py-1.5 bg-[#5c67f6] hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors shrink-0"
                   >
                     <Send className="w-3 h-3" /> Assign
@@ -363,10 +363,10 @@ export function TeacherSubstitutionPage({ onNavigate }) {
 
             <div className="space-y-2.5">
               {[
-                { name: 'Prof. Anita Sharma', dept: 'Science Dept', freePeriods: 'Periods 2, 3, 6' },
-                { name: 'Mr. David Lee', dept: 'Mathematics Dept', freePeriods: 'Periods 1, 4, 5' },
-                { name: 'Ms. Sarah Jenkins', dept: 'Languages Dept', freePeriods: 'Periods 3, 7, 8' },
-                { name: 'Dr. Mehta', dept: 'Social Sciences', freePeriods: 'Periods 2, 5, 8' }
+                { name: 'Mrs. Monika Rani Verma', dept: 'Science Dept', freePeriods: 'Periods 2, 3, 6' },
+                { name: 'Mr. Amit Pareek', dept: 'Mathematics Dept', freePeriods: 'Periods 1, 4, 5' },
+                { name: 'Ms. Pooja Kanwar', dept: 'Languages Dept', freePeriods: 'Periods 3, 7, 8' },
+                { name: 'Dr. Arun Joshi', dept: 'Social Sciences', freePeriods: 'Periods 2, 5, 8' }
               ].map((teacher, idx) => (
                 <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
                   <div className="flex items-center justify-between">

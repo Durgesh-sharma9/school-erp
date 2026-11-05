@@ -117,6 +117,125 @@ let smsLogs = [
 ];
 
 const mockBirthdays = [
+    // April (matching UAB exact data)
+  {
+    id: '201',
+    srNo: '2001',
+    admNo: '2001',
+    name: 'DEVRAJ CHOUDHARY',
+    className: 'Lower Kindergarten - PP4+ - A',
+    fatherName: 'RAMESH CHOUDHARY',
+    motherName: 'MANJU DEVI',
+    contactNo: '7062142122',
+    dob: '2026-04-01',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '202',
+    srNo: '2034',
+    admNo: '2034',
+    name: 'DEVRAJ CHOUDHARY',
+    className: 'Nursery - PP3+ - A',
+    fatherName: 'RAMESH CHOUDHARY',
+    motherName: 'MANJU DEVI',
+    contactNo: '7062142122',
+    dob: '2026-04-01',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '203',
+    srNo: '0',
+    admNo: 'A156',
+    name: 'AVADH',
+    className: 'IV-A',
+    fatherName: 'VIKRAM SINGH',
+    motherName: 'SUSHILA DEVI',
+    contactNo: '9929512948',
+    dob: '2026-04-01',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '204',
+    srNo: '1999',
+    admNo: '1999',
+    name: 'CHIRAG DEPAN',
+    className: 'Lower Kindergarten - PP4+ - A',
+    fatherName: 'KISHAN DEPAN',
+    motherName: 'SUNITA DEPAN',
+    contactNo: '9413486049',
+    dob: '2026-04-02',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '205',
+    srNo: '1988',
+    admNo: '1988',
+    name: 'VISHESH MEHRA',
+    className: 'II-A',
+    fatherName: 'SANJAY MEHRA',
+    motherName: 'ANITA MEHRA',
+    contactNo: '0',
+    dob: '2026-04-02',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '206',
+    srNo: '1575',
+    admNo: '1575',
+    name: 'TANISHA JAIN',
+    className: 'V-A',
+    fatherName: 'PRADEEP JAIN',
+    motherName: 'PRIYANKA JAIN',
+    contactNo: '9302095457',
+    dob: '2026-04-02',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '207',
+    srNo: '1854',
+    admNo: '1854',
+    name: 'KHUSHI SINGH',
+    className: 'VI-A',
+    fatherName: 'DILIP SINGH',
+    motherName: 'SAROJ SINGH',
+    contactNo: '8104008861',
+    dob: '2026-04-02',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '208',
+    srNo: '159602',
+    admNo: '159602',
+    name: 'DEEPAK MALAWAT',
+    className: 'II-A',
+    fatherName: 'MUKESH MALAWAT',
+    motherName: 'GEETA MALAWAT',
+    contactNo: '0',
+    dob: '2026-04-03',
+    type: 'Student',
+    month: 'April'
+  },
+  {
+    id: '209',
+    srNo: '908',
+    admNo: '908',
+    name: 'GAURI PAURUSH',
+    className: 'VII-A',
+    fatherName: 'AMIT PAURUSH',
+    motherName: 'NEELAM PAURUSH',
+    contactNo: '84334838503',
+    dob: '2026-04-03',
+    type: 'Student',
+    month: 'April'
+  },
+  // October
   {
     id: '1',
     srNo: '101',
@@ -181,6 +300,204 @@ const mockBirthdays = [
     dob: '2011-10-18',
     type: 'Student',
     month: 'October'
+  },
+  {
+    id: '6',
+    srNo: '101',
+    admNo: 'ADM-2024-001',
+    name: 'RAJESH SHARMA',
+    studentName: 'AARAV SHARMA',
+    className: 'I - A',
+    fatherName: 'RAJESH SHARMA',
+    motherName: 'PRIYA SHARMA',
+    contactNo: '7891008092',
+    dob: '1985-10-20',
+    type: 'Father',
+    month: 'October'
+  },
+  {
+    id: '7',
+    srNo: '101',
+    admNo: 'ADM-2024-001',
+    name: 'PRIYA SHARMA',
+    studentName: 'AARAV SHARMA',
+    className: 'I - A',
+    fatherName: 'RAJESH SHARMA',
+    motherName: 'PRIYA SHARMA',
+    contactNo: '7891008092',
+    dob: '1988-10-24',
+    type: 'Mother',
+    month: 'October'
+  },
+
+  // July
+  {
+    id: '8',
+    srNo: '106',
+    admNo: 'ADM-2024-031',
+    name: 'AARADHYA VERMA',
+    className: 'III - A',
+    fatherName: 'SANJAY VERMA',
+    motherName: 'RITU VERMA',
+    contactNo: '9876543210',
+    dob: '2018-07-08',
+    type: 'Student',
+    month: 'July'
+  },
+  {
+    id: '9',
+    srNo: '107',
+    admNo: 'ADM-2024-032',
+    name: 'ROHAN PATEL',
+    className: 'IV - B',
+    fatherName: 'MANOJ PATEL',
+    motherName: 'SUNITA PATEL',
+    contactNo: '9876543211',
+    dob: '2017-07-15',
+    type: 'Student',
+    month: 'July'
+  },
+  {
+    id: '10',
+    srNo: '108',
+    admNo: 'ADM-2024-033',
+    name: 'PRIYA NAIR',
+    className: 'II - A',
+    fatherName: 'RAMESH NAIR',
+    motherName: 'DEEPA NAIR',
+    contactNo: '9876543212',
+    dob: '2019-07-22',
+    type: 'Student',
+    month: 'July'
+  },
+  {
+    id: '11',
+    srNo: 'EMP-15',
+    admNo: 'STF-015',
+    name: 'SUNITA SHARMA',
+    className: 'PRT - English',
+    fatherName: 'OMPRAKASH SHARMA',
+    motherName: 'SHANTI DEVI',
+    contactNo: '9876543213',
+    dob: '1985-07-12',
+    type: 'Staff',
+    month: 'July'
+  },
+  {
+    id: '12',
+    srNo: '106',
+    admNo: 'ADM-2024-031',
+    name: 'SANJAY VERMA',
+    studentName: 'AARADHYA VERMA',
+    className: 'III - A',
+    fatherName: 'SANJAY VERMA',
+    motherName: 'RITU VERMA',
+    contactNo: '9876543210',
+    dob: '1982-07-19',
+    type: 'Father',
+    month: 'July'
+  },
+  {
+    id: '13',
+    srNo: '107',
+    admNo: 'ADM-2024-032',
+    name: 'SUNITA PATEL',
+    studentName: 'ROHAN PATEL',
+    className: 'IV - B',
+    fatherName: 'MANOJ PATEL',
+    motherName: 'SUNITA PATEL',
+    contactNo: '9876543211',
+    dob: '1986-07-25',
+    type: 'Mother',
+    month: 'July'
+  },
+
+  // January
+  {
+    id: '14',
+    srNo: '109',
+    admNo: 'ADM-2024-041',
+    name: 'AYUSH MISHRA',
+    className: 'VI - A',
+    fatherName: 'DEEPAK MISHRA',
+    motherName: 'POOJA MISHRA',
+    contactNo: '9811223344',
+    dob: '2014-01-10',
+    type: 'Student',
+    month: 'January'
+  },
+  {
+    id: '15',
+    srNo: 'EMP-08',
+    admNo: 'STF-008',
+    name: 'ANIL KUMAR JOSHI',
+    className: 'PGT - Physics',
+    fatherName: 'GOPAL JOSHI',
+    motherName: 'SAVITRI JOSHI',
+    contactNo: '9811223345',
+    dob: '1982-01-18',
+    type: 'Staff',
+    month: 'January'
+  },
+
+  // March
+  {
+    id: '16',
+    srNo: '110',
+    admNo: 'ADM-2024-051',
+    name: 'TANVI CHAUHAN',
+    className: 'VII - B',
+    fatherName: 'VIJAY CHAUHAN',
+    motherName: 'ANITA CHAUHAN',
+    contactNo: '9822334455',
+    dob: '2013-03-05',
+    type: 'Student',
+    month: 'March'
+  },
+
+  // August
+  {
+    id: '17',
+    srNo: '111',
+    admNo: 'ADM-2024-061',
+    name: 'HARSHIT AGARWAL',
+    className: 'VIII - A',
+    fatherName: 'PAWAN AGARWAL',
+    motherName: 'SUMAN AGARWAL',
+    contactNo: '9833445566',
+    dob: '2012-08-14',
+    type: 'Student',
+    month: 'August'
+  },
+
+  // November
+  {
+    id: '18',
+    srNo: '112',
+    admNo: 'ADM-2024-071',
+    name: 'DIYA KAPOOR',
+    className: 'I - B',
+    fatherName: 'RAJAT KAPOOR',
+    motherName: 'NEETU KAPOOR',
+    contactNo: '9844556677',
+    dob: '2019-11-20',
+    type: 'Student',
+    month: 'November'
+  },
+
+  // December
+  {
+    id: '19',
+    srNo: '113',
+    admNo: 'ADM-2024-081',
+    name: 'SARTHAK YADAV',
+    className: 'X - A',
+    fatherName: 'DEVENDRA YADAV',
+    motherName: 'MAMTA YADAV',
+    contactNo: '9855667788',
+    dob: '2010-12-25',
+    type: 'Student',
+    month: 'December'
   }
 ];
 

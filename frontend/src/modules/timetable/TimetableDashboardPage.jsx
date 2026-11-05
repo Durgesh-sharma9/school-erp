@@ -47,9 +47,9 @@ const DEFAULT_KPIS = {
 const DEFAULT_ABSENT_TEACHERS = [
   {
     id: 'att-1',
-    name: 'Dr. Robert Smith',
-    phone: '+91 98765 43210',
-    reason: 'Medical Leave - Approved by Principal',
+    name: 'Mrs. Sunita Kumari',
+    phone: '+91 95117 19644',
+    reason: 'Casual Leave - Approved by Principal',
     status: 'Absent'
   }
 ];
@@ -57,32 +57,34 @@ const DEFAULT_ABSENT_TEACHERS = [
 const DEFAULT_TODAY_REPLACEMENTS = [
   {
     id: 'rep-1',
-    className: 'Grade 10 - Section A',
-    periodLabel: 'Period 3 (10:15 - 11:00 AM)',
-    originalTeacherName: 'Dr. Robert Smith',
-    replacementTeacherName: 'Prof. Anita Sharma',
+    className: 'Class X - Section A',
+    periodLabel: 'Period 4 (10:15 - 11:00 AM)',
+    originalTeacherName: 'Mrs. Sunita Kumari',
+    replacementTeacherName: 'Mrs. Monika Rani Verma',
     status: 'Assigned',
     notifiedAt: '08:30 AM'
   },
   {
     id: 'rep-2',
-    className: 'Grade 9 - Section B',
-    periodLabel: 'Period 5 (12:00 - 12:45 PM)',
-    originalTeacherName: 'Dr. Robert Smith',
-    replacementTeacherName: 'Mr. David Lee',
+    className: 'Class IX - Section B',
+    periodLabel: 'Period 5 (11:30 - 12:15 PM)',
+    originalTeacherName: 'Mrs. Sunita Kumari',
+    replacementTeacherName: 'Mr. Amit Pareek',
     status: 'In Progress',
     notifiedAt: '08:35 AM'
   }
 ];
 
 const DEFAULT_TEACHER_WORKLOAD = [
-  { name: 'Dr. Smith', assigned: 22, total: 24, utilization: 91 },
-  { name: 'Prof. Anita', assigned: 20, total: 24, utilization: 83 },
-  { name: 'Mr. David', assigned: 18, total: 24, utilization: 75 },
-  { name: 'Ms. Sarah', assigned: 24, total: 24, utilization: 100 },
-  { name: 'Mr. Rahul', assigned: 16, total: 24, utilization: 67 },
-  { name: 'Mrs. Sunita', assigned: 19, total: 24, utilization: 79 },
-  { name: 'Dr. Mehta', assigned: 21, total: 24, utilization: 88 }
+  { name: 'Monika Rani Verma', assigned: 21, total: 24, utilization: 88 },
+  { name: 'Sunita Kumari', assigned: 19, total: 24, utilization: 79 },
+  { name: 'Mr. Rakesh Sharma', assigned: 20, total: 24, utilization: 83 },
+  { name: 'Pooja Kanwar', assigned: 18, total: 24, utilization: 75 },
+  { name: 'Priti Verma', assigned: 18, total: 24, utilization: 75 },
+  { name: 'Dr. Arun Joshi', assigned: 17, total: 24, utilization: 71 },
+  { name: 'Mr. Amit Pareek', assigned: 16, total: 24, utilization: 67 },
+  { name: 'Nisha Goyal', assigned: 18, total: 24, utilization: 75 },
+  { name: 'Mrs. Suman Meena', assigned: 15, total: 24, utilization: 63 }
 ];
 
 const DEFAULT_SUBJECT_DISTRIBUTION = [
@@ -127,9 +129,9 @@ export function TimetableDashboardPage({ onNavigate }) {
   const todayReplacements = (data?.todayReplacements && data.todayReplacements.length > 0)
     ? data.todayReplacements
     : DEFAULT_TODAY_REPLACEMENTS;
-  const teacherWorkload = (data?.teacherWorkload && data.teacherWorkload.length > 0)
-    ? data.teacherWorkload
-    : DEFAULT_TEACHER_WORKLOAD;
+  const teacherWorkload = ((data?.teacherWorkload && data.teacherWorkload.length > 0)
+    ? data.teacherWorkload.filter(t => t.assigned > 0 || ['Monika Rani Verma', 'Sunita Kumari', 'Pooja Kanwar', 'Priti Verma', 'Rakesh Sharma', 'Dr. Arun Joshi', 'Amit Pareek', 'Nisha Goyal'].some(n => (t.name || '').includes(n)))
+    : DEFAULT_TEACHER_WORKLOAD).slice(0, 10);
   const subjectDistribution = (data?.subjectDistribution && data.subjectDistribution.length > 0)
     ? data.subjectDistribution
     : DEFAULT_SUBJECT_DISTRIBUTION;

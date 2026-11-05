@@ -142,6 +142,12 @@
         "headGroup": "ase hi fee",
         "priority": 1,
         "active": true
+      },
+      {
+        "id": "1793687018184",
+        "headGroup": "Tution Fee",
+        "priority": 2,
+        "active": true
       }
     ],
     "sch_dps_branch2": []

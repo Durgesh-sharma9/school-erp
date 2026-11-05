@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Download, Printer, Tag, X } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Download, Printer, Tag, X, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { tenantStore } from '../../services/tenantStore';
@@ -7,24 +7,48 @@ import { tenantStore } from '../../services/tenantStore';
 export function FeeHeadPage() {
   const { schoolId } = useAuth();
   const [heads, setHeads] = useState([]);
+  const [feeGroups, setFeeGroups] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHead, setEditingHead] = useState(null);
   const [formData, setFormData] = useState({
+    feeGroup: '',
+    installment: '',
     feeHead: '',
-    priority: '',
+    shortName: '',
+    feeType: 'Day Scholar',
     applyFor: 'Both',
     gender: 'Both',
-    installment: 'Quarterly',
-    feeType: 'dayscholar',
-    isBoard: false
+    isBoard: false,
+    priority: ''
   });
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchHeads();
+    fetchFeeGroups();
   }, [schoolId]);
+
+  const fetchFeeGroups = async () => {
+    try {
+      const local = tenantStore.getFeeHeadGroups(schoolId) || [];
+      if (local && local.length > 0) {
+        setFeeGroups(local);
+      }
+
+      const res = await fetch('/api/fees/head-groups', {
+        headers: { 'x-school-id': schoolId }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        setFeeGroups(data.data);
+      }
+    } catch (err) {
+      console.error('[Fetch Fee Groups error]:', err);
+    }
+  };
 
   const fetchHeads = async () => {
     try {
@@ -42,27 +66,33 @@ export function FeeHeadPage() {
   };
 
   const handleOpenModal = (head = null) => {
+    fetchFeeGroups();
+    setErrors({});
     if (head) {
       setEditingHead(head);
       setFormData({
-        feeHead: head.feeHead,
-        priority: head.priority,
-        applyFor: head.applyFor,
-        gender: head.gender,
-        installment: head.installment,
-        feeType: head.feeType,
-        isBoard: head.isBoard || false
+        feeGroup: head.feeGroup || '',
+        installment: head.installment || '',
+        feeHead: head.feeHead || '',
+        shortName: head.shortName || '',
+        feeType: head.feeType || 'Day Scholar',
+        applyFor: head.applyFor || 'Both',
+        gender: head.gender || 'Both',
+        isBoard: Boolean(head.isBoard),
+        priority: head.priority || 1
       });
     } else {
       setEditingHead(null);
       setFormData({
+        feeGroup: '',
+        installment: '',
         feeHead: '',
-        priority: heads.length + 1,
+        shortName: '',
+        feeType: 'Day Scholar',
         applyFor: 'Both',
         gender: 'Both',
-        installment: 'Quarterly',
-        feeType: 'dayscholar',
-        isBoard: false
+        isBoard: false,
+        priority: heads.length + 1
       });
     }
     setIsModalOpen(true);
@@ -70,8 +100,23 @@ export function FeeHeadPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!formData.feeHead.trim()) {
-      toast.error('Please enter Fee Head name');
+
+    const newErrors = {};
+    if (!formData.feeGroup || !formData.feeGroup.trim()) {
+      newErrors.feeGroup = 'Fee Group is required !';
+    }
+    if (!formData.installment || !formData.installment.trim()) {
+      newErrors.installment = 'Installment Type is required !';
+    }
+    if (!formData.feeHead || !formData.feeHead.trim()) {
+      newErrors.feeHead = 'Fee Head Name is required !';
+    }
+    if (!formData.shortName || !formData.shortName.trim()) {
+      newErrors.shortName = 'Fee Head Short Name is required !';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -79,13 +124,15 @@ export function FeeHeadPage() {
     try {
       const payload = {
         id: editingHead?.id,
+        feeGroup: formData.feeGroup.trim(),
+        installment: formData.installment.trim(),
         feeHead: formData.feeHead.trim(),
-        priority: Number(formData.priority) || 1,
+        shortName: formData.shortName.trim(),
+        feeType: formData.feeType,
         applyFor: formData.applyFor,
         gender: formData.gender,
-        installment: formData.installment,
-        feeType: formData.feeType,
-        isBoard: Boolean(formData.isBoard)
+        isBoard: Boolean(formData.isBoard),
+        priority: Number(formData.priority) || 1
       };
 
       await fetch('/api/fees/heads', {
@@ -95,7 +142,7 @@ export function FeeHeadPage() {
       });
 
       if (editingHead) {
-        const updatedHeads = heads.map(h => h.id === editingHead.id ? { ...h, ...payload } : h);
+        const updatedHeads = heads.map(h => (h.id === editingHead.id ? { ...h, ...payload } : h));
         tenantStore.saveFeeHeads(schoolId, updatedHeads);
         setHeads(updatedHeads);
         toast.success('Fee Head updated successfully');
@@ -128,14 +175,18 @@ export function FeeHeadPage() {
   };
 
   const exportExcel = () => {
-    const csvContent = "data:text/csv;charset=utf-8," +
-      ["S.No.,Fee Head,Priority,Apply For,Gender,Installment,Fee Type"].concat(
-        heads.map((h, i) => `${i + 1},"${h.feeHead}",${h.priority},"${h.applyFor}","${h.gender}","${h.installment}","${h.feeType}"`)
-      ).join("\n");
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      ['S.No.,Fee Head,Short Name,Fee Group,Priority,Apply For,Gender,Installment,Fee Type'].concat(
+        heads.map(
+          (h, i) =>
+            `${i + 1},"${h.feeHead || ''}","${h.shortName || ''}","${h.feeGroup || ''}",${h.priority || ''},"${h.applyFor || ''}","${h.gender || ''}","${h.installment || ''}","${h.feeType || ''}"`
+        )
+      ).join('\n');
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Fee_Heads_Master.csv");
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'Fee_Heads_Master.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -143,8 +194,10 @@ export function FeeHeadPage() {
   };
 
   const filtered = heads.filter(h =>
-    h.feeHead.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    h.installment.toLowerCase().includes(searchQuery.toLowerCase())
+    (h.feeHead || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (h.shortName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (h.feeGroup || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (h.installment || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -194,7 +247,7 @@ export function FeeHeadPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search fee head..."
+              placeholder="Search fee head, group, or short name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -212,6 +265,7 @@ export function FeeHeadPage() {
               <tr>
                 <th className="py-3.5 px-6 w-16">S.NO.</th>
                 <th className="py-3.5 px-6">FEE HEAD</th>
+                <th className="py-3.5 px-6 w-36">FEE GROUP</th>
                 <th className="py-3.5 px-6 w-24">PRIORITY</th>
                 <th className="py-3.5 px-6 w-28">APPLY FOR</th>
                 <th className="py-3.5 px-6 w-24">GENDER</th>
@@ -224,17 +278,33 @@ export function FeeHeadPage() {
               {filtered.map((h, idx) => (
                 <tr key={h.id} className="hover:bg-slate-50/60 transition-colors">
                   <td className="py-3.5 px-6 font-medium text-slate-800">{idx + 1}</td>
-                  <td className="py-3.5 px-6 font-semibold text-slate-900 flex items-center gap-2">
-                    {h.feeHead}
-                    {h.isBoard && (
-                      <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-sm">
-                        BOARD
+                  <td className="py-3.5 px-6 font-semibold text-slate-900">
+                    <div className="flex items-center gap-2">
+                      <span>{h.feeHead}</span>
+                      {h.shortName && (
+                        <span className="text-[10px] bg-slate-100 text-slate-600 font-mono font-medium px-1.5 py-0.5 rounded">
+                          {h.shortName}
+                        </span>
+                      )}
+                      {h.isBoard && (
+                        <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-sm">
+                          BOARD
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-6">
+                    {h.feeGroup ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-50 text-indigo-700">
+                        {h.feeGroup}
                       </span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
                     )}
                   </td>
                   <td className="py-3.5 px-6">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700">
-                      #{h.priority}
+                      #{h.priority || idx + 1}
                     </span>
                   </td>
                   <td className="py-3.5 px-6 font-medium text-slate-700">{h.applyFor}</td>
@@ -265,7 +335,7 @@ export function FeeHeadPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="py-12 text-center text-slate-400">
+                  <td colSpan="9" className="py-12 text-center text-slate-400">
                     No Fee Heads found.
                   </td>
                 </tr>
@@ -275,143 +345,246 @@ export function FeeHeadPage() {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Modal - Exact 1:1 Matching User Specification */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <Tag className="w-4 h-4 text-indigo-600" />
-                {editingHead ? 'Edit Fee Head' : 'Add Fee Head'}
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-xl overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-slate-800 text-sm tracking-wider uppercase">
+                FEE HEAD
+              </h2>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 rounded-lg p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-md transition"
+                aria-label="Close"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Fee Head Name *
-                  </label>
+            <form onSubmit={handleSave} className="p-6 space-y-4.5">
+              {/* Row 1: Fee Group & Installment Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fee Group Dropdown */}
+                <div>
+                  <div className="relative">
+                    <select
+                      value={formData.feeGroup}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, feeGroup: e.target.value }));
+                        if (errors.feeGroup) setErrors(prev => ({ ...prev, feeGroup: '' }));
+                      }}
+                      className={`w-full px-3.5 py-2.5 bg-white border rounded-lg text-xs appearance-none pr-9 focus:outline-none transition ${
+                        errors.feeGroup
+                          ? 'border-red-500 text-red-500 focus:border-red-500'
+                          : formData.feeGroup
+                          ? 'border-slate-300 text-slate-800 focus:border-indigo-500'
+                          : 'border-slate-300 text-slate-500 focus:border-indigo-500'
+                      }`}
+                    >
+                      <option value="" className="text-slate-400">
+                        Fee Group *
+                      </option>
+                      {feeGroups.map(g => (
+                        <option key={g.id || g.headGroup} value={g.headGroup} className="text-slate-800">
+                          {g.headGroup}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                      <ChevronDown
+                        className={`w-4 h-4 ${errors.feeGroup ? 'text-red-500' : 'text-slate-400'}`}
+                      />
+                    </div>
+                  </div>
+                  {errors.feeGroup && (
+                    <p className="text-[11px] text-red-500 mt-1">{errors.feeGroup}</p>
+                  )}
+                </div>
+
+                {/* Installment Type Dropdown */}
+                <div>
+                  <div className="relative">
+                    <select
+                      value={formData.installment}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, installment: e.target.value }));
+                        if (errors.installment) setErrors(prev => ({ ...prev, installment: '' }));
+                      }}
+                      className={`w-full px-3.5 py-2.5 bg-white border rounded-lg text-xs appearance-none pr-9 focus:outline-none transition ${
+                        errors.installment
+                          ? 'border-red-500 text-red-500 focus:border-red-500'
+                          : formData.installment
+                          ? 'border-slate-300 text-slate-800 focus:border-indigo-500'
+                          : 'border-slate-300 text-slate-500 focus:border-indigo-500'
+                      }`}
+                    >
+                      <option value="" className="text-slate-400">
+                        Installment Type*
+                      </option>
+                      <option value="Monthly" className="text-slate-800">Monthly</option>
+                      <option value="Quarterly" className="text-slate-800">Quarterly</option>
+                      <option value="Half-Yearly" className="text-slate-800">Half-Yearly</option>
+                      <option value="Annually" className="text-slate-800">Annually</option>
+                      <option value="Only Once" className="text-slate-800">Only Once</option>
+                      <option value="One Time" className="text-slate-800">One Time</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                      <ChevronDown
+                        className={`w-4 h-4 ${errors.installment ? 'text-red-500' : 'text-slate-400'}`}
+                      />
+                    </div>
+                  </div>
+                  {errors.installment && (
+                    <p className="text-[11px] text-red-500 mt-1">{errors.installment}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 2: Fee Head Name & Fee Head Short Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fee Head Name */}
+                <div>
                   <input
                     type="text"
-                    required
-                    placeholder="e.g. Tuition Fee, Admission Fee, Activity Fee"
+                    placeholder="Fee Head Name*"
                     value={formData.feeHead}
-                    onChange={(e) => setFormData(prev => ({ ...prev, feeHead: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, feeHead: e.target.value }));
+                      if (errors.feeHead) setErrors(prev => ({ ...prev, feeHead: '' }));
+                    }}
+                    className={`w-full px-3.5 py-2.5 bg-white border rounded-lg text-xs focus:outline-none transition ${
+                      errors.feeHead
+                        ? 'border-red-500 text-red-500 placeholder:text-red-400 focus:border-red-500'
+                        : 'border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-indigo-500'
+                    }`}
                   />
+                  {errors.feeHead && (
+                    <p className="text-[11px] text-red-500 mt-1">{errors.feeHead}</p>
+                  )}
                 </div>
 
+                {/* Fee Head Short Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Priority / Order *
-                  </label>
                   <input
-                    type="number"
-                    min="1"
-                    required
-                    value={formData.priority}
-                    onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    type="text"
+                    placeholder="Fee Head Short Name*"
+                    value={formData.shortName}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, shortName: e.target.value }));
+                      if (errors.shortName) setErrors(prev => ({ ...prev, shortName: '' }));
+                    }}
+                    className={`w-full px-3.5 py-2.5 bg-white border rounded-lg text-xs focus:outline-none transition ${
+                      errors.shortName
+                        ? 'border-red-500 text-red-500 placeholder:text-red-500 focus:border-red-500'
+                        : 'border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-indigo-500'
+                    }`}
                   />
+                  {errors.shortName && (
+                    <p className="text-[11px] text-red-500 mt-1">{errors.shortName}</p>
+                  )}
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Apply For
-                  </label>
-                  <select
-                    value={formData.applyFor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, applyFor: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  >
-                    <option value="Both">Both (Old & New)</option>
-                    <option value="New">New Admission Only</option>
-                    <option value="Old">Old Existing Student Only</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Gender
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  >
-                    <option value="Both">Both</option>
-                    <option value="Male">Male Only</option>
-                    <option value="Female">Female Only</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Installment
-                  </label>
-                  <select
-                    value={formData.installment}
-                    onChange={(e) => setFormData(prev => ({ ...prev, installment: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  >
-                    <option value="Quarterly">Quarterly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Annually">Annually</option>
-                    <option value="Only Once">Only Once</option>
-                    <option value="Half-Yearly">Half-Yearly</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Fee Type
+              {/* Row 3: Fee Type (Outlined with notched legend label) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="relative">
+                  <label className="absolute -top-2 left-3 bg-white px-1 text-[11px] text-slate-600 font-medium z-10 pointer-events-none">
+                    Fee Type*
                   </label>
                   <select
                     value={formData.feeType}
                     onChange={(e) => setFormData(prev => ({ ...prev, feeType: e.target.value }))}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 appearance-none pr-9 focus:outline-none focus:border-indigo-500 transition"
                   >
-                    <option value="dayscholar">Day Scholar</option>
-                    <option value="hosteler">Hosteler</option>
-                    <option value="both">Both</option>
+                    <option value="Day Scholar">Day Scholar</option>
+                    <option value="Hosteler">Hosteler</option>
+                    <option value="Both">Both</option>
                   </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
+                <div></div>
+              </div>
+
+              {/* Row 4: Head Type & Gender Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                {/* Head Type */}
+                <div>
+                  <label className="block text-xs font-normal text-slate-600 mb-2">
+                    Head Type
+                  </label>
+                  <div className="flex items-center gap-5 text-xs text-slate-700">
+                    {['Both', 'New', 'Old'].map((type) => (
+                      <label key={type} className="inline-flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="applyFor"
+                          value={type}
+                          checked={formData.applyFor === type}
+                          onChange={(e) => setFormData(prev => ({ ...prev, applyFor: e.target.value }))}
+                          className="w-4 h-4 text-red-500 accent-red-500 focus:ring-red-400 cursor-pointer"
+                        />
+                        <span>{type}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-6">
-                  <input
-                    type="checkbox"
-                    id="isBoard"
-                    checked={formData.isBoard}
-                    onChange={(e) => setFormData(prev => ({ ...prev, isBoard: e.target.checked }))}
-                    className="w-4 h-4 text-indigo-600 rounded-sm border-slate-300 focus:ring-indigo-500"
-                  />
-                  <label htmlFor="isBoard" className="text-xs font-semibold text-slate-700 cursor-pointer">
-                    Is Board Examination Fee
+                {/* Gender Type */}
+                <div>
+                  <label className="block text-xs font-normal text-slate-600 mb-2">
+                    Gender Type
                   </label>
+                  <div className="flex items-center gap-5 text-xs text-slate-700">
+                    {['Both', 'Male', 'Female'].map((gender) => (
+                      <label key={gender} className="inline-flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={gender}
+                          checked={formData.gender === gender}
+                          onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
+                          className="w-4 h-4 text-red-500 accent-red-500 focus:ring-red-400 cursor-pointer"
+                        />
+                        <span>{gender}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              {/* Row 5: Is Board Fee */}
+              <div className="pt-1">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-normal text-slate-700 select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.isBoard}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isBoard: e.target.checked }))}
+                    className="w-4 h-4 rounded-xs border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <span>Is Board Fee</span>
+                </label>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition"
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-xs transition"
+                  className="px-6 py-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-semibold rounded-lg shadow-xs transition cursor-pointer"
                 >
-                  {isLoading ? 'Saving...' : 'Save Fee Head'}
+                  {isLoading ? 'Saving...' : editingHead ? 'Update' : 'Add'}
                 </button>
               </div>
             </form>
@@ -421,3 +594,5 @@ export function FeeHeadPage() {
     </div>
   );
 }
+
+export default FeeHeadPage;

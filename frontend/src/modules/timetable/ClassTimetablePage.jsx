@@ -240,7 +240,7 @@ export function ClassTimetablePage({ onNavigate }) {
                           </p>
                           <p className="text-[10px] text-slate-500 font-medium flex items-center justify-center gap-1">
                             <User className="w-2.5 h-2.5" />
-                            {period === 1 ? 'Dr. Sharma' : period === 2 ? 'Prof. Anita' : period === 3 ? 'Ms. Kavita' : period === 4 ? 'Mr. Verma' : period === 5 ? 'Dr. Mehta' : period === 6 ? 'Mr. Rahul' : period === 7 ? 'Mrs. Sunita' : 'Coach Rajesh'}
+                            {period === 1 ? 'Mrs. Monika Rani Verma' : period === 2 ? 'Mr. Rakesh Sharma' : period === 3 ? 'Mrs. Priti Verma' : period === 4 ? 'Mrs. Sunita Kumari' : period === 5 ? 'Dr. Arun Joshi' : period === 6 ? 'Mr. Amit Pareek' : period === 7 ? 'Ms. Pooja Kanwar' : 'Mrs. Suman Meena'}
                           </p>
                           <p className="text-[9px] text-slate-400">Room 102</p>
                         </div>

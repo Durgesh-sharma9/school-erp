@@ -4,6 +4,7 @@ import {
   Smartphone,
   Laptop,
   CheckCircle2,
+  Check,
   Share,
   PlusSquare,
   X,
@@ -56,7 +57,7 @@ export function PwaDownloadButton() {
         {/* Subtle Tooltip / Callout pill */}
         <div className="mb-2 hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900/90 text-white text-[11px] font-medium backdrop-blur-md shadow-lg border border-slate-700/50 opacity-90 group-hover:opacity-100 transition-opacity">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>{isInstalled ? 'App Installed' : 'Fast PWA &bull; Install on any device'}</span>
+          <span>{isInstalled ? 'App Installed' : 'Fast PWA • Install on any device'}</span>
         </div>
 
         <button
@@ -124,7 +125,7 @@ export function PwaDownloadButton() {
                   School ERP Portal
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Progressive Web App &bull; Version 1.0.0
+                  Progressive Web App • Version 1.0.0
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
@@ -151,11 +152,17 @@ export function PwaDownloadButton() {
 
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800">
-                    <p className="font-semibold text-slate-900 dark:text-white">&check; Works Offline</p>
+                    <p className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Works Offline</span>
+                    </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">Core cached data available</p>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800">
-                    <p className="font-semibold text-slate-900 dark:text-white">&check; Instant Launch</p>
+                    <p className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Instant Launch</span>
+                    </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">Zero load lag</p>
                   </div>
                 </div>
@@ -232,7 +239,7 @@ export function PwaDownloadButton() {
                     <Laptop className="w-4 h-4 text-indigo-600" /> Desktop & Laptop (Chrome, Edge, Brave)
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Look for the <strong className="font-semibold text-indigo-700 dark:text-indigo-300">Install icon</strong> (computer screen with a down arrow) in your browser’s URL address bar, or click browser menu (three dots) &rarr; <span className="underline">Install School ERP</span>.
+                    Look for the <strong className="font-semibold text-indigo-700 dark:text-indigo-300">Install icon</strong> (computer screen with a down arrow) in your browser’s URL address bar, or click browser menu (three dots) → <span className="underline">Install School ERP</span>.
                   </p>
                 </div>
 
@@ -241,7 +248,7 @@ export function PwaDownloadButton() {
                     <Smartphone className="w-4 h-4 text-indigo-600" /> Android Devices
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Tap the 3-dots menu in Chrome &rarr; select <strong className="font-semibold text-slate-800 dark:text-slate-200">&ldquo;Install App&rdquo;</strong> or <strong className="font-semibold text-slate-800 dark:text-slate-200">&ldquo;Add to Home Screen&rdquo;</strong>.
+                    Tap the 3-dots menu in Chrome → select <strong className="font-semibold text-slate-800 dark:text-slate-200">“Install App”</strong> or <strong className="font-semibold text-slate-800 dark:text-slate-200">“Add to Home Screen”</strong>.
                   </p>
                 </div>
 
