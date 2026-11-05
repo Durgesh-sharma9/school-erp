@@ -278,7 +278,7 @@ export function SubjectGroupPage({ onNavigate }) {
             <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shadow-indigo-200">
               <Layers className="w-5 h-5" />
             </div>
-            Subject Group Master (विषय समूह निर्देशिका)
+            Subject Group Master
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Categorize subjects into Scholastic, Co-Scholastic, Streams & CCE Life Skills for Report Cards & Marksheets

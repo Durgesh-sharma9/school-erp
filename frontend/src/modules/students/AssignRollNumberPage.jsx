@@ -432,9 +432,9 @@ export function AssignRollNumberPage({ onNavigate }) {
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
-              <p className="font-bold text-sm">Is school me koi class create nahi hai</p>
+              <p className="font-bold text-sm">No classes created in this school</p>
               <p className="text-amber-700 mt-0.5">
-                Pehle Class Master me jakar apni classes (jaise Class 1, Class 2 ya Nursery) add karein.
+                Please navigate to Class Master and add classes (e.g. Nursery, Class 1, Class 2) first.
               </p>
             </div>
           </div>
@@ -737,8 +737,8 @@ export function AssignRollNumberPage({ onNavigate }) {
                         {searchQuery
                           ? 'Try matching another search keyword.'
                           : selectedClass
-                          ? `Class "${selectedClass}" (Section ${selectedDivision}) me koi student enrolled nahi hai.`
-                          : 'Pehle Class Master se class create karein ya student registration karein.'}
+                          ? `No students are enrolled in Class "${selectedClass}" (Section ${selectedDivision}).`
+                          : 'Please create classes in Class Master or register students first.'}
                       </p>
                       {selectedClass && (
                         <button

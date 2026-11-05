@@ -33,7 +33,8 @@ import {
   Cpu,
   Megaphone,
   Trophy,
-  TrendingUp
+  TrendingUp,
+  UserPlus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { STUDENT_REPORT_PATHS } from '../../modules/students/reports/studentReportsCatalog';
@@ -56,7 +57,9 @@ const ITEM_COLORS = {
   'fee': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'transport': { iconColor: 'text-orange-600', boxBg: 'bg-orange-50 group-hover:bg-orange-100' },
   'hostel': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
+  'recruitment': { iconColor: 'text-indigo-600', boxBg: 'bg-indigo-50 group-hover:bg-indigo-100' },
   'payroll': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
+  'salary': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
   'library': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'inventory-hub': { iconColor: 'text-fuchsia-600', boxBg: 'bg-fuchsia-50 group-hover:bg-fuchsia-100' },
   'stationary': { iconColor: 'text-fuchsia-600', boxBg: 'bg-fuchsia-50 group-hover:bg-fuchsia-100' },
@@ -274,6 +277,51 @@ export const menuCategories = [
     ]
   },
   {
+    id: 'recruitment',
+    title: 'Recruitment (HireHub)',
+    icon: UserPlus,
+    subItems: [
+      { title: 'Dashboard', path: '/recruitment-dashboard' },
+      { title: 'Biodata List', path: '/recruitment-candidates' },
+      { title: 'Add Biodata', path: '/recruitment-add' },
+      { title: 'QR & Apply Links', path: '/recruitment-openings' },
+      { title: 'Settings', path: '/recruitment-settings' }
+    ]
+  },
+  {
+    id: 'payroll',
+    title: 'Payroll',
+    icon: Users, // people in UAB
+    subItems: [
+      { title: 'Branch', path: '/payroll-branch' },
+      { title: 'Department', path: '/payroll-department' },
+      { title: 'Designation', path: '/payroll-designation' },
+      { title: 'Allowances', path: '/payroll-allowances' },
+      { title: 'Leave Setup', path: '/payroll-leave-setup' },
+      { title: 'Shift Master', path: '/shift-master' },
+      { title: 'Staff Registration', path: '/payroll-registration' },
+      { title: 'Staff Attendance', path: '/staff-attendance' },
+      { title: 'Generate Salary', path: '/generate-staff-salary' },
+      { title: 'Advance Salary', path: '/payroll-advance-payment' },
+      { title: 'Staff ID Card', path: '/staff-id-card-generator' },
+      { title: 'Reports', path: '/payroll-reports' }
+    ]
+  },
+  {
+    id: 'salary',
+    title: 'Salary',
+    icon: IndianRupee,
+    subItems: [
+      { title: 'Salary Hub', path: '/salary-hub' },
+      { title: 'Process Salary', path: '/salary-processing' },
+      { title: 'Payslips Studio', path: '/salary-payslips' },
+      { title: 'Salary Structure', path: '/salary-structure' },
+      { title: 'Salary Settings', path: '/salary-settings' },
+      { title: 'Salary Analytics', path: '/salary-analytics' },
+      { title: 'Salary Reports', path: '/salary-reports' }
+    ]
+  },
+  {
     id: 'master',
     title: 'Master',
     icon: GraduationCap, // school in UAB
@@ -283,6 +331,8 @@ export const menuCategories = [
       { title: 'Subject Master', path: '/subject' },
       { title: 'Subject Link', path: '/subject-link' },
       { title: 'Stream Master', path: '/add-update-stream' },
+      { title: 'Department Master', path: '/department-master' },
+      { title: 'Designation Master', path: '/designation-master' },
       { title: 'Reports', path: '/master-reports' }
     ]
   },
@@ -477,25 +527,6 @@ export const menuCategories = [
     ]
   },
   {
-    id: 'payroll',
-    title: 'Payroll',
-    icon: Users, // people in UAB
-    subItems: [
-      { title: 'Branch', path: '/payroll-branch' },
-      { title: 'Department', path: '/payroll-department' },
-      { title: 'Designation', path: '/payroll-designation' },
-      { title: 'Allowances', path: '/payroll-allowances' },
-      { title: 'Leave Setup', path: '/payroll-leave-setup' },
-      { title: 'Shift Master', path: '/shift-master' },
-      { title: 'Staff Registration', path: '/payroll-registration' },
-      { title: 'Staff Attendance', path: '/staff-attendance' },
-      { title: 'Generate Salary', path: '/generate-staff-salary' },
-      { title: 'Advance Salary', path: '/payroll-advance-payment' },
-      { title: 'Staff ID Card', path: '/staff-id-card-generator' },
-      { title: 'Reports', path: '/payroll-reports' }
-    ]
-  },
-  {
     id: 'frontOffice',
     title: 'Front Office',
     icon: UserCheck, // account_circle in UAB
@@ -579,6 +610,8 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
     if (path.includes('fee')) return { fee: true };
     if (path.includes('hostel')) return { hostel: true };
     if (path.includes('exam') || path.includes('date-sheet') || path.includes('datesheet') || path.includes('marks') || path.includes('grade') || path.includes('toppers') || path.includes('prc') || path.includes('performance') || path.includes('consolidated')) return { examination: true };
+    if (path.includes('salary')) return { salary: true };
+    if (path.includes('recruitment') || path.includes('hirehub') || path.includes('candidate')) return { recruitment: true };
     if (path.includes('payroll') || path.includes('staff-salary') || path.includes('staff-attendance') || path.includes('staff-list')) return { payroll: true };
     if (path.includes('front') || path.includes('complaint') || path.includes('visitor') || path.includes('gate-pass') || path.includes('reminder') || path.includes('notification-count')) return { frontOffice: true };
     if (path.includes('library') || path.includes('book')) return { library: true };
@@ -717,7 +750,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
       />
 
       {/* 1:1 Test Master Pro Sidenav */}
-      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 md:w-64 bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
+      <aside className="fixed md:sticky top-0 inset-y-0 left-0 z-50 md:z-30 w-64 min-w-[16rem] max-w-[16rem] bg-white border-r border-slate-200/80 h-screen flex flex-col shrink-0 select-none text-slate-800 shadow-xl md:shadow-none transition-all duration-300">
 
         {/* Top Header with Brand Logo & Collapse */}
         <div className="relative flex h-16 items-center justify-between border-b border-slate-100 px-4 shrink-0 bg-white">
@@ -756,7 +789,7 @@ export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose 
         </div>
 
         {/* Menu Items List with Clean Scroll & Padding */}
-        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 pb-16 space-y-1 text-sm font-medium no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div ref={sidebarNavRef} className="flex-1 overflow-y-auto px-3 py-3 pb-24 space-y-1 text-sm font-medium custom-scrollbar">
           {activeCategories.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.subItems && item.subItems.length > 0;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import JsBarcode from 'jsbarcode';
 import {
   Package,
   Tag,
@@ -9,6 +10,8 @@ import {
   Edit2,
   Printer,
   FileDown,
+  Download,
+  Eye,
   X,
   Layers,
   CheckCircle2,
@@ -27,6 +30,7 @@ import {
   GraduationCap,
   Globe,
   Barcode,
+  SlidersHorizontal,
   Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -50,6 +54,251 @@ const CATEGORY_TYPES = [
   { id: 'General', label: 'General / Accessories', icon: Package, color: 'text-slate-600 bg-slate-50 border-slate-200' }
 ];
 
+
+// ================= BARCODE HELPER COMPONENT & PRINT UTILITIES =================
+const BarcodeSvgPreview = ({ value, width = 1.6, height = 36, fontSize = 11, displayValue = true }) => {
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    if (svgRef.current && value) {
+      try {
+        JsBarcode(svgRef.current, String(value).trim(), {
+          format: 'CODE128',
+          lineColor: '#0f172a',
+          width,
+          height,
+          displayValue,
+          fontSize,
+          margin: 4,
+          background: '#ffffff'
+        });
+      } catch (err) {
+        console.warn('JsBarcode render error:', err);
+      }
+    }
+  }, [value, width, height, fontSize, displayValue]);
+
+  if (!value) return null;
+  return <svg ref={svgRef} className="max-w-full h-auto mx-auto" />;
+};
+
+const printBarcodeLabels = ({
+  barcode,
+  itemName,
+  rate,
+  quantity = 1,
+  layout = 'thermal',
+  shopName = 'Campus Store',
+  options = {}
+}) => {
+  if (!barcode) {
+    toast.error('No barcode available to print');
+    return;
+  }
+
+  const {
+    storeName = false,
+    itemName: showItemName = true,
+    barcodeLines = true,
+    barcodeText = true,
+    price = true
+  } = options || {};
+
+  const printWindow = window.open('', '_blank', 'width=800,height=650');
+  if (!printWindow) {
+    toast.error('Pop-up blocked. Please allow pop-ups to print barcode labels.');
+    return;
+  }
+
+  let svgHtml = '';
+  if (barcodeLines) {
+    const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    try {
+      JsBarcode(tempSvg, String(barcode).trim(), {
+        format: 'CODE128',
+        lineColor: '#000000',
+        width: layout === 'thermal' ? 1.8 : 1.5,
+        height: layout === 'thermal' ? 44 : 34,
+        displayValue: barcodeText,
+        fontSize: 10,
+        margin: 2
+      });
+      svgHtml = tempSvg.outerHTML;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const count = Math.max(1, parseInt(quantity) || 1);
+
+  let stickersHtml = '';
+  for (let i = 0; i < count; i++) {
+    stickersHtml += `
+      <div class="sticker">
+        ${storeName ? `<div class="shop-name">${shopName || 'Campus Store'}</div>` : ''}
+        ${showItemName ? `<div class="item-name" title="${itemName || ''}">${itemName || 'Store Item'}</div>` : ''}
+        ${barcodeLines ? `<div class="barcode-svg">${svgHtml}</div>` : (barcodeText ? `<div class="barcode-text-code" style="font-family:monospace;font-size:12px;font-weight:700;letter-spacing:1px;padding:3px 0;">${barcode}</div>` : '')}
+        ${price && rate ? `<div class="rate-tag">MRP: ₹${rate}</div>` : ''}
+      </div>
+    `;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Barcode Print - ${itemName || barcode}</title>
+      <style>
+        @page {
+          size: ${layout === 'thermal' ? '50mm 30mm' : 'A4 portrait'};
+          margin: ${layout === 'thermal' ? '0' : '8mm'};
+        }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          margin: 0;
+          padding: ${layout === 'thermal' ? '2mm' : '4mm'};
+          background: white;
+          color: #0f172a;
+        }
+        .sheet {
+          display: grid;
+          grid-template-columns: ${layout === 'thermal' ? '1fr' : 'repeat(3, 1fr)'};
+          gap: ${layout === 'thermal' ? '0' : '4mm'};
+        }
+        .sticker {
+          box-sizing: border-box;
+          background: white;
+          border: 1px dashed #94a3b8;
+          border-radius: 4px;
+          padding: 6px 4px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          page-break-inside: avoid;
+          min-height: ${layout === 'thermal' ? '26mm' : '32mm'};
+        }
+        .shop-name {
+          font-size: 8px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #64748b;
+          margin-bottom: 1px;
+        }
+        .item-name {
+          font-size: 10px;
+          font-weight: 700;
+          color: #0f172a;
+          max-width: 170px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 2px;
+        }
+        .barcode-svg svg {
+          max-width: 100%;
+          height: auto;
+        }
+        .rate-tag {
+          font-size: 10px;
+          font-weight: 800;
+          color: #047857;
+          margin-top: 1px;
+        }
+        @media print {
+          body {
+            padding: 0;
+          }
+          .sticker {
+            border: 1px solid #cbd5e1;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="sheet">
+        ${stickersHtml}
+      </div>
+      <script>
+        window.onload = function() {
+          window.print();
+          setTimeout(function() { window.close(); }, 800);
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+};
+
+const downloadBarcodeImage = (barcodeVal, itemName, format = 'png', displayValue = true) => {
+  if (!barcodeVal) {
+    toast.error('No barcode available to download');
+    return;
+  }
+
+  const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  try {
+    JsBarcode(tempSvg, String(barcodeVal).trim(), {
+      format: 'CODE128',
+      lineColor: '#000000',
+      width: 2.2,
+      height: 70,
+      displayValue: Boolean(displayValue),
+      fontSize: 14,
+      margin: 10,
+      background: '#ffffff'
+    });
+  } catch (e) {
+    toast.error('Failed to generate barcode image');
+    return;
+  }
+
+  const svgData = new XMLSerializer().serializeToString(tempSvg);
+
+  if (format === 'svg') {
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `barcode-${barcodeVal}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('SVG barcode downloaded!');
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  img.onload = () => {
+    canvas.width = img.width || 320;
+    canvas.height = img.height || 120;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+
+    const pngUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = pngUrl;
+    link.download = `barcode-${barcodeVal}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('PNG barcode downloaded!');
+  };
+  img.src = url;
+};
+
 export function ItemsMasterPage({ onNavigate }) {
   // State: Data
   const [items, setItems] = useState([]);
@@ -67,6 +316,18 @@ export function ItemsMasterPage({ onNavigate }) {
   // State: Item Modal
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState(null);
+  const [selectedBarcodeItem, setSelectedBarcodeItem] = useState(null);
+  const [barcodePrintQty, setBarcodePrintQty] = useState(1);
+  const [barcodePrintLayout, setBarcodePrintLayout] = useState('thermal');
+  const [isBulkBarcodeModalOpen, setIsBulkBarcodeModalOpen] = useState(false);
+  const [bulkBarcodeCategory, setBulkBarcodeCategory] = useState('ALL');
+  const [labelElements, setLabelElements] = useState({
+    storeName: false,
+    itemName: true,
+    barcodeLines: true,
+    barcodeText: true,
+    price: true
+  });
   const [itemForm, setItemForm] = useState({
     shopName: 'Main Store',
     categoryName: '',
@@ -491,11 +752,12 @@ export function ItemsMasterPage({ onNavigate }) {
             Export CSV
           </button>
           <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-sm transition-all"
+            onClick={() => setIsBulkBarcodeModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 shadow-sm transition-all"
+            title="Batch print barcode labels"
           >
-            <Printer className="w-3.5 h-3.5 text-blue-600" />
-            Print
+            <Barcode className="w-3.5 h-3.5 text-indigo-600" />
+            Print Barcodes
           </button>
           <button
             onClick={openAddCategoryModal}
@@ -742,10 +1004,11 @@ export function ItemsMasterPage({ onNavigate }) {
                   <th className="py-3 px-3 text-center w-12">S.NO.</th>
                   <th className="py-3 px-4">ITEM NAME</th>
                   <th className="py-3 px-3">CATEGORY</th>
+                  <th className="py-3 px-3">BARCODE</th>
                   <th className="py-3 px-3">HSN CODE</th>
                   <th className="py-3 px-3 text-right">RATE (₹)</th>
                   <th className="py-3 px-3 text-center">STOCK</th>
-                  <th className="py-3 px-3 text-center w-24">ACTIONS</th>
+                  <th className="py-3 px-3 text-center w-28">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -771,6 +1034,47 @@ export function ItemsMasterPage({ onNavigate }) {
                             {item.categoryName}
                           </button>
                         </td>
+                        <td className="py-3 px-3">
+                          {item.barcode ? (
+                            <div className="flex flex-col items-start gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBarcodeItem(item)}
+                                className="group p-1 bg-white border border-slate-200 rounded hover:border-indigo-400 hover:shadow-xs transition flex flex-col items-center"
+                                title="Click to view, print or download barcode sticker"
+                              >
+                                <BarcodeSvgPreview value={item.barcode} width={1.2} height={24} fontSize={9} />
+                              </button>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedBarcodeItem(item)}
+                                  className="text-[10px] text-indigo-600 font-semibold hover:text-indigo-800 flex items-center gap-0.5"
+                                  title="Print Barcode Label"
+                                >
+                                  <Printer className="w-2.5 h-2.5" /> Print
+                                </button>
+                                <span className="text-slate-300">•</span>
+                                <button
+                                  type="button"
+                                  onClick={() => downloadBarcodeImage(item.barcode, item.itemName, 'png')}
+                                  className="text-[10px] text-emerald-600 font-semibold hover:text-emerald-800 flex items-center gap-0.5"
+                                  title="Download Barcode PNG"
+                                >
+                                  <Download className="w-2.5 h-2.5" /> Save
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => openEditItemModal(item)}
+                              className="text-[10px] text-indigo-600 font-medium hover:underline flex items-center gap-1 bg-indigo-50/60 px-2 py-0.5 rounded border border-indigo-100"
+                            >
+                              <Barcode className="w-2.5 h-2.5" /> Add Barcode
+                            </button>
+                          )}
+                        </td>
                         <td className="py-3 px-3 font-mono text-slate-500">{item.hsnCode || '—'}</td>
                         <td className="py-3 px-3 text-right font-bold text-slate-800">₹{item.rate}</td>
                         <td className="py-3 px-3 text-center">
@@ -784,6 +1088,15 @@ export function ItemsMasterPage({ onNavigate }) {
                         </td>
                         <td className="py-3 px-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
+                            {item.barcode && (
+                              <button
+                                onClick={() => setSelectedBarcodeItem(item)}
+                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                title="Print / Download Barcode"
+                              >
+                                <Barcode className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                             <button
                               onClick={() => openEditItemModal(item)}
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -805,7 +1118,7 @@ export function ItemsMasterPage({ onNavigate }) {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-slate-400">
                       <Package className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                       <p className="font-semibold text-slate-600">
                         {selectedCategory === 'ALL'
@@ -943,6 +1256,68 @@ export function ItemsMasterPage({ onNavigate }) {
                 </div>
               </div>
 
+              {/* Live Barcode Graphic Preview Box */}
+              {itemForm.barcode && (
+                <div className="p-3.5 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Barcode className="w-3.5 h-3.5 text-indigo-600" />
+                      Live Barcode Graphic (CODE128)
+                    </span>
+                    <span className="text-[10px] bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-full">
+                      Ready to Print & Scan
+                    </span>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs flex flex-col items-center justify-center">
+                    <div className="text-xs font-bold text-slate-800 mb-1 max-w-[280px] truncate text-center">
+                      {itemForm.itemName || 'Store Item'}
+                    </div>
+                    <BarcodeSvgPreview value={itemForm.barcode} width={1.8} height={48} fontSize={11} />
+                    {itemForm.rate && (
+                      <div className="text-xs font-extrabold text-emerald-600 mt-1">
+                        MRP: ₹{itemForm.rate}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => printBarcodeLabels({
+                        barcode: itemForm.barcode,
+                        itemName: itemForm.itemName,
+                        rate: itemForm.rate,
+                        quantity: 1
+                      })}
+                      className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-1.5 shadow-2xs hover:bg-slate-50 transition"
+                      title="Print Barcode Sticker"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-indigo-600" />
+                      Print Sticker
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadBarcodeImage(itemForm.barcode, itemForm.itemName, 'png')}
+                      className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-1.5 shadow-2xs hover:bg-slate-50 transition"
+                      title="Download PNG Image"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-600" />
+                      Download PNG
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadBarcodeImage(itemForm.barcode, itemForm.itemName, 'svg')}
+                      className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-1.5 shadow-2xs hover:bg-slate-50 transition"
+                      title="Download SVG Vector"
+                    >
+                      <FileDown className="w-3.5 h-3.5 text-blue-600" />
+                      Download SVG
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Rate & Stocks */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
@@ -1040,7 +1415,7 @@ export function ItemsMasterPage({ onNavigate }) {
               {/* 2. Category Nature / Item Type */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1.5">
-                  Item Type / Nature (Kya cheez hai?) <span className="text-rose-500">*</span>
+                  Item Classification / Type <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {CATEGORY_TYPES.map(type => {
@@ -1070,7 +1445,7 @@ export function ItemsMasterPage({ onNavigate }) {
               {/* 3. Applicable Classes / Whom to Issue */}
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
                 <label className="block font-semibold text-slate-800">
-                  Target Audience (Kisko Issue Hogi?)
+                  Target Audience / Applicability
                 </label>
 
                 {/* Scope Radio Toggle */}
@@ -1214,6 +1589,546 @@ export function ItemsMasterPage({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* ================= MODAL 1: SINGLE ITEM BARCODE LABEL STUDIO ================= */}
+      {selectedBarcodeItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  <Barcode className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800">Print Item Barcode Label</h3>
+                  <p className="text-[11px] text-slate-400">Generate printable stickers & download barcode</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedBarcodeItem(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              {/* Item Info Box */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold text-slate-800">{selectedBarcodeItem.itemName}</div>
+                  <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                    <span>Category: {selectedBarcodeItem.categoryName || 'General'}</span>
+                    {selectedBarcodeItem.hsnCode && <span>• HSN: {selectedBarcodeItem.hsnCode}</span>}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-extrabold text-emerald-600">₹{selectedBarcodeItem.rate || '0'}</div>
+                  <div className="text-[10px] text-slate-400">Price (MRP)</div>
+                </div>
+              </div>
+
+              {/* Physical Label Preview with Live Dynamic Elements */}
+              <div className="border border-dashed border-indigo-300 rounded-xl p-4 bg-indigo-50/30 flex flex-col items-center justify-center text-center min-h-[120px] transition-all">
+                {labelElements.storeName && (
+                  <div className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">
+                    School Campus Store
+                  </div>
+                )}
+                {labelElements.itemName && (
+                  <div className="text-sm font-bold text-slate-800 max-w-[240px] truncate mb-1">
+                    {selectedBarcodeItem.itemName}
+                  </div>
+                )}
+                {labelElements.barcodeLines ? (
+                  <div className="bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs max-w-full overflow-hidden flex justify-center">
+                    <BarcodeSvgPreview
+                      value={selectedBarcodeItem.barcode}
+                      width={1.8}
+                      height={46}
+                      fontSize={12}
+                      displayValue={labelElements.barcodeText}
+                    />
+                  </div>
+                ) : (
+                  labelElements.barcodeText && (
+                    <div className="font-mono text-sm font-bold bg-white px-4 py-1.5 rounded-lg border border-slate-200 text-slate-800 shadow-2xs">
+                      {selectedBarcodeItem.barcode}
+                    </div>
+                  )
+                )}
+                {labelElements.price && selectedBarcodeItem.rate && (
+                  <div className="text-xs font-extrabold text-emerald-600 mt-1.5">
+                    MRP: ₹{selectedBarcodeItem.rate}
+                  </div>
+                )}
+                {!labelElements.storeName && !labelElements.itemName && !labelElements.barcodeLines && !labelElements.barcodeText && !labelElements.price && (
+                  <div className="text-xs text-rose-500 font-semibold py-3">
+                    ⚠️ Select at least one element below to include on sticker
+                  </div>
+                )}
+              </div>
+
+              {/* Sticker Content Selector / Presets */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+                    Select What to Print
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">Live preview updates above</span>
+                </div>
+
+                {/* 1-Click Quick Presets */}
+                <div className="flex flex-wrap items-center gap-1 text-[10px]">
+                  <span className="font-semibold text-slate-400 mr-1">Quick:</span>
+                  <button
+                    type="button"
+                    onClick={() => setLabelElements({ storeName: true, itemName: true, barcodeLines: true, barcodeText: true, price: true })}
+                    className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium transition"
+                  >
+                    All Details
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLabelElements({ storeName: false, itemName: true, barcodeLines: true, barcodeText: true, price: true })}
+                    className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium transition"
+                  >
+                    Barcode + Price
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLabelElements({ storeName: false, itemName: false, barcodeLines: true, barcodeText: true, price: false })}
+                    className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium transition"
+                  >
+                    Barcode Only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLabelElements({ storeName: false, itemName: false, barcodeLines: true, barcodeText: false, price: false })}
+                    className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium transition"
+                  >
+                    Lines Only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLabelElements({ storeName: false, itemName: true, barcodeLines: false, barcodeText: true, price: true })}
+                    className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium transition"
+                  >
+                    Code & Price
+                  </button>
+                </div>
+
+                {/* Element Toggle Buttons */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1">
+                  {[
+                    { key: 'itemName', label: 'Item Name' },
+                    { key: 'barcodeLines', label: 'Barcode Lines' },
+                    { key: 'barcodeText', label: 'Code Text (BC-...)' },
+                    { key: 'price', label: 'Price (MRP)' },
+                    { key: 'storeName', label: 'School Store' }
+                  ].map(({ key, label }) => {
+                    const isChecked = labelElements[key];
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setLabelElements(prev => ({ ...prev, [key]: !prev[key] }))}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs text-left transition ${
+                          isChecked
+                            ? 'bg-indigo-50 border-indigo-600 text-indigo-900 font-bold shadow-2xs'
+                            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[10px] font-bold ${
+                          isChecked ? 'bg-indigo-600 text-white' : 'border border-slate-300'
+                        }`}>
+                          {isChecked && '✓'}
+                        </div>
+                        <span className="truncate">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Printer / Paper Format */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Printer / Paper Format
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBarcodePrintLayout('thermal')}
+                    className={`py-2 px-3 text-xs font-bold rounded-lg border text-left transition ${
+                      barcodePrintLayout === 'thermal'
+                        ? 'bg-indigo-50 text-indigo-900 border-indigo-600 ring-2 ring-indigo-500/20'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>🏷️ Thermal Label</div>
+                    <div className="text-[10px] font-normal text-slate-500 mt-0.5">50mm x 30mm Roll</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBarcodePrintLayout('sheet')}
+                    className={`py-2 px-3 text-xs font-bold rounded-lg border text-left transition ${
+                      barcodePrintLayout === 'sheet'
+                        ? 'bg-indigo-50 text-indigo-900 border-indigo-600 ring-2 ring-indigo-500/20'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>📄 A4 Sheet (3x8)</div>
+                    <div className="text-[10px] font-normal text-slate-500 mt-0.5">Standard Sticker Paper</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Print Quantity Selector */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Number of Stickers to Print
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 4, 8, 16, 24].map((qty) => (
+                    <button
+                      key={qty}
+                      type="button"
+                      onClick={() => setBarcodePrintQty(qty)}
+                      className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                        barcodePrintQty === qty
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs ring-2 ring-indigo-500/20'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {qty}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => printBarcodeLabels({
+                    barcode: selectedBarcodeItem.barcode,
+                    itemName: selectedBarcodeItem.itemName,
+                    rate: selectedBarcodeItem.rate,
+                    quantity: barcodePrintQty,
+                    layout: barcodePrintLayout,
+                    options: labelElements
+                  })}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Print ({barcodePrintQty})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadBarcodeImage(selectedBarcodeItem.barcode, selectedBarcodeItem.itemName, 'png', labelElements.barcodeText)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
+                  PNG Image
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadBarcodeImage(selectedBarcodeItem.barcode, selectedBarcodeItem.itemName, 'svg')}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition"
+                >
+                  <FileDown className="w-3.5 h-3.5 text-purple-600" />
+                  Vector SVG
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL 2: BULK / FULL CATALOG BARCODE LABEL SHEET STUDIO ================= */}
+      {isBulkBarcodeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  <Barcode className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800">Bulk Barcode Label Printing Studio</h3>
+                  <p className="text-xs text-slate-500">Print barcode sheets for your inventory stickers</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsBulkBarcodeModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Filter & Options Toolbar */}
+            <div className="p-4 bg-white border-b border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Filter Items</label>
+                <select
+                  value={bulkBarcodeCategory}
+                  onChange={e => setBulkBarcodeCategory(e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:border-indigo-500 font-medium"
+                >
+                  <option value="ALL">All Categories ({items.filter(i => i.barcode).length} barcoded items)</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.categoryName}>
+                      {c.categoryName} ({items.filter(i => i.categoryName === c.categoryName && i.barcode).length} items)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Paper Layout</label>
+                <select
+                  value={barcodePrintLayout}
+                  onChange={e => setBarcodePrintLayout(e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:border-indigo-500 font-medium"
+                >
+                  <option value="sheet">A4 Sticker Sheet (24 Labels - 3x8)</option>
+                  <option value="thermal">Thermal Roll (50mm x 30mm Continuous)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Copies Per Item</label>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 5, 10].map(cnt => (
+                    <button
+                      key={cnt}
+                      type="button"
+                      onClick={() => setBarcodePrintQty(cnt)}
+                      className={`flex-1 py-1 text-xs font-bold rounded-lg border transition ${
+                        barcodePrintQty === cnt
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {cnt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sheet Preview Body */}
+            <div className="p-4 overflow-y-auto flex-1 bg-slate-50/50">
+              {(() => {
+                const targetItems = items.filter(i => {
+                  if (!i.barcode) return false;
+                  if (bulkBarcodeCategory !== 'ALL' && i.categoryName !== bulkBarcodeCategory) return false;
+                  return true;
+                });
+
+                if (targetItems.length === 0) {
+                  return (
+                    <div className="py-12 text-center text-slate-400">
+                      <Barcode className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="font-semibold text-slate-700 text-sm">No items with barcodes found</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Please add or generate barcodes for your items first.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                      <span>Found {targetItems.length} items ({targetItems.length * barcodePrintQty} total stickers to print)</span>
+                      <span className="font-mono text-[11px] text-indigo-600">Layout: {barcodePrintLayout === 'sheet' ? 'A4 Grid' : 'Thermal Roll'}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[360px] overflow-y-auto p-2 bg-white rounded-xl border border-slate-200">
+                      {targetItems.map(item => (
+                        <div key={item.id} className="p-2.5 rounded-lg border border-slate-200 bg-white shadow-2xs flex flex-col items-center text-center">
+                          <div className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Campus Store</div>
+                          <div className="text-xs font-bold text-slate-800 truncate max-w-full">{item.itemName}</div>
+                          <div className="my-1 max-w-full overflow-hidden flex justify-center">
+                            <BarcodeSvgPreview value={item.barcode} width={1.3} height={30} fontSize={9} />
+                          </div>
+                          <div className="text-[10px] font-extrabold text-emerald-600">
+                            {item.rate ? 'MRP: ₹' + item.rate : 'Barcode'}
+                          </div>
+                          <div className="mt-1 text-[9px] font-mono text-slate-400">
+                            {barcodePrintQty} {barcodePrintQty === 1 ? 'sticker' : 'stickers'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3.5 bg-white border-t border-slate-200 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setIsBulkBarcodeModalOpen(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              >
+                Close
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const targetItems = items.filter(i => {
+                    if (!i.barcode) return false;
+                    if (bulkBarcodeCategory !== 'ALL' && i.categoryName !== bulkBarcodeCategory) return false;
+                    return true;
+                  });
+
+                  if (targetItems.length === 0) {
+                    toast.error('No items to print');
+                    return;
+                  }
+
+                  const printWindow = window.open('', '_blank', 'width=850,height=700');
+                  if (!printWindow) {
+                    toast.error('Pop-up blocked. Please allow pop-ups to print barcode sheets.');
+                    return;
+                  }
+
+                  let stickersHtml = '';
+                  targetItems.forEach(item => {
+                    const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    try {
+                      JsBarcode(tempSvg, String(item.barcode).trim(), {
+                        format: 'CODE128',
+                        lineColor: '#000000',
+                        width: 1.5,
+                        height: 38,
+                        displayValue: true,
+                        fontSize: 10,
+                        margin: 2
+                      });
+                    } catch (e) {}
+                    const svgHtml = tempSvg.outerHTML;
+
+                    for (let c = 0; c < barcodePrintQty; c++) {
+                      stickersHtml += `
+                        <div class="sticker">
+                          <div class="shop-name">Campus Store</div>
+                          <div class="item-name">${item.itemName || 'Store Item'}</div>
+                          <div class="barcode-svg">${svgHtml}</div>
+                          <div class="rate-tag">${item.rate ? 'MRP: ₹' + item.rate : 'Verified'}</div>
+                        </div>
+                      `;
+                    }
+                  });
+
+                  printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <meta charset="utf-8">
+                      <title>Barcode Label Sheet Print</title>
+                      <style>
+                        @page {
+                          size: ${barcodePrintLayout === 'thermal' ? '50mm 30mm' : 'A4 portrait'};
+                          margin: ${barcodePrintLayout === 'thermal' ? '0' : '6mm'};
+                        }
+                        body {
+                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                          margin: 0;
+                          padding: ${barcodePrintLayout === 'thermal' ? '2mm' : '4mm'};
+                          background: white;
+                          color: #0f172a;
+                        }
+                        .sheet {
+                          display: grid;
+                          grid-template-columns: ${barcodePrintLayout === 'thermal' ? '1fr' : 'repeat(3, 1fr)'};
+                          gap: ${barcodePrintLayout === 'thermal' ? '0' : '4mm'};
+                        }
+                        .sticker {
+                          box-sizing: border-box;
+                          background: white;
+                          border: 1px dashed #94a3b8;
+                          border-radius: 4px;
+                          padding: 6px 4px;
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          text-align: center;
+                          page-break-inside: avoid;
+                          min-height: ${barcodePrintLayout === 'thermal' ? '26mm' : '32mm'};
+                        }
+                        .shop-name {
+                          font-size: 8px;
+                          font-weight: 800;
+                          text-transform: uppercase;
+                          letter-spacing: 0.5px;
+                          color: #64748b;
+                          margin-bottom: 1px;
+                        }
+                        .item-name {
+                          font-size: 10px;
+                          font-weight: 700;
+                          color: #0f172a;
+                          max-width: 170px;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          margin-bottom: 2px;
+                        }
+                        .barcode-svg svg {
+                          max-width: 100%;
+                          height: auto;
+                        }
+                        .rate-tag {
+                          font-size: 10px;
+                          font-weight: 800;
+                          color: #047857;
+                          margin-top: 1px;
+                        }
+                        @media print {
+                          body {
+                            padding: 0;
+                          }
+                          .sticker {
+                            border: 1px solid #cbd5e1;
+                          }
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="sheet">
+                        ${stickersHtml}
+                      </div>
+                      <script>
+                        window.onload = function() {
+                          window.print();
+                          setTimeout(function() { window.close(); }, 800);
+                        };
+                      </script>
+                    </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                }}
+                className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition flex items-center gap-1.5"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Print Sticker Sheet Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

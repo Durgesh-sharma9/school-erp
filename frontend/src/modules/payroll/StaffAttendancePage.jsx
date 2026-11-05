@@ -962,8 +962,8 @@ export function StaffAttendancePage({ onNavigate }) {
       {activeTab === 'analytics' && (!selectedStaff ? (
         <div className="bg-white rounded-2xl border border-slate-200/90 p-12 text-center shadow-2xs">
           <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">Koi Staff Registered Nahi Hai</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Analytics dekhne ke liye pehle Staff Registration me jakar staff add karein.</p>
+          <h3 className="text-base font-bold text-slate-800">No Staff Members Registered</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">To view analytics, please add staff members in the Staff Registration module first.</p>
         </div>
       ) : (
         <div className="space-y-3.5">

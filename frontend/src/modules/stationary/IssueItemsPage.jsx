@@ -17,7 +17,8 @@ import {
   Calendar,
   CreditCard,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Barcode
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { tenantStore } from '../../services/tenantStore';
@@ -54,6 +55,83 @@ export function IssueItemsPage({ onNavigate }) {
   const [discount, setDiscount] = useState('');
   const [paidAmt, setPaidAmt] = useState('');
   const [isPaidCustomized, setIsPaidCustomized] = useState(false);
+  const [scannedBarcode, setScannedBarcode] = useState('');
+
+  // Auto Scan & Add Barcode to Cart
+  const handleBarcodeSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const cleanCode = scannedBarcode.trim();
+    if (!cleanCode) return;
+
+    // Search inventoryItems by barcode or hsnCode
+    const foundItem = inventoryItems.find(
+      it => String(it.barcode || '').trim().toLowerCase() === cleanCode.toLowerCase() ||
+            String(it.hsnCode || '').trim().toLowerCase() === cleanCode.toLowerCase()
+    );
+
+    if (foundItem) {
+      const itemKey = `ITEM:${foundItem.id}`;
+      const existingIndex = cartItems.findIndex(r => r.itemId === itemKey);
+
+      if (existingIndex !== -1) {
+        setCartItems(prev => prev.map((r, idx) => {
+          if (idx === existingIndex) {
+            const nextQty = (Number(r.qty) || 1) + 1;
+            const rRate = Number(r.rate) || 0;
+            return { ...r, qty: String(nextQty), total: nextQty * rRate };
+          }
+          return r;
+        }));
+        toast.success(`Updated quantity for "${foundItem.itemName}"`);
+      } else {
+        const rate = Number(foundItem.rate) || 0;
+        const newRow = {
+          id: String(Date.now() + Math.random()),
+          itemId: itemKey,
+          itemName: foundItem.itemName,
+          categoryName: foundItem.categoryName || 'General',
+          rate: String(rate),
+          qty: '1',
+          total: rate
+        };
+
+        if (cartItems.length === 1 && !cartItems[0].itemName) {
+          setCartItems([newRow]);
+        } else {
+          setCartItems(prev => [...prev, newRow]);
+        }
+        toast.success(`Scanned: ${foundItem.itemName} (₹${rate}) added to bill!`);
+      }
+      setScannedBarcode('');
+    } else {
+      // Check sets by setCode
+      const foundSet = inventorySets.find(
+        s => String(s.setCode || '').trim().toLowerCase() === cleanCode.toLowerCase()
+      );
+      if (foundSet) {
+        const setKey = `SET:${foundSet.id || foundSet.setCode}`;
+        const rate = foundSet.totalCost || foundSet.items?.reduce((sum, it) => sum + (Number(it.rate) * Number(it.qty || 1)), 0) || 0;
+        const newRow = {
+          id: String(Date.now() + Math.random()),
+          itemId: setKey,
+          itemName: `[SET] ${foundSet.setName}`,
+          categoryName: foundSet.categoryName || 'Set Bundle',
+          rate: String(rate),
+          qty: '1',
+          total: rate
+        };
+        if (cartItems.length === 1 && !cartItems[0].itemName) {
+          setCartItems([newRow]);
+        } else {
+          setCartItems(prev => [...prev, newRow]);
+        }
+        toast.success(`Scanned Set: ${foundSet.setName} (₹${rate}) added to bill!`);
+        setScannedBarcode('');
+      } else {
+        toast.error(`No inventory item found for barcode "${cleanCode}"`);
+      }
+    }
+  };
 
   // Load backend sales, items, sets and students
   const loadData = () => {
@@ -245,6 +323,7 @@ export function IssueItemsPage({ onNavigate }) {
     setDiscount('');
     setPaidAmt('');
     setIsPaidCustomized(false);
+    setScannedBarcode('');
     setIsModalOpen(true);
   };
 
@@ -653,7 +732,7 @@ export function IssueItemsPage({ onNavigate }) {
               </div>
 
               {/* STEP 2: ITEMS SELECTION (AUTO PRICE & QUANTITY) */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wide text-[11px]">
                     <Package className="w-3.5 h-3.5 text-indigo-600" />
@@ -667,6 +746,35 @@ export function IssueItemsPage({ onNavigate }) {
                     <Plus className="w-3.5 h-3.5" />
                     + Add Another Item
                   </button>
+                </div>
+
+                {/* Instant Barcode Scanner Input */}
+                <div className="p-2.5 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    <Barcode className="w-4 h-4" />
+                  </div>
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      placeholder="Scan item barcode with handheld scanner or type barcode (e.g. BC-674347)..."
+                      value={scannedBarcode}
+                      onChange={(e) => setScannedBarcode(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleBarcodeSubmit();
+                        }
+                      }}
+                      className="w-full pl-3 pr-24 py-1.5 text-xs rounded-lg border border-indigo-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono placeholder:font-sans placeholder:text-slate-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleBarcodeSubmit}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-md shadow-2xs transition"
+                    >
+                      Scan / Add
+                    </button>
+                  </div>
                 </div>
 
                 <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">

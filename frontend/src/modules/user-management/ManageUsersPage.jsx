@@ -1913,7 +1913,7 @@ export function ManageUsersPage({ onNavigate, currentPath = '' }) {
                           />
                         </div>
                         <p className="text-[11px] text-amber-800/90 flex items-center gap-1">
-                          <span>ℹ️</span> Bus vehicle allocation aur route schedule Transport module se direct assign hoga.
+                          <span>ℹ️</span> Vehicle allocation and route schedules are assigned directly from the Transport module.
                         </p>
                       </div>
                     )}

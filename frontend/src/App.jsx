@@ -177,6 +177,23 @@ import {
   StaffAttendanceTimeReportPage
 } from './modules/payroll';
 import {
+  SalaryHubPage,
+  SalaryProcessingPage,
+  SalaryPayslipsPage,
+  SalaryStructurePage,
+  SalarySettingsPage,
+  SalaryAnalyticsPage,
+  SalaryReportsPage
+} from './modules/salary';
+import {
+  RecruitmentDashboardPage,
+  RecruitmentCandidatesPage,
+  CandidateFormPage,
+  JobOpeningsPage,
+  PublicApplyPortalPage,
+  RecruitmentSettingsPage
+} from './modules/recruitment';
+import {
   AppUsersPage,
   ReminderPage,
   StudentGatePassPage,
@@ -291,6 +308,8 @@ function AppContent() {
     try {
       p = decodeURIComponent(p);
     } catch {}
+    // Normalize repeated slashes (e.g. //recruitment-dashboard -> /recruitment-dashboard)
+    p = p.replace(/\/+/g, '/');
     if (p === 'dashboard' || p === '/dashboard') return '/dashboard';
     if (p === '' || p === '/' || p === '/landing' || p === 'landing') return '/';
     if (!p.startsWith('/')) p = '/' + p;
@@ -360,6 +379,16 @@ function AppContent() {
         <Toaster position="top-right" />
         <SchoolRegistrationPage onNavigate={handleNavigate} />
       </>
+    );
+  }
+
+  // Public candidate self-apply portal (only when accessing external /apply without ERP shell)
+  if (currentPath === '/apply' || currentPath.startsWith('/apply?') || currentPath === '/self-apply') {
+    return (
+      <div className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-slate-50">
+        <Toaster position="top-right" />
+        <PublicApplyPortalPage onNavigate={handleNavigate} isStandalone={true} />
+      </div>
     );
   }
 
@@ -499,6 +528,7 @@ function AppContent() {
               case '/master-reports':
                 return <MasterReportsPage onNavigate={handleNavigate} />;
               case '/student-registration':
+              case '/student-admission':
                 return <StudentRegistrationPage onNavigate={handleNavigate} />;
               case '/assign-roll-number':
                 return <AssignRollNumberPage onNavigate={handleNavigate} />;
@@ -670,8 +700,10 @@ function AppContent() {
                 return <ExaminationReportsPage onNavigate={handleNavigate} />;
               case '/payroll-branch':
                 return <PayrollBranchPage onNavigate={handleNavigate} />;
+              case '/department-master':
               case '/payroll-department':
                 return <PayrollDepartmentPage onNavigate={handleNavigate} />;
+              case '/designation-master':
               case '/payroll-designation':
                 return <PayrollDesignationPage onNavigate={handleNavigate} />;
               case '/payroll-allowances':
@@ -706,6 +738,60 @@ function AppContent() {
                 return <MonthlyStaffAttendanceReportPage onNavigate={handleNavigate} />;
               case '/staff-attendance-time-report':
                 return <StaffAttendanceTimeReportPage onNavigate={handleNavigate} />;
+              case '/salary':
+              case '/salary-hub':
+                return <SalaryHubPage onNavigate={handleNavigate} />;
+              case '/salary-processing':
+              case '/salary-process':
+                return <SalaryProcessingPage onNavigate={handleNavigate} />;
+              case '/salary-payslips':
+              case '/salary-payslip':
+                return <SalaryPayslipsPage onNavigate={handleNavigate} />;
+              case '/salary-structure':
+              case '/salary-rules':
+                return <SalaryStructurePage onNavigate={handleNavigate} />;
+              case '/salary-settings':
+              case '/salary-setting':
+              case '/salary-policies':
+                return <SalarySettingsPage onNavigate={handleNavigate} />;
+              case '/salary-analytics':
+                return <SalaryAnalyticsPage onNavigate={handleNavigate} />;
+              case '/salary-reports':
+                return <SalaryReportsPage onNavigate={handleNavigate} />;
+
+              // Recruitment & Talent Hub (HireHub clone)
+              case '/recruitment':
+              case '/recruitment-dashboard':
+              case '//recruitment-dashboard':
+              case '/recruitment/dashboard':
+              case '/hirehub':
+                return <RecruitmentDashboardPage onNavigate={handleNavigate} />;
+              case '/recruitment-candidates':
+              case '//recruitment-candidates':
+              case '/recruitment/candidates':
+              case '/candidates':
+              case '/my-candidates':
+                return <RecruitmentCandidatesPage onNavigate={handleNavigate} />;
+              case '/recruitment-add':
+              case '//recruitment-add':
+              case '/recruitment/add':
+              case '/candidates/new':
+                return <CandidateFormPage onNavigate={handleNavigate} />;
+              case '/recruitment-openings':
+              case '//recruitment-openings':
+              case '/recruitment/openings':
+              case '/job-openings':
+              case '/application-links':
+                return <JobOpeningsPage onNavigate={handleNavigate} />;
+              case '/recruitment-apply':
+              case '//recruitment-apply':
+              case '/recruitment/apply':
+                return <JobOpeningsPage onNavigate={handleNavigate} />;
+              case '/recruitment-settings':
+              case '//recruitment-settings':
+              case '/recruitment/settings':
+                return <RecruitmentSettingsPage onNavigate={handleNavigate} />;
+
               case '/student-reports':
               case '/student-report-hub':
               case '/students-reports':

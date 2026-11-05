@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Plus,
@@ -11,11 +11,58 @@ import {
   UserCheck,
   Phone
 } from 'lucide-react';
+import { salaryStorage } from '../salary/salaryStore';
 
-const INITIAL_STAFF = [];
+const INITIAL_STAFF = [
+  { id: '1', code: '101', name: 'ABHILASHA BHATT', designation: 'Principal', department: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9829012345', appoinDate: '2020-04-01', basicSalary: 65000, accNo: '34892019482', status: 'Active', gender: 'Female' },
+  { id: '2', code: '102', name: 'PRITI VERMA', designation: 'Administrator', department: 'ADMINISTRATIVE & MANAGEMENT', mobile: '9414023456', appoinDate: '2021-07-15', basicSalary: 42000, accNo: '501002394821', status: 'Active', gender: 'Female' },
+  { id: '3', code: '201', name: 'MONIKA RANI VERMA', designation: 'Teacher', department: 'TEACHING', mobile: '9783034567', appoinDate: '2022-06-10', basicSalary: 35000, accNo: '10293847562', status: 'Active', gender: 'Female' },
+  { id: '4', code: '202', name: 'SUNITA KUMARI', designation: 'Teacher', department: 'TEACHING', mobile: '9672045678', appoinDate: '2022-08-01', basicSalary: 32000, accNo: '09876543210', status: 'Active', gender: 'Female' },
+  { id: '5', code: '501', name: 'BHARAT JANGID', designation: 'Driver', department: 'TRANSPORT', mobile: '9587056789', appoinDate: '2023-01-10', basicSalary: 22000, accNo: '29384756102', status: 'Active', gender: 'Male' },
+  { id: '6', code: '502', name: 'HANSRAJ JAT', designation: 'Driver', department: 'TRANSPORT', mobile: '9460067890', appoinDate: '2023-03-01', basicSalary: 24000, accNo: '49382019472', status: 'Active', gender: 'Male' }
+];
 
 export function PayrollRegistrationPage({ onNavigate }) {
-  const [data, setData] = useState(INITIAL_STAFF);
+  const [data, setData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('erp_staff_roster');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Error reading erp_staff_roster:', e);
+    }
+    return INITIAL_STAFF;
+  });
+
+  const saveRoster = (updater) => {
+    setData(prev => {
+      const nextData = typeof updater === 'function' ? updater(prev) : updater;
+      try {
+        localStorage.setItem('erp_staff_roster', JSON.stringify(nextData));
+      } catch (e) {
+        console.error('Error saving erp_staff_roster:', e);
+      }
+      return nextData;
+    });
+  };
+  const [departmentsList, setDepartmentsList] = useState(() => salaryStorage.getDepartments());
+  const [designationsList, setDesignationsList] = useState(() => salaryStorage.getDesignations());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setDepartmentsList(salaryStorage.getDepartments());
+      setDesignationsList(salaryStorage.getDesignations());
+    };
+    window.addEventListener('school_erp_salary_departments_updated', handleUpdate);
+    window.addEventListener('school_erp_salary_designations_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('school_erp_salary_departments_updated', handleUpdate);
+      window.removeEventListener('school_erp_salary_designations_updated', handleUpdate);
+    };
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDeptFilter, setSelectedDeptFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +120,7 @@ export function PayrollRegistrationPage({ onNavigate }) {
     if (!formName.trim()) return;
 
     if (editingItem) {
-      setData(prev => prev.map(item => item.id === editingItem.id ? {
+      saveRoster(prev => prev.map(item => item.id === editingItem.id ? {
         ...item,
         code: formCode,
         name: formName.trim().toUpperCase(),
@@ -99,7 +146,7 @@ export function PayrollRegistrationPage({ onNavigate }) {
         status: 'Active',
         gender: formGender
       };
-      setData(prev => [newItem, ...prev]);
+      saveRoster(prev => [newItem, ...prev]);
     }
     setIsModalOpen(false);
   };
@@ -173,10 +220,9 @@ export function PayrollRegistrationPage({ onNavigate }) {
                 className="px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 font-semibold"
               >
                 <option value="All">All Departments</option>
-                <option value="TEACHING">TEACHING</option>
-                <option value="ADMINISTRATIVE & MANAGEMENT">ADMINISTRATIVE & MANAGEMENT</option>
-                <option value="TRANSPORT">TRANSPORT</option>
-                <option value="ACCOUNTS">ACCOUNTS</option>
+                {departmentsList.map(d => (
+                  <option key={d.id} value={d.name}>{d.name}</option>
+                ))}
               </select>
             </div>
 
@@ -239,7 +285,7 @@ export function PayrollRegistrationPage({ onNavigate }) {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => setData(prev => prev.filter(d => d.id !== item.id))}
+                          onClick={() => saveRoster(prev => prev.filter(d => d.id !== item.id))}
                           className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-600"
                           title="Delete"
                         >
@@ -313,12 +359,12 @@ export function PayrollRegistrationPage({ onNavigate }) {
                     onChange={(e) => setFormDept(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-semibold"
                   >
-                    <option value="TEACHING">TEACHING</option>
-                    <option value="ADMINISTRATIVE & MANAGEMENT">ADMINISTRATIVE & MANAGEMENT</option>
-                    <option value="TRANSPORT">TRANSPORT</option>
-                    <option value="ACCOUNTS">ACCOUNTS</option>
-                    <option value="LIBRARY">LIBRARY</option>
-                    <option value="NON TEACHING">NON TEACHING</option>
+                    {departmentsList.map(d => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                    {!departmentsList.some(d => d.name === formDept) && formDept && (
+                      <option value={formDept}>{formDept}</option>
+                    )}
                   </select>
                 </div>
                 <div>
@@ -328,13 +374,12 @@ export function PayrollRegistrationPage({ onNavigate }) {
                     onChange={(e) => setFormDesig(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-semibold"
                   >
-                    <option value="Teacher">Teacher</option>
-                    <option value="Principal">Principal</option>
-                    <option value="Administrator">Administrator</option>
-                    <option value="Director">Director</option>
-                    <option value="Driver">Driver</option>
-                    <option value="Accountant">Accountant</option>
-                    <option value="LIBRARIAN">Librarian</option>
+                    {designationsList.map(d => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                    {!designationsList.some(d => d.name === formDesig) && formDesig && (
+                      <option value={formDesig}>{formDesig}</option>
+                    )}
                   </select>
                 </div>
               </div>
