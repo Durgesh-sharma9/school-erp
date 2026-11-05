@@ -3,19 +3,9 @@ import {
   Briefcase, 
   BookOpen, 
   GraduationCap, 
-  Layers, 
   Plus, 
   Trash2, 
-  Check, 
-  RotateCcw, 
-  SlidersHorizontal,
-  Save, 
-  Sparkles,
-  Users,
-  ShieldCheck,
-  MessageSquare,
-  Clock,
-  School
+  Save
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { PageHeader } from './components/PageHeader';
@@ -53,14 +43,6 @@ export function RecruitmentSettingsPage({ onNavigate }) {
   ]);
 
   const [newItemText, setNewItemText] = useState('');
-
-  const [preferences, setPreferences] = useState({
-    autoShortlistBEd: true,
-    autoShortlistMinExp: 2,
-    enableWhatsAppAlerts: true,
-    defaultInterviewDuration: '45 Mins',
-    interviewerName: 'Principal / Academic Coordinator'
-  });
 
   const handleAddItem = (e) => {
     e.preventDefault();
@@ -103,15 +85,15 @@ export function RecruitmentSettingsPage({ onNavigate }) {
   };
 
   const handleSaveAll = () => {
-    toast.success('Recruitment master criteria & preferences saved successfully!');
+    toast.success('Recruitment master criteria saved successfully!');
   };
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto pb-16 antialiased text-slate-800">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-4 max-w-5xl mx-auto pb-16 antialiased text-slate-800">
       {/* ─── Page Header (1:1 HireHub) ─── */}
       <PageHeader
         title="Recruitment Master Settings"
-        description="Configure open teaching positions, recognized qualification standards, subjects, and automated interview preferences."
+        description="Configure open teaching positions, recognized qualification standards, and teaching subjects."
         action={
           <button
             type="button"
@@ -129,8 +111,7 @@ export function RecruitmentSettingsPage({ onNavigate }) {
         {[
           { id: 'positions', label: 'Staff Positions', count: positions.length, icon: Briefcase },
           { id: 'subjects', label: 'Teaching Subjects', count: subjects.length, icon: BookOpen },
-          { id: 'qualifications', label: 'Qualifications', count: qualifications.length, icon: GraduationCap },
-          { id: 'preferences', label: 'Interview Preferences', count: null, icon: SlidersHorizontal }
+          { id: 'qualifications', label: 'Qualifications', count: qualifications.length, icon: GraduationCap }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -160,119 +141,54 @@ export function RecruitmentSettingsPage({ onNavigate }) {
       </div>
 
       {/* ─── Tab Content ─── */}
-      {activeTab !== 'preferences' ? (
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div>
-              <h2 className="text-sm font-black text-slate-900 capitalize">Active {activeTab}</h2>
-              <p className="text-[11px] text-slate-500">
-                These options appear in dropdown filters and candidate application forms.
-              </p>
-            </div>
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-black text-slate-900 capitalize">Active {activeTab}</h2>
+            <p className="text-[11px] text-slate-500">
+              These options appear in dropdown filters and candidate application forms.
+            </p>
+          </div>
 
-            {/* Quick Add Form */}
-            <form onSubmit={handleAddItem} className="flex items-center gap-2 w-full sm:w-auto">
-              <input
-                type="text"
-                value={newItemText}
-                onChange={(e) => setNewItemText(e.target.value)}
-                placeholder={`Add new ${activeTab.slice(0, -1)}...`}
-                className="px-3.5 py-1.5 text-xs border border-slate-200 rounded-xl bg-white w-full sm:w-64 focus:ring-2 focus:ring-[#0F766E]/20"
-              />
+          {/* Quick Add Form */}
+          <form onSubmit={handleAddItem} className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="text"
+              value={newItemText}
+              onChange={(e) => setNewItemText(e.target.value)}
+              placeholder={`Add new ${activeTab.slice(0, -1)}...`}
+              className="px-3.5 py-1.5 text-xs border border-slate-200 rounded-xl bg-white w-full sm:w-64 focus:ring-2 focus:ring-[#0F766E]/20"
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0F766E] hover:bg-[#0D655E] shadow-xs cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add</span>
+            </button>
+          </form>
+        </div>
+
+        {/* Tag Pills List */}
+        <div className="flex flex-wrap gap-2.5">
+          {(activeTab === 'positions' ? positions : activeTab === 'subjects' ? subjects : qualifications).map((item, idx) => (
+            <div
+              key={idx}
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/90 rounded-xl text-xs font-semibold text-slate-800 transition group"
+            >
+              <span>{item}</span>
               <button
-                type="submit"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0F766E] hover:bg-[#0D655E] shadow-xs cursor-pointer shrink-0"
+                type="button"
+                onClick={() => handleRemoveItem(item)}
+                className="text-slate-400 hover:text-rose-500 transition cursor-pointer"
+                title="Remove"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add</span>
+                <Trash2 className="w-3 h-3" />
               </button>
-            </form>
-          </div>
-
-          {/* Tag Pills List */}
-          <div className="flex flex-wrap gap-2.5">
-            {(activeTab === 'positions' ? positions : activeTab === 'subjects' ? subjects : qualifications).map((item, idx) => (
-              <div
-                key={idx}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/90 rounded-xl text-xs font-semibold text-slate-800 transition group"
-              >
-                <span>{item}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItem(item)}
-                  className="text-slate-400 hover:text-rose-500 transition cursor-pointer"
-                  title="Remove"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      ) : (
-        /* Interview & Candidate Screening Preferences */
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-5">
-          <div className="pb-3 border-b border-slate-100">
-            <h2 className="text-sm font-black text-slate-900">Recruitment & Interview Automation Preferences</h2>
-            <p className="text-[11px] text-slate-500">Define auto-screening rules and messaging channels</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
-              <label className="flex items-center justify-between text-xs font-bold text-slate-800 cursor-pointer">
-                <span>Auto-Prioritize Candidates with B.Ed</span>
-                <input
-                  type="checkbox"
-                  checked={preferences.autoShortlistBEd}
-                  onChange={(e) => setPreferences(p => ({ ...p, autoShortlistBEd: e.target.checked }))}
-                  className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
-                />
-              </label>
-              <p className="text-[11px] text-slate-500">
-                Highlights candidates with verified B.Ed in the Shortlisted tab automatically.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
-              <label className="flex items-center justify-between text-xs font-bold text-slate-800 cursor-pointer">
-                <span>Enable WhatsApp Interview Confirmation</span>
-                <input
-                  type="checkbox"
-                  checked={preferences.enableWhatsAppAlerts}
-                  onChange={(e) => setPreferences(p => ({ ...p, enableWhatsAppAlerts: e.target.checked }))}
-                  className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
-                />
-              </label>
-              <p className="text-[11px] text-slate-500">
-                Enables one-click WhatsApp interview scheduling invitations with Google Maps pin.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
-              <label className="block text-xs font-bold text-slate-800 mb-1">Default Demo Class / Interview Duration</label>
-              <select
-                value={preferences.defaultInterviewDuration}
-                onChange={(e) => setPreferences(p => ({ ...p, defaultInterviewDuration: e.target.value }))}
-                className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white font-medium"
-              >
-                <option value="30 Mins">30 Minutes</option>
-                <option value="45 Mins">45 Minutes</option>
-                <option value="60 Mins">60 Minutes</option>
-              </select>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
-              <label className="block text-xs font-bold text-slate-800 mb-1">Default Interviewer / Authority</label>
-              <input
-                type="text"
-                value={preferences.interviewerName}
-                onChange={(e) => setPreferences(p => ({ ...p, interviewerName: e.target.value }))}
-                className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white font-medium"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
