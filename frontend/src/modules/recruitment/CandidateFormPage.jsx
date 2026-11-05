@@ -229,7 +229,7 @@ export function CandidateFormPage({ onNavigate, candidateId }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 max-w-4xl mx-auto pb-16 antialiased text-slate-800">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 max-w-4xl mx-auto pb-16 antialiased text-slate-800">
       
       {/* ─── Top Breadcrumb Bar (1:1 with HireHub) ─── */}
       <div className="flex items-center justify-between gap-3 pt-1">

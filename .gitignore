@@ -17,6 +17,8 @@ dist/
 build/
 frontend/dist/
 frontend/build/
+*.timestamp-*.mjs
+*.timestamp-*.js
 
 # Logs
 npm-debug.log*

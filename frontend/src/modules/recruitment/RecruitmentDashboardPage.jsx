@@ -251,7 +251,7 @@ export function RecruitmentDashboardPage({ onNavigate }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 w-full antialiased text-slate-800 pb-16 max-w-7xl mx-auto min-h-screen bg-[#F4F7F6]/60">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-4 w-full antialiased text-slate-800 pb-16 min-h-screen bg-[#F4F7F6]/60">
       
       {/* ─── 1. TOP HEADER: Clean Recruiter Desk Header ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#F0FCF5] via-[#EFF6FF] to-[#FAF5FF] p-3.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-2xs border border-slate-200/80">
@@ -533,8 +533,8 @@ export function RecruitmentDashboardPage({ onNavigate }) {
             </div>
 
             {/* Candidates Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th className="py-3 px-4">Candidate Profile</th>
