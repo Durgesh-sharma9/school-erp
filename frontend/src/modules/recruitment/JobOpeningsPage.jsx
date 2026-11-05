@@ -364,7 +364,7 @@ export function JobOpeningsPage({ onNavigate }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full antialiased text-slate-800 pb-16 max-w-7xl mx-auto min-h-screen bg-[#F4F7F6]/60">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-5 w-full antialiased text-slate-800 pb-16 min-h-screen bg-[#F4F7F6]/60">
       
       {/* ─── 1. PAGE HEADER (1:1 with HireHub) ─── */}
       <PageHeader

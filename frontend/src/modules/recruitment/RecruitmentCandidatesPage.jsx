@@ -198,7 +198,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 w-full antialiased text-slate-800 pb-16 max-w-7xl mx-auto min-h-screen bg-[#F4F7F6]/60">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-4 w-full antialiased text-slate-800 pb-16 min-h-screen bg-[#F4F7F6]/60">
       
       {/* ─── 1. PAGE HEADER (1:1 with HireHub) ─── */}
       <PageHeader
@@ -432,14 +432,14 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
           </div>
         ) : viewMode === 'list' ? (
           
-          /* TABLE VIEW (1:1 with HireHub Screenshot) */
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          /* TABLE VIEW (1:1 with HireHub - No Horizontal Scrollbar) */
+          <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <table className="w-full text-left border-collapse table-auto">
               <thead>
                 <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                  <th className="py-3 px-3 pl-4 w-[50px]">PHOTO</th>
+                  <th className="py-2.5 px-2 pl-3.5 w-11">PHOTO</th>
                   <th 
-                    className="py-3 px-3 cursor-pointer hover:text-[#8A3BD4] transition-colors"
+                    className="py-2.5 px-2 cursor-pointer hover:text-[#8A3BD4] transition-colors"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center gap-1">
@@ -447,25 +447,25 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                     </div>
                   </th>
                   <th 
-                    className="py-3 px-3 cursor-pointer hover:text-[#8A3BD4] transition-colors"
+                    className="py-2.5 px-2 cursor-pointer hover:text-[#8A3BD4] transition-colors"
                     onClick={() => handleSort('appliedPosition')}
                   >
                     <div className="flex items-center gap-1">
                       POSITION <ArrowUpDown className="h-3 w-3 opacity-60" />
                     </div>
                   </th>
-                  <th className="py-3 px-3">
+                  <th className="py-2.5 px-2">
                     <div className="flex items-center gap-1">
                       <Phone className="h-3 w-3 text-[#0F766E]" /> CONTACT
                     </div>
                   </th>
-                  <th className="py-3 px-3">
+                  <th className="py-2.5 px-2 hidden md:table-cell">
                     <div className="flex items-center gap-1">
                       <GraduationCap className="h-3 w-3" /> QUALIFICATION
                     </div>
                   </th>
                   <th 
-                    className="py-3 px-3 cursor-pointer hover:text-[#8A3BD4] transition-colors"
+                    className="py-2.5 px-1.5 cursor-pointer hover:text-[#8A3BD4] transition-colors hidden sm:table-cell"
                     onClick={() => handleSort('experienceYears')}
                   >
                     <div className="flex items-center gap-1">
@@ -473,7 +473,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                     </div>
                   </th>
                   <th 
-                    className="py-3 px-3 cursor-pointer hover:text-[#8A3BD4] transition-colors"
+                    className="py-2.5 px-2 cursor-pointer hover:text-[#8A3BD4] transition-colors hidden sm:table-cell"
                     onClick={() => handleSort('expectedSalary')}
                   >
                     <div className="flex items-center gap-1">
@@ -481,14 +481,14 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                     </div>
                   </th>
                   <th 
-                    className="py-3 px-3 cursor-pointer hover:text-[#8A3BD4] transition-colors whitespace-nowrap"
+                    className="py-2.5 px-2 cursor-pointer hover:text-[#8A3BD4] transition-colors whitespace-nowrap hidden lg:table-cell"
                     onClick={() => handleSort('appliedDate')}
                   >
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" /> DATE <ArrowUpDown className="h-3 w-3 opacity-60" />
                     </div>
                   </th>
-                  <th className="py-3 px-3 pr-4 text-right">ACTIONS</th>
+                  <th className="py-2.5 px-2 pr-3.5 text-right">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
@@ -500,37 +500,38 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                     <tr key={c.id} className="hover:bg-slate-50/80 transition-colors group">
                       
                       {/* 1. PHOTO */}
-                      <td className="py-2.5 px-3 pl-4">
+                      <td className="py-2 px-2 pl-3.5">
                         {c.photoUrl ? (
-                          <div className="h-9 w-9 rounded-full p-0.5 border border-slate-200 overflow-hidden shadow-2xs">
+                          <div className="h-8 w-8 rounded-full p-0.5 border border-slate-200 overflow-hidden shadow-2xs">
                             <img src={c.photoUrl} alt={c.name} className="h-full w-full rounded-full object-cover" />
                           </div>
                         ) : (
-                          <div className="h-9 w-9 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center border border-slate-200">
+                          <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center border border-slate-200">
                             {c.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                         )}
                       </td>
 
                       {/* 2. NAME */}
-                      <td className="py-2.5 px-3 font-bold text-slate-800">
-                        <div className="flex flex-col">
+                      <td className="py-2 px-2 font-bold text-slate-800">
+                        <div className="flex flex-col min-w-0">
                           <span 
                             onClick={() => {
                               setSelectedCandidate(c);
                               setShowProfileModal(true);
                             }}
-                            className="cursor-pointer hover:text-[#0F766E] transition-colors truncate max-w-[180px]"
+                            className="cursor-pointer hover:text-[#0F766E] transition-colors truncate max-w-[130px] lg:max-w-[160px]"
+                            title={c.name}
                           >
                             {c.name}
                           </span>
                           {hasShortlist && (
-                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200 w-fit mt-0.5">
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200 w-fit mt-0.5">
                               SHORTLISTED
                             </span>
                           )}
                           {!hasShortlist && c.status && c.status !== 'new' && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-100 text-slate-600 w-fit mt-0.5">
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider bg-slate-100 text-slate-600 w-fit mt-0.5">
                               {c.status.replace(/_/g, ' ')}
                             </span>
                           )}
@@ -538,23 +539,25 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                       </td>
 
                       {/* 3. POSITION */}
-                      <td className="py-2.5 px-3 font-semibold text-slate-700">
-                        <div className="truncate max-w-[160px]">{c.appliedPosition}</div>
+                      <td className="py-2 px-2 font-semibold text-slate-700">
+                        <div className="truncate max-w-[130px] lg:max-w-[160px]" title={c.appliedPosition}>
+                          {c.appliedPosition}
+                        </div>
                         {c.subject && (
-                          <div className="text-[10px] text-[#0F766E] font-medium truncate max-w-[160px]">
+                          <div className="text-[10px] text-[#0F766E] font-medium truncate max-w-[130px] lg:max-w-[160px]" title={c.subject}>
                             {c.subject}
                           </div>
                         )}
                       </td>
 
                       {/* 4. CONTACT */}
-                      <td className="py-2.5 px-3">
+                      <td className="py-2 px-2 whitespace-nowrap">
                         <div className="flex flex-col">
                           <span className="font-semibold text-slate-800 text-xs font-mono tracking-tight">
                             {c.phone}
                           </span>
                           {c.email && (
-                            <span className="text-[10px] text-slate-400 truncate max-w-[150px]">
+                            <span className="text-[10px] text-slate-400 truncate max-w-[120px] lg:max-w-[140px]" title={c.email}>
                               {c.email}
                             </span>
                           )}
@@ -562,28 +565,28 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                       </td>
 
                       {/* 5. QUALIFICATION */}
-                      <td className="py-2.5 px-3 text-slate-600 font-medium text-xs truncate max-w-[140px]">
+                      <td className="py-2 px-2 text-slate-600 font-medium text-xs truncate max-w-[110px] lg:max-w-[140px] hidden md:table-cell" title={c.qualification}>
                         {c.qualification || '—'}
                       </td>
 
                       {/* 6. EXPERIENCE */}
-                      <td className="py-2.5 px-3 text-xs font-semibold text-slate-700 whitespace-nowrap">
+                      <td className="py-2 px-1.5 text-xs font-semibold text-slate-700 whitespace-nowrap hidden sm:table-cell">
                         {c.experienceYears > 0 ? `${c.experienceYears} yrs` : 'Fresher'}
                       </td>
 
                       {/* 7. SALARY */}
-                      <td className="py-2.5 px-3 text-xs font-bold text-slate-800 font-mono whitespace-nowrap">
+                      <td className="py-2 px-2 text-xs font-bold text-slate-800 font-mono whitespace-nowrap hidden sm:table-cell">
                         {c.expectedSalary ? `₹${Number(c.expectedSalary).toLocaleString('en-IN')}` : '—'}
                       </td>
 
                       {/* 8. DATE */}
-                      <td className="py-2.5 px-3 text-slate-500 font-medium text-xs whitespace-nowrap">
+                      <td className="py-2 px-2 text-slate-500 font-medium text-xs whitespace-nowrap hidden lg:table-cell">
                         {formatDisplayDate(c.appliedDate)}
                       </td>
 
-                      {/* 9. ACTIONS (1:1 with HireHub Buttons) */}
-                      <td className="py-2.5 px-3 pr-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      {/* 9. ACTIONS */}
+                      <td className="py-2 px-2 pr-3.5 text-right whitespace-nowrap shrink-0">
+                        <div className="flex items-center justify-end gap-1">
                           {/* Call Button */}
                           {c.phone && (
                             <a
@@ -591,7 +594,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                               className="h-7 w-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center border border-blue-200/70 transition-all hover:scale-105 shadow-2xs"
                               title={`Call ${c.phone}`}
                             >
-                              <Phone className="h-3.5 w-3.5" />
+                              <Phone className="h-3 w-3" />
                             </a>
                           )}
 
@@ -604,7 +607,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                               className="h-7 w-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200/70 transition-all hover:scale-105 shadow-2xs"
                               title="WhatsApp Chat"
                             >
-                              <WhatsAppIcon className="h-3.5 w-3.5 fill-emerald-600" />
+                              <WhatsAppIcon className="h-3 w-3 fill-emerald-600" />
                             </a>
                           )}
 
@@ -615,7 +618,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                             className="h-7 w-7 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center border border-purple-200/70 transition-all hover:scale-105 shadow-2xs cursor-pointer relative"
                             title="View Attached Documents"
                           >
-                            <FileText className="h-3.5 w-3.5 text-purple-600" />
+                            <FileText className="h-3 w-3 text-purple-600" />
                             {docCount > 0 && (
                               <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-purple-600 text-white text-[8px] font-extrabold flex items-center justify-center">
                                 {docCount}
@@ -633,7 +636,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                             className="h-7 w-7 rounded-lg bg-purple-50 hover:bg-purple-100 text-[#8A3BD4] flex items-center justify-center border border-purple-200/70 transition-all hover:scale-105 shadow-2xs cursor-pointer"
                             title="View Profile"
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="h-3 w-3" />
                           </button>
 
                           {/* Edit Pencil Button */}
@@ -643,7 +646,7 @@ export function RecruitmentCandidatesPage({ onNavigate }) {
                             className="h-7 w-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200/70 transition-all hover:scale-105 shadow-2xs cursor-pointer"
                             title="Edit Candidate"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3 w-3" />
                           </button>
                         </div>
                       </td>
