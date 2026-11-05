@@ -178,6 +178,7 @@ import {
 } from './modules/payroll';
 import {
   SalaryHubPage,
+  SalaryAttendancePage,
   SalaryProcessingPage,
   SalaryPayslipsPage,
   SalaryStructurePage,
@@ -741,6 +742,10 @@ function AppContent() {
               case '/salary':
               case '/salary-hub':
                 return <SalaryHubPage onNavigate={handleNavigate} />;
+              case '/salary-attendance':
+              case '/attendance-summary':
+              case '/monthly-attendance-summary':
+                return <SalaryAttendancePage onNavigate={handleNavigate} />;
               case '/salary-processing':
               case '/salary-process':
                 return <SalaryProcessingPage onNavigate={handleNavigate} />;

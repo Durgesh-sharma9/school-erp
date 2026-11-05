@@ -41,6 +41,7 @@ import toast from 'react-hot-toast';
 import { PageHeader, ErpSection, PageStack } from '../../components/erp/PagePrimitives';
 import StatsCard from '../../components/StatsCard';
 import { cn } from '../../utils/cn';
+import { SalaryAttendancePage } from '../salary/SalaryAttendancePage';
 
 export const INITIAL_STAFF_MASTER = [];
 
@@ -582,6 +583,20 @@ export function StaffAttendancePage({ onNavigate }) {
         >
           <ShieldCheck className="h-4 w-4 text-blue-600" />
           <span>Staff Roster & Shifts</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('monthly')}
+          className={cn(
+            'flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-black rounded-xl transition-all duration-200 shrink-0 cursor-pointer',
+            activeTab === 'monthly'
+              ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 font-bold'
+          )}
+        >
+          <CalendarDays className="h-4 w-4 text-emerald-600" />
+          <span>Monthly Attendance (Payroll)</span>
         </button>
       </div>
 

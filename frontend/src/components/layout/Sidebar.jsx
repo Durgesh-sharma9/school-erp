@@ -313,6 +313,7 @@ export const menuCategories = [
     icon: IndianRupee,
     subItems: [
       { title: 'Salary Hub', path: '/salary-hub' },
+      { title: 'Monthly Attendance', path: '/salary-attendance' },
       { title: 'Process Salary', path: '/salary-processing' },
       { title: 'Payslips Studio', path: '/salary-payslips' },
       { title: 'Salary Structure', path: '/salary-structure' },
