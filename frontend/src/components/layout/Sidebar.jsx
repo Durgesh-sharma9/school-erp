@@ -428,6 +428,20 @@ export const menuCategories = [
     ]
   },
 
+  {
+    id: 'syllabusTracker',
+    title: 'Syllabus Tracker',
+    icon: BookMarked,
+    subItems: [
+      { title: 'Dashboard', path: '/syllabus-dashboard' },
+      { title: 'Sessions', path: '/syllabus-sessions' },
+      { title: 'Academic Timeline', path: '/syllabus-academic-timeline' },
+      { title: 'Syllabus', path: '/syllabus-structure' },
+      { title: 'Progress', path: '/syllabus-progress' },
+      { title: 'Exam Papers', path: '/syllabus-exam-papers' },
+      { title: 'Teacher Training', path: '/syllabus-teacher-training' }
+    ]
+  },
 
   {
     id: 'inventory-hub',
@@ -600,20 +614,7 @@ export const menuCategories = [
     icon: Megaphone,
     path: '/targeted-announcements'
   },
-  {
-    id: 'syllabusTracker',
-    title: 'Syllabus Tracker',
-    icon: BookMarked,
-    subItems: [
-      { title: 'Dashboard', path: '/syllabus-dashboard' },
-      { title: 'Sessions', path: '/syllabus-sessions' },
-      { title: 'Academic Timeline', path: '/syllabus-academic-timeline' },
-      { title: 'Syllabus', path: '/syllabus-structure' },
-      { title: 'Progress', path: '/syllabus-progress' },
-      { title: 'Exam Papers', path: '/syllabus-exam-papers' },
-      { title: 'Teacher Training', path: '/syllabus-teacher-training' }
-    ]
-  },
+
   {
     id: 'leaveManagement',
     title: 'Leave Management',
