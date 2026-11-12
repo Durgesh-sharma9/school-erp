@@ -66,7 +66,9 @@ const ITEM_COLORS = {
   'sms': { iconColor: 'text-amber-600', boxBg: 'bg-amber-50 group-hover:bg-amber-100' },
   'notices': { iconColor: 'text-rose-600', boxBg: 'bg-rose-50 group-hover:bg-rose-100' },
   'announcements': { iconColor: 'text-purple-600', boxBg: 'bg-purple-50 group-hover:bg-purple-100' },
-  'leaveManagement': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' }
+  'leaveManagement': { iconColor: 'text-teal-600', boxBg: 'bg-teal-50 group-hover:bg-teal-100' },
+  'syllabusTracker': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' },
+  'staff-syllabus-tracker': { iconColor: 'text-emerald-600', boxBg: 'bg-emerald-50 group-hover:bg-emerald-100' }
 };
 
 export const studentMenuCategories = [
@@ -213,6 +215,19 @@ export const staffMenuCategories = [
   { id: 'staff-homework', title: 'Homework Management', icon: BookOpen, path: '/homework' },
   { id: 'staff-marks', title: 'Marks Entry Grid', icon: Award, path: '/marks-entry' },
   { id: 'staff-studymaterial', title: 'Study Material', icon: BookMarked, path: '/study-material' },
+  {
+    id: 'staff-syllabus-tracker',
+    title: 'Syllabus Tracker',
+    icon: TrendingUp,
+    subItems: [
+      { title: 'Dashboard', path: '/teacher/syllabus-dashboard' },
+      { title: 'Classes', path: '/teacher/syllabus-classes' },
+      { title: 'Progress', path: '/teacher/syllabus-progress' },
+      { title: 'Academic Timeline', path: '/teacher/syllabus-academic-timeline' },
+      { title: 'Exam Papers', path: '/teacher/syllabus-exam-papers' },
+      { title: 'Teacher Training', path: '/teacher/syllabus-teacher-training' }
+    ]
+  },
   { id: 'staff-datesheet', title: 'Exam Date Sheet', icon: FileSpreadsheet, path: '/exam-date-sheet' },
   { id: 'staff-portfolio', title: 'Student Portfolio', icon: Contact, path: '/student-portfolio' },
   { id: 'staff-registration', title: 'Student Registration', icon: User, path: '/student-registration' },
@@ -586,6 +601,20 @@ export const menuCategories = [
     path: '/targeted-announcements'
   },
   {
+    id: 'syllabusTracker',
+    title: 'Syllabus Tracker',
+    icon: BookMarked,
+    subItems: [
+      { title: 'Dashboard', path: '/syllabus-dashboard' },
+      { title: 'Sessions', path: '/syllabus-sessions' },
+      { title: 'Academic Timeline', path: '/syllabus-academic-timeline' },
+      { title: 'Syllabus', path: '/syllabus-structure' },
+      { title: 'Progress', path: '/syllabus-progress' },
+      { title: 'Exam Papers', path: '/syllabus-exam-papers' },
+      { title: 'Teacher Training', path: '/syllabus-teacher-training' }
+    ]
+  },
+  {
     id: 'leaveManagement',
     title: 'Leave Management',
     icon: ClipboardList, // receipt_long in UAB
@@ -599,6 +628,7 @@ export const menuCategories = [
 
 export function Sidebar({ currentPath = '/', onNavigate, isOpen = true, onClose }) {
   const getInitialActiveDropdown = (path) => {
+    if (path.includes('syllabus')) return { syllabusTracker: true, 'staff-syllabus-tracker': true };
     if (path.includes('staff-attendance') || path.includes('student-attendance') || path.includes('attendance-geofence') || path === '/attendance') return { attendance: true, 'staff-attendance-group': true, 'attender-attendance-group': true };
     if (path.includes('daily-test')) return { 'daily-test': true };
     if (path.includes('performance')) return { performance: true };

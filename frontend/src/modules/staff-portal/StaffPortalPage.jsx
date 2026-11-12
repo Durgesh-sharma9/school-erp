@@ -91,7 +91,7 @@ export function StaffPortalPage({ onNavigate }) {
       desc: 'Track chapter progress and curriculum completion',
       icon: FileSpreadsheet,
       color: 'bg-cyan-50 text-cyan-600',
-      path: '/study-material',
+      path: '/teacher/syllabus-dashboard',
       badge: '72% Done'
     },
     {

@@ -297,6 +297,23 @@ import {
   BiometricSyncPage
 } from './modules/attendance/BiometricSyncPage';
 import TargetedAnnouncementsPage from './modules/announcements/TargetedAnnouncementsPage';
+import {
+  SyllabusDashboardPage,
+  SyllabusSessionsPage,
+  AcademicTimelinePage,
+  SyllabusStructurePage,
+  SyllabusProgressPage,
+  AdminExamPapersPage,
+  AdminTeacherTrainingPage,
+  TeacherSyllabusDashboardPage,
+  TeacherClassesPage,
+  TeacherClassDetailPage,
+  TeacherProgressPage,
+  TeacherAcademicTimelinePage,
+  TeacherExamPapersPage,
+  TeacherExamPaperStudioPage,
+  TeacherTrainingPage,
+} from './modules/syllabus-tracker';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
@@ -1116,7 +1133,48 @@ function AppContent() {
               case '/biometric-sync':
                 return <BiometricSyncPage onNavigate={handleNavigate} />;
 
-              default:
+              // Syllabus Tracker — Admin (7 Submodules; Classes/Subjects/Teachers stay in ERP Master)
+              case '/syllabus-dashboard':
+                return <SyllabusDashboardPage onNavigate={handleNavigate} />;
+              case '/syllabus-sessions':
+                return <SyllabusSessionsPage onNavigate={handleNavigate} />;
+              case '/syllabus-academic-timeline':
+                return <AcademicTimelinePage onNavigate={handleNavigate} />;
+              case '/syllabus-structure':
+                return <SyllabusStructurePage onNavigate={handleNavigate} />;
+              case '/syllabus-progress':
+                return <SyllabusProgressPage onNavigate={handleNavigate} />;
+              case '/syllabus-exam-papers':
+                return <AdminExamPapersPage onNavigate={handleNavigate} />;
+              case '/syllabus-teacher-training':
+                return <AdminTeacherTrainingPage onNavigate={handleNavigate} />;
+
+              // Syllabus Tracker — Teacher (6 Submodules + Detail & Studio)
+              case '/teacher/syllabus-dashboard':
+                return <TeacherSyllabusDashboardPage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-classes':
+                return <TeacherClassesPage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-progress':
+                return <TeacherProgressPage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-academic-timeline':
+                return <TeacherAcademicTimelinePage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-exam-papers':
+                return <TeacherExamPapersPage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-exam-papers/create':
+                return <TeacherExamPaperStudioPage onNavigate={handleNavigate} />;
+              case '/teacher/syllabus-teacher-training':
+                return <TeacherTrainingPage onNavigate={handleNavigate} />;
+
+              default: {
+                const dynRoute = getCleanRoute(currentPath);
+                const classMatch = dynRoute.match(/^\/teacher\/syllabus-classes\/([^/]+)$/);
+                if (classMatch) {
+                  return <TeacherClassDetailPage classId={classMatch[1]} onNavigate={handleNavigate} />;
+                }
+                const paperEditMatch = dynRoute.match(/^\/teacher\/syllabus-exam-papers\/([^/]+)\/edit$/);
+                if (paperEditMatch) {
+                  return <TeacherExamPaperStudioPage paperId={paperEditMatch[1]} onNavigate={handleNavigate} />;
+                }
                 return (
                   <div className="p-8 max-w-4xl mx-auto text-center py-20 space-y-4">
                     <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto text-2xl font-bold shadow-xs">
@@ -1136,6 +1194,7 @@ function AppContent() {
                     </button>
                   </div>
                 );
+            }
             }
           })()}
           </ErrorBoundary>

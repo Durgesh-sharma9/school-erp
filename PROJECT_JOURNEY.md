@@ -1608,6 +1608,26 @@ This document tracks the complete development journey of the **Unified School ER
 
 ---
 
+### Entry 58: Full-Stack CBSE Syllabus Tracker, Timeline, Exam Paper Studio & 50h Teacher CPD Module
+* **Date:** 2026-11-12
+* **Goal / Prompt:** Clone all features of `Aryan-s-teacher-syllabus-tracker` into `school-erp` across both Admin and Teacher portals, omitting redundant Admin `Classes`, `Subjects`, and `Teachers` pages (syncing directly with ERP Masters and User Management) while ensuring every submodule functions end-to-end.
+* **Backend Additions (`backend/src/modules/syllabus/`):**
+  - Created `syllabus.constants.js`, `syllabus.service.js`, `syllabus.controller.js`, and `syllabus.routes.js`, mounted at `/api/syllabus-tracker` in `backend/src/app.js`.
+  - Persistent multi-tenant JSON store (`backend/data/syllabus_tracker.json` via `localStore.js`) with strict `schoolId` isolation (`sch_jd_intl`, `sch_dps_branch2` demo data; clean empty state for newly registered schools).
+  - Live ERP synchronization merging `classesStore`, `subjectsStore`, `subjectLinksStore`, and `usersList` (Teaching staff) into syllabus curriculum nodes and `STAFF` actor mapping (e.g., `PRITI VERMA` / `RAJESH GUPTA`).
+  - Full Academic Sessions & Post-Session Import engine, Academic Timeline working-day & Indian holiday calculator (30–380 days + vacations + day overrides), 3-step chapter completion workflow (`Teaching Done`, `Q&A Done`, `Copy Checked`), configurable velocity pacing (`Behind` / `On Pace` / `Ahead`), Exam Papers & Header Logo templates, and strict CBSE Circular TRG-02/2025 50-hour CPD compliance engine (25h CBSE + 25h School; D1 12h / D2 24h / D3 14h with 11h Academic Activity cap & Admin approval workflow).
+* **Frontend Additions (`frontend/src/modules/syllabus-tracker/`):**
+  - Installed `jszip` and `katex` packages for bulk roll-number ZIP export and LaTeX math equation rendering.
+  - **7 Admin Submodules:** `SyllabusDashboardPage.jsx`, `SyllabusSessionsPage.jsx`, `AcademicTimelinePage.jsx`, `SyllabusStructurePage.jsx`, `SyllabusProgressPage.jsx`, `AdminExamPapersPage.jsx`, and `AdminTeacherTrainingPage.jsx`.
+  - **6 Teacher (`STAFF`) Submodules (+ Detail & 5-Step Exam Studio):** `TeacherSyllabusDashboardPage.jsx`, `TeacherClassesPage.jsx` (`TeacherClassDetailPage`), `TeacherProgressPage.jsx`, `TeacherAcademicTimelinePage.jsx`, `TeacherExamPapersPage.jsx`, `TeacherExamPaperStudioPage.jsx`, and `TeacherTrainingPage.jsx`.
+  - Wired Admin (`syllabusTracker`) and Teacher (`staff-syllabus-tracker`) navigation in `Sidebar.jsx`, route handling (including dynamic class detail & paper edit routes) in `App.jsx`, and updated `StaffPortalPage.jsx` card navigation.
+* **Build & Verification:**
+  - Backend syntax verified via `node --check`; all 10 live API + Vite proxy + multi-tenant isolation checks executed against `:5000` & `:5173` and passed (`ALL_API_TESTS_PASSED`).
+  - Frontend production build (`npm run build`) succeeded cleanly (`3680 modules transformed`, 0 errors).
+* **Status:** ✅ Completed
+
+---
+
 ## 🔜 Current Next Task in Queue:
 * Ready for production deployment or client demonstration.
 

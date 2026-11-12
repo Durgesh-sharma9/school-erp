@@ -1,0 +1,2435 @@
+{
+  "tenants": {
+    "sch_jd_intl": {
+      "schoolId": "sch_jd_intl",
+      "sessions": [
+        {
+          "id": "sess_b725daa8",
+          "name": "2027-28",
+          "isActive": true,
+          "isArchived": false,
+          "createdAt": "2026-11-12T06:30:07.437Z"
+        },
+        {
+          "id": "sch_jd_intl_sess_25_26",
+          "name": "2025-26",
+          "isActive": false,
+          "isArchived": false,
+          "createdAt": "2025-04-01T00:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_sess_26_27",
+          "name": "2026-27",
+          "isActive": false,
+          "isArchived": false,
+          "createdAt": "2026-04-01T00:00:00Z"
+        }
+      ],
+      "activeSessionId": "sess_b725daa8",
+      "classes": [
+        {
+          "id": "cls_3a",
+          "name": "Class III",
+          "section": "A",
+          "label": "Class III - A",
+          "sessionId": "sch_jd_intl_sess_26_27"
+        },
+        {
+          "id": "cls_4a",
+          "name": "Class IV",
+          "section": "A",
+          "label": "Class IV - A",
+          "sessionId": "sch_jd_intl_sess_26_27"
+        },
+        {
+          "id": "cls_9a",
+          "name": "Class IX",
+          "section": "A",
+          "label": "Class IX - A",
+          "sessionId": "sch_jd_intl_sess_26_27"
+        },
+        {
+          "id": "cls_10a",
+          "name": "Class X",
+          "section": "A",
+          "label": "Class X - A",
+          "sessionId": "sch_jd_intl_sess_26_27"
+        },
+        {
+          "id": "cls_3a_prev",
+          "name": "Class III",
+          "section": "A",
+          "label": "Class III - A",
+          "sessionId": "sch_jd_intl_sess_25_26"
+        },
+        {
+          "id": "cls_4a_prev",
+          "name": "Class IV",
+          "section": "A",
+          "label": "Class IV - A",
+          "sessionId": "sch_jd_intl_sess_25_26"
+        }
+      ],
+      "teachers": [
+        {
+          "id": "3",
+          "empCode": "102",
+          "name": "Priti Verma",
+          "email": "priti.verma@jdintl.edu",
+          "phone": "9414056789",
+          "designation": "Primary & Secondary Teacher",
+          "erpClasses": [
+            "III - A",
+            "IV - A"
+          ],
+          "erpSubjects": [
+            "Hindi",
+            "Social Science"
+          ]
+        },
+        {
+          "id": "1",
+          "empCode": "301",
+          "name": "Pooja Kanwar",
+          "email": "pooja.kanwar@jdintl.edu",
+          "phone": "9876543210",
+          "designation": "PRT Faculty",
+          "erpClasses": [
+            "I - A",
+            "I - B",
+            "II - A"
+          ],
+          "erpSubjects": [
+            "English",
+            "EVS"
+          ]
+        },
+        {
+          "id": "f_101",
+          "empCode": "101",
+          "name": "Abhilasha Bhatt",
+          "email": "abhilasha.bhatt@jdintl.edu",
+          "phone": "9829011101",
+          "designation": "TGT Faculty",
+          "erpClasses": [
+            "VIII - A",
+            "IX - A",
+            "X - A"
+          ],
+          "erpSubjects": [
+            "English",
+            "Social Science"
+          ]
+        },
+        {
+          "id": "f_201",
+          "empCode": "201",
+          "name": "Monika Rani Verma",
+          "email": "monika.verma@jdintl.edu",
+          "phone": "9829011201",
+          "designation": "PGT Mathematics",
+          "erpClasses": [
+            "Class I - A",
+            "Class II - A"
+          ],
+          "erpSubjects": [
+            "Mathematics",
+            "EVS"
+          ]
+        },
+        {
+          "id": "f_204",
+          "empCode": "204",
+          "name": "Dr. Arun Joshi",
+          "email": "arun.joshi@jdintl.edu",
+          "phone": "9829011204",
+          "designation": "PGT Senior Science",
+          "erpClasses": [
+            "Class IX - A",
+            "Class X - A",
+            "Class XI - Science (Medical) - A"
+          ],
+          "erpSubjects": [
+            "Science",
+            "Biology(044)"
+          ]
+        },
+        {
+          "id": "f_205",
+          "empCode": "205",
+          "name": "Mr. Rakesh Sharma",
+          "email": "rakesh.sharma@jdintl.edu",
+          "phone": "9829011205",
+          "designation": "PGT Senior Mathematics",
+          "erpClasses": [
+            "Class X - A",
+            "Class X - B",
+            "Class XI - Science (Non-Medical) - A"
+          ],
+          "erpSubjects": [
+            "Mathematics",
+            "Physics(042)"
+          ]
+        }
+      ],
+      "classSubjects": [
+        {
+          "id": "cs_3a_hin",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_3a",
+          "className": "Class III - A",
+          "subjectId": "sub_hin",
+          "subjectName": "Hindi",
+          "subjectCode": "HIN",
+          "teacherId": "3",
+          "teacherName": "Priti Verma"
+        },
+        {
+          "id": "cs_3a_sst",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_3a",
+          "className": "Class III - A",
+          "subjectId": "sub_sst",
+          "subjectName": "Social Science",
+          "subjectCode": "SST",
+          "teacherId": "3",
+          "teacherName": "Priti Verma"
+        },
+        {
+          "id": "cs_4a_hin",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_4a",
+          "className": "Class IV - A",
+          "subjectId": "sub_hin",
+          "subjectName": "Hindi",
+          "subjectCode": "HIN",
+          "teacherId": "3",
+          "teacherName": "Priti Verma"
+        },
+        {
+          "id": "cs_4a_eng",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_4a",
+          "className": "Class IV - A",
+          "subjectId": "sub_eng",
+          "subjectName": "English",
+          "subjectCode": "ENG",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar"
+        },
+        {
+          "id": "cs_9a_math",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_9a",
+          "className": "Class IX - A",
+          "subjectId": "sub_math",
+          "subjectName": "Mathematics",
+          "subjectCode": "041",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma"
+        },
+        {
+          "id": "cs_9a_sci",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_9a",
+          "className": "Class IX - A",
+          "subjectId": "sub_sci",
+          "subjectName": "Science",
+          "subjectCode": "086",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi"
+        },
+        {
+          "id": "cs_10a_math",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_10a",
+          "className": "Class X - A",
+          "subjectId": "sub_math",
+          "subjectName": "Mathematics",
+          "subjectCode": "041",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma"
+        },
+        {
+          "id": "cs_10a_sst",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_10a",
+          "className": "Class X - A",
+          "subjectId": "sub_sst",
+          "subjectName": "Social Science",
+          "subjectCode": "087",
+          "teacherId": "3",
+          "teacherName": "Priti Verma"
+        },
+        {
+          "id": "cs_10a_eng",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classId": "cls_10a",
+          "className": "Class X - A",
+          "subjectId": "sub_eng",
+          "subjectName": "English",
+          "subjectCode": "184",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt"
+        },
+        {
+          "id": "sch_jd_intl_sess_25_26_cs_10a_math",
+          "sessionId": "sch_jd_intl_sess_25_26",
+          "classId": "cls_3a_prev",
+          "className": "Class X - A",
+          "subjectId": "sub_math",
+          "subjectName": "Mathematics",
+          "subjectCode": "041",
+          "teacherId": "3",
+          "teacherName": "Priti Verma"
+        }
+      ],
+      "chapters": [
+        {
+          "id": "cs_3a_hin_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 1,
+          "name": "सूरदास के पद (काव्य खंड)",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 1 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_hin_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 2,
+          "name": "राम-लक्ष्मण-परशुराम संवाद",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 2 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_hin_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 3,
+          "name": "नेताजी का चश्मा (गद्य खंड)",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 3 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_hin_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 4,
+          "name": "बालगोबिन भगत",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 4 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_hin_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 5,
+          "name": "माता का अँचल (कृतिका)",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 5 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_hin_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_hin",
+          "classId": "cls_3a",
+          "subjectId": "sub_hin",
+          "chapterNo": 6,
+          "name": "व्याकरण: रचना के आधार पर वाक्य भेद",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 6 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 1,
+          "name": "The Rise of Nationalism in Europe",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 1 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 2,
+          "name": "Resources and Development",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 2 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 3,
+          "name": "Power Sharing & Federalism",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 3 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 4,
+          "name": "Nationalism in India",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 4 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 5,
+          "name": "Sectors of the Indian Economy",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 5 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_3a_sst_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_3a_sst",
+          "classId": "cls_3a",
+          "subjectId": "sub_sst",
+          "chapterNo": 6,
+          "name": "Money and Credit",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 6 for Class III - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 1,
+          "name": "सूरदास के पद (काव्य खंड)",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 1 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 2,
+          "name": "राम-लक्ष्मण-परशुराम संवाद",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 2 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 3,
+          "name": "नेताजी का चश्मा (गद्य खंड)",
+          "termTag": "Term 1",
+          "description": "Hindi Chapter 3 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 4,
+          "name": "बालगोबिन भगत",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 4 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 5,
+          "name": "माता का अँचल (कृतिका)",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 5 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_hin_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_hin",
+          "classId": "cls_4a",
+          "subjectId": "sub_hin",
+          "chapterNo": 6,
+          "name": "व्याकरण: रचना के आधार पर वाक्य भेद",
+          "termTag": "Term 2",
+          "description": "Hindi Chapter 6 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 1,
+          "name": "A Letter to God & Dust of Snow",
+          "termTag": "Term 1",
+          "description": "English Chapter 1 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 2,
+          "name": "Nelson Mandela: Long Walk to Freedom",
+          "termTag": "Term 1",
+          "description": "English Chapter 2 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 3,
+          "name": "Two Stories about Flying",
+          "termTag": "Term 1",
+          "description": "English Chapter 3 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 4,
+          "name": "From the Diary of Anne Frank",
+          "termTag": "Term 2",
+          "description": "English Chapter 4 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 5,
+          "name": "Glimpses of India",
+          "termTag": "Term 2",
+          "description": "English Chapter 5 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_4a_eng_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_4a_eng",
+          "classId": "cls_4a",
+          "subjectId": "sub_eng",
+          "chapterNo": 6,
+          "name": "Madam Rides the Bus",
+          "termTag": "Term 2",
+          "description": "English Chapter 6 for Class IV - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 1,
+          "name": "Real Numbers",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 1 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 2,
+          "name": "Polynomials",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 2 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 3,
+          "name": "Pair of Linear Equations in Two Variables",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 3 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 4,
+          "name": "Quadratic Equations",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 4 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 5,
+          "name": "Arithmetic Progressions",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 5 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 6,
+          "name": "Triangles & Similarity",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 6 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_7",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 7,
+          "name": "Coordinate Geometry",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 7 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_math_ch_8",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_math",
+          "classId": "cls_9a",
+          "subjectId": "sub_math",
+          "chapterNo": 8,
+          "name": "Introduction to Trigonometry",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 8 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_sci_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_sci",
+          "classId": "cls_9a",
+          "subjectId": "sub_sci",
+          "chapterNo": 1,
+          "name": "Chemical Reactions and Equations",
+          "termTag": "Term 1",
+          "description": "Science Chapter 1 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_sci_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_sci",
+          "classId": "cls_9a",
+          "subjectId": "sub_sci",
+          "chapterNo": 2,
+          "name": "Acids, Bases and Salts",
+          "termTag": "Term 1",
+          "description": "Science Chapter 2 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_sci_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_sci",
+          "classId": "cls_9a",
+          "subjectId": "sub_sci",
+          "chapterNo": 3,
+          "name": "Life Processes",
+          "termTag": "Term 1",
+          "description": "Science Chapter 3 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_sci_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_sci",
+          "classId": "cls_9a",
+          "subjectId": "sub_sci",
+          "chapterNo": 4,
+          "name": "Light - Reflection and Refraction",
+          "termTag": "Term 2",
+          "description": "Science Chapter 4 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_9a_sci_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_9a_sci",
+          "classId": "cls_9a",
+          "subjectId": "sub_sci",
+          "chapterNo": 5,
+          "name": "Electricity & Magnetic Effects",
+          "termTag": "Term 2",
+          "description": "Science Chapter 5 for Class IX - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 1,
+          "name": "Real Numbers",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 1 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 2,
+          "name": "Polynomials",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 2 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 3,
+          "name": "Pair of Linear Equations in Two Variables",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 3 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 4,
+          "name": "Quadratic Equations",
+          "termTag": "Term 1",
+          "description": "Mathematics Chapter 4 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 5,
+          "name": "Arithmetic Progressions",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 5 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 6,
+          "name": "Triangles & Similarity",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 6 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_7",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 7,
+          "name": "Coordinate Geometry",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 7 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_math_ch_8",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_math",
+          "classId": "cls_10a",
+          "subjectId": "sub_math",
+          "chapterNo": 8,
+          "name": "Introduction to Trigonometry",
+          "termTag": "Term 2",
+          "description": "Mathematics Chapter 8 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 1,
+          "name": "The Rise of Nationalism in Europe",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 1 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 2,
+          "name": "Resources and Development",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 2 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 3,
+          "name": "Power Sharing & Federalism",
+          "termTag": "Term 1",
+          "description": "Social Science Chapter 3 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 4,
+          "name": "Nationalism in India",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 4 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 5,
+          "name": "Sectors of the Indian Economy",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 5 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_sst_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_sst",
+          "classId": "cls_10a",
+          "subjectId": "sub_sst",
+          "chapterNo": 6,
+          "name": "Money and Credit",
+          "termTag": "Term 2",
+          "description": "Social Science Chapter 6 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 1,
+          "name": "A Letter to God & Dust of Snow",
+          "termTag": "Term 1",
+          "description": "English Chapter 1 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 2,
+          "name": "Nelson Mandela: Long Walk to Freedom",
+          "termTag": "Term 1",
+          "description": "English Chapter 2 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 3,
+          "name": "Two Stories about Flying",
+          "termTag": "Term 1",
+          "description": "English Chapter 3 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 4,
+          "name": "From the Diary of Anne Frank",
+          "termTag": "Term 2",
+          "description": "English Chapter 4 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 5,
+          "name": "Glimpses of India",
+          "termTag": "Term 2",
+          "description": "English Chapter 5 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "cs_10a_eng_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "classSubjectId": "cs_10a_eng",
+          "classId": "cls_10a",
+          "subjectId": "sub_eng",
+          "chapterNo": 6,
+          "name": "Madam Rides the Bus",
+          "termTag": "Term 2",
+          "description": "English Chapter 6 for Class X - A",
+          "createdAt": "2026-04-05T09:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_sess_25_26_cs_10a_math_ch1",
+          "sessionId": "sch_jd_intl_sess_25_26",
+          "classSubjectId": "sch_jd_intl_sess_25_26_cs_10a_math",
+          "classId": "cls_3a_prev",
+          "subjectId": "sub_math",
+          "chapterNo": 1,
+          "name": "Real Numbers (2025-26 Archive)",
+          "termTag": "Term 1",
+          "description": "Archived session syllabus reference"
+        }
+      ],
+      "topics": [],
+      "chapterProgress": [
+        {
+          "id": "prog_cs_3a_hin_ch_1",
+          "chapterId": "cs_3a_hin_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_hin_ch_2",
+          "chapterId": "cs_3a_hin_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-11-12T06:09:44.881Z"
+        },
+        {
+          "id": "prog_cs_3a_hin_ch_3",
+          "chapterId": "cs_3a_hin_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_hin_ch_4",
+          "chapterId": "cs_3a_hin_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_hin_ch_5",
+          "chapterId": "cs_3a_hin_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_hin_ch_6",
+          "chapterId": "cs_3a_hin_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_1",
+          "chapterId": "cs_3a_sst_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_2",
+          "chapterId": "cs_3a_sst_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_3",
+          "chapterId": "cs_3a_sst_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_4",
+          "chapterId": "cs_3a_sst_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_5",
+          "chapterId": "cs_3a_sst_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_3a_sst_ch_6",
+          "chapterId": "cs_3a_sst_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_1",
+          "chapterId": "cs_4a_hin_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_2",
+          "chapterId": "cs_4a_hin_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_3",
+          "chapterId": "cs_4a_hin_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_4",
+          "chapterId": "cs_4a_hin_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_5",
+          "chapterId": "cs_4a_hin_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_hin_ch_6",
+          "chapterId": "cs_4a_hin_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_1",
+          "chapterId": "cs_4a_eng_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_2",
+          "chapterId": "cs_4a_eng_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_3",
+          "chapterId": "cs_4a_eng_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_4",
+          "chapterId": "cs_4a_eng_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_5",
+          "chapterId": "cs_4a_eng_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_4a_eng_ch_6",
+          "chapterId": "cs_4a_eng_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_1",
+          "chapterId": "cs_9a_math_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_2",
+          "chapterId": "cs_9a_math_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_3",
+          "chapterId": "cs_9a_math_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_4",
+          "chapterId": "cs_9a_math_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_5",
+          "chapterId": "cs_9a_math_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_6",
+          "chapterId": "cs_9a_math_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_7",
+          "chapterId": "cs_9a_math_ch_7",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_math_ch_8",
+          "chapterId": "cs_9a_math_ch_8",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_201",
+          "teacherName": "Monika Rani Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_sci_ch_1",
+          "chapterId": "cs_9a_sci_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_sci_ch_2",
+          "chapterId": "cs_9a_sci_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_sci_ch_3",
+          "chapterId": "cs_9a_sci_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_sci_ch_4",
+          "chapterId": "cs_9a_sci_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_9a_sci_ch_5",
+          "chapterId": "cs_9a_sci_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_204",
+          "teacherName": "Dr. Arun Joshi",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_1",
+          "chapterId": "cs_10a_math_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_2",
+          "chapterId": "cs_10a_math_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_3",
+          "chapterId": "cs_10a_math_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_4",
+          "chapterId": "cs_10a_math_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_5",
+          "chapterId": "cs_10a_math_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_6",
+          "chapterId": "cs_10a_math_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_7",
+          "chapterId": "cs_10a_math_ch_7",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_math_ch_8",
+          "chapterId": "cs_10a_math_ch_8",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_1",
+          "chapterId": "cs_10a_sst_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_2",
+          "chapterId": "cs_10a_sst_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_3",
+          "chapterId": "cs_10a_sst_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_4",
+          "chapterId": "cs_10a_sst_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_5",
+          "chapterId": "cs_10a_sst_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_sst_ch_6",
+          "chapterId": "cs_10a_sst_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_1",
+          "chapterId": "cs_10a_eng_ch_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": true,
+          "completionPercentage": 100,
+          "status": "COMPLETED",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_2",
+          "chapterId": "cs_10a_eng_ch_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_3",
+          "chapterId": "cs_10a_eng_ch_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": true,
+          "qaCompleted": true,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 67,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_4",
+          "chapterId": "cs_10a_eng_ch_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": true,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 33,
+          "status": "IN_PROGRESS",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_5",
+          "chapterId": "cs_10a_eng_ch_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_cs_10a_eng_ch_6",
+          "chapterId": "cs_10a_eng_ch_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_101",
+          "teacherName": "Abhilasha Bhatt",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "prog_bc1b5712",
+          "chapterId": "ch_489fdb6d",
+          "sessionId": "sess_8a8ac2ec",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "teachingCompleted": false,
+          "qaCompleted": false,
+          "copyCheckedCompleted": false,
+          "completionPercentage": 0,
+          "status": "PENDING",
+          "updatedAt": "2026-11-12T06:04:43.995Z"
+        }
+      ],
+      "academicTerms": [
+        {
+          "id": "sch_jd_intl_term_26_27",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "name": "Academic Session 2026-27 Calendar",
+          "startDate": "2026-04-01",
+          "endDate": "2027-03-20",
+          "weeklyHolidays": [
+            0
+          ],
+          "includeIndianHolidays": true,
+          "holidayDates": [
+            {
+              "date": "2026-07-04",
+              "name": "Rath Yatra / Founders Day",
+              "isRemoved": false,
+              "type": "CUSTOM"
+            }
+          ],
+          "vacationPeriods": [
+            {
+              "id": "vac_ba0f0d05",
+              "name": "Summer Vacation",
+              "startDate": "2026-05-18",
+              "endDate": "2026-06-27"
+            },
+            {
+              "id": "vac_ca4bc4e1",
+              "name": "Diwali Break",
+              "startDate": "2026-11-06",
+              "endDate": "2026-11-12"
+            },
+            {
+              "id": "vac_cb501c70",
+              "name": "Winter Vacation",
+              "startDate": "2026-12-26",
+              "endDate": "2027-01-04"
+            }
+          ],
+          "terms": [
+            {
+              "id": "subterm_66c449ac",
+              "name": "Term 1 (Half Yearly)",
+              "startDate": "2026-04-01",
+              "endDate": "2026-09-30"
+            },
+            {
+              "id": "subterm_eda68f20",
+              "name": "Term 2 (Annual)",
+              "startDate": "2026-10-01",
+              "endDate": "2027-03-20"
+            }
+          ]
+        },
+        {
+          "id": "term_b6cb399d",
+          "sessionId": "sess_b725daa8",
+          "name": "Academic Session 2026-27",
+          "startDate": "2026-04-01",
+          "endDate": "2027-03-20",
+          "weeklyHolidays": [
+            0,
+            6
+          ],
+          "includeIndianHolidays": true,
+          "holidayDates": [],
+          "vacationPeriods": [
+            {
+              "id": "vac_dd757913",
+              "name": "test break",
+              "startDate": "2026-11-12",
+              "endDate": "2026-12-12"
+            }
+          ],
+          "terms": []
+        }
+      ],
+      "examNames": [
+        "Unit Test 1",
+        "Half Yearly (Term 1)",
+        "Pre-Board",
+        "Annual Exam (Term 2)"
+      ],
+      "examTemplate": {
+        "schoolName": "J.D. INTERNATIONAL SCHOOL",
+        "logoUrl": "",
+        "defaultTemplateType": "SINGLE",
+        "defaultFontFamily": "Times New Roman",
+        "defaultFontSize": "11pt",
+        "defaultColor": "#0f172a",
+        "showTeacherName": true,
+        "headerSubtitle": "CBSE Affiliated Senior Secondary Institution"
+      },
+      "examPapers": [
+        {
+          "id": "sch_jd_intl_ep_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "classId": "cls_3a",
+          "className": "Class III - A",
+          "subjectId": "sub_hin",
+          "subjectName": "Hindi",
+          "examName": "Half Yearly (Term 1)",
+          "examDate": "2026-09-22",
+          "duration": 180,
+          "totalMarks": 20,
+          "templateType": "SINGLE",
+          "styleFontFamily": "Times New Roman",
+          "styleFontSize": "11pt",
+          "styleColor": "#0f172a",
+          "showTeacherName": true,
+          "status": "SUBMITTED",
+          "driveSynced": false,
+          "instructions": "1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neat and legible answers.",
+          "sections": [
+            {
+              "sectionTitle": "Section A",
+              "sectionDescription": "Objective & Multiple Choice Questions",
+              "segments": [
+                {
+                  "label": "Multiple Choice Questions",
+                  "type": "MCQ",
+                  "questionCount": 2,
+                  "marksPerQuestion": 1
+                }
+              ],
+              "questions": [
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "Multiple Choice Questions",
+                  "marks": 1,
+                  "questionText": "सूरदास के पदों में मुख्य रस कौन-सा है?",
+                  "options": [
+                    {
+                      "text": "वात्सल्य एवं शृंगार रस",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "वीर रस",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "भयानक रस",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "हास्य रस",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "Multiple Choice Questions",
+                  "marks": 1,
+                  "questionText": "‘नेताजी का चश्मा’ पाठ के लेखक कौन हैं?",
+                  "options": [
+                    {
+                      "text": "स्वयं प्रकाश",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "प्रेमचंद",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "रामवृक्ष बेनीपुरी",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "यशपाल",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Section B",
+              "sectionDescription": "Short & Long Answer Questions",
+              "segments": [
+                {
+                  "label": "Short Answer Questions",
+                  "type": "SHORT_ANSWER",
+                  "questionCount": 2,
+                  "marksPerQuestion": 4
+                },
+                {
+                  "label": "Long Answer Question",
+                  "type": "LONG_ANSWER",
+                  "questionCount": 2,
+                  "marksPerQuestion": 5
+                }
+              ],
+              "questions": [
+                {
+                  "segmentType": "SHORT_ANSWER",
+                  "segmentLabel": "Short Answer Questions",
+                  "marks": 4,
+                  "questionText": "गोपियों द्वारा उद्धव को भाग्यवान कहने में क्या व्यंग्य निहित है?",
+                  "options": [],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "SHORT_ANSWER",
+                  "segmentLabel": "Short Answer Questions",
+                  "marks": 4,
+                  "questionText": "कैप्टन के प्रति पानवाले के मन में क्या भाव थे? स्पष्ट कीजिए।",
+                  "options": [],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer Question",
+                  "marks": 5,
+                  "questionText": "‘माता का अँचल’ पाठ के आधार पर ग्रामीण जीवन के चित्रण का वर्णन कीजिए।",
+                  "options": [],
+                  "alternatives": [
+                    {
+                      "segmentType": "LONG_ANSWER",
+                      "questionText": "बालगोबिन भगत के जीवन मूल्यों पर अपने विचार लिखिए।",
+                      "options": []
+                    }
+                  ]
+                },
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer Question",
+                  "marks": 5,
+                  "questionText": "रचना के आधार पर वाक्य के तीनों भेद सोदाहरण स्पष्ट कीजिए।",
+                  "options": [],
+                  "alternatives": []
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-09-10T11:00:00Z",
+          "updatedAt": "2026-09-12T15:20:00Z"
+        },
+        {
+          "id": "sch_jd_intl_ep_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "f_205",
+          "teacherName": "Mr. Rakesh Sharma",
+          "classId": "cls_10a",
+          "className": "Class X - A",
+          "subjectId": "sub_math",
+          "subjectName": "Mathematics",
+          "examName": "Unit Test 1",
+          "examDate": "2026-07-18",
+          "duration": 90,
+          "totalMarks": 25,
+          "templateType": "SPLIT",
+          "styleFontFamily": "Times New Roman",
+          "styleFontSize": "11pt",
+          "styleColor": "#000000",
+          "showTeacherName": true,
+          "status": "REVIEWED",
+          "driveSynced": true,
+          "reviewedAt": "2026-07-15T10:00:00Z",
+          "reviewedBy": "Principal / Academic Coordinator",
+          "instructions": "1. Attempt all questions neatly.\n2. Use of calculator is not permitted.",
+          "sections": [
+            {
+              "sectionTitle": "Section A",
+              "sectionDescription": "Objective Type",
+              "segments": [
+                {
+                  "label": "MCQ",
+                  "type": "MCQ",
+                  "questionCount": 5,
+                  "marksPerQuestion": 1
+                }
+              ],
+              "questions": [
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "MCQ",
+                  "marks": 1,
+                  "questionText": "Find the 1st root / discriminant of quadratic expression $x^{2} - 4x + 3 = 0$.",
+                  "options": [
+                    {
+                      "text": "Option A (1)",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "Option B (2)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option C (3)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option D (4)",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "MCQ",
+                  "marks": 1,
+                  "questionText": "Find the 2th root / discriminant of quadratic expression $x^{2} - 5x + 4 = 0$.",
+                  "options": [
+                    {
+                      "text": "Option A (2)",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "Option B (3)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option C (4)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option D (5)",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "MCQ",
+                  "marks": 1,
+                  "questionText": "Find the 3th root / discriminant of quadratic expression $x^{2} - 6x + 5 = 0$.",
+                  "options": [
+                    {
+                      "text": "Option A (3)",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "Option B (4)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option C (5)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option D (6)",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "MCQ",
+                  "marks": 1,
+                  "questionText": "Find the 4th root / discriminant of quadratic expression $x^{2} - 7x + 6 = 0$.",
+                  "options": [
+                    {
+                      "text": "Option A (4)",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "Option B (5)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option C (6)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option D (7)",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "MCQ",
+                  "segmentLabel": "MCQ",
+                  "marks": 1,
+                  "questionText": "Find the 5th root / discriminant of quadratic expression $x^{2} - 8x + 7 = 0$.",
+                  "options": [
+                    {
+                      "text": "Option A (5)",
+                      "isCorrect": true
+                    },
+                    {
+                      "text": "Option B (6)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option C (7)",
+                      "isCorrect": false
+                    },
+                    {
+                      "text": "Option D (8)",
+                      "isCorrect": false
+                    }
+                  ],
+                  "alternatives": []
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Section B",
+              "sectionDescription": "Problem Solving",
+              "segments": [
+                {
+                  "label": "Long Answer",
+                  "type": "LONG_ANSWER",
+                  "questionCount": 4,
+                  "marksPerQuestion": 5
+                }
+              ],
+              "questions": [
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer",
+                  "marks": 5,
+                  "questionText": "Prove that $\\sqrt{5}$ is an irrational number.",
+                  "options": [],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer",
+                  "marks": 5,
+                  "questionText": "Find the zeroes of $6x^{2} - 3 - 7x$ and verify relationship between zeroes and coefficients.",
+                  "options": [],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer",
+                  "marks": 5,
+                  "questionText": "Solve graphically: $2x + y = 6$ and $2x - y = 2$.",
+                  "options": [],
+                  "alternatives": []
+                },
+                {
+                  "segmentType": "LONG_ANSWER",
+                  "segmentLabel": "Long Answer",
+                  "marks": 5,
+                  "questionText": "If $\\tan\\theta = \\frac{4}{3}$, find $\\frac{\\sin\\theta + \\cos\\theta}{\\sin\\theta - \\cos\\theta}$.",
+                  "options": [],
+                  "alternatives": []
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-07-10T09:00:00Z",
+          "updatedAt": "2026-07-15T10:00:00Z"
+        }
+      ],
+      "teacherTrainings": [
+        {
+          "id": "sch_jd_intl_trg_1",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "title": "Ethics & Integrity",
+          "provider": "CBSE",
+          "domain": "CORE_VALUES_ETHICS",
+          "annexure": "ANNEXURE_I",
+          "hours": 12,
+          "mode": "OFFLINE",
+          "trainingDate": "2026-06-14",
+          "certificateNo": "CBSE-COE-2026-1042",
+          "organizer": "CBSE COE Ajmer",
+          "notes": "Completed 2-day Ethics & Integrity residential workshop",
+          "status": "VERIFIED",
+          "createdAt": "2026-06-16T09:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_trg_2",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "title": "Experiential Learning",
+          "provider": "CBSE",
+          "domain": "KNOWLEDGE_PRACTICE",
+          "annexure": "ANNEXURE_II",
+          "hours": 12,
+          "mode": "OFFLINE",
+          "trainingDate": "2026-07-20",
+          "certificateNo": "CBSE-COE-2026-2189",
+          "organizer": "CBSE COE Ajmer",
+          "notes": "Competency & Experiential pedagogy workshop",
+          "status": "VERIFIED",
+          "createdAt": "2026-07-22T09:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_trg_3",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "title": "National Education Policy 2020 (NEP 2020)",
+          "provider": "SCHOOL",
+          "domain": "PROFESSIONAL_GROWTH",
+          "annexure": "ANNEXURE_III",
+          "hours": 6,
+          "mode": "ONLINE",
+          "trainingDate": "2026-08-10",
+          "certificateNo": "SCH-INHOUSE-089",
+          "organizer": "J.D. INTERNATIONAL SCHOOL",
+          "notes": "In-house NEP 2020 NCF-SE alignment seminar",
+          "status": "VERIFIED",
+          "createdAt": "2026-08-11T09:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_trg_4",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "3",
+          "teacherName": "Priti Verma",
+          "title": "Active Learning & Art Integration",
+          "provider": "SAHODAYA",
+          "domain": "KNOWLEDGE_PRACTICE",
+          "annexure": "ANNEXURE_II",
+          "hours": 6,
+          "mode": "OFFLINE",
+          "trainingDate": "2026-09-05",
+          "certificateNo": "SAH-2026-441",
+          "organizer": "Sahodaya School Complex",
+          "notes": "Pending coordinator certificate verification",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-06T12:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_trg_5",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "title": "Inclusive Education & Values Education",
+          "provider": "CBSE",
+          "domain": "CORE_VALUES_ETHICS",
+          "annexure": "ANNEXURE_I",
+          "hours": 12,
+          "mode": "OFFLINE",
+          "trainingDate": "2026-06-25",
+          "certificateNo": "CBSE-2026-3310",
+          "organizer": "CBSE COE",
+          "notes": "Full Domain 1 compliance fulfilled",
+          "status": "VERIFIED",
+          "createdAt": "2026-06-26T09:00:00Z"
+        },
+        {
+          "id": "sch_jd_intl_trg_6",
+          "sessionId": "sch_jd_intl_sess_26_27",
+          "teacherId": "1",
+          "teacherName": "Pooja Kanwar",
+          "title": "Use of Artificial Intelligence in Classrooms",
+          "provider": "SCHOOL",
+          "domain": "KNOWLEDGE_PRACTICE",
+          "annexure": "ANNEXURE_II",
+          "hours": 6,
+          "mode": "ONLINE",
+          "trainingDate": "2026-09-18",
+          "certificateNo": "AI-EDU-092",
+          "organizer": "J.D. INTERNATIONAL SCHOOL",
+          "notes": "Submitted for Admin approval",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-19T14:00:00Z"
+        }
+      ],
+      "pacingSettings": {
+        "onPaceMinDelta": -5,
+        "aheadMinDelta": 5
+      },
+      "recentUpdates": [
+        {
+          "id": "upd_cade652d",
+          "teacherName": "Admin (J D International)",
+          "className": "Class III - A",
+          "subjectName": "Hindi",
+          "chapterName": "राम-लक्ष्मण-परशुराम संवाद",
+          "status": "IN_PROGRESS",
+          "completionPercentage": 33,
+          "updatedAt": "2026-11-12T06:09:44.881Z"
+        },
+        {
+          "id": "upd_7104e35b",
+          "teacherName": "Admin (J D International)",
+          "className": "Class III - A",
+          "subjectName": "Hindi",
+          "chapterName": "राम-लक्ष्मण-परशुराम संवाद",
+          "status": "PENDING",
+          "completionPercentage": 0,
+          "updatedAt": "2026-11-12T06:09:44.234Z"
+        },
+        {
+          "id": "upd_0a8e0d5b",
+          "teacherName": "Priti Verma",
+          "className": "Class III - A",
+          "subjectName": "Hindi",
+          "chapterName": "API Test Ch",
+          "status": "IN_PROGRESS",
+          "completionPercentage": 67,
+          "updatedAt": "2026-11-12T06:04:44.118Z"
+        },
+        {
+          "id": "upd_cs_3a_hin_ch_1",
+          "teacherName": "Priti Verma",
+          "className": "Class III - A",
+          "subjectName": "Hindi",
+          "chapterName": "सूरदास के पद (काव्य खंड)",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_3a_sst_ch_1",
+          "teacherName": "Priti Verma",
+          "className": "Class III - A",
+          "subjectName": "Social Science",
+          "chapterName": "The Rise of Nationalism in Europe",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_4a_hin_ch_1",
+          "teacherName": "Priti Verma",
+          "className": "Class IV - A",
+          "subjectName": "Hindi",
+          "chapterName": "सूरदास के पद (काव्य खंड)",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_4a_eng_ch_1",
+          "teacherName": "Pooja Kanwar",
+          "className": "Class IV - A",
+          "subjectName": "English",
+          "chapterName": "A Letter to God & Dust of Snow",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_9a_math_ch_1",
+          "teacherName": "Monika Rani Verma",
+          "className": "Class IX - A",
+          "subjectName": "Mathematics",
+          "chapterName": "Real Numbers",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_9a_sci_ch_1",
+          "teacherName": "Dr. Arun Joshi",
+          "className": "Class IX - A",
+          "subjectName": "Science",
+          "chapterName": "Chemical Reactions and Equations",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_10a_math_ch_1",
+          "teacherName": "Mr. Rakesh Sharma",
+          "className": "Class X - A",
+          "subjectName": "Mathematics",
+          "chapterName": "Real Numbers",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_10a_sst_ch_1",
+          "teacherName": "Priti Verma",
+          "className": "Class X - A",
+          "subjectName": "Social Science",
+          "chapterName": "The Rise of Nationalism in Europe",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        },
+        {
+          "id": "upd_cs_10a_eng_ch_1",
+          "teacherName": "Abhilasha Bhatt",
+          "className": "Class X - A",
+          "subjectName": "English",
+          "chapterName": "A Letter to God & Dust of Snow",
+          "status": "COMPLETED",
+          "completionPercentage": 100,
+          "updatedAt": "2026-10-18T10:30:00Z"
+        }
+      ]
+    }
+  }
+}
